@@ -19,6 +19,7 @@ import {
   Settings,
   LayoutDashboard,
   Calendar,
+  Receipt,
 } from "lucide-react"
 
 interface PermissoesSelectorProps {
@@ -36,6 +37,7 @@ const permissoesDisponiveis = [
   { id: "documentos", nome: "Documentos", descricao: "Gerenciar documentos", icone: File },
   { id: "financeiro", nome: "Financeiro", descricao: "Gestão financeira", icone: DollarSign },
   { id: "ordem_servico", nome: "Ordem de Serviço", descricao: "Gerenciar ordens de serviço", icone: Wrench },
+  { id: "nota_fiscal", nome: "Notas Fiscais", descricao: "Emitir e gerenciar notas fiscais", icone: Receipt },
   { id: "calendario", nome: "Calendário", descricao: "Visualizar calendário de agendamentos", icone: Calendar },
   { id: "relatorios", nome: "Relatórios", descricao: "Visualizar relatórios", icone: BarChart3 },
   { id: "usuarios", nome: "Usuários", descricao: "Gerenciar usuários", icone: Shield },
@@ -53,6 +55,7 @@ const permissoesPadrao = {
     "documentos",
     "financeiro",
     "ordem_servico",
+    "nota_fiscal",
     "calendario",
     "relatorios",
     "usuarios",
@@ -60,7 +63,7 @@ const permissoesPadrao = {
     "configuracoes",
   ],
   tecnico: ["dashboard", "ordem_servico", "calendario", "clientes", "produtos"],
-  vendedor: ["dashboard", "clientes", "orcamentos", "contratos", "financeiro"],
+  vendedor: ["dashboard", "clientes", "orcamentos", "contratos", "financeiro", "nota_fiscal"],
   usuario: ["dashboard"],
 }
 
