@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Progress } from "@/components/ui/progress"
 import {
   DollarSign,
   FileText,
@@ -23,7 +22,6 @@ import {
   TrendingUp,
   TrendingDown,
   ArrowRight,
-  Building2,
   Receipt,
   Package,
 } from "lucide-react"
@@ -57,24 +55,27 @@ interface RecentItem {
   tipo: "boleto" | "orcamento"
 }
 
-// Componente de Loading Skeleton
+// Componente de Loading Skeleton adaptado ao novo padrão
 function DashboardSkeleton() {
   return (
-    <div className="p-4 lg:p-6 space-y-6">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30 min-h-screen">
       {/* Header Skeleton */}
-      <div className="flex flex-col gap-4 mb-8">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96" />
+      <div className="flex items-center gap-3 mb-6">
+        <Skeleton className="h-8 w-8 rounded" />
+        <div>
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96 mt-2" />
+        </div>
       </div>
 
       {/* Stats Cards Skeleton */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="border border-border">
+          <Card key={i} className="border-2 rounded-xl">
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <Skeleton className="h-10 w-10 rounded-xl" />
-                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4" />
               </div>
               <Skeleton className="h-8 w-24 mt-4" />
               <Skeleton className="h-3 w-32 mt-2" />
@@ -85,7 +86,7 @@ function DashboardSkeleton() {
 
       {/* Activity Section Skeleton */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <Card className="xl:col-span-2 border border-border">
+        <Card className="xl:col-span-2 border-2 rounded-2xl">
           <CardHeader>
             <Skeleton className="h-6 w-48 mb-2" />
             <Skeleton className="h-4 w-64" />
@@ -99,7 +100,7 @@ function DashboardSkeleton() {
           </CardContent>
         </Card>
 
-        <Card className="border border-border">
+        <Card className="border-2 rounded-2xl">
           <CardHeader>
             <Skeleton className="h-6 w-36 mb-2" />
           </CardHeader>
@@ -116,7 +117,7 @@ function DashboardSkeleton() {
   )
 }
 
-// Componente de Card de KPI
+// Componente de Card de KPI adaptado ao padrão visual premium do Calendário e Ordem de Serviço
 function KPICard({
   title,
   value,
@@ -136,94 +137,72 @@ function KPICard({
   color: "primary" | "success" | "warning" | "destructive" | "info"
   onClick?: () => void
 }) {
-  const colorClasses = {
+  const colorStyles = {
     primary: {
-      bg: "bg-primary/10",
-      icon: "text-primary",
-      badge: "bg-primary/10 text-primary",
+      card: "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 dark:from-slate-900/60 dark:to-blue-950/30 dark:border-blue-900/40 text-blue-800",
+      title: "text-blue-700 dark:text-blue-400",
+      desc: "text-blue-600/80 dark:text-blue-500/80",
+      icon: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-50 dark:bg-blue-950/40",
+      badge: "bg-blue-600 text-white"
     },
     success: {
-      bg: "bg-[hsl(var(--success))]/10",
-      icon: "text-[hsl(var(--success))]",
-      badge: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]",
+      card: "bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 dark:from-slate-900/60 dark:to-emerald-950/30 dark:border-emerald-900/40 text-emerald-800",
+      title: "text-emerald-700 dark:text-emerald-400",
+      desc: "text-emerald-600/80 dark:text-emerald-500/80",
+      icon: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50 dark:bg-emerald-950/40",
+      badge: "bg-emerald-600 text-white"
     },
     warning: {
-      bg: "bg-[hsl(var(--warning))]/10",
-      icon: "text-[hsl(var(--warning))]",
-      badge: "bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))]",
+      card: "bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200 dark:from-slate-900/60 dark:to-amber-950/30 dark:border-amber-900/40 text-amber-800",
+      title: "text-amber-700 dark:text-amber-400",
+      desc: "text-amber-600/80 dark:text-amber-500/80",
+      icon: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 dark:bg-amber-950/40",
+      badge: "bg-amber-600 text-white"
     },
     destructive: {
-      bg: "bg-destructive/10",
-      icon: "text-destructive",
-      badge: "bg-destructive/10 text-destructive",
+      card: "bg-gradient-to-br from-red-50 to-red-100 border-red-200 dark:from-slate-900/60 dark:to-red-950/30 dark:border-red-900/40 text-red-800",
+      title: "text-red-700 dark:text-red-400",
+      desc: "text-red-600/80 dark:text-red-500/80",
+      icon: "text-red-600 dark:text-red-400",
+      bg: "bg-red-50 dark:bg-red-950/40",
+      badge: "bg-red-600 text-white"
     },
     info: {
-      bg: "bg-accent/10",
-      icon: "text-accent",
-      badge: "bg-accent/10 text-accent",
-    },
+      card: "bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200 dark:from-slate-900/60 dark:to-cyan-950/30 dark:border-cyan-900/40 text-cyan-800",
+      title: "text-cyan-700 dark:text-cyan-400",
+      desc: "text-cyan-600/80 dark:text-cyan-500/80",
+      icon: "text-cyan-600 dark:text-cyan-400",
+      bg: "bg-cyan-50 dark:bg-cyan-950/40",
+      badge: "bg-cyan-600 text-white"
+    }
   }
 
-  const classes = colorClasses[color]
-
-  const cardGradientStyles = {
-    primary: "from-white to-blue-100/50 dark:from-card dark:to-blue-950/20",
-    success: "from-white to-teal-100/50 dark:from-card dark:to-teal-950/20",
-    warning: "from-white to-amber-100/50 dark:from-card dark:to-amber-950/20",
-    destructive: "from-white to-rose-100/50 dark:from-card dark:to-rose-950/20",
-    info: "from-white to-indigo-100/50 dark:from-card dark:to-indigo-950/20",
-  }
-
-  const cardHoverBorders = {
-    primary: "hover:border-blue-500/35 hover:shadow-blue-500/5",
-    success: "hover:border-emerald-500/35 hover:shadow-emerald-500/5",
-    warning: "hover:border-amber-500/35 hover:shadow-amber-500/5",
-    destructive: "hover:border-rose-500/35 hover:shadow-rose-500/5",
-    info: "hover:border-indigo-500/35 hover:shadow-indigo-500/5",
-  }
-
-  const iconShadows = {
-    primary: "shadow-[0_4px_20px_rgba(59,130,246,0.15)]",
-    success: "shadow-[0_4px_20px_rgba(16,185,129,0.15)]",
-    warning: "shadow-[0_4px_20px_rgba(245,158,11,0.15)]",
-    destructive: "shadow-[0_4px_20px_rgba(239,68,68,0.15)]",
-    info: "shadow-[0_4px_20px_rgba(139,92,246,0.15)]",
-  }
+  const style = colorStyles[color]
 
   return (
     <Card
       className={cn(
-        "border border-border/60 bg-gradient-to-b backdrop-blur-md shadow-sm transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg relative overflow-hidden rounded-2xl",
-        cardGradientStyles[color],
-        cardHoverBorders[color],
-        onClick && "cursor-pointer",
+        "cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-2 rounded-xl overflow-hidden shadow-sm",
+        style.card
       )}
       onClick={onClick}
     >
-      <div className="absolute top-0 left-0 w-full h-[2.5px] bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div className={cn("p-2.5 rounded-xl transition-transform duration-300 group-hover:scale-110", classes.bg, iconShadows[color])}>
-            <Icon className={cn("h-5 w-5", classes.icon)} />
-          </div>
-          {trend && trendValue && (
-            <Badge variant="secondary" className={cn("text-xs font-semibold border-0", classes.badge)}>
-              {trend === "up" && <TrendingUp className="h-3 w-3 mr-1" />}
-              {trend === "down" && <TrendingDown className="h-3 w-3 mr-1" />}
-              {trendValue}
-            </Badge>
-          )}
-        </div>
-        <div className="mt-4">
-          <p className="text-2xl lg:text-3xl font-extrabold text-foreground tracking-tight font-display">{value}</p>
-          <p className="text-xs font-semibold text-muted-foreground mt-1.5">{title}</p>
-          <p className="text-[10px] lg:text-xs text-muted-foreground/75 mt-0.5">{subtitle}</p>
-        </div>
-        {onClick && (
-          <div className="mt-4 flex items-center text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-            <span>Ver detalhes</span>
-            <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform group-hover:translate-x-1" />
-          </div>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-1">
+        <CardTitle className={cn("text-xs md:text-sm font-medium", style.title)}>{title}</CardTitle>
+        <Icon className={cn("h-4 w-4", style.icon)} />
+      </CardHeader>
+      <CardContent className="p-3 md:p-4 pt-0">
+        <div className="text-xl md:text-2xl font-bold">{value}</div>
+        <p className={cn("text-[10px] md:text-xs font-medium", style.desc)}>{subtitle}</p>
+        {trend && trendValue && (
+          <Badge className={cn("mt-2 border-0 text-[10px] py-0 px-2", style.badge)}>
+            {trend === "up" && <TrendingUp className="h-2.5 w-2.5 mr-1" />}
+            {trend === "down" && <TrendingDown className="h-2.5 w-2.5 mr-1" />}
+            {trendValue}
+          </Badge>
         )}
       </CardContent>
     </Card>
@@ -237,6 +216,7 @@ export default function DashboardPage() {
   const [recentItems, setRecentItems] = useState<RecentItem[]>([])
   const [loading, setLoading] = useState(true)
   const [showValues, setShowValues] = useState(true)
+  const [logoMenu, setLogoMenu] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -274,17 +254,26 @@ export default function DashboardPage() {
     try {
       setLoading(true)
 
-      const [clientesRes, boletosRes, orcamentosRes] = await Promise.all([
+      const [clientesRes, boletosRes, orcamentosRes, logoRes] = await Promise.all([
         fetch("/api/clientes"),
         fetch("/api/boletos"),
         fetch("/api/orcamentos"),
+        fetch("/api/configuracoes/logos"),
       ])
 
-      const [clientesData, boletosData, orcamentosData] = await Promise.all([
+      const [clientesData, boletosData, orcamentosData, logoResult] = await Promise.all([
         clientesRes.json(),
         boletosRes.json(),
         orcamentosRes.json(),
+        logoRes.json(),
       ])
+
+      if (logoResult.success && logoResult.data) {
+        const logoMenuData = logoResult.data.find((logo: any) => logo.tipo === "menu")
+        if (logoMenuData && logoMenuData.caminho) {
+          setLogoMenu(logoMenuData.caminho)
+        }
+      }
 
       if (clientesData.success && boletosData.success && orcamentosData.success) {
         const clientes = clientesData.data || []
@@ -388,12 +377,12 @@ export default function DashboardPage() {
 
   if (!stats) {
     return (
-      <div className="p-4 lg:p-6">
-        <div className="text-center py-20">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30 min-h-screen">
+        <div className="text-center py-20 bg-white/60 backdrop-blur-sm border-2 rounded-2xl p-6">
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
-          <p className="text-foreground font-medium">Erro ao carregar dados</p>
+          <p className="text-foreground font-medium text-lg">Erro ao carregar dados</p>
           <p className="text-muted-foreground text-sm mt-1">Tente recarregar a página</p>
         </div>
       </div>
@@ -402,8 +391,8 @@ export default function DashboardPage() {
 
   if (user && !canAccessRoute(user, "/dashboard")) {
     return (
-      <div className="flex h-full items-center justify-center p-6">
-        <Card className="w-full max-w-md border-border">
+      <div className="flex h-full items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-orange-50/30 min-h-screen">
+        <Card className="w-full max-w-md border-2 rounded-2xl shadow-xl">
           <CardHeader className="text-center">
             <div className="w-16 h-16 rounded-full bg-[hsl(var(--warning))]/10 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="h-8 w-8 text-[hsl(var(--warning))]" />
@@ -421,33 +410,42 @@ export default function DashboardPage() {
     : 0
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 animate-in fade-in duration-300">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30 min-h-screen animate-in fade-in duration-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-extrabold text-foreground tracking-tight font-display bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-            Dashboard
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Visão geral dos indicadores do sistema
-          </p>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
+        <div className="flex items-center gap-3">
+          {logoMenu && (
+            <img
+              src={logoMenu || "/placeholder.svg"}
+              alt="Logo"
+              className="h-6 w-6 md:h-8 md:w-8 object-contain rounded"
+            />
+          )}
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Dashboard
+            </h2>
+            <p className="text-xs md:text-sm text-muted-foreground">
+              Visão geral dos indicadores e performance do sistema
+            </p>
+          </div>
         </div>
 
         <Button
           variant="outline"
           size="sm"
           onClick={toggleShowValues}
-          className="flex items-center gap-2 h-9 rounded-lg"
+          className="flex items-center justify-center gap-2 h-9 rounded-lg border-2 bg-transparent hover:bg-slate-50"
         >
           {showValues ? (
             <>
               <EyeOff className="h-4 w-4" />
-              <span className="hidden sm:inline">Ocultar Valores</span>
+              <span className="text-xs font-semibold">Ocultar Valores</span>
             </>
           ) : (
             <>
               <Eye className="h-4 w-4" />
-              <span className="hidden sm:inline">Mostrar Valores</span>
+              <span className="text-xs font-semibold">Mostrar Valores</span>
             </>
           )}
         </Button>
@@ -458,7 +456,7 @@ export default function DashboardPage() {
         <KPICard
           title="Total de Clientes"
           value={stats.totalClientes}
-          subtitle={`${stats.clientesComContrato} com contrato ativo`}
+          subtitle={`${stats.clientesComContrato} contratos ativos`}
           icon={Users}
           color="primary"
           onClick={() => router.push("/clientes")}
@@ -497,15 +495,14 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <Card className="xl:col-span-2 border border-border/60 bg-gradient-to-b from-white to-slate-50/30 dark:from-card dark:to-card/85 backdrop-blur-md shadow-sm rounded-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-          <CardHeader className="pb-4">
+        <Card className="xl:col-span-2 bg-white/60 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 lg:p-6 rounded-t-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-bold font-display text-foreground">Atividade Recente</CardTitle>
-                <CardDescription className="text-sm">Últimos boletos e orçamentos</CardDescription>
+                <CardTitle className="text-base md:text-lg text-white">Atividade Recente</CardTitle>
+                <CardDescription className="text-blue-100 text-xs md:text-sm">Últimos boletos e orçamentos emitidos</CardDescription>
               </div>
-              <Button variant="ghost" size="sm" asChild className="text-primary hover:text-primary hover:bg-primary/10">
+              <Button variant="ghost" size="sm" asChild className="text-white hover:text-blue-200 hover:bg-white/10">
                 <Link href="/financeiro">
                   Ver Todos
                   <ArrowRight className="h-4 w-4 ml-1" />
@@ -513,7 +510,7 @@ export default function DashboardPage() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6">
             {recentItems.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
@@ -531,35 +528,35 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={`${item.tipo}-${item.id}`}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors group"
+                      className="flex items-center justify-between p-3 rounded-lg bg-slate-50/50 border border-slate-200 hover:bg-slate-100/60 hover:shadow-sm transition-all duration-200 group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={cn(
                           "p-2 rounded-lg shrink-0",
-                          item.tipo === "boleto" ? "bg-[hsl(var(--success))]/10" : "bg-primary/10"
+                          item.tipo === "boleto" ? "bg-emerald-50 border border-emerald-200" : "bg-blue-50 border border-blue-200"
                         )}>
                           {item.tipo === "boleto" ? (
-                            <Receipt className={cn("h-4 w-4", "text-[hsl(var(--success))]")} />
+                            <Receipt className={cn("h-4 w-4 text-emerald-600")} />
                           ) : (
-                            <FileText className="h-4 w-4 text-primary" />
+                            <FileText className="h-4 w-4 text-blue-600" />
                           )}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-foreground">{item.numero}</span>
-                            <Badge variant="secondary" className={cn("text-xs border-0", config.className)}>
-                              <StatusIcon className="h-3 w-3 mr-1" />
+                            <span className="font-bold text-sm text-foreground">{item.numero}</span>
+                            <Badge className={cn("text-[10px] border py-0 px-2 font-semibold", config.className)}>
+                              <StatusIcon className="h-2.5 w-2.5 mr-1" />
                               {config.label}
                             </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">{item.cliente_nome}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{item.cliente_nome}</p>
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="font-semibold text-sm text-foreground">
+                        <p className="font-bold text-sm text-foreground">
                           {showValues ? formatCurrency(item.valor) : "R$ ****"}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-[10px] font-medium text-muted-foreground mt-0.5">
                           {item.tipo === "boleto" ? "Boleto" : "Orçamento"}
                         </p>
                       </div>
@@ -572,21 +569,20 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions */}
-        <Card className="border border-border/60 bg-gradient-to-b from-white to-slate-50/30 dark:from-card dark:to-card/85 backdrop-blur-md shadow-sm rounded-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-bold font-display text-foreground">Ações Rápidas</CardTitle>
-            <CardDescription className="text-sm">Acesso às principais funcionalidades</CardDescription>
+        <Card className="bg-white/60 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 lg:p-6 rounded-t-2xl">
+            <CardTitle className="text-base md:text-lg text-white">Ações Rápidas</CardTitle>
+            <CardDescription className="text-indigo-100 text-xs md:text-sm">Acesso direto às principais telas</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 p-4 md:p-6">
             <Button
               variant="ghost"
-              className="w-full justify-start h-11 hover:bg-accent/10 hover:text-accent rounded-lg group"
+              className="w-full justify-start h-11 hover:bg-orange-50 hover:text-orange-700 rounded-lg group border-2 border-transparent hover:border-orange-200 transition-all duration-200"
               asChild
             >
               <Link href="/ordem-servico/nova">
-                <div className="p-1.5 rounded-lg bg-accent/10 mr-3 group-hover:bg-accent/20 transition-colors">
-                  <Wrench className="h-4 w-4 text-accent" />
+                <div className="p-1.5 rounded-lg bg-orange-50 mr-3 group-hover:bg-orange-100 transition-colors border border-orange-200">
+                  <Wrench className="h-4 w-4 text-orange-600" />
                 </div>
                 Nova Ordem de Serviço
               </Link>
@@ -594,12 +590,12 @@ export default function DashboardPage() {
 
             <Button
               variant="ghost"
-              className="w-full justify-start h-11 hover:bg-[hsl(var(--success))]/10 hover:text-[hsl(var(--success))] rounded-lg group"
+              className="w-full justify-start h-11 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg group border-2 border-transparent hover:border-emerald-200 transition-all duration-200"
               asChild
             >
               <Link href="/orcamentos/novo">
-                <div className="p-1.5 rounded-lg bg-[hsl(var(--success))]/10 mr-3 group-hover:bg-[hsl(var(--success))]/20 transition-colors">
-                  <Plus className="h-4 w-4 text-[hsl(var(--success))]" />
+                <div className="p-1.5 rounded-lg bg-emerald-50 mr-3 group-hover:bg-emerald-100 transition-colors border border-emerald-200">
+                  <Plus className="h-4 w-4 text-emerald-600" />
                 </div>
                 Novo Orçamento
               </Link>
@@ -607,12 +603,12 @@ export default function DashboardPage() {
 
             <Button
               variant="ghost"
-              className="w-full justify-start h-11 hover:bg-primary/10 hover:text-primary rounded-lg group"
+              className="w-full justify-start h-11 hover:bg-blue-50 hover:text-blue-700 rounded-lg group border-2 border-transparent hover:border-blue-200 transition-all duration-200"
               asChild
             >
               <Link href="/financeiro/novo">
-                <div className="p-1.5 rounded-lg bg-primary/10 mr-3 group-hover:bg-primary/20 transition-colors">
-                  <DollarSign className="h-4 w-4 text-primary" />
+                <div className="p-1.5 rounded-lg bg-blue-50 mr-3 group-hover:bg-blue-100 transition-colors border border-blue-200">
+                  <DollarSign className="h-4 w-4 text-blue-600" />
                 </div>
                 Novo Boleto
               </Link>
@@ -620,12 +616,12 @@ export default function DashboardPage() {
 
             <Button
               variant="ghost"
-              className="w-full justify-start h-11 hover:bg-[hsl(var(--warning))]/10 hover:text-[hsl(var(--warning))] rounded-lg group"
+              className="w-full justify-start h-11 hover:bg-amber-50 hover:text-amber-700 rounded-lg group border-2 border-transparent hover:border-amber-200 transition-all duration-200"
               asChild
             >
               <Link href="/clientes/novo">
-                <div className="p-1.5 rounded-lg bg-[hsl(var(--warning))]/10 mr-3 group-hover:bg-[hsl(var(--warning))]/20 transition-colors">
-                  <Users className="h-4 w-4 text-[hsl(var(--warning))]" />
+                <div className="p-1.5 rounded-lg bg-amber-50 mr-3 group-hover:bg-amber-100 transition-colors border border-amber-200">
+                  <Users className="h-4 w-4 text-amber-600" />
                 </div>
                 Novo Cliente
               </Link>
@@ -633,12 +629,12 @@ export default function DashboardPage() {
 
             <Button
               variant="ghost"
-              className="w-full justify-start h-11 hover:bg-muted rounded-lg group"
+              className="w-full justify-start h-11 hover:bg-slate-100 hover:text-slate-700 rounded-lg group border-2 border-transparent hover:border-slate-300 transition-all duration-200"
               asChild
             >
               <Link href="/produtos/novo">
-                <div className="p-1.5 rounded-lg bg-muted mr-3 group-hover:bg-muted/80 transition-colors">
-                  <Package className="h-4 w-4 text-foreground" />
+                <div className="p-1.5 rounded-lg bg-slate-100 mr-3 group-hover:bg-slate-200 transition-colors border border-slate-300">
+                  <Package className="h-4 w-4 text-slate-700" />
                 </div>
                 Novo Produto
               </Link>
@@ -646,34 +642,34 @@ export default function DashboardPage() {
 
             <Button
               variant="ghost"
-              className="w-full justify-start h-11 hover:bg-primary/10 hover:text-primary rounded-lg group"
+              className="w-full justify-start h-11 hover:bg-cyan-50 hover:text-cyan-700 rounded-lg group border-2 border-transparent hover:border-cyan-200 transition-all duration-200"
               asChild
             >
               <Link href="/contratos/proposta/nova">
-                <div className="p-1.5 rounded-lg bg-primary/10 mr-3 group-hover:bg-primary/20 transition-colors">
-                  <FileContract className="h-4 w-4 text-primary" />
+                <div className="p-1.5 rounded-lg bg-cyan-50 mr-3 group-hover:bg-cyan-100 transition-colors border border-cyan-200">
+                  <FileContract className="h-4 w-4 text-cyan-600" />
                 </div>
                 Nova Proposta
               </Link>
             </Button>
 
             {/* Status do Sistema */}
-            <div className="mt-4 p-4 bg-muted/30 rounded-lg">
-              <h4 className="font-medium text-sm text-foreground mb-3 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[hsl(var(--success))] animate-pulse" />
+            <div className="mt-4 p-4 bg-slate-50/80 border border-slate-200 rounded-xl shadow-xs">
+              <h4 className="font-bold text-xs text-foreground mb-3 flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse border border-emerald-600" />
                 Status do Sistema
               </h4>
-              <div className="space-y-2 text-xs">
+              <div className="space-y-2 text-[10px] font-semibold">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Sistema</span>
-                  <Badge variant="secondary" className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-0 text-xs">
+                  <span className="text-muted-foreground">Servidores</span>
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] py-0 px-2">
                     Online
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Backup</span>
-                  <Badge variant="secondary" className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-0 text-xs">
-                    Ativo
+                  <span className="text-muted-foreground">Banco de Dados</span>
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] py-0 px-2">
+                    Conectado
                   </Badge>
                 </div>
               </div>
@@ -684,31 +680,31 @@ export default function DashboardPage() {
 
       {/* Alerts Section */}
       {(stats.boletosVencidos > 0 || stats.boletosPendentes > 5) && (
-        <Card className="border border-destructive/30 bg-destructive/5">
+        <Card className="border-2 border-red-200 bg-gradient-to-r from-red-50 to-rose-50 shadow-md rounded-2xl overflow-hidden">
           <CardContent className="p-4 lg:p-6">
             <div className="flex items-start gap-4">
-              <div className="p-2.5 rounded-xl bg-destructive/10 shrink-0">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div className="p-2.5 rounded-xl bg-red-100 border-2 border-red-300 shrink-0">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Atenção Necessária</h3>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h3 className="font-bold text-red-800 text-sm md:text-base">Atenção Requerida</h3>
+                <p className="text-xs md:text-sm text-red-700 mt-1">
                   {stats.boletosVencidos > 0 && (
                     <span>
-                      Você tem <strong className="text-destructive">{stats.boletosVencidos} boleto{stats.boletosVencidos > 1 ? "s" : ""} vencido{stats.boletosVencidos > 1 ? "s" : ""}</strong>
+                      Você possui <strong className="text-red-900 font-extrabold">{stats.boletosVencidos} boleto{stats.boletosVencidos > 1 ? "s" : ""} vencido{stats.boletosVencidos > 1 ? "s" : ""}</strong>
                       {stats.boletosPendentes > 5 && " e "}
                     </span>
                   )}
                   {stats.boletosPendentes > 5 && (
                     <span>
-                      <strong className="text-[hsl(var(--warning))]">{stats.boletosPendentes} boletos pendentes</strong> aguardando pagamento
+                      <strong className="text-amber-800 font-extrabold">{stats.boletosPendentes} boletos pendentes</strong> aguardando pagamento
                     </span>
                   )}
                 </p>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mt-3 border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  className="mt-3 border-2 border-red-300 text-red-700 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all font-semibold"
                   asChild
                 >
                   <Link href="/financeiro?status=vencido">
