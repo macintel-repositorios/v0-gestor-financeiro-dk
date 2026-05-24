@@ -24,10 +24,11 @@ import {
   Printer,
   Copy,
   Plus,
+  GripVertical,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, cn } from "@/lib/utils"
 import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { ProdutoCombobox } from "@/components/produto-combobox"
 import { ProdutoFormDialog } from "@/components/produto-form-dialog"
@@ -77,6 +78,9 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
 
   const [showNewProductDialog, setShowNewProductDialog] = useState(false)
   const [produtoComboboxKey, setProdutoComboboxKey] = useState(0)
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const [distanciaKm, setDistanciaKm] = useState(orcamento.distancia_km || 0)
   const [valorBoleto, setValorBoleto] = useState(orcamento.valor_boleto || 3.5)
@@ -253,6 +257,37 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
 
   const removerItem = (index: number) => {
     setItens(itens.filter((_, i) => i !== index))
+  }
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = "move"
+  }
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setDragOverIndex(index)
+  }
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+    const novosItens = [...itens]
+    const [removido] = novosItens.splice(draggedIndex, 1)
+    novosItens.splice(targetIndex, 0, removido)
+    setItens(novosItens)
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+    setDragOverIndex(null)
   }
 
   const atualizarItem = (index: number, campo: keyof OrcamentoItem, valor: any) => {
@@ -1151,6 +1186,7 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-gray-50">
+                          <TableHead className="w-8 px-2"></TableHead>
                           <TableHead className="font-semibold">Produto</TableHead>
                           <TableHead className="font-semibold w-32">Quantidade</TableHead>
                           <TableHead className="font-semibold w-28">
@@ -1166,7 +1202,30 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
                       </TableHeader>
                       <TableBody>
                         {itens.map((item, index) => (
-                          <TableRow key={index}>
+                          <TableRow
+                            key={index}
+                            draggable={false}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDrop={(e) => handleDrop(e, index)}
+                            className={cn(
+                              "transition-colors",
+                              dragOverIndex === index && draggedIndex !== index
+                                ? "bg-blue-50 border-t-2 border-blue-400"
+                                : "",
+                              draggedIndex === index ? "opacity-40" : ""
+                            )}
+                          >
+                            <TableCell className="px-2 py-2 w-8">
+                              <div
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragEnd={handleDragEnd}
+                                className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 flex items-center justify-center h-full"
+                                title="Arrastar para reordenar"
+                              >
+                                <GripVertical className="h-4 w-4" />
+                              </div>
+                            </TableCell>
                             <TableCell>
                               <div>
                                 <div className="flex items-center gap-2">
@@ -1509,62 +1568,3 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
                   <div className="flex justify-between">
                     <span>Situação:</span>
                     <Badge variant="outline" className="text-xs">
-                      {situacao === "pendente" && "Pendente"}
-                      {situacao === "enviado por email" && "Enviado por Email"}
-                      {situacao === "nota fiscal emitida" && "Nota Fiscal Emitida"}
-                      {situacao === "concluido" && "Concluído"}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <ProdutoFormDialog
-        open={produtoEditDialog}
-        onOpenChange={handleProdutoEditCancel}
-        produto={produtoParaEditar}
-        onSuccess={handleProdutoEditSuccess}
-      />
-
-      <ProdutoFormDialog
-        open={showNewProductDialog}
-        onOpenChange={setShowNewProductDialog}
-        onSuccess={handleProdutoCreated}
-      />
-
-      <EditarServicoDialog
-        open={servicoEditDialog}
-        onOpenChange={handleServicoEditCancel}
-        servico={servicoParaEditar}
-        onSuccess={handleServicoEditSuccess}
-      />
-
-      {/* Modal de Impressão */}
-      {showPrintModal && (
-        <OrcamentoPrintEditor
-          orcamento={{
-            ...orcamento,
-            itens: itens.map((item) => ({
-              ...item,
-              produto_descricao: item.produto?.descricao || item.produto_descricao,
-              produto_codigo: item.produto?.codigo || item.produto_codigo,
-              produto_unidade: item.produto?.unidade || item.produto_unidade,
-              marca_nome: item.marca_nome || item.produto?.marca,
-            })),
-          }}
-          itens={itens.map((item) => ({
-            ...item,
-            produto_descricao: item.produto?.descricao || item.produto_descricao,
-            produto_codigo: item.produto?.codigo || item.produto_codigo,
-            produto_unidade: item.produto?.unidade || item.produto_unidade,
-            marca_nome: item.marca_nome || item.produto?.marca,
-          }))}
-          onClose={() => setShowPrintModal(false)}
-        />
-      )}
-    </div>
-  )
-}
