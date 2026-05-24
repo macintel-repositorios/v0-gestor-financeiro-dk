@@ -201,10 +201,11 @@ export async function POST(request: NextRequest) {
           valor_unitario_ajustado,
           valor_total_ajustado,
           created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))
       `
 
-      for (const item of data.itens) {
+      for (let i = 0; i < data.itens.length; i++) {
+        const item = data.itens[i]
         const itemId = generateUUID()
         await query(insertItensQuery, [
           itemId,
@@ -219,9 +220,11 @@ export async function POST(request: NextRequest) {
           item.descricao_personalizada || null,
           item.valor_unitario_ajustado || null,
           item.valor_total_ajustado || null,
+          i,
         ])
       }
     }
+
 
     return NextResponse.json({
       success: true,
