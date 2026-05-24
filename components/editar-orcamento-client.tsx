@@ -1,3 +1,5 @@
+"use client"
+
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { generateUUID } from "@/lib/utils"
