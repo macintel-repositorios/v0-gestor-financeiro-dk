@@ -23,6 +23,7 @@ import {
   ArrowLeft,
   Printer,
   Copy,
+  Plus,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -45,6 +46,9 @@ interface OrcamentoItem {
   produto_ncm?: string
   valor_unitario_ajustado?: number
   valor_total_ajustado?: number
+  produto_descricao?: string
+  produto_codigo?: string
+  produto_unidade?: string
 }
 
 interface EditarOrcamentoClientProps {
@@ -70,6 +74,9 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
 
   const [servicoEditDialog, setServicoEditDialog] = useState(false)
   const [servicoParaEditar, setServicoParaEditar] = useState<any | null>(null)
+
+  const [showNewProductDialog, setShowNewProductDialog] = useState(false)
+  const [produtoComboboxKey, setProdutoComboboxKey] = useState(0)
 
   const [distanciaKm, setDistanciaKm] = useState(orcamento.distancia_km || 0)
   const [valorBoleto, setValorBoleto] = useState(orcamento.valor_boleto || 3.5)
@@ -347,6 +354,44 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
     if (!open) {
       setProdutoEditDialog(false)
       setProdutoParaEditar(null)
+    }
+  }
+
+  const handleProdutoCreated = async (produtoCriado?: any) => {
+    setShowNewProductDialog(false)
+    setProdutoComboboxKey((prev) => prev + 1)
+
+    if (produtoCriado) {
+      try {
+        const response = await fetch(`/api/produtos/${produtoCriado.id}`)
+        const result = await response.json()
+
+        if (result.success && result.data) {
+          const produtoCompleto = result.data
+          await adicionarItem(produtoCompleto)
+
+          toast({
+            title: "Produto criado e adicionado",
+            description: `${produtoCompleto.descricao} foi criado e adicionado ao orçamento automaticamente.`,
+          })
+        } else {
+          toast({
+            title: "Produto criado",
+            description: "O produto foi criado com sucesso. Agora você pode selecioná-lo na lista.",
+          })
+        }
+      } catch (error) {
+        console.error("Erro ao buscar produto criado:", error)
+        toast({
+          title: "Produto criado",
+          description: "O produto foi criado com sucesso. Agora você pode selecioná-lo na lista.",
+        })
+      }
+    } else {
+      toast({
+        title: "Produto criado",
+        description: "O produto foi criado com sucesso. Agora você pode selecioná-lo na lista.",
+      })
     }
   }
 
@@ -1058,9 +1103,27 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-4">
-                <div>
-                  <Label>Adicionar Produto/Serviço</Label>
-                  <ProdutoCombobox onSelect={adicionarItem} placeholder="Busque e selecione um produto..." />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Label>Adicionar Produto/Serviço</Label>
+                    <ProdutoCombobox
+                      key={produtoComboboxKey}
+                      onSelect={adicionarItem}
+                      placeholder="Busque e selecione um produto..."
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowNewProductDialog(true)}
+                      className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 hover:border-blue-300"
+                      title="Adicionar novo produto"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Novo Produto
+                    </Button>
+                  </div>
                 </div>
 
                 {itens.length > 0 && calcularSubtotalMaterial() > 0 && (
@@ -1466,6 +1529,12 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
         onSuccess={handleProdutoEditSuccess}
       />
 
+      <ProdutoFormDialog
+        open={showNewProductDialog}
+        onOpenChange={setShowNewProductDialog}
+        onSuccess={handleProdutoCreated}
+      />
+
       <EditarServicoDialog
         open={servicoEditDialog}
         onOpenChange={handleServicoEditCancel}
@@ -1499,3 +1568,4 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
     </div>
   )
 }
+
