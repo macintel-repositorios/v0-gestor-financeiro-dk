@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { pool } from "@/lib/database"
+import { query } from "@/lib/db"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ numero: string; id: string }> }) {
   try {
     const { numero, id } = await params
 
-    const [rows] = await pool.execute(
+    const rows = await query(
       `
       SELECT 
         oi.*,
@@ -18,9 +18,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       WHERE oi.orcamento_numero = ? AND oi.id = ?
       `,
       [numero, id],
-    )
+    ) as any[]
 
-    if (!Array.isArray(rows) || rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return NextResponse.json({ success: false, message: "Item não encontrado" }, { status: 404 })
     }
 
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const data = await request.json()
 
     // Verificar se o item existe e buscar a marca atual
-    const [existingRows] = await pool.execute(
+    const existingRows = await query(
       `
       SELECT oi.*, COALESCE(oi.marca_nome, p.marca) as marca_atual
       FROM orcamentos_itens oi
@@ -48,13 +48,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       WHERE oi.orcamento_numero = ? AND oi.id = ?
       `,
       [numero, id],
-    )
+    ) as any[]
 
-    if (!Array.isArray(existingRows) || existingRows.length === 0) {
+    if (!existingRows || existingRows.length === 0) {
       return NextResponse.json({ success: false, message: "Item não encontrado" }, { status: 404 })
     }
 
-    const itemExistente = existingRows[0] as any
+    const itemExistente = existingRows[0]
 
     // Calcular valor total
     const quantidade = Number.parseFloat(data.quantidade || 0)
@@ -66,7 +66,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const marcaNome = data.marca_nome !== undefined ? data.marca_nome : itemExistente.marca_atual
 
     // Atualizar item preservando a marca
-    await pool.execute(
+    await query(
       `
       UPDATE orcamentos_itens SET
         quantidade = ?,
@@ -80,24 +80,23 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     )
 
     // Recalcular total do orçamento (material + mão de obra)
-    const [totalRows] = await pool.execute(
+    const totalRows = await query(
       `SELECT 
         SUM(quantidade * valor_unitario) as total_material,
         SUM(quantidade * valor_mao_obra) as total_mao_obra
        FROM orcamentos_itens 
        WHERE orcamento_numero = ?`,
       [numero],
-    )
+    ) as any[]
 
-    const totals =
-      Array.isArray(totalRows) && totalRows.length > 0
-        ? (totalRows[0] as any)
-        : { total_material: 0, total_mao_obra: 0 }
+    const totals = totalRows && totalRows.length > 0
+      ? totalRows[0]
+      : { total_material: 0, total_mao_obra: 0 }
     const valorMaterial = totals.total_material || 0
     const valorMaoObraTotal = totals.total_mao_obra || 0
     const novoTotal = valorMaterial + valorMaoObraTotal
 
-    await pool.execute(
+    await query(
       "UPDATE orcamentos SET valor_material = ?, valor_mao_obra = ?, valor_total = ? WHERE numero = ?",
       [valorMaterial, valorMaoObraTotal, novoTotal, numero],
     )
@@ -117,37 +116,36 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const { numero, id } = await params
 
     // Verificar se o item existe
-    const [existingRows] = await pool.execute("SELECT id FROM orcamentos_itens WHERE orcamento_numero = ? AND id = ?", [
-      numero,
-      id,
-    ])
+    const existingRows = await query(
+      "SELECT id FROM orcamentos_itens WHERE orcamento_numero = ? AND id = ?",
+      [numero, id]
+    ) as any[]
 
-    if (!Array.isArray(existingRows) || existingRows.length === 0) {
+    if (!existingRows || existingRows.length === 0) {
       return NextResponse.json({ success: false, message: "Item não encontrado" }, { status: 404 })
     }
 
     // Deletar item
-    await pool.execute("DELETE FROM orcamentos_itens WHERE orcamento_numero = ? AND id = ?", [numero, id])
+    await query("DELETE FROM orcamentos_itens WHERE orcamento_numero = ? AND id = ?", [numero, id])
 
     // Recalcular total do orçamento (material + mão de obra)
-    const [totalRows] = await pool.execute(
+    const totalRows = await query(
       `SELECT 
         SUM(quantidade * valor_unitario) as total_material,
         SUM(quantidade * valor_mao_obra) as total_mao_obra
        FROM orcamentos_itens 
        WHERE orcamento_numero = ?`,
       [numero],
-    )
+    ) as any[]
 
-    const totals =
-      Array.isArray(totalRows) && totalRows.length > 0
-        ? (totalRows[0] as any)
-        : { total_material: 0, total_mao_obra: 0 }
+    const totals = totalRows && totalRows.length > 0
+      ? totalRows[0]
+      : { total_material: 0, total_mao_obra: 0 }
     const valorMaterial = totals.total_material || 0
     const valorMaoObraTotal = totals.total_mao_obra || 0
     const novoTotal = valorMaterial + valorMaoObraTotal
 
-    await pool.execute(
+    await query(
       "UPDATE orcamentos SET valor_material = ?, valor_mao_obra = ?, valor_total = ? WHERE numero = ?",
       [valorMaterial, valorMaoObraTotal, novoTotal, numero],
     )
