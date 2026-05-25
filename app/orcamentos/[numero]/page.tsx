@@ -401,8 +401,10 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
 
   const calcularValorJuros = () => {
     if (!orcamento) return 0
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
-    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material) || 1
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) ?? 1
+    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material) ?? 1
+    // Se parcelamento material = 0, sem juros
+    if (parcelamentoMaterial === 0) return 0
     const jurosAm = safeNumber(orcamento.juros_am)
     const valorMaterial = safeNumber(orcamento.valor_material)
     return ((parcelamentoMdo + parcelamentoMaterial - 1) * jurosAm * valorMaterial) / 100
@@ -410,20 +412,24 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
 
   const calcularTaxaBoletoMdo = () => {
     if (!orcamento) return 0
-    const parcelamento = safeNumber(orcamento.parcelamento_mdo) || 1
+    const parcelamento = safeNumber(orcamento.parcelamento_mdo)
     const valorBoleto = safeNumber(orcamento.valor_boleto)
     return parcelamento * valorBoleto
   }
 
   const calcularTaxaBoletoMaterial = () => {
     if (!orcamento) return 0
-    const parcelamento = safeNumber(orcamento.parcelamento_material) || 1
+    const parcelamento = safeNumber(orcamento.parcelamento_material)
+    if (parcelamento === 0) return 0
     const valorBoleto = safeNumber(orcamento.valor_boleto)
     return parcelamento * valorBoleto
   }
 
   const calcularImpostoServicoValor = () => {
     if (!orcamento) return 0
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
+    // Se parcelamento MDO = 0, sem cobrança de serviço → imposto = 0
+    if (parcelamentoMdo === 0) return 0
     const valorMaoObra = safeNumber(orcamento.valor_mao_obra)
     const descontoMdoValor = safeNumber(orcamento.desconto_mdo_valor)
     const custoDeslocamento = calcularCustoDeslocamento()
@@ -436,6 +442,8 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
 
   const calcularImpostoMaterialValor = () => {
     if (!orcamento) return 0
+    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
+    if (parcelamentoMaterial === 0) return 0
     const valorMaterial = safeNumber(orcamento.valor_material)
     const valorJuros = calcularValorJuros()
     const taxaBoletoMaterial = calcularTaxaBoletoMaterial()
@@ -451,7 +459,7 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
     if (!orcamento) return 0
 
     // Se parcelamento MDO for 0 (sem cobrança), subtotal MDO é 0
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
     if (parcelamentoMdo === 0) {
       return 0
     }
@@ -467,12 +475,15 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
 
   const calcularSubtotalMaterial = () => {
     if (!orcamento) return 0
+    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
+    if (parcelamentoMaterial === 0) return 0
+
     const valorMaterial = safeNumber(orcamento.valor_material)
     const valorJuros = calcularValorJuros()
     const taxaBoletoMaterial = calcularTaxaBoletoMaterial()
     const impostoMaterialValor = calcularImpostoMaterialValor()
 
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
     const custoDeslocamentoExtra = parcelamentoMdo === 0 ? calcularCustoDeslocamento() : 0
 
     return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor + custoDeslocamentoExtra
@@ -914,9 +925,9 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
                       <div className="text-center p-2 bg-blue-50 rounded">
                         <div className="text-sm text-gray-600">MDO</div>
                         <div className="font-semibold text-blue-600">
-                          {(orcamento.parcelamento_mdo || 1) === 0
+                          {orcamento.parcelamento_mdo === 0
                             ? "Sem cobrança"
-                            : (orcamento.parcelamento_mdo || 1) === 1
+                            : (orcamento.parcelamento_mdo ?? 1) === 1
                               ? "À vista"
                               : `${orcamento.parcelamento_mdo}x`}
                         </div>
@@ -924,9 +935,9 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
                       <div className="text-center p-2 bg-green-50 rounded">
                         <div className="text-sm text-gray-600">Material</div>
                         <div className="font-semibold text-green-600">
-                          {(orcamento.parcelamento_material || 1) === 0
+                          {orcamento.parcelamento_material === 0
                             ? "Sem cobrança"
-                            : (orcamento.parcelamento_material || 1) === 1 && !orcamento.material_a_vista
+                            : (orcamento.parcelamento_material ?? 1) === 1 && !orcamento.material_a_vista
                               ? "30dd"
                               : `${orcamento.parcelamento_material}x`}
                         </div>
@@ -1004,9 +1015,9 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-blue-700 font-medium">Mão de Obra:</span>
                           <span className="font-semibold text-blue-800">
-                            {(orcamento.parcelamento_mdo || 1) === 0
+                            {orcamento.parcelamento_mdo === 0
                               ? "Sem cobrança"
-                              : (orcamento.parcelamento_mdo || 1) === 1
+                              : (orcamento.parcelamento_mdo ?? 1) === 1
                                 ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
                                 : `${orcamento.parcelamento_mdo}x de ${formatCurrency(calcularSubtotalMdo() / (orcamento.parcelamento_mdo || 1))}`}
                           </span>
@@ -1017,9 +1028,9 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
                           <span className="font-semibold text-green-800">
                             {orcamento.material_a_vista
                               ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
-                              : (orcamento.parcelamento_material || 1) === 0
+                              : orcamento.parcelamento_material === 0
                                 ? "Sem cobrança"
-                                : (orcamento.parcelamento_material || 1) === 1
+                                : (orcamento.parcelamento_material ?? 1) === 1
                                   ? `30dd - ${formatCurrency(calcularSubtotalMaterial())}`
                                   : `${orcamento.parcelamento_material}x de ${formatCurrency(calcularSubtotalMaterial() / (orcamento.parcelamento_material || 1))}`}
                           </span>
