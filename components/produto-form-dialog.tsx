@@ -393,16 +393,13 @@ export function ProdutoFormDialog({ open, onOpenChange, produto, onSuccess }: Pr
                 <div className="relative flex-1">
                   <Input
                     id="codigo"
-                    value={codigo}
-                    onChange={(e) => setCodigo(e.target.value)}
-                    placeholder="Código do produto"
-                    readOnly={isEdicao}
-                    className={isEdicao ? "bg-gray-50 text-gray-600" : ""}
+                    value={codigo || (gerandoCodigo ? "" : "")}
+                    placeholder={gerandoCodigo ? "Gerando..." : !categoriaId ? "Selecione a categoria" : !isServicoCategory && (!marca || marca === "Nenhuma marca") ? "Selecione a marca" : "Aguardando geração..."}
+                    readOnly
+                    className="bg-gray-50 text-gray-600 cursor-not-allowed pr-8"
                     required
                   />
-                  {isEdicao && (
-                    <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  )}
+                  <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 </div>
                 {!isEdicao && (
                   <Button
@@ -414,13 +411,16 @@ export function ProdutoFormDialog({ open, onOpenChange, produto, onSuccess }: Pr
                       gerandoCodigo || !categoriaId || (!isServicoCategory && (!marca || marca === "Nenhuma marca"))
                     }
                     className="px-3 bg-transparent"
+                    title="Regenerar código"
                   >
                     {gerandoCodigo ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                   </Button>
                 )}
               </div>
-              {!isEdicao && (
+              {!isEdicao ? (
                 <p className="text-xs text-gray-500 mt-1">Código gerado automaticamente baseado na categoria e marca</p>
+              ) : (
+                <p className="text-xs text-gray-500 mt-1">O código não pode ser alterado após a criação</p>
               )}
             </div>
 
