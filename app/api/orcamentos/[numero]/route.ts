@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       WHERE o.numero = ?
     `
 
-    const orcamentos = await query(orcamentoQuery, [numero])
+    const orcamentos = await query(orcamentoQuery, [numero]) as any[]
 
     if (!orcamentos || orcamentos.length === 0) {
       return NextResponse.json({ success: false, message: "Orçamento não encontrado" }, { status: 404 })
