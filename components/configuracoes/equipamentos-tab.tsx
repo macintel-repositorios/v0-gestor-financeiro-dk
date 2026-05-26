@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResizableTable } from "@/components/ui/resizable-table"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -253,39 +253,38 @@ export function EquipamentosTab() {
           {equipamentos.length === 0 ? (
             <p className="text-center text-gray-500 py-4">Nenhum equipamento cadastrado</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Valor por Hora</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {equipamentos
-                  .filter((eq) => eq.ativo)
-                  .map((equipamento) => (
-                    <TableRow key={equipamento.id}>
-                      <TableCell className="font-medium">{equipamento.nome}</TableCell>
-                      <TableCell>{getCategoriaLabel(equipamento.categoria)}</TableCell>
-                      <TableCell>{formatCurrency(equipamento.valor_hora)}</TableCell>
-                      <TableCell className="max-w-xs truncate">{equipamento.descricao || "-"}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEdit(equipamento)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleDelete(equipamento.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+            <ResizableTable<Equipamento>
+              storageKey="config-equipamentos"
+              columns={[
+                { key: "nome",       label: "Nome",           width: 200, sortable: true },
+                { key: "categoria",  label: "Categoria",       width: 160, sortable: true },
+                { key: "valor_hora", label: "Valor por Hora",  width: 130, sortable: true },
+                { key: "descricao",  label: "Descrição",        width: 220, sortable: false },
+                { key: "acoes",      label: "Ações",           width: 90,  sortable: false, noResize: true, align: "right" },
+              ]}
+              data={equipamentos.filter((eq) => eq.ativo)}
+              rowKey={(row) => row.id}
+              renderCell={(equipamento, col) => {
+                switch (col) {
+                  case "nome": return <span className="font-medium">{equipamento.nome}</span>
+                  case "categoria": return <span>{getCategoriaLabel(equipamento.categoria)}</span>
+                  case "valor_hora": return <span>{formatCurrency(equipamento.valor_hora)}</span>
+                  case "descricao": return <span className="truncate max-w-xs">{equipamento.descricao || "-"}</span>
+                  case "acoes":
+                    return (
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(equipamento)}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDelete(equipamento.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )
+                  default: return null
+                }
+              }}
+            />
           )}
         </CardContent>
       </Card>
