@@ -200,9 +200,8 @@ export async function POST(request: NextRequest) {
           descricao_personalizada,
           valor_unitario_ajustado,
           valor_total_ajustado,
-          ordem,
           created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))
       `
 
       for (let i = 0; i < data.itens.length; i++) {
@@ -221,7 +220,7 @@ export async function POST(request: NextRequest) {
           item.descricao_personalizada || null,
           item.valor_unitario_ajustado || null,
           item.valor_total_ajustado || null,
-          i, // ordem = posição no array (preserva drag-and-drop)
+          i,
         ])
       }
     }
@@ -236,3 +235,4 @@ export async function POST(request: NextRequest) {
     console.error("Erro ao criar orçamento:", error)
     return NextResponse.json({ success: false, message: "Erro interno do servidor" }, { status: 500 })
   }
+}
