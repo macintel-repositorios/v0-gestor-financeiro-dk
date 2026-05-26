@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResizableTable } from "@/components/ui/resizable-table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Activity,
@@ -502,65 +502,51 @@ export default function LogsPage() {
             </Select>
           </div>
 
-          <div className="rounded-lg border border-slate-200 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow>
-                  <TableHead>Data/Hora (SP)</TableHead>
-                  <TableHead>Usuário</TableHead>
-                  <TableHead>Ação</TableHead>
-                  <TableHead>Módulo</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Tempo Sessão</TableHead>
-                  <TableHead>IP</TableHead>
-                  <TableHead>Detalhes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {logs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      Nenhum log encontrado
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  logs.map((log) => (
-                    <TableRow key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                      <TableCell className="font-mono text-sm">{log.data_formatada}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <div className="font-medium">{log.usuario_nome || "Sistema"}</div>
-                            <div className="text-xs text-muted-foreground">{log.usuario_email}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{log.acao}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{log.modulo}</Badge>
-                      </TableCell>
-                      <TableCell>{getTipoBadge(log.tipo)}</TableCell>
-                      <TableCell>
-                        {log.tempo_sessao_formatado ? (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Clock className="h-3 w-3 text-muted-foreground" />
-                            {log.tempo_sessao_formatado}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">{log.ip_address || "-"}</TableCell>
-                      <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
-                        {log.detalhes || "-"}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <ResizableTable
+            storageKey="logs"
+            columns={[
+              { key: "data_formatada",         label: "Data/Hora (SP)",  width: 160, sortable: true },
+              { key: "usuario_nome",            label: "Usuário",         width: 170, sortable: true },
+              { key: "acao",                    label: "Ação",            width: 200, sortable: true },
+              { key: "modulo",                  label: "Módulo",          width: 120, sortable: true },
+              { key: "tipo",                    label: "Tipo",            width: 110, sortable: true },
+              { key: "tempo_sessao_formatado",  label: "Tempo Sessão",    width: 120, sortable: false },
+              { key: "ip_address",              label: "IP",              width: 130, sortable: false },
+              { key: "detalhes",                label: "Detalhes",        width: 220, sortable: false },
+            ]}
+            data={logs}
+            rowKey={(row) => row.id}
+            emptyState={<div className="text-center py-8 text-muted-foreground">Nenhum log encontrado</div>}
+            renderCell={(log, col) => {
+              switch (col) {
+                case "data_formatada":
+                  return <span className="font-mono text-sm">{log.data_formatada}</span>
+                case "usuario_nome":
+                  return (
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <div className="font-medium">{log.usuario_nome || "Sistema"}</div>
+                        <div className="text-xs text-muted-foreground truncate">{log.usuario_email}</div>
+                      </div>
+                    </div>
+                  )
+                case "acao": return <span className="font-medium truncate">{log.acao}</span>
+                case "modulo": return <Badge variant="outline">{log.modulo}</Badge>
+                case "tipo": return getTipoBadge(log.tipo)
+                case "tempo_sessao_formatado":
+                  return log.tempo_sessao_formatado ? (
+                    <div className="flex items-center gap-1 text-sm">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                      {log.tempo_sessao_formatado}
+                    </div>
+                  ) : <span className="text-muted-foreground">-</span>
+                case "ip_address": return <span className="font-mono text-sm">{log.ip_address || "-"}</span>
+                case "detalhes": return <span className="text-sm text-muted-foreground truncate">{log.detalhes || "-"}</span>
+                default: return null
+              }
+            }}
+          />
         </CardContent>
       </Card>
     </div>
