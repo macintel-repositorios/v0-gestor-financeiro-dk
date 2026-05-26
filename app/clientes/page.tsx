@@ -4,8 +4,8 @@ import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Search, Users, Building2, Phone, Mail, Edit, Trash2, Filter, Plus } from "lucide-react"
+import { ResizableTable, type ColumnDef } from "@/components/ui/resizable-table"
 import { formatCNPJ, formatCPF, formatPhone } from "@/lib/utils"
 import type { Cliente } from "@/types/database"
 import {
@@ -416,125 +416,103 @@ export default function ClientesPage() {
                 )}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead className="font-semibold">Código</TableHead>
-                      <TableHead className="font-semibold">Nome/Razão Social</TableHead>
-                      <TableHead className="font-semibold">Documento</TableHead>
-                      <TableHead className="font-semibold">Contato</TableHead>
-                      <TableHead className="font-semibold">Distância</TableHead>
-                      <TableHead className="font-semibold">Contrato</TableHead>
-                      <TableHead className="font-semibold">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredClientes.map((cliente) => (
-                      <TableRow
-                        key={cliente.id}
-                        className={`hover:bg-gray-50 transition-colors ${cliente.tem_contrato ? "bg-green-50" : ""}`}
-                      >
-                        <TableCell className="font-medium">
-                          <Badge variant="outline" className="font-mono">
-                            {cliente.codigo}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium text-gray-900">{cliente.nome}</div>
-                            {cliente.contato && <div className="text-sm text-gray-600">Contato: {cliente.contato}</div>}
-                            <Badge
-                              variant={cliente.cnpj ? "default" : "secondary"}
-                              className={`mt-1 ${cliente.cnpj ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
-                            >
-                              {getClienteType(cliente.cnpj, cliente.cpf)}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm font-mono">{formatDocument(cliente.cnpj, cliente.cpf)}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {cliente.email && (
-                              <div className="flex items-center text-sm">
-                                <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                                <span className="text-gray-700">{cliente.email}</span>
-                              </div>
-                            )}
-                            {cliente.telefone && (
-                              <div className="flex items-center text-sm">
-                                <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                                <span className="text-gray-700">{formatPhone(cliente.telefone)}</span>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs font-mono">
-                            {getDistanceLabel(cliente.distancia_km)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
+              <ResizableTable<Cliente>
+                storageKey="clientes"
+                columns={[
+                  { key: "codigo",       label: "Código",           width: 100, sortable: true },
+                  { key: "nome",         label: "Nome/Razão Social", width: 220, sortable: true },
+                  { key: "cnpj",         label: "Documento",         width: 160, sortable: false },
+                  { key: "email",        label: "Contato",           width: 230, sortable: false },
+                  { key: "distancia_km", label: "Distância",         width: 100, sortable: true },
+                  { key: "tem_contrato", label: "Contrato",          width: 110, sortable: true },
+                  { key: "acoes",        label: "Ações",             width: 100, sortable: false, noResize: true },
+                ] as ColumnDef<Cliente>[]}
+                data={filteredClientes}
+                rowKey={(row) => row.id}
+                rowClassName={(row) => row.tem_contrato ? "bg-green-50" : ""}
+                renderCell={(cliente, col) => {
+                  switch (col) {
+                    case "codigo":
+                      return <Badge variant="outline" className="font-mono">{cliente.codigo}</Badge>
+                    case "nome":
+                      return (
+                        <div>
+                          <div className="font-medium text-gray-900 truncate">{cliente.nome}</div>
+                          {cliente.contato && <div className="text-sm text-gray-600">Contato: {cliente.contato}</div>}
+                          <Badge
+                            variant={cliente.cnpj ? "default" : "secondary"}
+                            className={`mt-1 ${cliente.cnpj ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
+                          >{getClienteType(cliente.cnpj, cliente.cpf)}</Badge>
+                        </div>
+                      )
+                    case "cnpj":
+                      return <div className="text-sm font-mono">{formatDocument(cliente.cnpj, cliente.cpf)}</div>
+                    case "email":
+                      return (
+                        <div className="space-y-1">
+                          {cliente.email && (
+                            <div className="flex items-center text-sm">
+                              <Mail className="h-3 w-3 mr-1 text-gray-400 flex-shrink-0" />
+                              <span className="text-gray-700 truncate">{cliente.email}</span>
+                            </div>
+                          )}
+                          {cliente.telefone && (
+                            <div className="flex items-center text-sm">
+                              <Phone className="h-3 w-3 mr-1 text-gray-400 flex-shrink-0" />
+                              <span className="text-gray-700">{formatPhone(cliente.telefone)}</span>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    case "distancia_km":
+                      return <Badge variant="outline" className="text-xs font-mono">{getDistanceLabel(cliente.distancia_km)}</Badge>
+                    case "tem_contrato":
+                      return (
+                        <div>
                           <Badge
                             variant={cliente.tem_contrato ? "default" : "secondary"}
-                            className={
-                              cliente.tem_contrato ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                            }
-                          >
-                            {cliente.tem_contrato ? "Sim" : "Não"}
-                          </Badge>
+                            className={cliente.tem_contrato ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
+                          >{cliente.tem_contrato ? "Sim" : "Não"}</Badge>
                           {cliente.tem_contrato && cliente.dia_contrato && (
                             <div className="text-xs text-gray-600 mt-1">Venc: Dia {cliente.dia_contrato}</div>
                           )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditCliente(cliente)}
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Tem certeza que deseja excluir o cliente "{cliente.nome}"? Esta ação não pode ser
-                                    desfeita e removerá todos os dados do cliente.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteCliente(cliente)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
-                                    Excluir Cliente
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                        </div>
+                      )
+                    case "acoes":
+                      return (
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleEditCliente(cliente)}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir o cliente "{cliente.nome}"? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteCliente(cliente)} className="bg-red-600 hover:bg-red-700">
+                                  Excluir Cliente
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      )
+                    default: return null
+                  }
+                }}
+              />
             )}
           </CardContent>
         </Card>
