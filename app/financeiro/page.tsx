@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResizableTable } from "@/components/ui/resizable-table"
 import {
   DollarSign,
   FileText,
@@ -815,145 +815,86 @@ export default function FinanceiroPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gray-50">
-                          <TableHead className="font-semibold">Número</TableHead>
-                          <TableHead className="font-semibold">Cliente</TableHead>
-                          <TableHead className="font-semibold">Valor</TableHead>
-                          <TableHead className="font-semibold">Vencimento</TableHead>
-                          <TableHead className="font-semibold">Mês Emissão</TableHead>
-                          <TableHead className="font-semibold">Status</TableHead>
-                          <TableHead className="font-semibold">Parcela</TableHead>
-                          <TableHead className="font-semibold">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredBoletos.map((boleto) => (
-                          <TableRow key={boleto.id} className="hover:bg-gray-50 transition-colors">
-                            <TableCell className="font-medium">
-                              <Badge variant="outline" className="font-mono">
-                                {boleto.numero}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-medium text-gray-900">{boleto.cliente_nome}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-semibold text-green-600">{formatarValor(boleto.valor)}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-gray-400" />
-                                <span>{formatDate(boleto.data_vencimento)}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-blue-400" />
-                                <span className="text-blue-700 font-medium">{formatMesEmissao(boleto.created_at)}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>{getStatusBadge(boleto.status, boleto.data_vencimento)}</TableCell>
-                            <TableCell className="text-gray-700 font-medium">
-                              {boleto.numero_parcela}/{boleto.total_parcelas}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                {/* Botão Visualizar - sempre aparece */}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleVisualizarBoleto(boleto)}
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
-                                  title="Visualizar boleto"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-
-                                {/* Botões que só aparecem quando o boleto NÃO está pago */}
-                                {!(boleto.status === "pago" && boleto.data_pagamento) && (
-                                  <>
-                                    {/* Botão Enviar para Asaas - só aparece quando NÃO tem asaas_id */}
-                                    {!boleto.asaas_id && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleEnviarAsaas(boleto)}
-                                        disabled={enviandoParaAsaas === boleto.id}
-                                        className="border-teal-500 text-teal-600 hover:bg-teal-50 h-9 lg:h-12 text-sm lg:text-base"
-                                        title="Enviar para Asaas"
-                                      >
-                                        {enviandoParaAsaas === boleto.id ? (
-                                          <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                          <Send className="h-4 w-4" />
-                                        )}
-                                      </Button>
-                                    )}
-
-                                    {/* Botão Imprimir - só aparece quando tem asaas_bankslip_url */}
-                                    {boleto.asaas_bankslip_url && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
-                                        className="border-purple-500 text-purple-600 hover:bg-purple-50 h-9 lg:h-12 text-sm lg:text-base"
-                                        title="Imprimir boleto"
-                                      >
-                                        <Printer className="h-4 w-4" />
-                                      </Button>
-                                    )}
-
-                                    {/* Botão Marcar como Pago - só aparece quando pendente ou aguardando_pagamento */}
-                                    {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleMarcarPago(boleto)}
-                                        className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
-                                        title="Marcar como Pago (TESTE)"
-                                      >
-                                        <CheckCircle className="h-4 w-4" />
-                                      </Button>
-                                    )}
-
-                                    {/* Botão Editar */}
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleEditarBoleto(boleto)}
-                                      className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
-                                      title="Editar boleto"
-                                    >
-                                      <Edit className="h-4 w-4" />
+                  <ResizableTable
+                    storageKey="financeiro-boletos"
+                    columns={[
+                      { key: "numero",          label: "Número",      width: 110, sortable: true },
+                      { key: "cliente_nome",    label: "Cliente",      width: 180, sortable: true },
+                      { key: "valor",           label: "Valor",        width: 120, sortable: true },
+                      { key: "data_vencimento", label: "Vencimento",   width: 130, sortable: true },
+                      { key: "created_at",      label: "Mês Emissão", width: 130, sortable: true },
+                      { key: "status",          label: "Status",       width: 130, sortable: true },
+                      { key: "numero_parcela",  label: "Parcela",      width: 80,  sortable: true },
+                      { key: "acoes",           label: "Ações",        width: 160, sortable: false, noResize: true },
+                    ]}
+                    data={filteredBoletos}
+                    rowKey={(row) => row.id}
+                    renderCell={(boleto, col) => {
+                      switch (col) {
+                        case "numero": return <Badge variant="outline" className="font-mono">{boleto.numero}</Badge>
+                        case "cliente_nome": return <div className="font-medium text-gray-900 truncate">{boleto.cliente_nome}</div>
+                        case "valor": return <div className="font-semibold text-green-600">{formatarValor(boleto.valor)}</div>
+                        case "data_vencimento":
+                          return (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                              <span>{formatDate(boleto.data_vencimento)}</span>
+                            </div>
+                          )
+                        case "created_at":
+                          return (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                              <span className="text-blue-700 font-medium">{formatMesEmissao(boleto.created_at)}</span>
+                            </div>
+                          )
+                        case "status": return getStatusBadge(boleto.status, boleto.data_vencimento)
+                        case "numero_parcela": return <span className="text-gray-700 font-medium">{boleto.numero_parcela}/{boleto.total_parcelas}</span>
+                        case "acoes":
+                          return (
+                            <div className="flex gap-1 flex-wrap">
+                              <Button size="sm" variant="outline" onClick={() => handleVisualizarBoleto(boleto)}
+                                className="text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0" title="Visualizar">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              {!(boleto.status === "pago" && boleto.data_pagamento) && (
+                                <>
+                                  {!boleto.asaas_id && (
+                                    <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
+                                      disabled={enviandoParaAsaas === boleto.id}
+                                      className="border-teal-500 text-teal-600 hover:bg-teal-50 h-8 w-8 p-0" title="Enviar Asaas">
+                                      {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                                     </Button>
-                                  </>
-                                )}
-
-                                {/* Botão Excluir - sempre aparece */}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleExcluirBoleto(boleto)}
-                                  disabled={deletingId === boleto.id}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
-                                  title="Excluir boleto"
-                                >
-                                  {deletingId === boleto.id ? (
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                                  ) : (
-                                    <Trash2 className="h-4 w-4" />
                                   )}
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                                  {boleto.asaas_bankslip_url && (
+                                    <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
+                                      className="border-purple-500 text-purple-600 hover:bg-purple-50 h-8 w-8 p-0" title="Imprimir">
+                                      <Printer className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
+                                    <Button size="sm" variant="outline" onClick={() => handleMarcarPago(boleto)}
+                                      className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
+                                      <CheckCircle className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  <Button size="sm" variant="outline" onClick={() => handleEditarBoleto(boleto)}
+                                    className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Editar">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                              <Button size="sm" variant="outline" onClick={() => handleExcluirBoleto(boleto)}
+                                disabled={deletingId === boleto.id}
+                                className="text-red-600 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0" title="Excluir">
+                                {deletingId === boleto.id ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" /> : <Trash2 className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          )
+                        default: return null
+                      }
+                    }}
+                  />
                 )}
               </CardContent>
             </Card>
@@ -1045,93 +986,63 @@ export default function FinanceiroPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gray-50">
-                          <TableHead className="font-semibold">Número</TableHead>
-                          <TableHead className="font-semibold">Cliente</TableHead>
-                          <TableHead className="font-semibold">Descrição</TableHead>
-                          <TableHead className="font-semibold">Valor</TableHead>
-                          <TableHead className="font-semibold">Data Emissão</TableHead>
-                          <TableHead className="font-semibold">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredRecibos.map((recibo) => (
-                          <TableRow key={recibo.id} className="hover:bg-gray-50 transition-colors">
-                            <TableCell className="font-medium">
-                              <Badge variant="outline" className="font-mono">
-                                {recibo.numero}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-medium text-gray-900">{recibo.cliente_nome}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="max-w-xs truncate">{recibo.descricao}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-semibold text-green-600">{formatarValor(recibo.valor)}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-gray-400" />
-                                <span>{formatDate(recibo.data_emissao)}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode
-                                        ser desfeita.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleDeleteRecibo(recibo)}
-                                        className="bg-red-600 hover:bg-red-700"
-                                      >
-                                        Excluir Recibo
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                  <ResizableTable
+                    storageKey="financeiro-recibos"
+                    columns={[
+                      { key: "numero",       label: "Número",      width: 110, sortable: true },
+                      { key: "cliente_nome", label: "Cliente",      width: 180, sortable: true },
+                      { key: "descricao",    label: "Descrição",    width: 220, sortable: false },
+                      { key: "valor",        label: "Valor",        width: 120, sortable: true },
+                      { key: "data_emissao", label: "Data Emissão", width: 130, sortable: true },
+                      { key: "acoes",        label: "Ações",        width: 120, sortable: false, noResize: true },
+                    ]}
+                    data={filteredRecibos}
+                    rowKey={(row) => row.id}
+                    renderCell={(recibo, col) => {
+                      switch (col) {
+                        case "numero": return <Badge variant="outline" className="font-mono">{recibo.numero}</Badge>
+                        case "cliente_nome": return <div className="font-medium text-gray-900 truncate">{recibo.cliente_nome}</div>
+                        case "descricao": return <div className="max-w-xs truncate">{recibo.descricao}</div>
+                        case "valor": return <div className="font-semibold text-green-600">{formatarValor(recibo.valor)}</div>
+                        case "data_emissao":
+                          return (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                              <span>{formatDate(recibo.data_emissao)}</span>
+                            </div>
+                          )
+                        case "acoes":
+                          return (
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                    <AlertDialogDescription>Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700">Excluir Recibo</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          )
+                        default: return null
+                      }
+                    }}
+                  />
                 )}
               </CardContent>
             </Card>
