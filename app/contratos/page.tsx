@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResizableTable } from "@/components/ui/resizable-table"
 import {
   Dialog,
   DialogContent,
@@ -635,98 +635,64 @@ export default function ContratosPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Número</TableHead>
-                          <TableHead className="min-w-[150px]">Cliente</TableHead>
-                          <TableHead className="hidden md:table-cell w-[80px]">Tipo</TableHead>
-                          <TableHead className="hidden lg:table-cell w-[100px]">Frequência</TableHead>
-                          <TableHead className="w-[120px]">Valor Total</TableHead>
-                          <TableHead className="w-[80px]">Status</TableHead>
-                          <TableHead className="hidden sm:table-cell w-[90px]">Data</TableHead>
-                          <TableHead className="hidden lg:table-cell w-[90px]">Validade</TableHead>
-                          <TableHead className="w-[60px]">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredPropostas.map((proposta) => (
-                          <TableRow key={proposta.id}>
-                            <TableCell className="font-medium">
-                              <Badge variant="outline" className="font-mono text-xs">
-                                {proposta.numero}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium text-sm">{proposta.cliente_nome}</div>
-                                {proposta.cliente_codigo && (
-                                  <div className="text-xs text-gray-500 hidden sm:block">{proposta.cliente_codigo}</div>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <Badge variant="outline" className="capitalize text-xs">
-                                {proposta.tipo}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="capitalize text-sm hidden lg:table-cell">
-                              {proposta.frequencia}
-                            </TableCell>
-                            <TableCell className="font-medium text-green-600 text-sm">
-                              {formatCurrency(proposta.valor_total_proposta)}
-                            </TableCell>
-                            <TableCell>{getStatusBadge(proposta.status)}</TableCell>
-                            <TableCell className="text-sm hidden sm:table-cell">
-                              {formatDateShort(proposta.data_proposta)}
-                            </TableCell>
-                            <TableCell className="text-sm hidden lg:table-cell">
-                              {proposta.data_validade ? formatDateShort(proposta.data_validade) : "-"}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center justify-end">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem asChild>
-                                      <Link
-                                        href={`/contratos/proposta/${proposta.numero}`}
-                                        className="flex items-center"
-                                      >
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        Visualizar
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                      <Link
-                                        href={`/contratos/proposta/${proposta.numero}/editar`}
-                                        className="flex items-center"
-                                      >
-                                        <Edit className="h-4 w-4 mr-2" />
-                                        Editar
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="text-red-600 focus:text-red-600"
-                                      onClick={() => excluirProposta(proposta.numero)}
-                                    >
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Excluir
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                  <ResizableTable
+                    storageKey="propostas"
+                    columns={[
+                      { key: "numero",                label: "Número",      width: 100, sortable: true },
+                      { key: "cliente_nome",          label: "Cliente",      width: 180, sortable: true },
+                      { key: "tipo",                  label: "Tipo",         width: 100, sortable: true },
+                      { key: "frequencia",             label: "Frequência",   width: 110, sortable: true },
+                      { key: "valor_total_proposta",   label: "Valor Total",  width: 130, sortable: true },
+                      { key: "status",                label: "Status",       width: 100, sortable: true },
+                      { key: "data_proposta",          label: "Data",         width: 90,  sortable: true },
+                      { key: "data_validade",          label: "Validade",     width: 90,  sortable: true },
+                      { key: "acoes",                 label: "Ações",        width: 60,  sortable: false, noResize: true },
+                    ]}
+                    data={filteredPropostas}
+                    rowKey={(row) => row.id}
+                    renderCell={(proposta, col) => {
+                      switch (col) {
+                        case "numero": return <Badge variant="outline" className="font-mono text-xs">{proposta.numero}</Badge>
+                        case "cliente_nome":
+                          return (
+                            <div>
+                              <div className="font-medium text-sm truncate">{proposta.cliente_nome}</div>
+                              {proposta.cliente_codigo && <div className="text-xs text-gray-500">{proposta.cliente_codigo}</div>}
+                            </div>
+                          )
+                        case "tipo": return <Badge variant="outline" className="capitalize text-xs">{proposta.tipo}</Badge>
+                        case "frequencia": return <span className="capitalize text-sm">{proposta.frequencia}</span>
+                        case "valor_total_proposta": return <span className="font-medium text-green-600 text-sm">{formatCurrency(proposta.valor_total_proposta)}</span>
+                        case "status": return getStatusBadge(proposta.status)
+                        case "data_proposta": return <span className="text-sm">{formatDateShort(proposta.data_proposta)}</span>
+                        case "data_validade": return <span className="text-sm">{proposta.data_validade ? formatDateShort(proposta.data_validade) : "-"}</span>
+                        case "acoes":
+                          return (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/contratos/proposta/${proposta.numero}`} className="flex items-center">
+                                    <Eye className="h-4 w-4 mr-2" />Visualizar
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/contratos/proposta/${proposta.numero}/editar`} className="flex items-center">
+                                    <Edit className="h-4 w-4 mr-2" />Editar
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => excluirProposta(proposta.numero)}>
+                                  <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )
+                        default: return null
+                      }
+                    }}
+                  />
                 )}
               </CardContent>
             </Card>
@@ -763,122 +729,80 @@ export default function ContratosPage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Numero</TableHead>
-                          <TableHead className="min-w-[200px]">Cliente / Equipamentos</TableHead>
-                          <TableHead className="w-[120px]">Valor Mensal</TableHead>
-                          <TableHead className="w-[50px] text-center">Dia</TableHead>
-                          <TableHead className="w-[80px]">Status</TableHead>
-                          <TableHead className="hidden sm:table-cell w-[90px]">Inicio</TableHead>
-                          <TableHead className="hidden lg:table-cell w-[100px]">Prazo</TableHead>
-                          <TableHead className="w-[100px]">Acoes</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                                {filteredContratos.map((contrato) => {
-                                  const equipamentos = parseEquipamentos(contrato)
-                                  // Botao sempre habilitado - verificacao de nota ja emitida sera feita no dialog apos selecionar o mes
-                                  return (
-                          <TableRow key={contrato.id}>
-                            <TableCell className="font-medium">
-                              <Badge variant="outline" className="font-mono text-xs">
-                                {contrato.numero}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium text-sm">{contrato.cliente_nome}</div>
-                                {equipamentos.length > 0 && (
-                                  <div className="mt-1">
-                                    {equipamentos.map((eq, idx) => (
-                                      <div key={idx} className="flex items-center gap-1 text-xs text-gray-500">
-                                        <Package className="h-3 w-3 flex-shrink-0" />
-                                        <span>{eq.nome}</span>
-                                        {eq.quantidade > 1 && (
-                                          <Badge variant="secondary" className="text-[10px] h-4 px-1">
-                                            x{eq.quantidade}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                                {contrato.equipamentos_consignacao && (
-                                  <div className="mt-1 text-xs text-amber-600">
-                                    Consig.: {contrato.equipamentos_consignacao}
-                                  </div>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium text-green-600 text-sm">
-                              {formatCurrency(contrato.valor_mensal)}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge variant="outline" className="font-mono text-xs">
-                                {contrato.dia_vencimento || "-"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{getContratoStatusBadge(contrato.status)}</TableCell>
-                            <TableCell className="text-sm hidden sm:table-cell">
-                              {formatDateShort(contrato.data_inicio)}
-                            </TableCell>
-                            <TableCell className="hidden lg:table-cell">
-                              <Badge variant="outline" className="text-xs">
-                                {formatPrazo(contrato.prazo_meses)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1 justify-end">
-                                      {contrato.status === "ativo" && (
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => handleIniciarEmitirNfse(contrato)}
-                                          className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200 bg-transparent"
-                                          title="Emitir NFS-e (Servico)"
-                                        >
-                                          <FileCheck className="h-4 w-4" />
-                                        </Button>
-                                      )}
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem asChild>
-                                      <Link href={`/contratos/${contrato.numero}`} className="flex items-center">
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        Visualizar
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                      <Link href={`/contratos/${contrato.numero}/editar`} className="flex items-center">
-                                        <Edit className="h-4 w-4 mr-2" />
-                                        Editar
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="text-red-600 focus:text-red-600"
-                                      onClick={() => excluirContrato(contrato.numero)}
-                                    >
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Excluir
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </TableCell>
-                          </TableRow>
+                  <ResizableTable
+                    storageKey="contratos-ativos"
+                    columns={[
+                      { key: "numero",         label: "Número",              width: 100, sortable: true },
+                      { key: "cliente_nome",   label: "Cliente/Equipamentos", width: 220, sortable: true },
+                      { key: "valor_mensal",   label: "Valor Mensal",        width: 130, sortable: true },
+                      { key: "dia_vencimento", label: "Dia",                 width: 60,  sortable: true },
+                      { key: "status",         label: "Status",              width: 100, sortable: true },
+                      { key: "data_inicio",    label: "Início",              width: 90,  sortable: true },
+                      { key: "prazo_meses",    label: "Prazo",               width: 100, sortable: true },
+                      { key: "acoes",          label: "Ações",               width: 100, sortable: false, noResize: true },
+                    ]}
+                    data={filteredContratos}
+                    rowKey={(row) => row.id}
+                    renderCell={(contrato, col) => {
+                      const equipamentos = parseEquipamentos(contrato)
+                      switch (col) {
+                        case "numero": return <Badge variant="outline" className="font-mono text-xs">{contrato.numero}</Badge>
+                        case "cliente_nome":
+                          return (
+                            <div>
+                              <div className="font-medium text-sm truncate">{contrato.cliente_nome}</div>
+                              {equipamentos.length > 0 && (
+                                <div className="mt-1">
+                                  {equipamentos.map((eq, idx) => (
+                                    <div key={idx} className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Package className="h-3 w-3 flex-shrink-0" />
+                                      <span>{eq.nome}</span>
+                                      {eq.quantidade > 1 && <Badge variant="secondary" className="text-[10px] h-4 px-1">x{eq.quantidade}</Badge>}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {contrato.equipamentos_consignacao && (
+                                <div className="mt-1 text-xs text-amber-600 truncate">Consig.: {contrato.equipamentos_consignacao}</div>
+                              )}
+                            </div>
                           )
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        case "valor_mensal": return <span className="font-medium text-green-600 text-sm">{formatCurrency(contrato.valor_mensal)}</span>
+                        case "dia_vencimento": return <Badge variant="outline" className="font-mono text-xs">{contrato.dia_vencimento || "-"}</Badge>
+                        case "status": return getContratoStatusBadge(contrato.status)
+                        case "data_inicio": return <span className="text-sm">{formatDateShort(contrato.data_inicio)}</span>
+                        case "prazo_meses": return <Badge variant="outline" className="text-xs">{formatPrazo(contrato.prazo_meses)}</Badge>
+                        case "acoes":
+                          return (
+                            <div className="flex items-center gap-1">
+                              {contrato.status === "ativo" && (
+                                <Button size="sm" variant="outline" onClick={() => handleIniciarEmitirNfse(contrato)}
+                                  className="h-8 w-8 p-0 text-emerald-600 hover:bg-emerald-50 border-emerald-200 bg-transparent" title="Emitir NFS-e">
+                                  <FileCheck className="h-4 w-4" />
+                                </Button>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem asChild>
+                                    <Link href={`/contratos/${contrato.numero}`} className="flex items-center"><Eye className="h-4 w-4 mr-2" />Visualizar</Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <Link href={`/contratos/${contrato.numero}/editar`} className="flex items-center"><Edit className="h-4 w-4 mr-2" />Editar</Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => excluirContrato(contrato.numero)}>
+                                    <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          )
+                        default: return null
+                      }
+                    }}
+                  />
                 )}
               </CardContent>
             </Card>
