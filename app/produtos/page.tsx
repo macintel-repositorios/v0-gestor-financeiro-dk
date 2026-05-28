@@ -76,6 +76,8 @@ export default function ProdutosPage() {
   const [selectedMarca, setSelectedMarca] = useState<string>("all")
   const [expandedProdutoId, setExpandedProdutoId] = useState<string | null>(null)
   const [expandedServicoId, setExpandedServicoId] = useState<string | null>(null)
+  const [expandedCategoriaId, setExpandedCategoriaId] = useState<string | null>(null)
+  const [expandedMarcaId, setExpandedMarcaId] = useState<string | null>(null)
 
   const loadLogoMenu = async () => {
     try {
@@ -918,7 +920,13 @@ export default function ProdutosPage() {
                 {servicos.length} serviço{servicos.length !== 1 ? "s" : ""}
               </p>
 
-              {servicos.length === 0 ? (
+              {!searchServicos.trim() ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque para ver os serviços</h3>
+                  <p className="text-sm text-gray-500">Digite na busca para exibir a lista de serviços.</p>
+                </div>
+              ) : servicos.length === 0 ? (
                 <div className="text-center py-12">
                   <Wrench className="mx-auto h-12 w-12 text-gray-300 mb-3" />
                   <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum serviço encontrado</h3>
@@ -1039,7 +1047,126 @@ export default function ProdutosPage() {
           </TabsContent>
 
           <TabsContent value="categorias" className="space-y-4">
-            <Card className="border-0 shadow-lg bg-white">
+            {/* ═══ MOBILE VIEW — Cards de categorias ═══ */}
+            <div className="md:hidden space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <div className="relative flex-1 mr-3">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar categorias..."
+                    value={searchCategorias}
+                    onChange={(e) => setSearchCategorias(e.target.value)}
+                    className="pl-10 h-9 text-sm"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => router.push("/produtos/categorias/nova")}
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 text-white h-9 px-3"
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  Nova
+                </Button>
+              </div>
+
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider px-1">
+                {categorias.length} categoria{categorias.length !== 1 ? "s" : ""}
+              </p>
+
+              {!searchCategorias.trim() ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque para ver as categorias</h3>
+                  <p className="text-sm text-gray-500">Digite na busca para exibir a lista de categorias.</p>
+                </div>
+              ) : categorias.length === 0 ? (
+                <div className="text-center py-12">
+                  <Tag className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-900 mb-1">Nenhuma categoria encontrada</h3>
+                  <p className="text-sm text-gray-500 mb-4">Tente ajustar a busca</p>
+                </div>
+              ) : (
+                categorias.map((categoria) => {
+                  const isExpanded = expandedCategoriaId === categoria.id
+
+                  return (
+                    <div
+                      key={categoria.id}
+                      className={`rounded-xl border transition-all duration-200 overflow-hidden border-gray-200 bg-white ${
+                        isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedCategoriaId(isExpanded ? null : categoria.id)}
+                        className="w-full text-left p-3.5 flex items-center gap-3"
+                      >
+                        {/* Ícone */}
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                          categoria.ativo ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          <Tag className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="font-semibold text-sm text-gray-900 truncate block">{categoria.nome}</span>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <span className="text-[11px] text-gray-500 font-mono">{categoria.codigo}</span>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 mr-1">
+                          <Badge variant={categoria.ativo ? "default" : "secondary"}
+                            className={`text-[9px] px-1 py-0 h-4 ${categoria.ativo ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                            {categoria.ativo ? "Ativo" : "Inativo"}
+                          </Badge>
+                        </div>
+                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                          isExpanded ? "rotate-90" : ""
+                        }`} />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-blue-50 rounded-lg p-2.5">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <span className="text-[10px] font-medium text-blue-500 uppercase">Código</span>
+                                </div>
+                                <p className="text-xs font-mono text-blue-700 font-semibold">{categoria.codigo}</p>
+                              </div>
+                              <div className="bg-purple-50 rounded-lg p-2.5">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <span className="text-[10px] font-medium text-purple-500 uppercase">Produtos Vinculados</span>
+                                </div>
+                                <p className="text-xs font-bold text-purple-700">{categoria.total_produtos || 0}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 pt-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 h-9 text-xs font-medium text-blue-600 border-blue-200 hover:bg-blue-50"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  router.push(`/produtos/categorias/${categoria.id}/editar`)
+                                }}
+                              >
+                                <Edit className="h-3.5 w-3.5 mr-1.5" />
+                                Editar
+                              </Button>
+                              <CategoriaDeleteDialog categoria={categoria} onSuccess={fetchCategorias} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
+
+            {/* ═══ DESKTOP VIEW — Tabela de categorias ═══ */}
+            <Card className="border-0 shadow-lg bg-white hidden md:block">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1071,7 +1198,128 @@ export default function ProdutosPage() {
           </TabsContent>
 
           <TabsContent value="marcas" className="space-y-4">
-            <Card className="border-0 shadow-lg bg-white">
+            {/* ═══ MOBILE VIEW — Cards de marcas ═══ */}
+            <div className="md:hidden space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <div className="relative flex-1 mr-3">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar marcas..."
+                    value={searchMarcas}
+                    onChange={(e) => setSearchMarcas(e.target.value)}
+                    className="pl-10 h-9 text-sm"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => router.push("/produtos/marcas/nova")}
+                  className="bg-gradient-to-r from-purple-500 to-pink-600 text-white h-9 px-3"
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  Nova
+                </Button>
+              </div>
+
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider px-1">
+                {marcas.length} marca{marcas.length !== 1 ? "s" : ""}
+              </p>
+
+              {!searchMarcas.trim() ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque para ver as marcas</h3>
+                  <p className="text-sm text-gray-500">Digite na busca para exibir a lista de marcas.</p>
+                </div>
+              ) : marcas.length === 0 ? (
+                <div className="text-center py-12">
+                  <Award className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-900 mb-1">Nenhuma marca encontrada</h3>
+                  <p className="text-sm text-gray-500 mb-4">Tente ajustar a busca</p>
+                </div>
+              ) : (
+                marcas.map((marca) => {
+                  const isExpanded = expandedMarcaId === marca.id
+
+                  return (
+                    <div
+                      key={marca.id}
+                      className={`rounded-xl border transition-all duration-200 overflow-hidden border-gray-200 bg-white ${
+                        isExpanded ? "shadow-lg ring-1 ring-purple-200" : "shadow-sm hover:shadow-md"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedMarcaId(isExpanded ? null : marca.id)}
+                        className="w-full text-left p-3.5 flex items-center gap-3"
+                      >
+                        {/* Ícone */}
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                          marca.ativo ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          <Award className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="font-semibold text-sm text-gray-900 truncate block">{marca.nome}</span>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            {marca.sigla && (
+                              <span className="text-[11px] text-gray-500 font-mono">{marca.sigla}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 mr-1">
+                          <Badge variant={marca.ativo ? "default" : "secondary"}
+                            className={`text-[9px] px-1 py-0 h-4 ${marca.ativo ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                            {marca.ativo ? "Ativo" : "Inativo"}
+                          </Badge>
+                        </div>
+                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                          isExpanded ? "rotate-90" : ""
+                        }`} />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-purple-50 rounded-lg p-2.5">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <span className="text-[10px] font-medium text-purple-500 uppercase">Sigla</span>
+                                </div>
+                                <p className="text-xs font-mono text-purple-700 font-semibold">{marca.sigla || "Sem Sigla"}</p>
+                              </div>
+                              <div className="bg-pink-50 rounded-lg p-2.5">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <span className="text-[10px] font-medium text-pink-500 uppercase">Produtos Vinculados</span>
+                                </div>
+                                <p className="text-xs font-bold text-pink-700">{marca.contador || 0}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 pt-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 h-9 text-xs font-medium text-purple-600 border-purple-200 hover:bg-purple-50"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  router.push(`/produtos/marcas/${marca.id}/editar`)
+                                }}
+                              >
+                                <Edit className="h-3.5 w-3.5 mr-1.5" />
+                                Editar
+                              </Button>
+                              <MarcaDeleteDialog marca={marca} onSuccess={fetchMarcas} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
+
+            {/* ═══ DESKTOP VIEW — Tabela de marcas ═══ */}
+            <Card className="border-0 shadow-lg bg-white hidden md:block">
               <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
