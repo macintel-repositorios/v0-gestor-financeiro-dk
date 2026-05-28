@@ -480,6 +480,8 @@ export default function ProdutosPage() {
     )
   }
 
+  const hasActiveFilter = searchProdutos.trim() !== "" || produtoCardFilter !== "all" || selectedCategoria !== "all" || selectedMarca !== "all"
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="flex-1 space-y-4 p-4 pt-6 pb-24 md:pb-6">
@@ -700,7 +702,13 @@ export default function ProdutosPage() {
                 {filteredProdutos.length} produto{filteredProdutos.length !== 1 ? "s" : ""}
               </p>
 
-              {filteredProdutos.length === 0 ? (
+              {!hasActiveFilter ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os produtos</h3>
+                  <p className="text-sm text-gray-500">Selecione uma categoria, marca ou digite na busca para começar.</p>
+                </div>
+              ) : filteredProdutos.length === 0 ? (
                 <div className="text-center py-12">
                   <Package className="mx-auto h-12 w-12 text-gray-300 mb-3" />
                   <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum produto encontrado</h3>
