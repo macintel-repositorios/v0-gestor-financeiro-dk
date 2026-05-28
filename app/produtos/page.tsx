@@ -74,10 +74,6 @@ export default function ProdutosPage() {
   const [produtoCardFilter, setProdutoCardFilter] = useState<string>("all")
   const [selectedCategoria, setSelectedCategoria] = useState<string>("all")
   const [selectedMarca, setSelectedMarca] = useState<string>("all")
-  const [popoverCategoriaOpen, setPopoverCategoriaOpen] = useState(false)
-  const [popoverMarcaOpen, setPopoverMarcaOpen] = useState(false)
-  const [searchValCategoria, setSearchValCategoria] = useState("")
-  const [searchValMarca, setSearchValMarca] = useState("")
   const [expandedProdutoId, setExpandedProdutoId] = useState<string | null>(null)
   const [expandedServicoId, setExpandedServicoId] = useState<string | null>(null)
 
@@ -219,19 +215,6 @@ export default function ProdutosPage() {
     return result
   }, [produtos, produtoCardFilter, selectedCategoria, selectedMarca])
 
-  // Filtrar categorias do combobox
-  const filteredCategoriasCombobox = useMemo(() => {
-    if (!searchValCategoria) return categorias
-    const search = searchValCategoria.toLowerCase()
-    return categorias.filter((c) => c.nome?.toLowerCase().includes(search))
-  }, [categorias, searchValCategoria])
-
-  // Filtrar marcas do combobox
-  const filteredMarcasCombobox = useMemo(() => {
-    if (!searchValMarca) return marcas
-    const search = searchValMarca.toLowerCase()
-    return marcas.filter((m) => m.nome?.toLowerCase().includes(search) || (m.sigla && m.sigla.toLowerCase().includes(search)))
-  }, [marcas, searchValMarca])
 
   const handleProdutoCardToggle = (filter: string) => {
     setProdutoCardFilter((prev) => (prev === filter ? "all" : filter))
@@ -705,116 +688,10 @@ export default function ProdutosPage() {
                 {/* Mobile Dropdowns */}
                 <div className="flex gap-2">
                   <div className="w-1/2">
-                    <Popover open={popoverCategoriaOpen} onOpenChange={setPopoverCategoriaOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={popoverCategoriaOpen}
-                          className="w-full justify-between h-9 text-xs bg-white border-gray-200 text-gray-700 font-normal hover:bg-gray-50"
-                        >
-                          <span className="truncate">
-                            {selectedCategoria === "all" ? "Categoria" : selectedCategoria}
-                          </span>
-                          <ChevronsUpDown className="ml-1 h-3.5 w-3.5 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[200px] p-0" align="start">
-                        <Command shouldFilter={false}>
-                          <CommandInput 
-                            placeholder="Buscar categoria..." 
-                            value={searchValCategoria} 
-                            onValueChange={setSearchValCategoria} 
-                          />
-                          <CommandList>
-                            <CommandEmpty>Nenhuma encontrada.</CommandEmpty>
-                            <CommandGroup>
-                              <CommandItem
-                                value="all"
-                                onSelect={() => {
-                                  setSelectedCategoria("all")
-                                  setPopoverCategoriaOpen(false)
-                                  setSearchValCategoria("")
-                                }}
-                              >
-                                <Check className={cn("mr-2 h-4 w-4", selectedCategoria === "all" ? "opacity-100" : "opacity-0")} />
-                                Todas Categorias
-                              </CommandItem>
-                              {filteredCategoriasCombobox.map((cat) => (
-                                <CommandItem
-                                  key={cat.id}
-                                  value={cat.nome}
-                                  onSelect={() => {
-                                    setSelectedCategoria(cat.nome)
-                                    setPopoverCategoriaOpen(false)
-                                    setSearchValCategoria("")
-                                  }}
-                                >
-                                  <Check className={cn("mr-2 h-4 w-4", selectedCategoria === cat.nome ? "opacity-100" : "opacity-0")} />
-                                  {cat.nome}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                    <CategoriaFilter value={selectedCategoria} onValueChange={setSelectedCategoria} categorias={categorias} />
                   </div>
                   <div className="w-1/2">
-                    <Popover open={popoverMarcaOpen} onOpenChange={setPopoverMarcaOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={popoverMarcaOpen}
-                          className="w-full justify-between h-9 text-xs bg-white border-gray-200 text-gray-700 font-normal hover:bg-gray-50"
-                        >
-                          <span className="truncate">
-                            {selectedMarca === "all" ? "Marca" : selectedMarca}
-                          </span>
-                          <ChevronsUpDown className="ml-1 h-3.5 w-3.5 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[200px] p-0" align="start">
-                        <Command shouldFilter={false}>
-                          <CommandInput 
-                            placeholder="Buscar marca..." 
-                            value={searchValMarca} 
-                            onValueChange={setSearchValMarca} 
-                          />
-                          <CommandList>
-                            <CommandEmpty>Nenhuma encontrada.</CommandEmpty>
-                            <CommandGroup>
-                              <CommandItem
-                                value="all"
-                                onSelect={() => {
-                                  setSelectedMarca("all")
-                                  setPopoverMarcaOpen(false)
-                                  setSearchValMarca("")
-                                }}
-                              >
-                                <Check className={cn("mr-2 h-4 w-4", selectedMarca === "all" ? "opacity-100" : "opacity-0")} />
-                                Todas Marcas
-                              </CommandItem>
-                              {filteredMarcasCombobox.map((m) => (
-                                <CommandItem
-                                  key={m.id}
-                                  value={m.nome}
-                                  onSelect={() => {
-                                    setSelectedMarca(m.nome)
-                                    setPopoverMarcaOpen(false)
-                                    setSearchValMarca("")
-                                  }}
-                                >
-                                  <Check className={cn("mr-2 h-4 w-4", selectedMarca === m.nome ? "opacity-100" : "opacity-0")} />
-                                  {m.nome}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                    <MarcaFilter value={selectedMarca} onValueChange={setSelectedMarca} marcas={marcas} />
                   </div>
                 </div>
               </div>
@@ -997,115 +874,8 @@ export default function ProdutosPage() {
                     />
                   </div>
                   <div className="flex items-center gap-3">
-                    <Popover open={popoverCategoriaOpen} onOpenChange={setPopoverCategoriaOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={popoverCategoriaOpen}
-                          className="w-[200px] justify-between bg-white text-gray-800 border-0 h-9 font-normal hover:bg-gray-50"
-                        >
-                          <span className="truncate">
-                            {selectedCategoria === "all" ? "Filtrar por Categoria" : selectedCategoria}
-                          </span>
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[200px] p-0" align="start">
-                        <Command shouldFilter={false}>
-                          <CommandInput 
-                            placeholder="Buscar categoria..." 
-                            value={searchValCategoria} 
-                            onValueChange={setSearchValCategoria} 
-                          />
-                          <CommandList>
-                            <CommandEmpty>Nenhuma encontrada.</CommandEmpty>
-                            <CommandGroup>
-                              <CommandItem
-                                value="all"
-                                onSelect={() => {
-                                  setSelectedCategoria("all")
-                                  setPopoverCategoriaOpen(false)
-                                  setSearchValCategoria("")
-                                }}
-                              >
-                                <Check className={cn("mr-2 h-4 w-4", selectedCategoria === "all" ? "opacity-100" : "opacity-0")} />
-                                Todas Categorias
-                              </CommandItem>
-                              {filteredCategoriasCombobox.map((cat) => (
-                                <CommandItem
-                                  key={cat.id}
-                                  value={cat.nome}
-                                  onSelect={() => {
-                                    setSelectedCategoria(cat.nome)
-                                    setPopoverCategoriaOpen(false)
-                                    setSearchValCategoria("")
-                                  }}
-                                >
-                                  <Check className={cn("mr-2 h-4 w-4", selectedCategoria === cat.nome ? "opacity-100" : "opacity-0")} />
-                                  {cat.nome}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-
-                    <Popover open={popoverMarcaOpen} onOpenChange={setPopoverMarcaOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={popoverMarcaOpen}
-                          className="w-[200px] justify-between bg-white text-gray-800 border-0 h-9 font-normal hover:bg-gray-50"
-                        >
-                          <span className="truncate">
-                            {selectedMarca === "all" ? "Filtrar por Marca" : selectedMarca}
-                          </span>
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[200px] p-0" align="start">
-                        <Command shouldFilter={false}>
-                          <CommandInput 
-                            placeholder="Buscar marca..." 
-                            value={searchValMarca} 
-                            onValueChange={setSearchValMarca} 
-                          />
-                          <CommandList>
-                            <CommandEmpty>Nenhuma encontrada.</CommandEmpty>
-                            <CommandGroup>
-                              <CommandItem
-                                value="all"
-                                onSelect={() => {
-                                  setSelectedMarca("all")
-                                  setPopoverMarcaOpen(false)
-                                  setSearchValMarca("")
-                                }}
-                              >
-                                <Check className={cn("mr-2 h-4 w-4", selectedMarca === "all" ? "opacity-100" : "opacity-0")} />
-                                Todas Marcas
-                              </CommandItem>
-                              {filteredMarcasCombobox.map((m) => (
-                                <CommandItem
-                                  key={m.id}
-                                  value={m.nome}
-                                  onSelect={() => {
-                                    setSelectedMarca(m.nome)
-                                    setPopoverMarcaOpen(false)
-                                    setSearchValMarca("")
-                                  }}
-                                >
-                                  <Check className={cn("mr-2 h-4 w-4", selectedMarca === m.nome ? "opacity-100" : "opacity-0")} />
-                                  {m.nome}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                    <CategoriaFilter value={selectedCategoria} onValueChange={setSelectedCategoria} categorias={categorias} />
+                    <MarcaFilter value={selectedMarca} onValueChange={setSelectedMarca} marcas={marcas} />
                   </div>
                 </div>
               </CardHeader>
@@ -1335,5 +1105,153 @@ export default function ProdutosPage() {
         }}
       />
     </div>
+  )
+}
+
+interface CategoriaFilterProps {
+  value: string
+  onValueChange: (value: string) => void
+  categorias: Categoria[]
+}
+
+function CategoriaFilter({ value, onValueChange, categorias }: CategoriaFilterProps) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState("")
+
+  const filtered = useMemo(() => {
+    if (!search) return categorias
+    const s = search.toLowerCase()
+    return categorias.filter((c) => c.nome?.toLowerCase().includes(s))
+  }, [categorias, search])
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full md:w-[200px] justify-between bg-white text-gray-800 border border-gray-200 h-9 font-normal hover:bg-gray-50"
+        >
+          <span className="truncate">
+            {value === "all" ? "Filtrar por Categoria" : value}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder="Buscar categoria..." 
+            value={search} 
+            onValueChange={setSearch} 
+          />
+          <CommandList>
+            <CommandEmpty>Nenhuma encontrada.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="all"
+                onSelect={() => {
+                  onValueChange("all")
+                  setOpen(false)
+                  setSearch("")
+                }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", value === "all" ? "opacity-100" : "opacity-0")} />
+                Todas Categorias
+              </CommandItem>
+              {filtered.map((cat) => (
+                <CommandItem
+                  key={cat.id}
+                  value={cat.nome}
+                  onSelect={() => {
+                    onValueChange(cat.nome)
+                    setOpen(false)
+                    setSearch("")
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === cat.nome ? "opacity-100" : "opacity-0")} />
+                  {cat.nome}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+interface MarcaFilterProps {
+  value: string
+  onValueChange: (value: string) => void
+  marcas: Marca[]
+}
+
+function MarcaFilter({ value, onValueChange, marcas }: MarcaFilterProps) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState("")
+
+  const filtered = useMemo(() => {
+    if (!search) return marcas
+    const s = search.toLowerCase()
+    return marcas.filter((m) => m.nome?.toLowerCase().includes(s) || (m.sigla && m.sigla.toLowerCase().includes(s)))
+  }, [marcas, search])
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full md:w-[200px] justify-between bg-white text-gray-800 border border-gray-200 h-9 font-normal hover:bg-gray-50"
+        >
+          <span className="truncate">
+            {value === "all" ? "Filtrar por Marca" : value}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder="Buscar marca..." 
+            value={search} 
+            onValueChange={setSearch} 
+          />
+          <CommandList>
+            <CommandEmpty>Nenhuma encontrada.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="all"
+                onSelect={() => {
+                  onValueChange("all")
+                  setOpen(false)
+                  setSearch("")
+                }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", value === "all" ? "opacity-100" : "opacity-0")} />
+                Todas Marcas
+              </CommandItem>
+              {filtered.map((m) => (
+                <CommandItem
+                  key={m.id}
+                  value={m.nome}
+                  onSelect={() => {
+                    onValueChange(m.nome)
+                    setOpen(false)
+                    setSearch("")
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === m.nome ? "opacity-100" : "opacity-0")} />
+                  {m.nome}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }
