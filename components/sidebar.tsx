@@ -361,7 +361,7 @@ export function AppSidebar() {
         )}
 
         {/* Navigation */}
-        <ScrollArea className="flex-1 px-3">
+        <ScrollArea className="flex-1 px-3 min-h-0">
           <div className="py-2 space-y-4">
             {Object.entries(groupedItems).map(([group, items]) => (
               <div key={group}>
