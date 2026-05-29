@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Plus,
   Eye,
+  EyeOff,
   Edit,
   Trash2,
   FileText,
@@ -83,6 +84,30 @@ export default function OrcamentosPage() {
   // Mapa de orcamento numero -> { temNfse, temNfe } para controlar icones
   const [notasEmitidas, setNotasEmitidas] = useState<Record<string, { temNfse: boolean; temNfe: boolean }>>({})
   const { toast } = useToast()
+
+  const [ocultarValores, setOcultarValores] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+
+    const saved = localStorage.getItem("ocultar-valores")
+    if (saved !== null) {
+      setOcultarValores(JSON.parse(saved))
+    }
+
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  const toggleOcultarValores = () => {
+    const newValue = !ocultarValores
+    setOcultarValores(newValue)
+    localStorage.setItem("ocultar-valores", JSON.stringify(newValue))
+  }
+
+  const shouldHideValues = ocultarValores || isMobile
 
   useEffect(() => {
     fetchOrcamentos()
@@ -555,12 +580,22 @@ export default function OrcamentosPage() {
               <p className="text-xs lg:text-base text-gray-600 mt-1">Gerencie todos os orçamentos do sistema</p>
             </div>
           </div>
-          <Link href="/orcamentos/novo">
-            <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-xs lg:text-sm h-8 lg:h-10">
-              <Plus className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-              Novo Orçamento
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={toggleOcultarValores}
+              variant="outline"
+              className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 bg-white h-8 lg:h-10 text-xs lg:text-sm hidden md:inline-flex"
+            >
+              {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+              {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
             </Button>
-          </Link>
+            <Link href="/orcamentos/novo">
+              <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-xs lg:text-sm h-8 lg:h-10">
+                <Plus className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                Novo Orçamento
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Cards - Agora clicáveis */}
@@ -667,7 +702,9 @@ export default function OrcamentosPage() {
               <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-indigo-600" />
             </CardHeader>
             <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
-              <div className="text-2xl lg:text-3xl font-bold text-indigo-800">{formatCurrency(valorTotal)}</div>
+              <div className="text-2xl lg:text-3xl font-bold text-indigo-800">
+                {shouldHideValues ? "R$ •••" : formatCurrency(valorTotal)}
+              </div>
               <p className="text-xs lg:text-sm text-indigo-600 mt-1">Soma total</p>
             </CardContent>
           </Card>
@@ -783,7 +820,9 @@ export default function OrcamentosPage() {
                       return (
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-3 w-3 text-green-600 flex-shrink-0" />
-                          <span className="font-semibold text-green-600 text-sm">{formatCurrency(Number(orcamento.valor_total))}</span>
+                          <span className="font-semibold text-green-600 text-sm">
+                            {shouldHideValues ? "R$ •••" : formatCurrency(Number(orcamento.valor_total))}
+                          </span>
                         </div>
                       )
                     case "situacao":
@@ -916,7 +955,9 @@ export default function OrcamentosPage() {
                                     <DollarSign className="h-3 w-3 text-green-500" />
                                     <span className="text-[10px] font-medium text-green-500 uppercase">Valor Total</span>
                                   </div>
-                                  <p className="text-xs font-bold text-green-700">{formatCurrency(Number(orcamento.valor_total))}</p>
+                                  <p className="text-xs font-bold text-green-700">
+                                    {shouldHideValues ? "R$ •••" : formatCurrency(Number(orcamento.valor_total))}
+                                  </p>
                                 </div>
                               </div>
 

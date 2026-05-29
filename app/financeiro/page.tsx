@@ -115,7 +115,8 @@ export default function FinanceiroPage() {
   const [boletoParaExcluir, setBoletoParaExcluir] = useState<Boleto | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [enviandoParaAsaas, setEnviandoParaAsaas] = useState<number | null>(null)
-  const [valoresOcultos, setValoresOcultos] = useState(false)
+  const [valoresOcultos, setValoresOcultos] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const [expandedBoletoId, setExpandedBoletoId] = useState<number | null>(null)
   const [expandedReciboId, setExpandedReciboId] = useState<number | null>(null)
   const { toast } = useToast()
@@ -123,11 +124,17 @@ export default function FinanceiroPage() {
   useEffect(() => {
     loadData()
     loadLogoMenu()
-    // Carregar preferência de valores ocultos do localStorage
-    const savedPreference = localStorage.getItem("financeiro-valores-ocultos")
-    if (savedPreference) {
+
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+
+    const savedPreference = localStorage.getItem("ocultar-valores")
+    if (savedPreference !== null) {
       setValoresOcultos(savedPreference === "true")
     }
+
+    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
   const loadLogoMenu = async () => {
@@ -182,12 +189,12 @@ export default function FinanceiroPage() {
   const toggleValoresOcultos = () => {
     const novoEstado = !valoresOcultos
     setValoresOcultos(novoEstado)
-    localStorage.setItem("financeiro-valores-ocultos", novoEstado.toString())
+    localStorage.setItem("ocultar-valores", novoEstado.toString())
   }
 
   const formatarValor = (valor: number) => {
-    if (valoresOcultos) {
-      return "R$ ••••••"
+    if (valoresOcultos || isMobile) {
+      return "R$ •••"
     }
     return formatCurrency(valor)
   }
@@ -609,7 +616,7 @@ export default function FinanceiroPage() {
         <Button
           onClick={toggleValoresOcultos}
           variant="outline"
-          className="flex items-center gap-2 border-2 hover:bg-gray-50 transition-all duration-200 bg-transparent"
+          className="hidden md:flex items-center gap-2 border-2 hover:bg-gray-50 transition-all duration-200 bg-transparent"
         >
           {valoresOcultos ? (
             <>

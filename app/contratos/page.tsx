@@ -23,6 +23,7 @@ import {
   Edit,
   Trash2,
   Eye,
+  EyeOff,
   Calendar,
   DollarSign,
   TrendingUp,
@@ -131,6 +132,30 @@ export default function ContratosPage() {
     aprovadas: 0,
     valor_total: 0,
   })
+
+  const [ocultarValores, setOcultarValores] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+
+    const saved = localStorage.getItem("ocultar-valores")
+    if (saved !== null) {
+      setOcultarValores(JSON.parse(saved))
+    }
+
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  const toggleOcultarValores = () => {
+    const newValue = !ocultarValores
+    setOcultarValores(newValue)
+    localStorage.setItem("ocultar-valores", JSON.stringify(newValue))
+  }
+
+  const shouldHideValues = ocultarValores || isMobile
   const [contratoStats, setContratoStats] = useState<ContratoStats>({
     total: 0,
     ativos: 0,
@@ -533,20 +558,30 @@ export default function ContratosPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          {logoMenu && (
-            <img
-              src={logoMenu}
-              alt="Logo"
-              className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
-            />
-          )}
-          <div>
-            <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Contratos & Propostas
-            </h1>
-            <p className="text-gray-600 mt-1 text-sm lg:text-base">Gerencie contratos e propostas de manutenção</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            {logoMenu && (
+              <img
+                src={logoMenu}
+                alt="Logo"
+                className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
+              />
+            )}
+            <div>
+              <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Contratos & Propostas
+              </h1>
+              <p className="text-gray-600 mt-1 text-sm lg:text-base">Gerencie contratos e propostas de manutenção</p>
+            </div>
           </div>
+          <Button
+            onClick={toggleOcultarValores}
+            variant="outline"
+            className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 bg-white h-8 lg:h-10 text-xs lg:text-sm hidden md:inline-flex self-start sm:self-center"
+          >
+            {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+            {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
+          </Button>
         </div>
 
         {/* Stats Cards - Propostas */}
@@ -624,7 +659,9 @@ export default function ContratosPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-emerald-700 text-xs lg:text-sm font-medium">Valor Contratos</p>
-                  <p className="text-sm lg:text-xl font-bold text-emerald-800">{formatCurrency(contratoStats.valor_total)}</p>
+                  <p className="text-sm lg:text-xl font-bold text-emerald-800">
+                    {shouldHideValues ? "R$ •••" : formatCurrency(contratoStats.valor_total)}
+                  </p>
                 </div>
                 <DollarSign className="h-6 w-6 lg:h-8 lg:w-8 text-emerald-600" />
               </div>
@@ -782,7 +819,7 @@ export default function ContratosPage() {
                             )
                           case "tipo": return <Badge variant="outline" className="capitalize text-xs">{proposta.tipo}</Badge>
                           case "frequencia": return <span className="capitalize text-sm">{proposta.frequencia}</span>
-                          case "valor_total_proposta": return <span className="font-medium text-green-600 text-sm">{formatCurrency(proposta.valor_total_proposta)}</span>
+                          case "valor_total_proposta": return <span className="font-medium text-green-600 text-sm">{shouldHideValues ? "R$ •••" : formatCurrency(proposta.valor_total_proposta)}</span>
                           case "status": return getStatusBadge(proposta.status)
                           case "data_proposta": return <span className="text-sm">{formatDateShort(proposta.data_proposta)}</span>
                           case "data_validade": return <span className="text-sm">{proposta.data_validade ? formatDateShort(proposta.data_validade) : "-"}</span>
@@ -898,7 +935,9 @@ export default function ContratosPage() {
                               </div>
                               <div className="bg-gray-50 rounded-lg p-2.5">
                                 <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor Total</span>
-                                <p className="text-xs font-semibold text-green-600">{formatCurrency(proposta.valor_total_proposta)}</p>
+                                <p className="text-xs font-semibold text-green-600">
+                                  {shouldHideValues ? "R$ •••" : formatCurrency(proposta.valor_total_proposta)}
+                                </p>
                               </div>
                               <div className="bg-gray-50 rounded-lg p-2.5">
                                 <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Data Proposta</span>
@@ -1067,7 +1106,7 @@ export default function ContratosPage() {
                                 )}
                               </div>
                             )
-                          case "valor_mensal": return <span className="font-medium text-green-600 text-sm">{formatCurrency(contrato.valor_mensal)}</span>
+                          case "valor_mensal": return <span className="font-medium text-green-600 text-sm">{shouldHideValues ? "R$ •••" : formatCurrency(contrato.valor_mensal)}</span>
                           case "dia_vencimento": return <Badge variant="outline" className="font-mono text-xs">{contrato.dia_vencimento || "-"}</Badge>
                           case "status": return getContratoStatusBadge(contrato.status)
                           case "data_inicio": return <span className="text-sm">{formatDateShort(contrato.data_inicio)}</span>
@@ -1202,7 +1241,9 @@ export default function ContratosPage() {
                             <div className="grid grid-cols-2 gap-2">
                               <div className="bg-gray-50 rounded-lg p-2.5">
                                 <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor Mensal</span>
-                                <p className="text-xs font-semibold text-green-600">{formatCurrency(contrato.valor_mensal)}</p>
+                                <p className="text-xs font-semibold text-green-600">
+                                  {shouldHideValues ? "R$ •••" : formatCurrency(contrato.valor_mensal)}
+                                </p>
                               </div>
                               <div className="bg-gray-50 rounded-lg p-2.5">
                                 <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Prazo</span>

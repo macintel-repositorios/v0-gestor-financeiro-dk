@@ -107,7 +107,8 @@ export default function NotaFiscalPage() {
   const [tipoFilter, setTipoFilter] = useState("todos")
   const [periodoFilter, setPeriodoFilter] = useState("todos")
   const [exportando, setExportando] = useState(false)
-  const [showValues, setShowValues] = useState(true)
+  const [showValues, setShowValues] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   // NFS-e states
   const [emitirNfseOpen, setEmitirNfseOpen] = useState(false)
@@ -154,12 +155,18 @@ export default function NotaFiscalPage() {
   })
 
   useEffect(() => {
-    const savedShowValues = localStorage.getItem("notas-show-values")
-    if (savedShowValues !== null) {
-      setShowValues(savedShowValues === "true")
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+
+    const saved = localStorage.getItem("ocultar-valores")
+    if (saved !== null) {
+      setShowValues(saved !== "true")
     }
     fetchTodasNotas()
     loadLogoMenu()
+
+    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
   useEffect(() => {
@@ -169,8 +176,10 @@ export default function NotaFiscalPage() {
   const toggleShowValues = () => {
     const newValue = !showValues
     setShowValues(newValue)
-    localStorage.setItem("notas-show-values", String(newValue))
+    localStorage.setItem("ocultar-valores", String(!newValue))
   }
+
+  const shouldShow = showValues && !isMobile
 
   const loadLogoMenu = async () => {
     try {
@@ -802,17 +811,17 @@ export default function NotaFiscalPage() {
               variant="outline"
               size="sm"
               onClick={toggleShowValues}
-              className="flex items-center justify-center gap-2 h-9 rounded-lg border-2 bg-transparent hover:bg-slate-50"
+              className="hidden md:flex items-center justify-center gap-2 h-9 rounded-lg border-2 bg-transparent hover:bg-slate-50"
             >
-              {showValues ? (
-                <>
-                  <EyeOff className="h-4 w-4" />
-                  <span className="text-xs font-semibold">Ocultar Valores</span>
-                </>
-              ) : (
+              {!shouldShow ? (
                 <>
                   <Eye className="h-4 w-4" />
                   <span className="text-xs font-semibold">Mostrar Valores</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="h-4 w-4" />
+                  <span className="text-xs font-semibold">Ocultar Valores</span>
                 </>
               )}
             </Button>
@@ -926,7 +935,7 @@ export default function NotaFiscalPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Valor Total</p>
                 <h3 className="text-sm md:text-xl font-bold text-amber-900 mt-1 truncate">
-                  {showValues ? formatCurrency(stats.valorTotal) : "R$ ****"}
+                  {shouldShow ? formatCurrency(stats.valorTotal) : "R$ •••"}
                 </h3>
               </div>
               <DollarSign className="h-8 w-8 text-amber-600/30 shrink-0" />
@@ -1164,7 +1173,7 @@ export default function NotaFiscalPage() {
                                 {getOrigemLabel(nota.origem)}{nota.origem_numero && ` #${nota.origem_numero}`}
                               </Badge>
                             )
-                          case "valor_total": return <span className="text-right font-black text-slate-800 text-sm">{showValues ? formatCurrency(nota.valor_total) : "R$ ****"}</span>
+                          case "valor_total": return <span className="text-right font-black text-slate-800 text-sm">{shouldShow ? formatCurrency(nota.valor_total) : "R$ •••"}</span>
                           case "status": return getStatusBadge(nota.status)
                           case "data": return <span className="text-xs text-slate-600 font-semibold">{formatDateBR(nota.data_emissao || nota.created_at)}</span>
                           case "acoes":
@@ -1264,7 +1273,7 @@ export default function NotaFiscalPage() {
                             </div>
                             <div className="text-right flex-shrink-0 mr-1">
                               <div className="text-sm font-bold text-emerald-600">
-                                {showValues ? formatCurrency(nota.valor_total) : "R$ ****"}
+                                {shouldShow ? formatCurrency(nota.valor_total) : "R$ •••"}
                               </div>
                               <div className="text-[10px] text-gray-500">
                                 {formatDateBR(nota.data_emissao || nota.created_at)}
@@ -1282,7 +1291,7 @@ export default function NotaFiscalPage() {
                                   <div className="bg-gray-50 rounded-lg p-2.5">
                                     <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor</span>
                                     <p className="text-xs font-semibold text-slate-800">
-                                      {showValues ? formatCurrency(nota.valor_total) : "R$ ****"}
+                                      {shouldShow ? formatCurrency(nota.valor_total) : "R$ •••"}
                                     </p>
                                   </div>
                                   <div className="bg-gray-50 rounded-lg p-2.5">
