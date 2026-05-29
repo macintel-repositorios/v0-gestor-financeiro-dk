@@ -27,6 +27,8 @@ import {
   Send,
   Loader2,
   RefreshCw,
+  ChevronRight,
+  X,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -114,6 +116,8 @@ export default function FinanceiroPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [enviandoParaAsaas, setEnviandoParaAsaas] = useState<number | null>(null)
   const [valoresOcultos, setValoresOcultos] = useState(false)
+  const [expandedBoletoId, setExpandedBoletoId] = useState<number | null>(null)
+  const [expandedReciboId, setExpandedReciboId] = useState<number | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -578,6 +582,9 @@ export default function FinanceiroPage() {
     )
   }
 
+  const hasActiveFilterBoletos = searchBoletos.trim() !== "" || statusFilter !== "all" || periodoFilter !== "todos"
+  const hasActiveFilterRecibos = searchRecibos.trim() !== ""
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -781,123 +788,269 @@ export default function FinanceiroPage() {
               </CardContent>
             </Card>
 
-            {/* Boletos Table */}
-            <Card>
-              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
-                <CardTitle>Lista de Boletos</CardTitle>
-                <CardDescription className="text-green-100">
-                  {filteredBoletos.length} boleto{filteredBoletos.length !== 1 ? "s" : ""} encontrado
-                  {filteredBoletos.length !== 1 ? "s" : ""}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                {filteredBoletos.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                    <h3 className="text-xl font-medium text-gray-900 mb-2">
-                      {searchBoletos || statusFilter !== "all" || periodoFilter !== "todos"
-                        ? "Nenhum boleto encontrado"
-                        : "Nenhum boleto cadastrado"}
-                    </h3>
-                    <p className="text-gray-600 mb-6">
-                      {searchBoletos || statusFilter !== "all" || periodoFilter !== "todos"
-                        ? "Tente ajustar os filtros de busca"
-                        : "Comece criando seu primeiro boleto"}
-                    </p>
-                    {!searchBoletos && statusFilter === "all" && periodoFilter === "todos" && (
-                      <Button
-                        onClick={() => setShowNovoBoleto(true)}
-                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white h-9 lg:h-12 text-sm lg:text-base"
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Card>
+                <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
+                  <CardTitle>Lista de Boletos</CardTitle>
+                  <CardDescription className="text-green-100">
+                    {filteredBoletos.length} boleto{filteredBoletos.length !== 1 ? "s" : ""} encontrado{filteredBoletos.length !== 1 ? "s" : ""}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {filteredBoletos.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                      <h3 className="text-xl font-medium text-gray-900 mb-2">
+                        {searchBoletos || statusFilter !== "all" || periodoFilter !== "todos"
+                          ? "Nenhum boleto encontrado"
+                          : "Nenhum boleto cadastrado"}
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        {searchBoletos || statusFilter !== "all" || periodoFilter !== "todos"
+                          ? "Tente ajustar os filtros de busca"
+                          : "Comece criando seu primeiro boleto"}
+                      </p>
+                      {!searchBoletos && statusFilter === "all" && periodoFilter === "todos" && (
+                        <Button
+                          onClick={() => setShowNovoBoleto(true)}
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white h-9 lg:h-12 text-sm lg:text-base"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Criar Primeiro Boleto
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <ResizableTable
+                      storageKey="financeiro-boletos"
+                      columns={[
+                        { key: "numero",          label: "Número",      width: 110, sortable: true },
+                        { key: "cliente_nome",    label: "Cliente",      width: 180, sortable: true },
+                        { key: "valor",           label: "Valor",        width: 120, sortable: true },
+                        { key: "data_vencimento", label: "Vencimento",   width: 130, sortable: true },
+                        { key: "created_at",      label: "Mês Emissão", width: 130, sortable: true },
+                        { key: "status",          label: "Status",       width: 130, sortable: true },
+                        { key: "numero_parcela",  label: "Parcela",      width: 80,  sortable: true },
+                        { key: "acoes",           label: "Ações",        width: 160, sortable: false, noResize: true },
+                      ]}
+                      data={filteredBoletos}
+                      rowKey={(row) => row.id}
+                      renderCell={(boleto, col) => {
+                        switch (col) {
+                          case "numero": return <Badge variant="outline" className="font-mono">{boleto.numero}</Badge>
+                          case "cliente_nome": return <div className="font-medium text-gray-900 truncate">{boleto.cliente_nome}</div>
+                          case "valor": return <div className="font-semibold text-green-600">{formatarValor(boleto.valor)}</div>
+                          case "data_vencimento":
+                            return (
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                <span>{formatDate(boleto.data_vencimento)}</span>
+                              </div>
+                            )
+                          case "created_at":
+                            return (
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                                <span className="text-blue-700 font-medium">{formatMesEmissao(boleto.created_at)}</span>
+                              </div>
+                            )
+                          case "status": return getStatusBadge(boleto.status, boleto.data_vencimento)
+                          case "numero_parcela": return <span className="text-gray-700 font-medium">{boleto.numero_parcela}/{boleto.total_parcelas}</span>
+                          case "acoes":
+                            return (
+                              <div className="flex gap-1 flex-wrap">
+                                <Button size="sm" variant="outline" onClick={() => handleVisualizarBoleto(boleto)}
+                                  className="text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0" title="Visualizar">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {!(boleto.status === "pago" && boleto.data_pagamento) && (
+                                  <>
+                                    {!boleto.asaas_id && (
+                                      <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
+                                        disabled={enviandoParaAsaas === boleto.id}
+                                        className="border-teal-500 text-teal-600 hover:bg-teal-50 h-8 w-8 p-0" title="Enviar Asaas">
+                                        {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                      </Button>
+                                    )}
+                                    {boleto.asaas_bankslip_url && (
+                                      <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
+                                        className="border-purple-500 text-purple-600 hover:bg-purple-50 h-8 w-8 p-0" title="Imprimir">
+                                        <Printer className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                    {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
+                                      <Button size="sm" variant="outline" onClick={() => handleMarcarPago(boleto)}
+                                        className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
+                                        <CheckCircle className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                    <Button size="sm" variant="outline" onClick={() => handleEditarBoleto(boleto)}
+                                      className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Editar">
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
+                                <Button size="sm" variant="outline" onClick={() => handleExcluirBoleto(boleto)}
+                                  disabled={deletingId === boleto.id}
+                                  className="text-red-600 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0" title="Excluir">
+                                  {deletingId === boleto.id ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" /> : <Trash2 className="h-4 w-4" />}
+                                </Button>
+                              </div>
+                            )
+                          default: return null
+                        }
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* MOBILE VIEW - Card-based layout */}
+            <div className="md:hidden space-y-3">
+              {hasActiveFilterBoletos && (
+                <div className="flex justify-between items-center px-1 mb-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    {filteredBoletos.length} boleto{filteredBoletos.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              )}
+
+              {!hasActiveFilterBoletos ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os boletos</h3>
+                  <p className="text-sm text-gray-500">Digite na busca ou selecione um filtro para começar.</p>
+                </div>
+              ) : filteredBoletos.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum boleto encontrado</h3>
+                  <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+                </div>
+              ) : (
+                filteredBoletos.map((boleto) => {
+                  const isExpanded = expandedBoletoId === boleto.id
+                  return (
+                    <div
+                      key={boleto.id}
+                      className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                        boleto.status === "pago"
+                          ? "border-green-200 bg-gradient-to-r from-green-50/80 to-white"
+                          : "border-gray-200 bg-white"
+                      } ${isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedBoletoId(prev => prev === boleto.id ? null : boleto.id)}
+                        className="w-full text-left p-3.5 flex items-center gap-3"
                       >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Criar Primeiro Boleto
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  <ResizableTable
-                    storageKey="financeiro-boletos"
-                    columns={[
-                      { key: "numero",          label: "Número",      width: 110, sortable: true },
-                      { key: "cliente_nome",    label: "Cliente",      width: 180, sortable: true },
-                      { key: "valor",           label: "Valor",        width: 120, sortable: true },
-                      { key: "data_vencimento", label: "Vencimento",   width: 130, sortable: true },
-                      { key: "created_at",      label: "Mês Emissão", width: 130, sortable: true },
-                      { key: "status",          label: "Status",       width: 130, sortable: true },
-                      { key: "numero_parcela",  label: "Parcela",      width: 80,  sortable: true },
-                      { key: "acoes",           label: "Ações",        width: 160, sortable: false, noResize: true },
-                    ]}
-                    data={filteredBoletos}
-                    rowKey={(row) => row.id}
-                    renderCell={(boleto, col) => {
-                      switch (col) {
-                        case "numero": return <Badge variant="outline" className="font-mono">{boleto.numero}</Badge>
-                        case "cliente_nome": return <div className="font-medium text-gray-900 truncate">{boleto.cliente_nome}</div>
-                        case "valor": return <div className="font-semibold text-green-600">{formatarValor(boleto.valor)}</div>
-                        case "data_vencimento":
-                          return (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                              <span>{formatDate(boleto.data_vencimento)}</span>
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                          boleto.status === "pago"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}>
+                          {(boleto.cliente_nome || "?").substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm text-gray-900 truncate">
+                              {boleto.cliente_nome}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-gray-500 font-sans">
+                              {boleto.numero}
+                            </span>
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                              Parc.: {boleto.numero_parcela}/{boleto.total_parcelas}
+                            </Badge>
+                            {getStatusBadge(boleto.status, boleto.data_vencimento)}
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 mr-1">
+                          <div className="text-sm font-bold text-green-600">
+                            {formatarValor(boleto.valor)}
+                          </div>
+                          <div className="text-[10px] text-gray-500">
+                            Venc: {formatDate(boleto.data_vencimento)}
+                          </div>
+                        </div>
+                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                          isExpanded ? "rotate-90" : ""
+                        }`} />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor</span>
+                                <p className="text-xs font-semibold text-green-600">{formatarValor(boleto.valor)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Vencimento</span>
+                                <p className="text-xs font-semibold text-gray-800">{formatDate(boleto.data_vencimento)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Mês Emissão</span>
+                                <p className="text-xs text-gray-800">{formatMesEmissao(boleto.created_at)}</p>
+                              </div>
+                              {boleto.observacoes && (
+                                <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                                  <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Observações</span>
+                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">{boleto.observacoes}</p>
+                                </div>
+                              )}
                             </div>
-                          )
-                        case "created_at":
-                          return (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                              <span className="text-blue-700 font-medium">{formatMesEmissao(boleto.created_at)}</span>
-                            </div>
-                          )
-                        case "status": return getStatusBadge(boleto.status, boleto.data_vencimento)
-                        case "numero_parcela": return <span className="text-gray-700 font-medium">{boleto.numero_parcela}/{boleto.total_parcelas}</span>
-                        case "acoes":
-                          return (
-                            <div className="flex gap-1 flex-wrap">
+                            <div className="flex flex-wrap gap-2 pt-2">
                               <Button size="sm" variant="outline" onClick={() => handleVisualizarBoleto(boleto)}
-                                className="text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0" title="Visualizar">
-                                <Eye className="h-4 w-4" />
+                                className="flex-1 text-xs text-blue-600 hover:bg-blue-50 border-blue-200 bg-white">
+                                <Eye className="h-3.5 w-3.5 mr-1" /> Ver
                               </Button>
                               {!(boleto.status === "pago" && boleto.data_pagamento) && (
                                 <>
                                   {!boleto.asaas_id && (
                                     <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
                                       disabled={enviandoParaAsaas === boleto.id}
-                                      className="border-teal-500 text-teal-600 hover:bg-teal-50 h-8 w-8 p-0" title="Enviar Asaas">
-                                      {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                      className="flex-1 text-xs border-teal-500 text-teal-600 hover:bg-teal-50 bg-white">
+                                      {enviandoParaAsaas === boleto.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Send className="h-3.5 w-3.5 mr-1" />}
+                                      Asaas
                                     </Button>
                                   )}
                                   {boleto.asaas_bankslip_url && (
                                     <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
-                                      className="border-purple-500 text-purple-600 hover:bg-purple-50 h-8 w-8 p-0" title="Imprimir">
-                                      <Printer className="h-4 w-4" />
+                                      className="flex-1 text-xs border-purple-500 text-purple-600 hover:bg-purple-50 bg-white">
+                                      <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir
                                     </Button>
                                   )}
                                   {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
                                     <Button size="sm" variant="outline" onClick={() => handleMarcarPago(boleto)}
-                                      className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
-                                      <CheckCircle className="h-4 w-4" />
+                                      className="flex-1 text-xs text-green-600 hover:bg-green-50 border-green-200 bg-white">
+                                      <CheckCircle className="h-3.5 w-3.5 mr-1" /> Pagar
                                     </Button>
                                   )}
                                   <Button size="sm" variant="outline" onClick={() => handleEditarBoleto(boleto)}
-                                    className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Editar">
-                                    <Edit className="h-4 w-4" />
+                                    className="flex-1 text-xs text-green-600 hover:bg-green-50 border-green-200 bg-white">
+                                    <Edit className="h-3.5 w-3.5 mr-1" /> Editar
                                   </Button>
                                 </>
                               )}
-                              <Button size="sm" variant="outline" onClick={() => handleExcluirBoleto(boleto)}
-                                disabled={deletingId === boleto.id}
-                                className="text-red-600 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0" title="Excluir">
-                                {deletingId === boleto.id ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" /> : <Trash2 className="h-4 w-4" />}
+                              <Button size="sm" variant="destructive" onClick={() => handleExcluirBoleto(boleto)}
+                                disabled={deletingId === boleto.id} className="text-xs">
+                                <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </div>
-                          )
-                        default: return null
-                      }
-                    }}
-                  />
-                )}
-              </CardContent>
-            </Card>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="recibos" className="p-6 space-y-6">
@@ -957,73 +1110,199 @@ export default function FinanceiroPage() {
               </CardContent>
             </Card>
 
-            {/* Recibos Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Lista de Recibos</CardTitle>
-                <CardDescription>
-                  {filteredRecibos.length} recibo{filteredRecibos.length !== 1 ? "s" : ""} encontrado
-                  {filteredRecibos.length !== 1 ? "s" : ""}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                {filteredRecibos.length === 0 ? (
-                  <div className="text-center py-12">
-                    <DollarSign className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                    <h3 className="text-xl font-medium text-gray-900 mb-2">
-                      {searchRecibos ? "Nenhum recibo encontrado" : "Nenhum recibo cadastrado"}
-                    </h3>
-                    <p className="text-gray-600 mb-6">
-                      {searchRecibos ? "Tente ajustar os termos de busca" : "Comece criando seu primeiro recibo"}
-                    </p>
-                    {!searchRecibos && (
-                      <Link href="/financeiro/novo-recibo">
-                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white h-9 lg:h-12 text-sm lg:text-base">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Criar Primeiro Recibo
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                ) : (
-                  <ResizableTable
-                    storageKey="financeiro-recibos"
-                    columns={[
-                      { key: "numero",       label: "Número",      width: 110, sortable: true },
-                      { key: "cliente_nome", label: "Cliente",      width: 180, sortable: true },
-                      { key: "descricao",    label: "Descrição",    width: 220, sortable: false },
-                      { key: "valor",        label: "Valor",        width: 120, sortable: true },
-                      { key: "data_emissao", label: "Data Emissão", width: 130, sortable: true },
-                      { key: "acoes",        label: "Ações",        width: 120, sortable: false, noResize: true },
-                    ]}
-                    data={filteredRecibos}
-                    rowKey={(row) => row.id}
-                    renderCell={(recibo, col) => {
-                      switch (col) {
-                        case "numero": return <Badge variant="outline" className="font-mono">{recibo.numero}</Badge>
-                        case "cliente_nome": return <div className="font-medium text-gray-900 truncate">{recibo.cliente_nome}</div>
-                        case "descricao": return <div className="max-w-xs truncate">{recibo.descricao}</div>
-                        case "valor": return <div className="font-semibold text-green-600">{formatarValor(recibo.valor)}</div>
-                        case "data_emissao":
-                          return (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                              <span>{formatDate(recibo.data_emissao)}</span>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Lista de Recibos</CardTitle>
+                  <CardDescription>
+                    {filteredRecibos.length} recibo{filteredRecibos.length !== 1 ? "s" : ""} encontrado{filteredRecibos.length !== 1 ? "s" : ""}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {filteredRecibos.length === 0 ? (
+                    <div className="text-center py-12">
+                      <DollarSign className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                      <h3 className="text-xl font-medium text-gray-900 mb-2">
+                        {searchRecibos ? "Nenhum recibo encontrado" : "Nenhum recibo cadastrado"}
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        {searchRecibos ? "Tente ajustar os termos de busca" : "Comece criando seu primeiro recibo"}
+                      </p>
+                      {!searchRecibos && (
+                        <Link href="/financeiro/novo-recibo">
+                          <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white h-9 lg:h-12 text-sm lg:text-base">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Criar Primeiro Recibo
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  ) : (
+                    <ResizableTable
+                      storageKey="financeiro-recibos"
+                      columns={[
+                        { key: "numero",       label: "Número",      width: 110, sortable: true },
+                        { key: "cliente_nome", label: "Cliente",      width: 180, sortable: true },
+                        { key: "descricao",    label: "Descrição",    width: 220, sortable: false },
+                        { key: "valor",        label: "Valor",        width: 120, sortable: true },
+                        { key: "data_emissao", label: "Data Emissão", width: 130, sortable: true },
+                        { key: "acoes",        label: "Ações",        width: 120, sortable: false, noResize: true },
+                      ]}
+                      data={filteredRecibos}
+                      rowKey={(row) => row.id}
+                      renderCell={(recibo, col) => {
+                        switch (col) {
+                          case "numero": return <Badge variant="outline" className="font-mono">{recibo.numero}</Badge>
+                          case "cliente_nome": return <div className="font-medium text-gray-900 truncate">{recibo.cliente_nome}</div>
+                          case "descricao": return <div className="max-w-xs truncate">{recibo.descricao}</div>
+                          case "valor": return <div className="font-semibold text-green-600">{formatarValor(recibo.valor)}</div>
+                          case "data_emissao":
+                            return (
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                <span>{formatDate(recibo.data_emissao)}</span>
+                              </div>
+                            )
+                          case "acoes":
+                            return (
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                      <AlertDialogDescription>Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700">Excluir Recibo</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            )
+                          default: return null
+                        }
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* MOBILE VIEW - Card-based layout */}
+            <div className="md:hidden space-y-3">
+              {hasActiveFilterRecibos && (
+                <div className="flex justify-between items-center px-1 mb-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    {filteredRecibos.length} recibo{filteredRecibos.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              )}
+
+              {!hasActiveFilterRecibos ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque para ver os recibos</h3>
+                  <p className="text-sm text-gray-500">Digite na busca para começar.</p>
+                </div>
+              ) : filteredRecibos.length === 0 ? (
+                <div className="text-center py-12">
+                  <DollarSign className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum recibo encontrado</h3>
+                  <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+                </div>
+              ) : (
+                filteredRecibos.map((recibo) => {
+                  const isExpanded = expandedReciboId === recibo.id
+                  return (
+                    <div
+                      key={recibo.id}
+                      className={`rounded-xl border border-gray-200 bg-white transition-all duration-200 overflow-hidden ${
+                        isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedReciboId(prev => prev === recibo.id ? null : recibo.id)}
+                        className="w-full text-left p-3.5 flex items-center gap-3"
+                      >
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-blue-50 text-blue-600">
+                          {(recibo.cliente_nome || "?").substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm text-gray-900 truncate">
+                              {recibo.cliente_nome}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-gray-500 font-sans">
+                              {recibo.numero}
+                            </span>
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                              {formatDate(recibo.data_emissao)}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 mr-1">
+                          <div className="text-sm font-bold text-blue-600">
+                            {formatarValor(recibo.valor)}
+                          </div>
+                          <div className="text-[10px] text-gray-500 font-medium">
+                            {formatDate(recibo.data_emissao)}
+                          </div>
+                        </div>
+                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                          isExpanded ? "rotate-90" : ""
+                        }`} />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor</span>
+                                <p className="text-xs font-semibold text-green-600">{formatarValor(recibo.valor)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Emissão</span>
+                                <p className="text-xs font-semibold text-gray-800">{formatDate(recibo.data_emissao)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Descrição</span>
+                                <p className="text-xs text-gray-700 whitespace-pre-wrap">{recibo.descricao}</p>
+                              </div>
+                              {recibo.observacoes && (
+                                <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                                  <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Observações</span>
+                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">{recibo.observacoes}</p>
+                                </div>
+                              )}
                             </div>
-                          )
-                        case "acoes":
-                          return (
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0">
-                                <Eye className="h-4 w-4" />
+                            <div className="flex gap-2 pt-2">
+                              <Button size="sm" variant="outline" className="flex-1 text-xs text-blue-600 hover:bg-blue-50 border-blue-200 bg-white">
+                                <Eye className="h-3.5 w-3.5 mr-1" /> Ver
                               </Button>
-                              <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0">
-                                <Edit className="h-4 w-4" />
+                              <Button size="sm" variant="outline" className="flex-1 text-xs text-green-600 hover:bg-green-50 border-green-200 bg-white">
+                                <Edit className="h-3.5 w-3.5 mr-1" /> Editar
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0">
-                                    <Trash2 className="h-4 w-4" />
+                                  <Button size="sm" variant="destructive" className="text-xs">
+                                    <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
@@ -1038,14 +1317,14 @@ export default function FinanceiroPage() {
                                 </AlertDialogContent>
                               </AlertDialog>
                             </div>
-                          )
-                        default: return null
-                      }
-                    }}
-                  />
-                )}
-              </CardContent>
-            </Card>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </Card>

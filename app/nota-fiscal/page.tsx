@@ -38,6 +38,8 @@ import {
   Wrench,
   Download,
   Calendar,
+  ChevronRight,
+  X,
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
@@ -129,6 +131,7 @@ export default function NotaFiscalPage() {
 
   const [consultandoId, setConsultandoId] = useState<number | null>(null)
   const [logoMenu, setLogoMenu] = useState<string>("")
+  const [expandedNotaId, setExpandedNotaId] = useState<string | null>(null)
 
   // Boleto
   const [boletoOpen, setBoletoOpen] = useState(false)
@@ -770,6 +773,8 @@ export default function NotaFiscalPage() {
     }
   }
 
+  const hasActiveFilterNotas = searchTerm.trim() !== "" || statusFilter !== "todos" || origemFilter !== "todos" || tipoFilter !== "todos" || periodoFilter !== "todos"
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30 min-h-screen animate-in fade-in duration-300">
       <div className="container mx-auto space-y-6 pb-32 md:pb-6">
@@ -831,55 +836,85 @@ export default function NotaFiscalPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {/* Card Total */}
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 dark:from-slate-900/60 dark:to-blue-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all">
+          <Card 
+            onClick={() => { setTipoFilter("todos"); setStatusFilter("todos"); }}
+            className={cn(
+              "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 dark:from-slate-900/60 dark:to-blue-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all cursor-pointer select-none",
+              tipoFilter === "todos" && statusFilter === "todos" ? "ring-2 ring-blue-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+            )}
+          >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Total</p>
-                <h3 className="text-xl md:text-2xl font-black text-blue-950 mt-1">{stats.total}</h3>
+                <h3 className="text-xl md:text-3xl font-bold text-blue-900 mt-1">{stats.total}</h3>
               </div>
               <FileText className="h-8 w-8 text-blue-600/30 shrink-0" />
             </CardContent>
           </Card>
 
           {/* Card NFS-e */}
-          <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 dark:from-slate-900/60 dark:to-emerald-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all">
+          <Card 
+            onClick={() => { setTipoFilter("nfse"); }}
+            className={cn(
+              "bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 dark:from-slate-900/60 dark:to-emerald-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all cursor-pointer select-none",
+              tipoFilter === "nfse" ? "ring-2 ring-emerald-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+            )}
+          >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">NFS-e</p>
-                <h3 className="text-xl md:text-2xl font-black text-emerald-950 mt-1">{stats.totalNfse}</h3>
+                <h3 className="text-xl md:text-3xl font-bold text-emerald-900 mt-1">{stats.totalNfse}</h3>
               </div>
               <Wrench className="h-8 w-8 text-emerald-600/30 shrink-0" />
             </CardContent>
           </Card>
 
           {/* Card NF-e */}
-          <Card className="bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200 dark:from-slate-900/60 dark:to-cyan-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all">
+          <Card 
+            onClick={() => { setTipoFilter("nfe"); }}
+            className={cn(
+              "bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200 dark:from-slate-900/60 dark:to-cyan-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all cursor-pointer select-none",
+              tipoFilter === "nfe" ? "ring-2 ring-cyan-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+            )}
+          >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-wider">NF-e</p>
-                <h3 className="text-xl md:text-2xl font-black text-cyan-955 mt-1">{stats.totalNfe}</h3>
+                <h3 className="text-xl md:text-3xl font-bold text-cyan-900 mt-1">{stats.totalNfe}</h3>
               </div>
               <Package className="h-8 w-8 text-cyan-600/30 shrink-0" />
             </CardContent>
           </Card>
 
           {/* Card Emitidas */}
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 dark:from-slate-900/60 dark:to-green-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all">
+          <Card 
+            onClick={() => { setStatusFilter("emitida"); }}
+            className={cn(
+              "bg-gradient-to-br from-green-50 to-green-100 border-green-200 dark:from-slate-900/60 dark:to-green-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all cursor-pointer select-none",
+              statusFilter === "emitida" ? "ring-2 ring-green-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+            )}
+          >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold text-green-500 uppercase tracking-wider">Emitidas</p>
-                <h3 className="text-xl md:text-2xl font-black text-green-950 mt-1">{stats.emitidas}</h3>
+                <h3 className="text-xl md:text-3xl font-bold text-green-900 mt-1">{stats.emitidas}</h3>
               </div>
               <CheckCircle2 className="h-8 w-8 text-green-600/30 shrink-0" />
             </CardContent>
           </Card>
 
           {/* Card Erros */}
-          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 dark:from-slate-900/60 dark:to-red-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all">
+          <Card 
+            onClick={() => { setStatusFilter("erro"); }}
+            className={cn(
+              "bg-gradient-to-br from-red-50 to-red-100 border-red-200 dark:from-slate-900/60 dark:to-red-950/30 border-2 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:scale-105 transition-all cursor-pointer select-none",
+              statusFilter === "erro" ? "ring-2 ring-red-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+            )}
+          >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Erros</p>
-                <h3 className="text-xl md:text-2xl font-black text-red-955 mt-1">{stats.erros}</h3>
+                <h3 className="text-xl md:text-3xl font-bold text-red-900 mt-1">{stats.erros}</h3>
               </div>
               <AlertCircle className="h-8 w-8 text-red-600/30 shrink-0" />
             </CardContent>
@@ -890,7 +925,7 @@ export default function NotaFiscalPage() {
             <CardContent className="p-4 flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Valor Total</p>
-                <h3 className="text-sm md:text-base lg:text-lg font-black text-amber-950 mt-1 truncate">
+                <h3 className="text-sm md:text-xl font-bold text-amber-900 mt-1 truncate">
                   {showValues ? formatCurrency(stats.valorTotal) : "R$ ****"}
                 </h3>
               </div>
@@ -994,7 +1029,10 @@ export default function NotaFiscalPage() {
             </div>
             
             {/* Barra de exportacao */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4 p-3 bg-slate-50/80 rounded-lg border border-slate-200">
+            <div className={cn(
+              "flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4 p-3 bg-slate-50/80 rounded-lg border border-slate-200",
+              !hasActiveFilterNotas && "hidden md:flex"
+            )}>
               <div className="flex items-center gap-2 text-sm text-slate-600 font-semibold">
                 <FileCheck className="h-4 w-4 text-emerald-600" />
                 <span>
@@ -1043,131 +1081,283 @@ export default function NotaFiscalPage() {
                   <Skeleton key={i} className="h-12 w-full rounded-lg" />
                 ))}
               </div>
-            ) : notasFiltradas.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-slate-700">Nenhuma nota fiscal encontrada</h3>
-                <p className="text-slate-500 text-sm mt-1 max-w-md mx-auto">
-                  Emita notas a partir de orçamentos aprovados ou clique nos botões abaixo para gerar uma nota avulsa.
-                </p>
-                <div className="flex items-center gap-2 justify-center mt-6">
-                  <Button
-                    onClick={() => setEmitirNfseOpen(true)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 rounded-lg"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Emitir NFS-e
-                  </Button>
-                  <Button
-                    onClick={() => setEmitirNfeOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9 rounded-lg"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Emitir NF-e
-                  </Button>
-                </div>
-              </div>
             ) : (
-              <ResizableTable<NotaUnificada>
-                    storageKey="notas-fiscais"
-                    columns={[
-                      { key: "tipo",        label: "Tipo",   width: 70,  sortable: true },
-                      { key: "numero",      label: "Número", width: 130, sortable: true },
-                      { key: "cliente",     label: "Cliente", width: 200, sortable: true },
-                      { key: "origem",      label: "Origem",  width: 120, sortable: true },
-                      { key: "valor_total", label: "Valor",   width: 110, sortable: true, align: "right" },
-                      { key: "status",      label: "Status",  width: 120, sortable: true },
-                      { key: "data",        label: "Data",    width: 90,  sortable: true },
-                      { key: "acoes",       label: "Ações",   width: 160, sortable: false, noResize: true, align: "right" },
-                    ]}
-                    data={notasFiltradas}
-                    rowKey={(row) => `${row.tipo}-${row.id}`}
-                    renderCell={(nota, col) => {
-                      switch (col) {
-                        case "tipo": return getTipoBadge(nota.tipo)
-                        case "numero":
-                          return (
-                            <div>
-                              {nota.tipo === "nfse" ? (
-                                <>
-                                  {nota.numero_nfse ? (
-                                    <span className="font-bold text-emerald-700">{String(nota.numero_nfse).padStart(8, "0")}</span>
-                                  ) : (nota.status === "processando" || nota.status === "erro") ? (
-                                    <button className="text-blue-600 text-xs font-semibold hover:underline flex items-center gap-1"
+              <>
+                {/* DESKTOP VIEW */}
+                <div className="hidden md:block">
+                  {notasFiltradas.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FileText className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-bold text-slate-700">Nenhuma nota fiscal encontrada</h3>
+                      <p className="text-slate-500 text-sm mt-1 max-w-md mx-auto">
+                        Emita notas a partir de orçamentos aprovados ou clique nos botões abaixo para gerar uma nota avulsa.
+                      </p>
+                      <div className="flex items-center gap-2 justify-center mt-6">
+                        <Button
+                          onClick={() => setEmitirNfseOpen(true)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 rounded-lg"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Emitir NFS-e
+                        </Button>
+                        <Button
+                          onClick={() => setEmitirNfeOpen(true)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9 rounded-lg"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Emitir NF-e
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <ResizableTable<NotaUnificada>
+                      storageKey="notas-fiscais"
+                      columns={[
+                        { key: "tipo",        label: "Tipo",   width: 70,  sortable: true },
+                        { key: "numero",      label: "Número", width: 130, sortable: true },
+                        { key: "cliente",     label: "Cliente", width: 200, sortable: true },
+                        { key: "origem",      label: "Origem",  width: 120, sortable: true },
+                        { key: "valor_total", label: "Valor",   width: 110, sortable: true, align: "right" },
+                        { key: "status",      label: "Status",  width: 120, sortable: true },
+                        { key: "data",        label: "Data",    width: 90,  sortable: true },
+                        { key: "acoes",       label: "Ações",   width: 160, sortable: false, noResize: true, align: "right" },
+                      ]}
+                      data={notasFiltradas}
+                      rowKey={(row) => `${row.tipo}-${row.id}`}
+                      renderCell={(nota, col) => {
+                        switch (col) {
+                          case "tipo": return getTipoBadge(nota.tipo)
+                          case "numero":
+                            return (
+                              <div>
+                                {nota.tipo === "nfse" ? (
+                                  <>
+                                    {nota.numero_nfse ? (
+                                      <span className="font-bold text-emerald-700">{String(nota.numero_nfse).padStart(8, "0")}</span>
+                                    ) : (nota.status === "processando" || nota.status === "erro") ? (
+                                      <button className="text-blue-600 text-xs font-semibold hover:underline flex items-center gap-1"
+                                        onClick={() => handleConsultarNfse(nota.id)} disabled={consultandoId === nota.id}>
+                                        {consultandoId === nota.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                                        Consultar
+                                      </button>
+                                    ) : <span className="text-gray-400 text-xs italic">-</span>}
+                                    <p className="text-[10px] text-gray-400 font-medium">RPS: {nota.serie_rps || "11"}.{String(nota.numero_rps || 0).padStart(8, "0")}</p>
+                                  </>
+                                ) : (
+                                  <>
+                                    {nota.numero_nfe ? <span className="font-bold text-blue-700">{String(nota.numero_nfe).padStart(9, "0")}</span> : <span className="text-gray-400 text-xs italic">-</span>}
+                                    {nota.serie && <p className="text-[10px] text-gray-400 font-medium">Série: {nota.serie}</p>}
+                                  </>
+                                )}
+                              </div>
+                            )
+                          case "cliente":
+                            return (
+                              <div>
+                                <p className="font-bold text-sm truncate max-w-[200px] text-slate-800">{nota.tomador_razao_social || nota.cliente_nome || "-"}</p>
+                                {nota.tomador_cpf_cnpj && <p className="text-[10px] text-gray-400 font-medium">{nota.tomador_cpf_cnpj}</p>}
+                              </div>
+                            )
+                          case "origem":
+                            return (
+                              <Badge variant="outline" className="text-xs font-semibold bg-white border border-slate-200">
+                                {getOrigemLabel(nota.origem)}{nota.origem_numero && ` #${nota.origem_numero}`}
+                              </Badge>
+                            )
+                          case "valor_total": return <span className="text-right font-black text-slate-800 text-sm">{showValues ? formatCurrency(nota.valor_total) : "R$ ****"}</span>
+                          case "status": return getStatusBadge(nota.status)
+                          case "data": return <span className="text-xs text-slate-600 font-semibold">{formatDateBR(nota.data_emissao || nota.created_at)}</span>
+                          case "acoes":
+                            return (
+                              <div className="flex items-center justify-end gap-1">
+                                {nota.tipo === "nfse" && (nota.status === "processando" || nota.status === "erro") && !nota.numero_nfse && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50"
+                                    onClick={() => handleConsultarNfse(nota.id)} disabled={consultandoId === nota.id} title="Consultar">
+                                    {consultandoId === nota.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                                  </Button>
+                                )}
+                                {nota.tipo === "nfe" && (nota.status === "processando" || nota.status === "rejeitada") && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50"
+                                    onClick={() => handleConsultarNfe(nota.id)} disabled={consultandoId === nota.id} title="Consultar SEFAZ">
+                                    {consultandoId === nota.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                                  </Button>
+                                )}
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:bg-slate-100" onClick={() => handleVerDetalhes(nota)} title="Ver detalhes">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:bg-emerald-50" onClick={() => handleImprimir(nota)} title={nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}>
+                                    <Printer className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (() => {
+                                  const notaNum = nota.tipo === "nfse" ? String(nota.numero_nfse || "") : String(nota.numero_nfe || "")
+                                  const boletoInfo = boletoStatusMap[notaNum]
+                                  if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
+                                    return <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-600 hover:bg-teal-50" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
+                                  }
+                                  if (boletoInfo?.temBoleto) return null
+                                  return <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
+                                })()}
+                                {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }} title={`Cancelar ${nota.tipo === "nfse" ? "NFS-e" : "NF-e"}`}>
+                                    <XCircle className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            )
+                          default: return null
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* MOBILE VIEW */}
+                <div className="md:hidden space-y-3">
+                  {!hasActiveFilterNotas ? (
+                    <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                      <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                      <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver as notas fiscais</h3>
+                      <p className="text-sm text-gray-500">Digite na busca ou selecione um filtro para começar.</p>
+                    </div>
+                  ) : notasFiltradas.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                      <h3 className="text-base font-medium text-gray-900 mb-1">Nenhuma nota encontrada</h3>
+                      <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+                    </div>
+                  ) : (
+                    notasFiltradas.map((nota) => {
+                      const notaKey = `${nota.tipo}-${nota.id}`
+                      const isExpanded = expandedNotaId === notaKey
+                      return (
+                        <div
+                          key={notaKey}
+                          className={`rounded-xl border transition-all duration-200 overflow-hidden bg-white ${
+                            isExpanded ? "shadow-lg ring-1 ring-emerald-200" : "shadow-sm hover:shadow-md"
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setExpandedNotaId(prev => prev === notaKey ? null : notaKey)}
+                            className="w-full text-left p-3.5 flex items-center gap-3"
+                          >
+                            <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-emerald-50 text-emerald-700">
+                              {(nota.tomador_razao_social || nota.cliente_nome || "?").substring(0, 2).toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-sm text-gray-900 truncate">
+                                  {nota.tomador_razao_social || nota.cliente_nome || "Avulsa"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                <span className="text-[11px] text-gray-500 font-sans">
+                                  {nota.tipo === "nfse"
+                                    ? (nota.numero_nfse ? `NFS-e: ${nota.numero_nfse}` : `RPS: ${nota.numero_rps || 0}`)
+                                    : `NF-e: ${nota.numero_nfe || "-"}`}
+                                </span>
+                                {getTipoBadge(nota.tipo)}
+                                {getStatusBadge(nota.status)}
+                              </div>
+                            </div>
+                            <div className="text-right flex-shrink-0 mr-1">
+                              <div className="text-sm font-bold text-emerald-600">
+                                {showValues ? formatCurrency(nota.valor_total) : "R$ ****"}
+                              </div>
+                              <div className="text-[10px] text-gray-500">
+                                {formatDateBR(nota.data_emissao || nota.created_at)}
+                              </div>
+                            </div>
+                            <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                              isExpanded ? "rotate-90" : ""
+                            }`} />
+                          </button>
+
+                          {isExpanded && (
+                            <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                              <div className="border-t border-gray-100 pt-3 space-y-2">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="bg-gray-50 rounded-lg p-2.5">
+                                    <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor</span>
+                                    <p className="text-xs font-semibold text-slate-800">
+                                      {showValues ? formatCurrency(nota.valor_total) : "R$ ****"}
+                                    </p>
+                                  </div>
+                                  <div className="bg-gray-50 rounded-lg p-2.5">
+                                    <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Emissão</span>
+                                    <p className="text-xs font-semibold text-gray-800">
+                                      {formatDateBR(nota.data_emissao || nota.created_at)}
+                                    </p>
+                                  </div>
+                                  <div className="bg-gray-50 rounded-lg p-2.5">
+                                    <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Origem</span>
+                                    <p className="text-xs font-semibold text-gray-800">
+                                      {getOrigemLabel(nota.origem)}{nota.origem_numero && ` #${nota.origem_numero}`}
+                                    </p>
+                                  </div>
+                                  {nota.tomador_cpf_cnpj && (
+                                    <div className="bg-gray-50 rounded-lg p-2.5">
+                                      <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">CPF/CNPJ</span>
+                                      <p className="text-xs font-mono text-gray-800">{nota.tomador_cpf_cnpj}</p>
+                                    </div>
+                                  )}
+                                  {nota.descricao_servico && (
+                                    <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                                      <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Serviço</span>
+                                      <p className="text-xs text-gray-700 whitespace-pre-wrap">{nota.descricao_servico}</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex flex-wrap gap-1.5 pt-2">
+                                  {nota.tipo === "nfse" && (nota.status === "processando" || nota.status === "erro") && !nota.numero_nfse && (
+                                    <Button variant="outline" size="sm" className="flex-1 text-xs text-blue-600 hover:bg-blue-50 border-blue-200"
                                       onClick={() => handleConsultarNfse(nota.id)} disabled={consultandoId === nota.id}>
-                                      {consultandoId === nota.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                                      {consultandoId === nota.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <RefreshCw className="h-3.5 w-3.5 mr-1" />}
                                       Consultar
-                                    </button>
-                                  ) : <span className="text-gray-400 text-xs italic">-</span>}
-                                  <p className="text-[10px] text-gray-400 font-medium">RPS: {nota.serie_rps || "11"}.{String(nota.numero_rps || 0).padStart(8, "0")}</p>
-                                </>
-                              ) : (
-                                <>
-                                  {nota.numero_nfe ? <span className="font-bold text-blue-700">{String(nota.numero_nfe).padStart(9, "0")}</span> : <span className="text-gray-400 text-xs italic">-</span>}
-                                  {nota.serie && <p className="text-[10px] text-gray-400 font-medium">Série: {nota.serie}</p>}
-                                </>
-                              )}
+                                    </Button>
+                                  )}
+                                  {nota.tipo === "nfe" && (nota.status === "processando" || nota.status === "rejeitada") && (
+                                    <Button variant="outline" size="sm" className="flex-1 text-xs text-blue-600 hover:bg-blue-50 border-blue-200"
+                                      onClick={() => handleConsultarNfe(nota.id)} disabled={consultandoId === nota.id}>
+                                      {consultandoId === nota.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <RefreshCw className="h-3.5 w-3.5 mr-1" />}
+                                      Consultar
+                                    </Button>
+                                  )}
+                                  <Button variant="outline" size="sm" className="flex-1 text-xs text-slate-600 hover:bg-slate-100" onClick={() => handleVerDetalhes(nota)}>
+                                    <Eye className="h-3.5 w-3.5 mr-1" /> Detalhes
+                                  </Button>
+                                  {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                    <Button variant="outline" size="sm" className="flex-1 text-xs text-emerald-600 hover:bg-emerald-50 border-emerald-200" onClick={() => handleImprimir(nota)}>
+                                      <Printer className="h-3.5 w-3.5 mr-1" /> {nota.tipo === "nfse" ? "Imprimir" : "DANFE"}
+                                    </Button>
+                                  )}
+                                  {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (() => {
+                                    const notaNum = nota.tipo === "nfse" ? String(nota.numero_nfse || "") : String(nota.numero_nfe || "")
+                                    const boletoInfo = boletoStatusMap[notaNum]
+                                    if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
+                                      return <Button variant="outline" size="sm" className="flex-1 text-xs text-teal-600 hover:bg-teal-50 border-teal-200" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
+                                    }
+                                    if (boletoInfo?.temBoleto) return null
+                                    return <Button variant="outline" size="sm" className="flex-1 text-xs text-blue-600 hover:bg-blue-50 border-blue-200" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }}><DollarSign className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
+                                  })()}
+                                  {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                    <Button variant="outline" size="sm" className="flex-1 text-xs text-red-600 hover:bg-red-50 border-red-200" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }}>
+                                      <XCircle className="h-3.5 w-3.5 mr-1" /> Cancelar
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                          )
-                        case "cliente":
-                          return (
-                            <div>
-                              <p className="font-bold text-sm truncate max-w-[200px] text-slate-800">{nota.tomador_razao_social || nota.cliente_nome || "-"}</p>
-                              {nota.tomador_cpf_cnpj && <p className="text-[10px] text-gray-400 font-medium">{nota.tomador_cpf_cnpj}</p>}
-                            </div>
-                          )
-                        case "origem":
-                          return (
-                            <Badge variant="outline" className="text-xs font-semibold bg-white border border-slate-200">
-                              {getOrigemLabel(nota.origem)}{nota.origem_numero && ` #${nota.origem_numero}`}
-                            </Badge>
-                          )
-                        case "valor_total": return <span className="text-right font-black text-slate-800 text-sm">{showValues ? formatCurrency(nota.valor_total) : "R$ ****"}</span>
-                        case "status": return getStatusBadge(nota.status)
-                        case "data": return <span className="text-xs text-slate-600 font-semibold">{formatDateBR(nota.data_emissao || nota.created_at)}</span>
-                        case "acoes":
-                          return (
-                            <div className="flex items-center justify-end gap-1">
-                              {nota.tipo === "nfse" && (nota.status === "processando" || nota.status === "erro") && !nota.numero_nfse && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50"
-                                  onClick={() => handleConsultarNfse(nota.id)} disabled={consultandoId === nota.id} title="Consultar">
-                                  {consultandoId === nota.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                                </Button>
-                              )}
-                              {nota.tipo === "nfe" && (nota.status === "processando" || nota.status === "rejeitada") && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50"
-                                  onClick={() => handleConsultarNfe(nota.id)} disabled={consultandoId === nota.id} title="Consultar SEFAZ">
-                                  {consultandoId === nota.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                                </Button>
-                              )}
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:bg-slate-100" onClick={() => handleVerDetalhes(nota)} title="Ver detalhes">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:bg-emerald-50" onClick={() => handleImprimir(nota)} title={nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}>
-                                  <Printer className="h-4 w-4" />
-                                </Button>
-                              )}
-                              {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (() => {
-                                const notaNum = nota.tipo === "nfse" ? String(nota.numero_nfse || "") : String(nota.numero_nfe || "")
-                                const boletoInfo = boletoStatusMap[notaNum]
-                                if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
-                                  return <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-600 hover:bg-teal-50" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
-                                }
-                                if (boletoInfo?.temBoleto) return null
-                                return <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
-                              })()}
-                              {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }} title={`Cancelar ${nota.tipo === "nfse" ? "NFS-e" : "NF-e"}`}>
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          )
-                        default: return null
-                      }
-                    }}
-                  />
+                          )}
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
