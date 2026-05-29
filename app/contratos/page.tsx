@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import {
   Plus,
   FileText,
@@ -29,6 +30,11 @@ import {
   MoreHorizontal,
   FileCheck,
   Package,
+  ChevronRight,
+  Search,
+  User,
+  Filter,
+  X,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
@@ -133,6 +139,11 @@ export default function ContratosPage() {
     valor_total: 0,
   })
   const [loading, setLoading] = useState(true)
+  const [logoMenu, setLogoMenu] = useState<string>("")
+  const [searchPropostas, setSearchPropostas] = useState("")
+  const [searchContratos, setSearchContratos] = useState("")
+  const [expandedPropostaId, setExpandedPropostaId] = useState<string | null>(null)
+  const [expandedContratoId, setExpandedContratoId] = useState<string | null>(null)
   const [propostaStatusFilter, setPropostaStatusFilter] = useState("all")
   const [contratoStatusFilter, setContratoStatusFilter] = useState("all")
   // NFS-e state
@@ -177,7 +188,23 @@ export default function ContratosPage() {
   useEffect(() => {
     loadPropostas()
     loadContratos()
+    loadLogoMenu()
   }, [])
+
+  const loadLogoMenu = async () => {
+    try {
+      const response = await fetch("/api/configuracoes/logos")
+      const result = await response.json()
+      if (result.success && result.data?.length > 0) {
+        const menuLogo = result.data.find((logo: any) => logo.tipo === "menu")
+        if (menuLogo?.arquivo_base64) {
+          setLogoMenu(menuLogo.arquivo_base64)
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar logo do menu:", error)
+    }
+  }
 
   const loadPropostas = async () => {
     try {
@@ -451,15 +478,41 @@ export default function ContratosPage() {
     )
   }
 
-  const filteredPropostas = propostas.filter((proposta) => {
-    if (propostaStatusFilter === "all") return true
-    return proposta.status === propostaStatusFilter
-  })
+  const filteredPropostas = useMemo(() => {
+    let result = propostas
+    if (propostaStatusFilter !== "all") {
+      result = result.filter((p) => p.status === propostaStatusFilter)
+    }
+    if (searchPropostas.trim()) {
+      const s = searchPropostas.toLowerCase()
+      result = result.filter(
+        (p) =>
+          p.numero.toLowerCase().includes(s) ||
+          p.cliente_nome.toLowerCase().includes(s) ||
+          p.cliente_codigo?.toLowerCase().includes(s)
+      )
+    }
+    return result
+  }, [propostas, propostaStatusFilter, searchPropostas])
 
-  const filteredContratos = contratos.filter((contrato) => {
-    if (contratoStatusFilter === "all") return true
-    return contrato.status === contratoStatusFilter
-  })
+  const filteredContratos = useMemo(() => {
+    let result = contratos
+    if (contratoStatusFilter !== "all") {
+      result = result.filter((c) => c.status === contratoStatusFilter)
+    }
+    if (searchContratos.trim()) {
+      const s = searchContratos.toLowerCase()
+      result = result.filter(
+        (c) =>
+          c.numero.toLowerCase().includes(s) ||
+          c.cliente_nome.toLowerCase().includes(s)
+      )
+    }
+    return result
+  }, [contratos, contratoStatusFilter, searchContratos])
+
+  const hasActiveFilterProposta = searchPropostas.trim() !== "" || propostaStatusFilter !== "all"
+  const hasActiveFilterContrato = searchContratos.trim() !== "" || contratoStatusFilter !== "all"
 
   if (loading) {
     return (
@@ -480,10 +533,17 @@ export default function ContratosPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4 mb-8">
+          {logoMenu && (
+            <img
+              src={logoMenu}
+              alt="Logo"
+              className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
+            />
+          )}
           <div>
             <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Contratos
+              Contratos & Propostas
             </h1>
             <p className="text-gray-600 mt-1 text-sm lg:text-base">Gerencie contratos e propostas de manutenção</p>
           </div>
@@ -492,85 +552,85 @@ export default function ContratosPage() {
         {/* Stats Cards - Propostas */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
           <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white cursor-pointer hover:scale-105 transition-all duration-300 ${
-              propostaStatusFilter === "all" ? "ring-2 ring-blue-300 ring-offset-2" : ""
+            className={`border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
+              propostaStatusFilter === "all" ? "ring-2 ring-blue-400 ring-offset-2" : ""
             }`}
             onClick={() => setPropostaStatusFilter("all")}
           >
             <CardContent className="p-3 lg:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100 text-xs lg:text-sm">Total Propostas</p>
-                  <p className="text-lg lg:text-2xl font-bold">{propostaStats.total}</p>
+                  <p className="text-blue-700 text-xs lg:text-sm font-medium">Total Propostas</p>
+                  <p className="text-lg lg:text-2xl font-bold text-blue-800">{propostaStats.total}</p>
                 </div>
-                <FileText className="h-6 w-6 lg:h-8 lg:w-8 text-blue-200" />
+                <FileText className="h-6 w-6 lg:h-8 lg:w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-yellow-500 to-yellow-600 text-white cursor-pointer hover:scale-105 transition-all duration-300 ${
-              propostaStatusFilter === "rascunho" ? "ring-2 ring-yellow-300 ring-offset-2" : ""
+            className={`border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-yellow-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
+              propostaStatusFilter === "rascunho" ? "ring-2 ring-yellow-400 ring-offset-2" : ""
             }`}
             onClick={() => setPropostaStatusFilter("rascunho")}
           >
             <CardContent className="p-3 lg:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-yellow-100 text-xs lg:text-sm">Rascunhos</p>
-                  <p className="text-lg lg:text-2xl font-bold">{propostaStats.rascunhos}</p>
+                  <p className="text-yellow-700 text-xs lg:text-sm font-medium">Rascunhos</p>
+                  <p className="text-lg lg:text-2xl font-bold text-yellow-800">{propostaStats.rascunhos}</p>
                 </div>
-                <Edit className="h-6 w-6 lg:h-8 lg:w-8 text-yellow-200" />
+                <Edit className="h-6 w-6 lg:h-8 lg:w-8 text-yellow-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white cursor-pointer hover:scale-105 transition-all duration-300 ${
-              propostaStatusFilter === "enviada" ? "ring-2 ring-purple-300 ring-offset-2" : ""
+            className={`border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
+              propostaStatusFilter === "enviada" ? "ring-2 ring-purple-400 ring-offset-2" : ""
             }`}
             onClick={() => setPropostaStatusFilter("enviada")}
           >
             <CardContent className="p-3 lg:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100 text-xs lg:text-sm">Enviadas</p>
-                  <p className="text-lg lg:text-2xl font-bold">{propostaStats.enviadas}</p>
+                  <p className="text-purple-700 text-xs lg:text-sm font-medium">Enviadas</p>
+                  <p className="text-lg lg:text-2xl font-bold text-purple-800">{propostaStats.enviadas}</p>
                 </div>
-                <Calendar className="h-6 w-6 lg:h-8 lg:w-8 text-purple-200" />
+                <Calendar className="h-6 w-6 lg:h-8 lg:w-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-green-500 to-green-600 text-white cursor-pointer hover:scale-105 transition-all duration-300 ${
-              contratoStatusFilter === "ativo" ? "ring-2 ring-green-300 ring-offset-2" : ""
+            className={`border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
+              contratoStatusFilter === "ativo" ? "ring-2 ring-green-400 ring-offset-2" : ""
             }`}
             onClick={() => setContratoStatusFilter("ativo")}
           >
             <CardContent className="p-3 lg:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100 text-xs lg:text-sm">Contratos Ativos</p>
-                  <p className="text-lg lg:text-2xl font-bold">{contratoStats.ativos}</p>
+                  <p className="text-green-700 text-xs lg:text-sm font-medium">Contratos Ativos</p>
+                  <p className="text-lg lg:text-2xl font-bold text-green-800">{contratoStats.ativos}</p>
                 </div>
-                <CheckCircle className="h-6 w-6 lg:h-8 lg:w-8 text-green-200" />
+                <CheckCircle className="h-6 w-6 lg:h-8 lg:w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white col-span-2 lg:col-span-1">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100 hover:shadow-xl transition-all duration-300 col-span-2 lg:col-span-1">
             <CardContent className="p-3 lg:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-emerald-100 text-xs lg:text-sm">Valor Contratos</p>
-                  <p className="text-sm lg:text-xl font-bold">{formatCurrency(contratoStats.valor_total)}</p>
+                  <p className="text-emerald-700 text-xs lg:text-sm font-medium">Valor Contratos</p>
+                  <p className="text-sm lg:text-xl font-bold text-emerald-800">{formatCurrency(contratoStats.valor_total)}</p>
                 </div>
-                <DollarSign className="h-6 w-6 lg:h-8 lg:w-8 text-emerald-200" />
+                <DollarSign className="h-6 w-6 lg:h-8 lg:w-8 text-emerald-600" />
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div>     </div>
 
         {/* Tabs */}
         <Tabs defaultValue="propostas" className="space-y-4 lg:space-y-6">
@@ -590,225 +650,615 @@ export default function ContratosPage() {
           </TabsList>
 
           <TabsContent value="propostas" className="space-y-4 lg:space-y-6">
-            <Card className="border-0 shadow-lg bg-white">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
-                      <FileText className="h-4 w-4 lg:h-5 lg:w-5" />
-                      Propostas de Contratos
-                    </CardTitle>
-                    <CardDescription className="text-blue-100 text-sm">
-                      {filteredPropostas.length} proposta{filteredPropostas.length !== 1 ? "s" : ""} encontrada
-                      {filteredPropostas.length !== 1 ? "s" : ""}
-                    </CardDescription>
-                  </div>
-                  <Link href="/contratos/proposta/nova">
-                    <Button className="bg-white text-blue-600 hover:bg-blue-50 text-sm lg:text-base">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nova Proposta
-                    </Button>
-                  </Link>
-                </div>
+            {/* Search and Filters Propostas */}
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="p-3 md:p-6 pb-2 md:pb-3">
+                <CardTitle className="text-base md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Buscar e Filtrar Propostas
+                </CardTitle>
+                <CardDescription className="text-xs md:text-sm">Pesquise por número ou nome do cliente</CardDescription>
               </CardHeader>
-              <CardContent className="p-4 lg:p-6">
-                {filteredPropostas.length === 0 ? (
-                  <div className="text-center py-8 lg:py-12">
-                    <FileText className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-base lg:text-lg font-semibold text-gray-600 mb-2">
-                      {propostaStatusFilter === "all"
-                        ? "Nenhuma proposta encontrada"
-                        : "Nenhuma proposta nesta categoria"}
-                    </h3>
-                    <p className="text-gray-500 mb-6 text-sm lg:text-base">
-                      {propostaStatusFilter === "all"
-                        ? "Crie sua primeira proposta de contrato"
-                        : "Tente ajustar os filtros"}
+              <CardContent className="p-3 md:p-6 pt-0">
+                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                  {/* Search Input */}
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Digite para buscar..."
+                      value={searchPropostas}
+                      onChange={(e) => setSearchPropostas(e.target.value)}
+                      className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Status Filter */}
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-gray-400" />
+                    <Select value={propostaStatusFilter} onValueChange={setPropostaStatusFilter}>
+                      <SelectTrigger className="w-full sm:w-48 border-gray-200 focus:border-blue-500">
+                        <SelectValue placeholder="Filtrar por status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os status</SelectItem>
+                        <SelectItem value="rascunho">Rascunho</SelectItem>
+                        <SelectItem value="enviada">Enviada</SelectItem>
+                        <SelectItem value="aprovada">Aprovada</SelectItem>
+                        <SelectItem value="rejeitada">Rejeitada</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {(searchPropostas || propostaStatusFilter !== "all") && (
+                  <div className="mt-3 md:mt-4 flex flex-wrap gap-2">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Mostrando {filteredPropostas.length} de {propostas.length} propostas
                     </p>
-                    {propostaStatusFilter === "all" && (
-                      <Link href="/contratos/proposta/nova">
-                        <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Nova Proposta
-                        </Button>
-                      </Link>
+                    {searchPropostas && (
+                      <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                        Busca: &quot;{searchPropostas}&quot;
+                      </Badge>
+                    )}
+                    {propostaStatusFilter !== "all" && (
+                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800">
+                        Status: {propostaStatusFilter}
+                      </Badge>
                     )}
                   </div>
-                ) : (
-                  <ResizableTable
-                    storageKey="propostas"
-                    columns={[
-                      { key: "numero",                label: "Número",      width: 100, sortable: true },
-                      { key: "cliente_nome",          label: "Cliente",      width: 180, sortable: true },
-                      { key: "tipo",                  label: "Tipo",         width: 100, sortable: true },
-                      { key: "frequencia",             label: "Frequência",   width: 110, sortable: true },
-                      { key: "valor_total_proposta",   label: "Valor Total",  width: 130, sortable: true },
-                      { key: "status",                label: "Status",       width: 100, sortable: true },
-                      { key: "data_proposta",          label: "Data",         width: 90,  sortable: true },
-                      { key: "data_validade",          label: "Validade",     width: 90,  sortable: true },
-                      { key: "acoes",                 label: "Ações",        width: 60,  sortable: false, noResize: true },
-                    ]}
-                    data={filteredPropostas}
-                    rowKey={(row) => row.id}
-                    renderCell={(proposta, col) => {
-                      switch (col) {
-                        case "numero": return <Badge variant="outline" className="font-mono text-xs">{proposta.numero}</Badge>
-                        case "cliente_nome":
-                          return (
-                            <div>
-                              <div className="font-medium text-sm truncate">{proposta.cliente_nome}</div>
-                              {proposta.cliente_codigo && <div className="text-xs text-gray-500">{proposta.cliente_codigo}</div>}
-                            </div>
-                          )
-                        case "tipo": return <Badge variant="outline" className="capitalize text-xs">{proposta.tipo}</Badge>
-                        case "frequencia": return <span className="capitalize text-sm">{proposta.frequencia}</span>
-                        case "valor_total_proposta": return <span className="font-medium text-green-600 text-sm">{formatCurrency(proposta.valor_total_proposta)}</span>
-                        case "status": return getStatusBadge(proposta.status)
-                        case "data_proposta": return <span className="text-sm">{formatDateShort(proposta.data_proposta)}</span>
-                        case "data_validade": return <span className="text-sm">{proposta.data_validade ? formatDateShort(proposta.data_validade) : "-"}</span>
-                        case "acoes":
-                          return (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem asChild>
-                                  <Link href={`/contratos/proposta/${proposta.numero}`} className="flex items-center">
-                                    <Eye className="h-4 w-4 mr-2" />Visualizar
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link href={`/contratos/proposta/${proposta.numero}/editar`} className="flex items-center">
-                                    <Edit className="h-4 w-4 mr-2" />Editar
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => excluirProposta(proposta.numero)}>
-                                  <Trash2 className="h-4 w-4 mr-2" />Excluir
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )
-                        default: return null
-                      }
-                    }}
-                  />
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
 
-          <TabsContent value="contratos" className="space-y-4 lg:space-y-6">
-            <Card className="border-0 shadow-lg bg-white">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
-                      <TrendingUp className="h-4 w-4 lg:h-5 lg:w-5" />
-                      Contratos Ativos
-                    </CardTitle>
-                    <CardDescription className="text-green-100 text-sm">
-                      {filteredContratos.length} contrato{filteredContratos.length !== 1 ? "s" : ""} encontrado
-                      {filteredContratos.length !== 1 ? "s" : ""}
-                    </CardDescription>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Card className="border-0 shadow-lg bg-white">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
+                        <FileText className="h-4 w-4 lg:h-5 lg:w-5" />
+                        Propostas de Contratos
+                      </CardTitle>
+                      <CardDescription className="text-blue-100 text-sm">
+                        {filteredPropostas.length} proposta{filteredPropostas.length !== 1 ? "s" : ""} encontrada{filteredPropostas.length !== 1 ? "s" : ""}
+                      </CardDescription>
+                    </div>
+                    <Link href="/contratos/proposta/nova">
+                      <Button className="bg-white text-blue-600 hover:bg-blue-50 text-sm lg:text-base">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nova Proposta
+                      </Button>
+                    </Link>
                   </div>
-
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 lg:p-6">
-                {filteredContratos.length === 0 ? (
-                  <div className="text-center py-8 lg:py-12">
-                    <TrendingUp className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-base lg:text-lg font-semibold text-gray-600 mb-2">
-                      {contratoStatusFilter === "all" ? "Nenhum contrato ativo" : "Nenhum contrato nesta categoria"}
-                    </h3>
-                    <p className="text-gray-500 text-sm lg:text-base">
-                      {contratoStatusFilter === "all"
-                        ? "Contratos aparecerão aqui quando propostas forem aprovadas"
-                        : "Tente ajustar os filtros"}
-                    </p>
-                  </div>
-                ) : (
-                  <ResizableTable
-                    storageKey="contratos-ativos"
-                    columns={[
-                      { key: "numero",         label: "Número",              width: 100, sortable: true },
-                      { key: "cliente_nome",   label: "Cliente/Equipamentos", width: 220, sortable: true },
-                      { key: "valor_mensal",   label: "Valor Mensal",        width: 130, sortable: true },
-                      { key: "dia_vencimento", label: "Dia",                 width: 60,  sortable: true },
-                      { key: "status",         label: "Status",              width: 100, sortable: true },
-                      { key: "data_inicio",    label: "Início",              width: 90,  sortable: true },
-                      { key: "prazo_meses",    label: "Prazo",               width: 100, sortable: true },
-                      { key: "acoes",          label: "Ações",               width: 100, sortable: false, noResize: true },
-                    ]}
-                    data={filteredContratos}
-                    rowKey={(row) => row.id}
-                    renderCell={(contrato, col) => {
-                      const equipamentos = parseEquipamentos(contrato)
-                      switch (col) {
-                        case "numero": return <Badge variant="outline" className="font-mono text-xs">{contrato.numero}</Badge>
-                        case "cliente_nome":
-                          return (
-                            <div>
-                              <div className="font-medium text-sm truncate">{contrato.cliente_nome}</div>
-                              {equipamentos.length > 0 && (
-                                <div className="mt-1">
-                                  {equipamentos.map((eq, idx) => (
-                                    <div key={idx} className="flex items-center gap-1 text-xs text-gray-500">
-                                      <Package className="h-3 w-3 flex-shrink-0" />
-                                      <span>{eq.nome}</span>
-                                      {eq.quantidade > 1 && <Badge variant="secondary" className="text-[10px] h-4 px-1">x{eq.quantidade}</Badge>}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {contrato.equipamentos_consignacao && (
-                                <div className="mt-1 text-xs text-amber-600 truncate">Consig.: {contrato.equipamentos_consignacao}</div>
-                              )}
-                            </div>
-                          )
-                        case "valor_mensal": return <span className="font-medium text-green-600 text-sm">{formatCurrency(contrato.valor_mensal)}</span>
-                        case "dia_vencimento": return <Badge variant="outline" className="font-mono text-xs">{contrato.dia_vencimento || "-"}</Badge>
-                        case "status": return getContratoStatusBadge(contrato.status)
-                        case "data_inicio": return <span className="text-sm">{formatDateShort(contrato.data_inicio)}</span>
-                        case "prazo_meses": return <Badge variant="outline" className="text-xs">{formatPrazo(contrato.prazo_meses)}</Badge>
-                        case "acoes":
-                          return (
-                            <div className="flex items-center gap-1">
-                              {contrato.status === "ativo" && (
-                                <Button size="sm" variant="outline" onClick={() => handleIniciarEmitirNfse(contrato)}
-                                  className="h-8 w-8 p-0 text-emerald-600 hover:bg-emerald-50 border-emerald-200 bg-transparent" title="Emitir NFS-e">
-                                  <FileCheck className="h-4 w-4" />
-                                </Button>
-                              )}
+                </CardHeader>
+                <CardContent className="p-4 lg:p-6">
+                  {filteredPropostas.length === 0 ? (
+                    <div className="text-center py-8 lg:py-12">
+                      <FileText className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-base lg:text-lg font-semibold text-gray-600 mb-2">
+                        {propostaStatusFilter === "all"
+                          ? "Nenhuma proposta encontrada"
+                          : "Nenhuma proposta nesta categoria"}
+                      </h3>
+                      <p className="text-gray-500 mb-6 text-sm lg:text-base">
+                        {propostaStatusFilter === "all"
+                          ? "Crie sua primeira proposta de contrato"
+                          : "Tente ajustar os filtros"}
+                      </p>
+                      {propostaStatusFilter === "all" && (
+                        <Link href="/contratos/proposta/nova">
+                          <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Nova Proposta
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  ) : (
+                    <ResizableTable
+                      storageKey="propostas"
+                      columns={[
+                        { key: "numero",                label: "Número",      width: 100, sortable: true },
+                        { key: "cliente_nome",          label: "Cliente",      width: 180, sortable: true },
+                        { key: "tipo",                  label: "Tipo",         width: 100, sortable: true },
+                        { key: "frequencia",             label: "Frequência",   width: 110, sortable: true },
+                        { key: "valor_total_proposta",   label: "Valor Total",  width: 130, sortable: true },
+                        { key: "status",                label: "Status",       width: 100, sortable: true },
+                        { key: "data_proposta",          label: "Data",         width: 90,  sortable: true },
+                        { key: "data_validade",          label: "Validade",     width: 90,  sortable: true },
+                        { key: "acoes",                 label: "Ações",        width: 60,  sortable: false, noResize: true },
+                      ]}
+                      data={filteredPropostas}
+                      rowKey={(row) => row.id}
+                      renderCell={(proposta, col) => {
+                        switch (col) {
+                          case "numero": return <Badge variant="outline" className="font-mono text-xs">{proposta.numero}</Badge>
+                          case "cliente_nome":
+                            return (
+                              <div>
+                                <div className="font-medium text-sm truncate">{proposta.cliente_nome}</div>
+                                {proposta.cliente_codigo && <div className="text-xs text-gray-500">{proposta.cliente_codigo}</div>}
+                              </div>
+                            )
+                          case "tipo": return <Badge variant="outline" className="capitalize text-xs">{proposta.tipo}</Badge>
+                          case "frequencia": return <span className="capitalize text-sm">{proposta.frequencia}</span>
+                          case "valor_total_proposta": return <span className="font-medium text-green-600 text-sm">{formatCurrency(proposta.valor_total_proposta)}</span>
+                          case "status": return getStatusBadge(proposta.status)
+                          case "data_proposta": return <span className="text-sm">{formatDateShort(proposta.data_proposta)}</span>
+                          case "data_validade": return <span className="text-sm">{proposta.data_validade ? formatDateShort(proposta.data_validade) : "-"}</span>
+                          case "acoes":
+                            return (
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem asChild>
-                                    <Link href={`/contratos/${contrato.numero}`} className="flex items-center"><Eye className="h-4 w-4 mr-2" />Visualizar</Link>
+                                    <Link href={`/contratos/proposta/${proposta.numero}`} className="flex items-center">
+                                      <Eye className="h-4 w-4 mr-2" />Visualizar
+                                    </Link>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem asChild>
-                                    <Link href={`/contratos/${contrato.numero}/editar`} className="flex items-center"><Edit className="h-4 w-4 mr-2" />Editar</Link>
+                                    <Link href={`/contratos/proposta/${proposta.numero}/editar`} className="flex items-center">
+                                      <Edit className="h-4 w-4 mr-2" />Editar
+                                    </Link>
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => excluirContrato(contrato.numero)}>
+                                  <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => excluirProposta(proposta.numero)}>
                                     <Trash2 className="h-4 w-4 mr-2" />Excluir
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
+                            )
+                          default: return null
+                        }
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* MOBILE VIEW - Card-based layout */}
+            <div className="md:hidden space-y-3">
+              <div className="flex justify-between items-center px-1 mb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  {filteredPropostas.length} proposta{filteredPropostas.length !== 1 ? "s" : ""}
+                </p>
+                <Link href="/contratos/proposta/nova">
+                  <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs h-8">
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Nova Proposta
+                  </Button>
+                </Link>
+              </div>
+
+              {!hasActiveFilterProposta ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver as propostas</h3>
+                  <p className="text-sm text-gray-500">Digite na busca ou selecione um filtro para começar.</p>
+                </div>
+              ) : filteredPropostas.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-900 mb-1">Nenhuma proposta encontrada</h3>
+                  <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+                </div>
+              ) : (
+                filteredPropostas.map((proposta) => {
+                  const isExpanded = expandedPropostaId === proposta.id
+                  return (
+                    <div
+                      key={proposta.id}
+                      className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                        proposta.status === "aprovada"
+                          ? "border-green-200 bg-gradient-to-r from-green-50/80 to-white"
+                          : "border-gray-200 bg-white"
+                      } ${isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedPropostaId(prev => prev === proposta.id ? null : proposta.id)}
+                        className="w-full text-left p-3.5 flex items-center gap-3"
+                      >
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                          proposta.status === "aprovada"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}>
+                          {(proposta.cliente_nome || "?").substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm text-gray-900 truncate">
+                              {proposta.cliente_nome}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-gray-500 font-mono">
+                              {proposta.numero}
+                            </span>
+                            <Badge variant="outline" className="capitalize text-[10px] px-1.5 py-0 h-4">
+                              {proposta.tipo}
+                            </Badge>
+                            {getStatusBadge(proposta.status)}
+                          </div>
+                        </div>
+                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                          isExpanded ? "rotate-90" : ""
+                        }`} />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Frequência</span>
+                                <p className="text-xs font-semibold text-gray-800 capitalize">{proposta.frequencia}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor Total</span>
+                                <p className="text-xs font-semibold text-green-600">{formatCurrency(proposta.valor_total_proposta)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Data Proposta</span>
+                                <p className="text-xs text-gray-800">{formatDate(proposta.data_proposta)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Validade</span>
+                                <p className="text-xs text-gray-800">{proposta.data_validade ? formatDate(proposta.data_validade) : "-"}</p>
+                              </div>
                             </div>
-                          )
-                        default: return null
-                      }
-                    }}
-                  />
+                            <div className="flex gap-2 pt-2">
+                              <Link href={`/contratos/proposta/${proposta.numero}`} className="flex-1">
+                                <Button size="sm" variant="outline" className="w-full text-xs">
+                                  <Eye className="h-3 w-3 mr-1" /> Visualizar
+                                </Button>
+                              </Link>
+                              <Link href={`/contratos/proposta/${proposta.numero}/editar`} className="flex-1">
+                                <Button size="sm" variant="outline" className="w-full text-xs">
+                                  <Edit className="h-3 w-3 mr-1" /> Editar
+                                </Button>
+                              </Link>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="text-xs"
+                                onClick={() => excluirProposta(proposta.numero)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contratos" className="space-y-4 lg:space-y-6">
+            {/* Search and Filters Contratos */}
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="p-3 md:p-6 pb-2 md:pb-3">
+                <CardTitle className="text-base md:text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  Buscar e Filtrar Contratos
+                </CardTitle>
+                <CardDescription className="text-xs md:text-sm">Pesquise por número ou nome do cliente</CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 md:p-6 pt-0">
+                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                  {/* Search Input */}
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Digite para buscar..."
+                      value={searchContratos}
+                      onChange={(e) => setSearchContratos(e.target.value)}
+                      className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Status Filter */}
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-gray-400" />
+                    <Select value={contratoStatusFilter} onValueChange={setContratoStatusFilter}>
+                      <SelectTrigger className="w-full sm:w-48 border-gray-200 focus:border-blue-500">
+                        <SelectValue placeholder="Filtrar por status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os status</SelectItem>
+                        <SelectItem value="ativo">Ativo</SelectItem>
+                        <SelectItem value="suspenso">Suspenso</SelectItem>
+                        <SelectItem value="cancelado">Cancelado</SelectItem>
+                        <SelectItem value="finalizado">Finalizado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {(searchContratos || contratoStatusFilter !== "all") && (
+                  <div className="mt-3 md:mt-4 flex flex-wrap gap-2">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Mostrando {filteredContratos.length} de {contratos.length} contratos
+                    </p>
+                    {searchContratos && (
+                      <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                        Busca: &quot;{searchContratos}&quot;
+                      </Badge>
+                    )}
+                    {contratoStatusFilter !== "all" && (
+                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800">
+                        Status: {contratoStatusFilter}
+                      </Badge>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Card className="border-0 shadow-lg bg-white">
+                <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
+                        <TrendingUp className="h-4 w-4 lg:h-5 lg:w-5" />
+                        Contratos Ativos
+                      </CardTitle>
+                      <CardDescription className="text-green-100 text-sm">
+                        {filteredContratos.length} contrato{filteredContratos.length !== 1 ? "s" : ""} encontrado{filteredContratos.length !== 1 ? "s" : ""}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 lg:p-6">
+                  {filteredContratos.length === 0 ? (
+                    <div className="text-center py-8 lg:py-12">
+                      <TrendingUp className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-base lg:text-lg font-semibold text-gray-600 mb-2">
+                        {contratoStatusFilter === "all" ? "Nenhum contrato ativo" : "Nenhum contrato nesta categoria"}
+                      </h3>
+                      <p className="text-gray-500 text-sm lg:text-base">
+                        {contratoStatusFilter === "all"
+                          ? "Contratos aparecerão aqui quando propostas forem aprovadas"
+                          : "Tente ajustar os filtros"}
+                      </p>
+                    </div>
+                  ) : (
+                    <ResizableTable
+                      storageKey="contratos-ativos"
+                      columns={[
+                        { key: "numero",         label: "Número",              width: 100, sortable: true },
+                        { key: "cliente_nome",   label: "Cliente/Equipamentos", width: 220, sortable: true },
+                        { key: "valor_mensal",   label: "Valor Mensal",        width: 130, sortable: true },
+                        { key: "dia_vencimento", label: "Dia",                 width: 60,  sortable: true },
+                        { key: "status",         label: "Status",              width: 100, sortable: true },
+                        { key: "data_inicio",    label: "Início",              width: 90,  sortable: true },
+                        { key: "prazo_meses",    label: "Prazo",               width: 100, sortable: true },
+                        { key: "acoes",          label: "Ações",               width: 100, sortable: false, noResize: true },
+                      ]}
+                      data={filteredContratos}
+                      rowKey={(row) => row.id}
+                      renderCell={(contrato, col) => {
+                        const equipamentos = parseEquipamentos(contrato)
+                        switch (col) {
+                          case "numero": return <Badge variant="outline" className="font-mono text-xs">{contrato.numero}</Badge>
+                          case "cliente_nome":
+                            return (
+                              <div>
+                                <div className="font-medium text-sm truncate">{contrato.cliente_nome}</div>
+                                {equipamentos.length > 0 && (
+                                  <div className="mt-1">
+                                    {equipamentos.map((eq, idx) => (
+                                      <div key={idx} className="flex items-center gap-1 text-xs text-gray-500">
+                                        <Package className="h-3 w-3 flex-shrink-0" />
+                                        <span>{eq.nome}</span>
+                                        {eq.quantidade > 1 && <Badge variant="secondary" className="text-[10px] h-4 px-1">x{eq.quantidade}</Badge>}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                {contrato.equipamentos_consignacao && (
+                                  <div className="mt-1 text-xs text-amber-600 truncate">Consig.: {contrato.equipamentos_consignacao}</div>
+                                )}
+                              </div>
+                            )
+                          case "valor_mensal": return <span className="font-medium text-green-600 text-sm">{formatCurrency(contrato.valor_mensal)}</span>
+                          case "dia_vencimento": return <Badge variant="outline" className="font-mono text-xs">{contrato.dia_vencimento || "-"}</Badge>
+                          case "status": return getContratoStatusBadge(contrato.status)
+                          case "data_inicio": return <span className="text-sm">{formatDateShort(contrato.data_inicio)}</span>
+                          case "prazo_meses": return <Badge variant="outline" className="text-xs">{formatPrazo(contrato.prazo_meses)}</Badge>
+                          case "acoes":
+                            return (
+                              <div className="flex items-center gap-1">
+                                {contrato.status === "ativo" && (
+                                  <Button size="sm" variant="outline" onClick={() => handleIniciarEmitirNfse(contrato)}
+                                    className="h-8 w-8 p-0 text-emerald-600 hover:bg-emerald-50 border-emerald-200 bg-transparent" title="Emitir NFS-e">
+                                    <FileCheck className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Link href={`/contratos/${contrato.numero}`} className="flex items-center"><Eye className="h-4 w-4 mr-2" />Visualizar</Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                      <Link href={`/contratos/${contrato.numero}/editar`} className="flex items-center"><Edit className="h-4 w-4 mr-2" />Editar</Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => excluirContrato(contrato.numero)}>
+                                      <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            )
+                          default: return null
+                        }
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* MOBILE VIEW - Card-based layout */}
+            <div className="md:hidden space-y-3">
+              <div className="flex justify-between items-center px-1 mb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  {filteredContratos.length} contrato{filteredContratos.length !== 1 ? "s" : ""}
+                </p>
+              </div>
+
+              {!hasActiveFilterContrato ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os contratos</h3>
+                  <p className="text-sm text-gray-500">Digite na busca ou selecione um filtro para começar.</p>
+                </div>
+              ) : filteredContratos.length === 0 ? (
+                <div className="text-center py-12">
+                  <TrendingUp className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum contrato encontrado</h3>
+                  <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+                </div>
+              ) : (
+                filteredContratos.map((contrato) => {
+                  const isExpanded = expandedContratoId === contrato.id
+                  const equipamentos = parseEquipamentos(contrato)
+                  return (
+                    <div
+                      key={contrato.id}
+                      className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                        contrato.status === "ativo"
+                          ? "border-green-200 bg-gradient-to-r from-green-50/80 to-white"
+                          : "border-gray-200 bg-white"
+                      } ${isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedContratoId(prev => prev === contrato.id ? null : contrato.id)}
+                        className="w-full text-left p-3.5 flex items-center gap-3"
+                      >
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                          contrato.status === "ativo"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}>
+                          {(contrato.cliente_nome || "?").substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm text-gray-900 truncate">
+                              {contrato.cliente_nome}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-gray-500 font-mono">
+                              {contrato.numero}
+                            </span>
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                              Dia venc.: {contrato.dia_vencimento || "-"}
+                            </Badge>
+                            {getContratoStatusBadge(contrato.status)}
+                          </div>
+                        </div>
+                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                          isExpanded ? "rotate-90" : ""
+                        }`} />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                            {equipamentos.length > 0 && (
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-1">Equipamentos</span>
+                                <div className="space-y-1">
+                                  {equipamentos.map((eq, idx) => (
+                                    <div key={idx} className="flex items-center gap-1.5 text-xs text-gray-600">
+                                      <Package className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                      <span>{eq.nome}</span>
+                                      {eq.quantidade > 1 && <Badge variant="secondary" className="text-[9px] h-3.5 px-1 py-0">x{eq.quantidade}</Badge>}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {contrato.equipamentos_consignacao && (
+                              <div className="bg-amber-50 rounded-lg p-2.5 border border-amber-100">
+                                <span className="text-[10px] font-medium text-amber-700 uppercase block mb-0.5">Consignado</span>
+                                <p className="text-xs text-amber-800 font-medium">{contrato.equipamentos_consignacao}</p>
+                              </div>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor Mensal</span>
+                                <p className="text-xs font-semibold text-green-600">{formatCurrency(contrato.valor_mensal)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Prazo</span>
+                                <p className="text-xs font-semibold text-gray-800">{formatPrazo(contrato.prazo_meses)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Início</span>
+                                <p className="text-xs text-gray-800">{formatDate(contrato.data_inicio)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Fim / Término</span>
+                                <p className="text-xs text-gray-800">{formatDate(contrato.data_fim)}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2 pt-2">
+                              {contrato.status === "ativo" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleIniciarEmitirNfse(contrato)}
+                                  className="text-xs text-emerald-600 hover:bg-emerald-50 border-emerald-200 bg-white"
+                                >
+                                  <FileCheck className="h-3.5 w-3.5 mr-1" /> NFS-e
+                                </Button>
+                              )}
+                              <Link href={`/contratos/${contrato.numero}`} className="flex-1">
+                                <Button size="sm" variant="outline" className="w-full text-xs">
+                                  <Eye className="h-3 w-3 mr-1" /> Visualizar
+                                </Button>
+                              </Link>
+                              <Link href={`/contratos/${contrato.numero}/editar`} className="flex-1">
+                                <Button size="sm" variant="outline" className="w-full text-xs">
+                                  <Edit className="h-3 w-3 mr-1" /> Editar
+                                </Button>
+                              </Link>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="text-xs"
+                                onClick={() => excluirContrato(contrato.numero)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
           </TabsContent>
         </Tabs>
-      </div>
+      
 
       {/* Dialog de Mes de Referencia */}
       <Dialog open={mesRefDialogOpen} onOpenChange={(open) => {
