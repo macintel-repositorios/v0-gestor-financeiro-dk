@@ -978,7 +978,7 @@ export default function RelatoriosPage() {
               page-break-after: auto !important;
             }
             
-            .grid, .card, .border {
+            .page-break-inside-avoid {
               page-break-inside: avoid !important;
             }
 
