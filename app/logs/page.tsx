@@ -138,12 +138,24 @@ export default function LogsPage() {
       console.log("Resultado da API:", logsResult)
 
       if (logsResult.success) {
-        const formattedLogs = (logsResult.data || []).map((log: any) => ({
-          ...log,
-          data_formatada: log.data_hora 
-            ? new Date(log.data_hora).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }) 
-            : "-"
-        }))
+        const formattedLogs = (logsResult.data || []).map((log: any) => {
+          let dateObj = null
+          if (log.data_hora) {
+            const dateStr = String(log.data_hora)
+            if (dateStr.includes("Z") || (dateStr.includes("-") && dateStr.includes("T"))) {
+              dateObj = new Date(dateStr)
+            } else {
+              const isoStr = dateStr.replace(" ", "T") + (dateStr.endsWith("Z") ? "" : "Z")
+              dateObj = new Date(isoStr)
+            }
+          }
+          return {
+            ...log,
+            data_formatada: dateObj && !isNaN(dateObj.getTime())
+              ? dateObj.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
+              : "-"
+          }
+        })
         setLogs(formattedLogs)
         console.log("Logs carregados:", formattedLogs.length)
 

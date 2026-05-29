@@ -214,7 +214,17 @@ export default function UsuariosPage() {
   const formatarData = (data: string | undefined) => {
     if (!data) return "-"
     try {
-      return new Date(data).toLocaleString("pt-BR")
+      const dateStr = String(data)
+      let dateObj = null
+      if (dateStr.includes("Z") || (dateStr.includes("-") && dateStr.includes("T"))) {
+        dateObj = new Date(dateStr)
+      } else {
+        const isoStr = dateStr.replace(" ", "T") + (dateStr.endsWith("Z") ? "" : "Z")
+        dateObj = new Date(isoStr)
+      }
+      return dateObj && !isNaN(dateObj.getTime())
+        ? dateObj.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
+        : "-"
     } catch {
       return "-"
     }
