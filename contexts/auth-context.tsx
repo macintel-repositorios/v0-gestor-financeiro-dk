@@ -6,6 +6,8 @@ import { useRouter, usePathname } from "next/navigation"
 import type { User } from "@/types/usuario"
 import { getFirstAvailableRoute } from "@/lib/redirect-helper"
 
+import { registrarLog } from "@/lib/logger"
+
 interface AuthContextType {
   user: User | null
   loading: boolean
@@ -96,6 +98,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
+    if (user) {
+      registrarLog({
+        usuario_id: user.id,
+        usuario_nome: user.nome,
+        usuario_email: user.email,
+        acao: "Logout realizado",
+        modulo: "Autenticação",
+        tipo: "logout",
+        detalhes: `Usuário ${user.nome} saiu do sistema.`,
+        ip_address: "client-side",
+      }).catch((err) => console.error("Erro ao registrar log de logout:", err))
+    }
     localStorage.removeItem("token")
     localStorage.removeItem("user")
     setUser(null)

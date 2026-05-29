@@ -72,6 +72,45 @@ export async function POST(request: Request) {
       configuracoes: parsedConfiguracoes,
     }
 
+    // Registrar log de login no banco
+    const userAgent = request.headers.get("user-agent") || "unknown"
+    const headersList = [
+      "x-forwarded-for",
+      "x-real-ip",
+      "x-client-ip",
+      "cf-connecting-ip",
+    ]
+    let ipAddress = "127.0.0.1"
+    for (const header of headersList) {
+      const value = request.headers.get(header)
+      if (value) {
+        ipAddress = value.split(",")[0].trim()
+        break
+      }
+    }
+
+    try {
+      await query(
+        `INSERT INTO logs_sistema (
+          usuario_id, usuario_nome, usuario_email, acao, modulo, tipo,
+          detalhes, ip_address, user_agent, data_hora
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, UTC_TIMESTAMP())`,
+        [
+          usuario.id,
+          usuario.nome,
+          usuario.email,
+          "Login realizado",
+          "Autenticação",
+          "login",
+          `Usuário ${usuario.nome} realizou login no sistema.`,
+          ipAddress,
+          userAgent,
+        ]
+      )
+    } catch (logError) {
+      console.error("Erro ao registrar log de login no banco:", logError)
+    }
+
     return NextResponse.json({
       success: true,
       message: "Login realizado com sucesso!",

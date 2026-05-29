@@ -24,9 +24,11 @@ import {
   User,
   RefreshCw,
   Globe,
+  ChevronRight,
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 interface Log {
   id: number
@@ -65,6 +67,7 @@ export default function LogsPage() {
   const [search, setSearch] = useState("")
   const [tipoFilter, setTipoFilter] = useState("all")
   const [moduloFilter, setModuloFilter] = useState("all")
+  const [expandedLogId, setExpandedLogId] = useState<number | null>(null)
   const [currentTime, setCurrentTime] = useState<string>("")
   const [stats, setStats] = useState<Stats>({
     total: 0,
@@ -135,8 +138,14 @@ export default function LogsPage() {
       console.log("Resultado da API:", logsResult)
 
       if (logsResult.success) {
-        setLogs(logsResult.data || [])
-        console.log("Logs carregados:", logsResult.data?.length || 0)
+        const formattedLogs = (logsResult.data || []).map((log: any) => ({
+          ...log,
+          data_formatada: log.data_hora 
+            ? new Date(log.data_hora).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }) 
+            : "-"
+        }))
+        setLogs(formattedLogs)
+        console.log("Logs carregados:", formattedLogs.length)
 
         // Usar estatísticas da API se disponíveis, senão calcular localmente
         if (logsResult.stats) {
@@ -346,7 +355,13 @@ export default function LogsPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-7 gap-3 lg:gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card 
+          onClick={() => setTipoFilter("all")}
+          className={cn(
+            "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoFilter === "all" ? "ring-2 ring-blue-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total de Logs</CardTitle>
             <Activity className="h-3 w-3 lg:h-4 lg:w-4 text-blue-600" />
@@ -357,7 +372,13 @@ export default function LogsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card 
+          onClick={() => setTipoFilter("login")}
+          className={cn(
+            "bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoFilter === "login" ? "ring-2 ring-green-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Logins</CardTitle>
             <LogIn className="h-3 w-3 lg:h-4 lg:w-4 text-green-600" />
@@ -368,7 +389,13 @@ export default function LogsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+        <Card 
+          onClick={() => setTipoFilter("logout")}
+          className={cn(
+            "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoFilter === "logout" ? "ring-2 ring-orange-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-orange-700">Logouts</CardTitle>
             <LogOut className="h-3 w-3 lg:h-4 lg:w-4 text-orange-600" />
@@ -379,7 +406,13 @@ export default function LogsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+        <Card 
+          onClick={() => setTipoFilter("create")}
+          className={cn(
+            "bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoFilter === "create" ? "ring-2 ring-purple-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Criações</CardTitle>
             <Plus className="h-3 w-3 lg:h-4 lg:w-4 text-purple-600" />
@@ -390,7 +423,13 @@ export default function LogsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+        <Card 
+          onClick={() => setTipoFilter("update")}
+          className={cn(
+            "bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoFilter === "update" ? "ring-2 ring-yellow-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Edições</CardTitle>
             <Edit className="h-3 w-3 lg:h-4 lg:w-4 text-yellow-600" />
@@ -401,7 +440,13 @@ export default function LogsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+        <Card 
+          onClick={() => setTipoFilter("delete")}
+          className={cn(
+            "bg-gradient-to-br from-red-50 to-red-100 border-red-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoFilter === "delete" ? "ring-2 ring-red-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-red-700">Exclusões</CardTitle>
             <Trash2 className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
@@ -412,14 +457,20 @@ export default function LogsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+        <Card 
+          onClick={() => setTipoFilter("error")}
+          className={cn(
+            "bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoFilter === "error" ? "ring-2 ring-rose-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-red-700">Erros</CardTitle>
-            <XCircle className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-rose-700">Erros</CardTitle>
+            <XCircle className="h-3 w-3 lg:h-4 lg:w-4 text-rose-600" />
           </CardHeader>
           <CardContent className="p-3 lg:p-4 pt-0">
-            <div className="text-lg lg:text-2xl font-bold text-red-800">{stats.errors}</div>
-            <p className="text-[10px] lg:text-xs text-red-600 mt-0.5">problemas</p>
+            <div className="text-lg lg:text-2xl font-bold text-rose-800">{stats.errors}</div>
+            <p className="text-[10px] lg:text-xs text-rose-600 mt-0.5">problemas</p>
           </CardContent>
         </Card>
       </div>
@@ -502,51 +553,144 @@ export default function LogsPage() {
             </Select>
           </div>
 
-          <ResizableTable
-            storageKey="logs"
-            columns={[
-              { key: "data_formatada",         label: "Data/Hora (SP)",  width: 160, sortable: true },
-              { key: "usuario_nome",            label: "Usuário",         width: 170, sortable: true },
-              { key: "acao",                    label: "Ação",            width: 200, sortable: true },
-              { key: "modulo",                  label: "Módulo",          width: 120, sortable: true },
-              { key: "tipo",                    label: "Tipo",            width: 110, sortable: true },
-              { key: "tempo_sessao_formatado",  label: "Tempo Sessão",    width: 120, sortable: false },
-              { key: "ip_address",              label: "IP",              width: 130, sortable: false },
-              { key: "detalhes",                label: "Detalhes",        width: 220, sortable: false },
-            ]}
-            data={logs}
-            rowKey={(row) => row.id}
-            emptyState={<div className="text-center py-8 text-muted-foreground">Nenhum log encontrado</div>}
-            renderCell={(log, col) => {
-              switch (col) {
-                case "data_formatada":
-                  return <span className="font-mono text-sm">{log.data_formatada}</span>
-                case "usuario_nome":
-                  return (
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <div>
-                        <div className="font-medium">{log.usuario_nome || "Sistema"}</div>
-                        <div className="text-xs text-muted-foreground truncate">{log.usuario_email}</div>
+          {/* DESKTOP VIEW */}
+          <div className="hidden md:block">
+            <ResizableTable
+              storageKey="logs"
+              columns={[
+                { key: "data_formatada",         label: "Data/Hora (SP)",  width: 160, sortable: true },
+                { key: "usuario_nome",            label: "Usuário",         width: 170, sortable: true },
+                { key: "acao",                    label: "Ação",            width: 200, sortable: true },
+                { key: "modulo",                  label: "Módulo",          width: 120, sortable: true },
+                { key: "tipo",                    label: "Tipo",            width: 110, sortable: true },
+                { key: "tempo_sessao_formatado",  label: "Tempo Sessão",    width: 120, sortable: false },
+                { key: "ip_address",              label: "IP",              width: 130, sortable: false },
+                { key: "detalhes",                label: "Detalhes",        width: 220, sortable: false },
+              ]}
+              data={logs}
+              rowKey={(row) => row.id}
+              emptyState={<div className="text-center py-8 text-muted-foreground">Nenhum log encontrado</div>}
+              renderCell={(log, col) => {
+                switch (col) {
+                  case "data_formatada":
+                    return <span className="font-mono text-sm">{log.data_formatada}</span>
+                  case "usuario_nome":
+                    return (
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <div>
+                          <div className="font-medium">{log.usuario_nome || "Sistema"}</div>
+                          <div className="text-xs text-muted-foreground truncate">{log.usuario_email}</div>
+                        </div>
                       </div>
-                    </div>
-                  )
-                case "acao": return <span className="font-medium truncate">{log.acao}</span>
-                case "modulo": return <Badge variant="outline">{log.modulo}</Badge>
-                case "tipo": return getTipoBadge(log.tipo)
-                case "tempo_sessao_formatado":
-                  return log.tempo_sessao_formatado ? (
-                    <div className="flex items-center gap-1 text-sm">
-                      <Clock className="h-3 w-3 text-muted-foreground" />
-                      {log.tempo_sessao_formatado}
-                    </div>
-                  ) : <span className="text-muted-foreground">-</span>
-                case "ip_address": return <span className="font-mono text-sm">{log.ip_address || "-"}</span>
-                case "detalhes": return <span className="text-sm text-muted-foreground truncate">{log.detalhes || "-"}</span>
-                default: return null
-              }
-            }}
-          />
+                    )
+                  case "acao": return <span className="font-medium truncate">{log.acao}</span>
+                  case "modulo": return <Badge variant="outline">{log.modulo}</Badge>
+                  case "tipo": return getTipoBadge(log.tipo)
+                  case "tempo_sessao_formatado":
+                    return log.tempo_sessao_formatado ? (
+                      <div className="flex items-center gap-1 text-sm">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        {log.tempo_sessao_formatado}
+                      </div>
+                    ) : <span className="text-muted-foreground">-</span>
+                  case "ip_address": return <span className="font-mono text-sm">{log.ip_address || "-"}</span>
+                  case "detalhes": return <span className="text-sm text-muted-foreground truncate">{log.detalhes || "-"}</span>
+                  default: return null
+                }
+              }}
+            />
+          </div>
+
+          {/* MOBILE VIEW */}
+          <div className="md:hidden space-y-3">
+            {!(search.trim() !== "" || tipoFilter !== "all" || moduloFilter !== "all") ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os logs</h3>
+                <p className="text-sm text-gray-500">Digite na busca, filtre por módulo/tipo ou selecione um card de filtro para começar.</p>
+              </div>
+            ) : logs.length === 0 ? (
+              <div className="text-center py-12">
+                <Activity className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum log encontrado</h3>
+                <p className="text-sm text-gray-500">Tente ajustar os filtros de busca ou tipo.</p>
+              </div>
+            ) : (
+              logs.map((log) => {
+                const isExpanded = expandedLogId === log.id
+                return (
+                  <div
+                    key={log.id}
+                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-white ${
+                      isExpanded ? "shadow-lg ring-1 ring-slate-200" : "shadow-sm hover:shadow-md"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setExpandedLogId(prev => prev === log.id ? null : log.id)}
+                      className="w-full text-left p-3.5 flex items-center gap-3"
+                    >
+                      <div className="h-10 w-10 flex-shrink-0 bg-slate-50 rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-slate-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold text-sm text-gray-900 truncate block">
+                          {log.usuario_nome || "Sistema"}
+                        </span>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          {getTipoBadge(log.tipo)}
+                          <Badge variant="outline" className="text-xs">{log.modulo}</Badge>
+                        </div>
+                      </div>
+                      <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                        isExpanded ? "rotate-90" : ""
+                      }`} />
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                        <div className="border-t border-gray-100 pt-3 space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Ação</span>
+                              <p className="text-xs text-gray-800 font-medium">{log.acao}</p>
+                            </div>
+                            {log.usuario_email && (
+                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Email</span>
+                                <p className="text-xs text-gray-800 truncate">{log.usuario_email}</p>
+                              </div>
+                            )}
+                            <div className="bg-gray-50 rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Data/Hora (SP)</span>
+                              <p className="text-xs text-gray-800 font-mono">{log.data_formatada}</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">IP</span>
+                              <p className="text-xs text-gray-800 font-mono">{log.ip_address || "-"}</p>
+                            </div>
+                            {log.tempo_sessao_formatado && (
+                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Tempo Sessão</span>
+                                <p className="text-xs text-gray-800">{log.tempo_sessao_formatado}</p>
+                              </div>
+                            )}
+                            {log.detalhes && (
+                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Detalhes</span>
+                                <p className="text-xs text-gray-800 whitespace-pre-wrap">{log.detalhes}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

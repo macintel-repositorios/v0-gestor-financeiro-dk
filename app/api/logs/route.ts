@@ -48,25 +48,74 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    const search = searchParams.get("search") || ""
+    const tipo = searchParams.get("tipo") || "all"
+    const modulo = searchParams.get("modulo") || "all"
     const page = Number.parseInt(searchParams.get("page") || "1")
-    const limit = Number.parseInt(searchParams.get("limit") || "50")
+    const limit = Number.parseInt(searchParams.get("limit") || "100")
     const offset = (page - 1) * limit
+
+    const whereConditions: string[] = []
+    const queryParams: any[] = []
+
+    if (tipo !== "all") {
+      whereConditions.push("tipo = ?")
+      queryParams.push(tipo)
+    }
+
+    if (modulo !== "all") {
+      whereConditions.push("modulo = ?")
+      queryParams.push(modulo)
+    }
+
+    if (search.trim() !== "") {
+      whereConditions.push("(usuario_nome LIKE ? OR usuario_email LIKE ? OR acao LIKE ? OR detalhes LIKE ?)")
+      const likeSearch = `%${search}%`
+      queryParams.push(likeSearch, likeSearch, likeSearch, likeSearch)
+    }
+
+    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : ""
 
     const logsQuery = `
       SELECT * FROM logs_sistema 
+      ${whereClause}
       ORDER BY data_hora DESC 
       LIMIT ? OFFSET ?
     `
 
-    const logs = await query(logsQuery, [limit, offset])
+    const logs = await query(logsQuery, [...queryParams, limit, offset])
 
-    const countQuery = "SELECT COUNT(*) as total FROM logs_sistema"
-    const countResult = await query(countQuery)
+    const countQuery = `SELECT COUNT(*) as total FROM logs_sistema ${whereClause}`
+    const countResult = await query(countQuery, queryParams)
     const total = countResult[0]?.total || 0
+
+    // Calcular estatísticas globais para os cards
+    const statsQuery = `
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN tipo = 'login' THEN 1 ELSE 0 END) as logins,
+        SUM(CASE WHEN tipo = 'logout' THEN 1 ELSE 0 END) as logouts,
+        SUM(CASE WHEN tipo = 'create' THEN 1 ELSE 0 END) as creates,
+        SUM(CASE WHEN tipo = 'update' THEN 1 ELSE 0 END) as updates,
+        SUM(CASE WHEN tipo = 'delete' THEN 1 ELSE 0 END) as deletes,
+        SUM(CASE WHEN tipo = 'error' THEN 1 ELSE 0 END) as errors
+      FROM logs_sistema
+    `
+    const statsResult = await query(statsQuery)
+    const stats = {
+      total: statsResult[0]?.total || 0,
+      logins: statsResult[0]?.logins || 0,
+      logouts: statsResult[0]?.logouts || 0,
+      creates: statsResult[0]?.creates || 0,
+      updates: statsResult[0]?.updates || 0,
+      deletes: statsResult[0]?.deletes || 0,
+      errors: statsResult[0]?.errors || 0,
+    }
 
     return NextResponse.json({
       success: true,
       data: logs,
+      stats,
       pagination: {
         page,
         limit,

@@ -7,19 +7,22 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ResizableTable, type ColumnDef } from "@/components/ui/resizable-table"
-import { UserCog, Search, Shield, User, Users, CheckCircle, XCircle, Crown, RefreshCw } from "lucide-react"
+import { UserCog, Search, Shield, User, Users, CheckCircle, XCircle, Crown, RefreshCw, ChevronRight } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { NovoUsuarioDialog } from "@/components/usuarios/novo-usuario-dialog"
 import { EditarUsuarioDialog } from "@/components/usuarios/editar-usuario-dialog"
 import { ExcluirUsuarioDialog } from "@/components/usuarios/excluir-usuario-dialog"
 import type { Usuario } from "@/types/usuario"
+import { cn } from "@/lib/utils"
 
 export default function UsuariosPage() {
   const [loading, setLoading] = useState(true)
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([])
   const [busca, setBusca] = useState("")
+  const [tipoCardFilter, setTipoCardFilter] = useState("todos")
+  const [expandedUsuarioId, setExpandedUsuarioId] = useState<number | null>(null)
   const [logoMenu, setLogoMenu] = useState<string | null>(null)
   const [usuarioEditando, setUsuarioEditando] = useState<Usuario | null>(null)
   const [usuarioExcluindo, setUsuarioExcluindo] = useState<Usuario | null>(null)
@@ -78,17 +81,29 @@ export default function UsuariosPage() {
   }, [])
 
   useEffect(() => {
-    if (busca.trim() === "") {
-      setUsuariosFiltrados(usuarios)
-    } else {
-      const filtrados = usuarios.filter(
-        (usuario) =>
-          usuario.nome.toLowerCase().includes(busca.toLowerCase()) ||
-          usuario.email.toLowerCase().includes(busca.toLowerCase()),
-      )
-      setUsuariosFiltrados(filtrados)
+    let filtrados = usuarios
+
+    // Filtro do Card
+    if (tipoCardFilter === "ativo") {
+      filtrados = filtrados.filter((u) => u.ativo === 1)
+    } else if (tipoCardFilter === "admin") {
+      filtrados = filtrados.filter((u) => u.tipo === "admin")
+    } else if (tipoCardFilter === "tecnico") {
+      filtrados = filtrados.filter((u) => u.tipo === "tecnico")
     }
-  }, [busca, usuarios])
+
+    // Filtro de Busca
+    if (busca.trim() !== "") {
+      const search = busca.toLowerCase()
+      filtrados = filtrados.filter(
+        (usuario) =>
+          usuario.nome.toLowerCase().includes(search) ||
+          usuario.email.toLowerCase().includes(search),
+      )
+    }
+
+    setUsuariosFiltrados(filtrados)
+  }, [busca, usuarios, tipoCardFilter])
 
   const getStatusBadge = (ativo: number) => {
     if (ativo === 1) {
@@ -240,6 +255,8 @@ export default function UsuariosPage() {
   const usuariosAdmin = usuarios.filter((u) => u.tipo === "admin").length
   const usuariosTecnicos = usuarios.filter((u) => u.tipo === "tecnico").length
 
+  const hasActiveFilterUsuarios = busca.trim() !== "" || tipoCardFilter !== "todos"
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-purple-50/30">
       <div className="flex items-center gap-3 mb-6">
@@ -255,7 +272,13 @@ export default function UsuariosPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+        <Card 
+          onClick={() => setTipoCardFilter("todos")}
+          className={cn(
+            "bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoCardFilter === "todos" ? "ring-2 ring-purple-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Total de Usuários</CardTitle>
             <Users className="h-3 w-3 lg:h-5 lg:w-5 text-purple-600" />
@@ -266,7 +289,13 @@ export default function UsuariosPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card 
+          onClick={() => setTipoCardFilter("ativo")}
+          className={cn(
+            "bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoCardFilter === "ativo" ? "ring-2 ring-green-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Usuários Ativos</CardTitle>
             <CheckCircle className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
@@ -277,7 +306,13 @@ export default function UsuariosPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card 
+          onClick={() => setTipoCardFilter("admin")}
+          className={cn(
+            "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoCardFilter === "admin" ? "ring-2 ring-blue-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Administradores</CardTitle>
             <Crown className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
@@ -288,7 +323,13 @@ export default function UsuariosPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+        <Card 
+          onClick={() => setTipoCardFilter("tecnico")}
+          className={cn(
+            "bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            tipoCardFilter === "tecnico" ? "ring-2 ring-yellow-500 ring-offset-1" : "opacity-85 hover:opacity-100"
+          )}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Técnicos</CardTitle>
             <Shield className="h-3 w-3 lg:h-5 lg:w-5 text-yellow-600" />
@@ -337,55 +378,142 @@ export default function UsuariosPage() {
             </div>
           </div>
 
-          <ResizableTable
-            storageKey="usuarios"
-            columns={[
-              { key: "nome",          label: "Usuário",       width: 200, sortable: true },
-              { key: "email",         label: "Email",         width: 200, sortable: true },
-              { key: "tipo",          label: "Tipo",          width: 110, sortable: true },
-              { key: "permissoes",    label: "Permissões",    width: 200, sortable: false },
-              { key: "ativo",         label: "Status",        width: 100, sortable: true },
-              { key: "ultimo_acesso", label: "Último Acesso", width: 160, sortable: true },
-              { key: "acoes",         label: "Ações",         width: 120, sortable: false, noResize: true },
-            ]}
-            data={usuariosFiltrados}
-            rowKey={(row) => row.id}
-            emptyState={
-              <div className="text-center py-8 text-muted-foreground">
-                {busca ? "Nenhum usuário encontrado" : "Nenhum usuário cadastrado"}
+          {/* DESKTOP VIEW */}
+          <div className="hidden md:block">
+            <ResizableTable
+              storageKey="usuarios"
+              columns={[
+                { key: "nome",          label: "Usuário",       width: 200, sortable: true },
+                { key: "email",         label: "Email",         width: 200, sortable: true },
+                { key: "tipo",          label: "Tipo",          width: 110, sortable: true },
+                { key: "permissoes",    label: "Permissões",    width: 200, sortable: false },
+                { key: "ativo",         label: "Status",        width: 100, sortable: true },
+                { key: "ultimo_acesso", label: "Último Acesso", width: 160, sortable: true },
+                { key: "acoes",         label: "Ações",         width: 120, sortable: false, noResize: true },
+              ]}
+              data={usuariosFiltrados}
+              rowKey={(row) => row.id}
+              emptyState={
+                <div className="text-center py-8 text-muted-foreground">
+                  {busca ? "Nenhum usuário encontrado" : "Nenhum usuário cadastrado"}
+                </div>
+              }
+              renderCell={(usuario, col) => {
+                switch (col) {
+                  case "nome":
+                    return (
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                          <AvatarImage src="/placeholder.svg" alt={usuario.nome} />
+                          <AvatarFallback>{usuario.nome.split(" ").map((n) => n[0]).join("").toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <span className="font-medium">{usuario.nome}</span>
+                          {usuario.telefone && <p className="text-xs text-muted-foreground">{usuario.telefone}</p>}
+                        </div>
+                      </div>
+                    )
+                  case "email": return <span className="truncate">{usuario.email}</span>
+                  case "tipo": return getTipoBadge(usuario.tipo)
+                  case "permissoes": return getPermissoesBadges(usuario.permissoes)
+                  case "ativo": return getStatusBadge(usuario.ativo)
+                  case "ultimo_acesso": return <span className="text-sm text-muted-foreground">{formatarData(usuario.ultimo_acesso)}</span>
+                  case "acoes":
+                    return (
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" className="hover:bg-blue-50 bg-transparent" onClick={() => handleEditar(usuario)}>Editar</Button>
+                        <Button variant="outline" size="sm" className="hover:bg-red-50 text-red-600 bg-transparent" onClick={() => handleExcluir(usuario)}>Excluir</Button>
+                      </div>
+                    )
+                  default: return null
+                }
+              }}
+            />
+          </div>
+
+          {/* MOBILE VIEW */}
+          <div className="md:hidden space-y-3">
+            {!hasActiveFilterUsuarios ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os usuários</h3>
+                <p className="text-sm text-gray-500">Digite na busca ou selecione um card de filtro para começar.</p>
               </div>
-            }
-            renderCell={(usuario, col) => {
-              switch (col) {
-                case "nome":
-                  return (
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8 flex-shrink-0">
+            ) : usuariosFiltrados.length === 0 ? (
+              <div className="text-center py-12">
+                <Users className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum usuário encontrado</h3>
+                <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+              </div>
+            ) : (
+              usuariosFiltrados.map((usuario) => {
+                const isExpanded = expandedUsuarioId === usuario.id
+                return (
+                  <div
+                    key={usuario.id}
+                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-white ${
+                      isExpanded ? "shadow-lg ring-1 ring-purple-200" : "shadow-sm hover:shadow-md"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setExpandedUsuarioId(prev => prev === usuario.id ? null : usuario.id)}
+                      className="w-full text-left p-3.5 flex items-center gap-3"
+                    >
+                      <Avatar className="h-10 w-10 flex-shrink-0">
                         <AvatarImage src="/placeholder.svg" alt={usuario.nome} />
                         <AvatarFallback>{usuario.nome.split(" ").map((n) => n[0]).join("").toUpperCase()}</AvatarFallback>
                       </Avatar>
-                      <div>
-                        <span className="font-medium">{usuario.nome}</span>
-                        {usuario.telefone && <p className="text-xs text-muted-foreground">{usuario.telefone}</p>}
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold text-sm text-gray-900 truncate block">
+                          {usuario.nome}
+                        </span>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          {getTipoBadge(usuario.tipo)}
+                          {getStatusBadge(usuario.ativo)}
+                        </div>
                       </div>
-                    </div>
-                  )
-                case "email": return <span className="truncate">{usuario.email}</span>
-                case "tipo": return getTipoBadge(usuario.tipo)
-                case "permissoes": return getPermissoesBadges(usuario.permissoes)
-                case "ativo": return getStatusBadge(usuario.ativo)
-                case "ultimo_acesso": return <span className="text-sm text-muted-foreground">{formatarData(usuario.ultimo_acesso)}</span>
-                case "acoes":
-                  return (
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="hover:bg-blue-50 bg-transparent" onClick={() => handleEditar(usuario)}>Editar</Button>
-                      <Button variant="outline" size="sm" className="hover:bg-red-50 text-red-600 bg-transparent" onClick={() => handleExcluir(usuario)}>Excluir</Button>
-                    </div>
-                  )
-                default: return null
-              }
-            }}
-          />
+                      <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                        isExpanded ? "rotate-90" : ""
+                      }`} />
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                        <div className="border-t border-gray-100 pt-3 space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-gray-50 rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Email</span>
+                              <p className="text-xs text-gray-800 truncate">{usuario.email}</p>
+                            </div>
+                            {usuario.telefone && (
+                              <div className="bg-gray-50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Telefone</span>
+                                <p className="text-xs text-gray-800">{usuario.telefone}</p>
+                              </div>
+                            )}
+                            <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Permissões</span>
+                              <div className="mt-1">{getPermissoesBadges(usuario.permissoes)}</div>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Último Acesso</span>
+                              <p className="text-xs text-gray-800">{formatarData(usuario.ultimo_acesso)}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 pt-2">
+                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-blue-50 bg-white" onClick={() => handleEditar(usuario)}>Editar</Button>
+                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-red-50 text-red-600 bg-white" onClick={() => handleExcluir(usuario)}>Excluir</Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            )}
+          </div>
         </CardContent>
       </Card>
 
