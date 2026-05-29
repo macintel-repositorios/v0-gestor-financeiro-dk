@@ -225,6 +225,58 @@ export default function RelatoriosPage() {
     window.print()
   }
 
+  const getNomeRelatorio = () => {
+    let nome = "Relatório "
+    
+    switch (tipoRelatorio) {
+      case "financeiro":
+        nome += "Financeiro de Boletos"
+        break
+      case "orcamentos":
+        nome += "de Orçamentos"
+        break
+      case "ordens_servico":
+        nome += "de Ordens de Serviço"
+        break
+      case "clientes":
+        nome += "de Clientes"
+        break
+      case "produtos":
+        nome += "de Produtos & Serviços"
+        break
+      default:
+        nome += "Geral"
+    }
+
+    if (status && status !== "todos") {
+      let statusLabel = status
+      if (status === "pago") statusLabel = "Pagos"
+      if (status === "vencidos") statusLabel = "Vencidos"
+      if (status === "vencer") statusLabel = "A Vencer"
+      if (status === "pendente") statusLabel = "Pendentes"
+      if (status === "aprovado") statusLabel = "Aprovados"
+      if (status === "rejeitado") statusLabel = "Rejeitados"
+      if (status === "finalizada") statusLabel = "Finalizadas"
+      if (status === "agendada") statusLabel = "Agendadas"
+      if (status === "em_andamento") statusLabel = "Em Andamento"
+      if (status === "cancelada") statusLabel = "Canceladas"
+      if (status === "rascunho") statusLabel = "Rascunhos"
+      if (status === "baixo_estoque") statusLabel = "Baixo Estoque"
+      if (status === "sem_estoque") statusLabel = "Sem Estoque"
+      
+      nome += ` (${statusLabel})`
+    }
+
+    if (clienteId && clienteId !== "todos") {
+      const clienteObj = clientes.find(c => c.id.toString() === clienteId)
+      if (clienteObj) {
+        nome += ` - Cliente: ${clienteObj.nome}`
+      }
+    }
+
+    return nome
+  }
+
   const exportToCSV = () => {
     if (!relatorioData) return
 
@@ -272,7 +324,8 @@ export default function RelatoriosPage() {
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.setAttribute("href", url)
-    link.setAttribute("download", `relatorio_${tipoRelatorio}_${new Date().toISOString().split("T")[0]}.csv`)
+    const fileName = `${getNomeRelatorio().toLowerCase().replace(/[^a-z0-9а-я]+/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`
+    link.setAttribute("download", fileName)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -1080,10 +1133,8 @@ export default function RelatoriosPage() {
             {/* Cabeçalho Timbrado */}
             <div className="flex items-center justify-between border-b-2 border-gray-800 pb-4 mb-6">
               <div className="flex items-center gap-3">
-                {logoMenu ? (
+                {logoMenu && (
                   <img src={logoMenu} alt="Logo Empresa" className="h-14 w-14 object-contain" />
-                ) : (
-                  <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center font-bold">OS</div>
                 )}
                 <div>
                   <h2 className="text-xl font-bold tracking-tight uppercase">Gestor Financeiro</h2>
@@ -1091,99 +1142,13 @@ export default function RelatoriosPage() {
                 </div>
               </div>
               <div className="text-right text-xs">
-                <p className="font-semibold text-gray-800">TIPO: Relatório de {tipoRelatorio.toUpperCase()}</p>
-                <p className="text-gray-600">Periodo: {dataInicio ? formatDate(dataInicio) : "-"} até {dataFim ? formatDate(dataFim) : "-"}</p>
+                <p className="font-bold text-gray-900 text-sm">{getNomeRelatorio()}</p>
+                <p className="text-gray-600 mt-1">Período: {dataInicio ? formatDate(dataInicio) : "-"} até {dataFim ? formatDate(dataFim) : "-"}</p>
               </div>
             </div>
 
-            {/* Sumário de Métricas para Impressão */}
-            <div className="mb-6">
-              <h3 className="text-sm font-bold uppercase text-gray-700 border-b border-gray-300 pb-1 mb-3">Resumo Executivo</h3>
-              
-              {tipoRelatorio === "financeiro" && (
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="border border-gray-300 p-2 rounded">
-                    <div className="text-[10px] uppercase text-gray-500 font-bold">Boletos Pagos</div>
-                    <div className="text-lg font-bold">{formatCurrency(relatorioData.estatisticas?.valorPago || 0)}</div>
-                    <div className="text-[10px] text-gray-600">({relatorioData.estatisticas?.pagos || 0} boletos)</div>
-                  </div>
-                  <div className="border border-gray-300 p-2 rounded">
-                    <div className="text-[10px] uppercase text-gray-500 font-bold">Boletos Vencidos</div>
-                    <div className="text-lg font-bold text-red-600">{formatCurrency(relatorioData.estatisticas?.valorVencido || 0)}</div>
-                    <div className="text-[10px] text-red-600">({relatorioData.estatisticas?.vencidos || 0} boletos)</div>
-                  </div>
-                  <div className="border border-gray-300 p-2 rounded">
-                    <div className="text-[10px] uppercase text-gray-500 font-bold">Pendentes / A Vencer</div>
-                    <div className="text-lg font-bold">{formatCurrency(relatorioData.estatisticas?.valorPendente || 0)}</div>
-                    <div className="text-[10px] text-gray-600">({relatorioData.estatisticas?.pendentes || 0} boletos)</div>
-                  </div>
-                </div>
-              )}
-
-              {tipoRelatorio === "orcamentos" && (
-                <div className="grid grid-cols-4 gap-4 text-center">
-                  <div className="border border-gray-300 p-2 rounded">
-                    <div className="text-[10px] uppercase text-gray-500 font-bold">Total Orçamentos</div>
-                    <div className="text-sm font-bold">{relatorioData.total || 0}</div>
-                    <div className="text-[10px] text-gray-600">{formatCurrency(relatorioData.valorTotal || 0)}</div>
-                  </div>
-                  <div className="border border-gray-300 p-2 rounded bg-gray-50">
-                    <div className="text-[10px] uppercase text-gray-500 font-bold">Aprovados</div>
-                    <div className="text-sm font-bold">{relatorioData.estatisticas?.aprovados || 0}</div>
-                  </div>
-                  <div className="border border-gray-300 p-2 rounded">
-                    <div className="text-[10px] uppercase text-gray-500 font-bold">Pendentes</div>
-                    <div className="text-sm font-bold">{relatorioData.estatisticas?.pendentes || 0}</div>
-                  </div>
-                  <div className="border border-gray-300 p-2 rounded">
-                    <div className="text-[10px] uppercase text-gray-500 font-bold">Rejeitados</div>
-                    <div className="text-sm font-bold">{relatorioData.estatisticas?.rejeitados || 0}</div>
-                  </div>
-                </div>
-              )}
-
-              {tipoRelatorio === "ordens_servico" && (
-                <div className="grid grid-cols-5 gap-2 text-center">
-                  <div className="border border-gray-300 p-1.5 rounded">
-                    <div className="text-[9px] uppercase text-gray-500 font-bold">Total OS</div>
-                    <div className="text-sm font-bold">{relatorioData.total || 0}</div>
-                  </div>
-                  <div className="border border-gray-300 p-1.5 rounded">
-                    <div className="text-[9px] uppercase text-gray-500 font-bold">Finalizadas</div>
-                    <div className="text-sm font-bold text-emerald-700">{relatorioData.estatisticas?.finalizadas || 0}</div>
-                  </div>
-                  <div className="border border-gray-300 p-1.5 rounded">
-                    <div className="text-[9px] uppercase text-gray-500 font-bold">Agendadas</div>
-                    <div className="text-sm font-bold">{relatorioData.estatisticas?.agendadas || 0}</div>
-                  </div>
-                  <div className="border border-gray-300 p-1.5 rounded">
-                    <div className="text-[9px] uppercase text-gray-500 font-bold">Em Andamento</div>
-                    <div className="text-sm font-bold">{relatorioData.estatisticas?.emAndamento || 0}</div>
-                  </div>
-                  <div className="border border-gray-300 p-1.5 rounded">
-                    <div className="text-[9px] uppercase text-gray-500 font-bold">Canceladas</div>
-                    <div className="text-sm font-bold text-red-600">{relatorioData.estatisticas?.canceladas || 0}</div>
-                  </div>
-                </div>
-              )}
-
-              {tipoRelatorio === "clientes" && (
-                <div className="border border-gray-300 p-3 rounded">
-                  <div className="text-[10px] uppercase text-gray-500 font-bold">Total de Clientes no Período</div>
-                  <div className="text-xl font-bold">{relatorioData.total || 0} clientes ativos</div>
-                </div>
-              )}
-
-              {tipoRelatorio === "produtos" && (
-                <div className="border border-gray-300 p-3 rounded">
-                  <div className="text-[10px] uppercase text-gray-500 font-bold">Total de Itens / Produtos no Catálogo</div>
-                  <div className="text-xl font-bold">{relatorioData.total || 0} itens listados</div>
-                </div>
-              )}
-            </div>
-
             {/* Listagem de Dados da Impressão */}
-            <div>
+            <div className="mb-6">
               <h3 className="text-sm font-bold uppercase text-gray-700 border-b border-gray-300 pb-1 mb-3">Detalhamento Analítico</h3>
               <table className="w-full text-left text-xs border border-gray-300 border-collapse">
                 <thead>
@@ -1283,6 +1248,92 @@ export default function RelatoriosPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Sumário de Métricas para Impressão (Resumo Executivo no final) */}
+            <div className="mb-6 page-break-inside-avoid">
+              <h3 className="text-sm font-bold uppercase text-gray-700 border-b border-gray-300 pb-1 mb-3">Resumo Executivo</h3>
+              
+              {tipoRelatorio === "financeiro" && (
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Boletos Pagos</div>
+                    <div className="text-lg font-bold">{formatCurrency(relatorioData.estatisticas?.valorPago || 0)}</div>
+                    <div className="text-[10px] text-gray-600">({relatorioData.estatisticas?.pagos || 0} boletos)</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Boletos Vencidos</div>
+                    <div className="text-lg font-bold text-red-600">{formatCurrency(relatorioData.estatisticas?.valorVencido || 0)}</div>
+                    <div className="text-[10px] text-red-600">({relatorioData.estatisticas?.vencidos || 0} boletos)</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Pendentes / A Vencer</div>
+                    <div className="text-lg font-bold">{formatCurrency(relatorioData.estatisticas?.valorPendente || 0)}</div>
+                    <div className="text-[10px] text-gray-600">({relatorioData.estatisticas?.pendentes || 0} boletos)</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "orcamentos" && (
+                <div className="grid grid-cols-4 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Total Orçamentos</div>
+                    <div className="text-sm font-bold">{relatorioData.total || 0}</div>
+                    <div className="text-[10px] text-gray-600">{formatCurrency(relatorioData.valorTotal || 0)}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded bg-gray-50">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Aprovados</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.aprovados || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Pendentes</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.pendentes || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Rejeitados</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.rejeitados || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "ordens_servico" && (
+                <div className="grid grid-cols-5 gap-2 text-center">
+                  <div className="border border-gray-300 p-1.5 rounded">
+                    <div className="text-[9px] uppercase text-gray-500 font-bold">Total OS</div>
+                    <div className="text-sm font-bold">{relatorioData.total || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-1.5 rounded">
+                    <div className="text-[9px] uppercase text-gray-500 font-bold">Finalizadas</div>
+                    <div className="text-sm font-bold text-emerald-700">{relatorioData.estatisticas?.finalizadas || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-1.5 rounded">
+                    <div className="text-[9px] uppercase text-gray-500 font-bold">Agendadas</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.agendadas || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-1.5 rounded">
+                    <div className="text-[9px] uppercase text-gray-500 font-bold">Em Andamento</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.emAndamento || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-1.5 rounded">
+                    <div className="text-[9px] uppercase text-gray-500 font-bold">Canceladas</div>
+                    <div className="text-sm font-bold text-red-600">{relatorioData.estatisticas?.canceladas || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "clientes" && (
+                <div className="border border-gray-300 p-3 rounded">
+                  <div className="text-[10px] uppercase text-gray-500 font-bold">Total de Clientes no Período</div>
+                  <div className="text-xl font-bold">{relatorioData.total || 0} clientes ativos</div>
+                </div>
+              )}
+
+              {tipoRelatorio === "produtos" && (
+                <div className="border border-gray-300 p-3 rounded">
+                  <div className="text-[10px] uppercase text-gray-500 font-bold">Total de Itens / Produtos no Catálogo</div>
+                  <div className="text-xl font-bold">{relatorioData.total || 0} itens listados</div>
+                </div>
+              )}
             </div>
 
             {/* Rodapé de Assinatura e Data */}
