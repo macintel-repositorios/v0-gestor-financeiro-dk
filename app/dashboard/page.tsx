@@ -504,7 +504,7 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <Card className="xl:col-span-2 bg-white/60 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl overflow-hidden">
+        <Card className="hidden md:block xl:col-span-2 bg-white/60 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 lg:p-6 rounded-t-2xl">
             <div className="flex items-center justify-between">
               <div>
