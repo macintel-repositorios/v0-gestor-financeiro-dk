@@ -352,6 +352,15 @@ export default function OrdemServicoPage() {
         </div>
       </div>
 
+      <div className="md:hidden">
+        <Link href="/ordem-servico/nova">
+          <Button className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-5 shadow-md rounded-xl">
+            <Plus className="h-5 w-5 mr-2" />
+            Nova Ordem de Serviço
+          </Button>
+        </Link>
+      </div>
+
       <div className="grid gap-2 md:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card
           className={`bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
