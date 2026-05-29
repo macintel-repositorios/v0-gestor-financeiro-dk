@@ -9,26 +9,41 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") || "todos"
     const clienteId = searchParams.get("clienteId")
     const categoriaId = searchParams.get("categoriaId")
+    const dataInicio = searchParams.get("dataInicio")
+    const dataFim = searchParams.get("dataFim")
 
-    console.log("Gerando relatório:", { tipo, periodo, status, clienteId, categoriaId })
+    console.log("Gerando relatório:", { tipo, periodo, status, clienteId, categoriaId, dataInicio, dataFim })
+
+    // Determinar datas de início e fim
+    let startDateStr = ""
+    let endDateStr = ""
+
+    if (dataInicio) {
+      startDateStr = dataInicio
+    } else {
+      const dataLimite = new Date()
+      dataLimite.setDate(dataLimite.getDate() - Number.parseInt(periodo))
+      startDateStr = dataLimite.toISOString().split("T")[0]
+    }
+
+    if (dataFim) {
+      endDateStr = dataFim
+    } else {
+      endDateStr = new Date().toISOString().split("T")[0]
+    }
 
     let data: any = {}
 
     try {
       switch (tipo) {
         case "dashboard":
-          // Dashboard geral - últimos X dias
-          const dataLimite = new Date()
-          dataLimite.setDate(dataLimite.getDate() - Number.parseInt(periodo))
-          const dataLimiteStr = dataLimite.toISOString().split("T")[0]
-
           // Total de clientes ativos (ativo = 1)
           const [clientesResult] = await pool.execute(`SELECT COUNT(*) as total FROM clientes WHERE ativo = 1`)
 
           // Total de produtos ativos (ativo = 1)
           const [produtosResult] = await pool.execute(`SELECT COUNT(*) as total FROM produtos WHERE ativo = 1`)
 
-          // Orçamentos no período (situacao em vez de status)
+          // Orçamentos no período
           const [orcamentosResult] = await pool.execute(
             `SELECT 
               COUNT(*) as total,
@@ -36,11 +51,12 @@ export async function GET(request: NextRequest) {
               COUNT(CASE WHEN situacao = 'pendente' THEN 1 END) as pendentes,
               COUNT(CASE WHEN situacao = 'rejeitado' THEN 1 END) as rejeitados,
               COALESCE(SUM(valor_total), 0) as valor_total
-            FROM orcamentos WHERE DATE(created_at) >= ?`,
-            [dataLimiteStr],
+            FROM orcamentos 
+            WHERE DATE(created_at) BETWEEN ? AND ?`,
+            [startDateStr, endDateStr],
           )
 
-          // Boletos no período (valor em vez de valor_total)
+          // Boletos no período
           const [boletosResult] = await pool.execute(
             `SELECT 
               COUNT(*) as total,
@@ -48,15 +64,16 @@ export async function GET(request: NextRequest) {
               COUNT(CASE WHEN status = 'pago' THEN 1 END) as pagos,
               COUNT(CASE WHEN status = 'pendente' AND data_vencimento < CURDATE() THEN 1 END) as vencidos,
               COUNT(CASE WHEN status = 'pendente' AND data_vencimento >= CURDATE() THEN 1 END) as pendentes
-            FROM boletos WHERE DATE(created_at) >= ?`,
-            [dataLimiteStr],
+            FROM boletos 
+            WHERE DATE(created_at) BETWEEN ? AND ?`,
+            [startDateStr, endDateStr],
           )
 
           const orcamentos = (orcamentosResult as any[])[0] || {}
           const boletos = (boletosResult as any[])[0] || {}
 
           data = {
-            periodo: `Últimos ${periodo} dias`,
+            periodo: dataInicio && dataFim ? `De ${dataInicio} até ${dataFim}` : `Últimos ${periodo} dias`,
             totalClientes: (clientesResult as any[])[0]?.total || 0,
             totalProdutos: (produtosResult as any[])[0]?.total || 0,
             orcamentos: {
@@ -85,11 +102,11 @@ export async function GET(request: NextRequest) {
               COUNT(DISTINCT b.id) as total_boletos,
               COALESCE(SUM(b.valor), 0) as valor_boletos
             FROM clientes c
-            LEFT JOIN orcamentos o ON c.id = o.cliente_id
-            LEFT JOIN boletos b ON c.id = b.cliente_id
+            LEFT JOIN orcamentos o ON c.id = o.cliente_id AND DATE(o.created_at) BETWEEN ? AND ?
+            LEFT JOIN boletos b ON c.id = b.cliente_id AND DATE(b.created_at) BETWEEN ? AND ?
             WHERE c.status = 1
           `
-          const clientesParams: any[] = []
+          const clientesParams: any[] = [startDateStr, endDateStr, startDateStr, endDateStr]
 
           if (clienteId && clienteId !== "todos") {
             clientesQuery += ` AND c.id = ?`
@@ -102,7 +119,7 @@ export async function GET(request: NextRequest) {
           data = {
             clientes: clientesData,
             total: (clientesData as any[]).length,
-            filtros: { clienteId },
+            filtros: { clienteId, dataInicio: startDateStr, dataFim: endDateStr },
           }
           break
 
@@ -116,9 +133,10 @@ export async function GET(request: NextRequest) {
               COALESCE(SUM(oi.valor_total), 0) as valor_vendido
             FROM produtos p
             LEFT JOIN orcamentos_itens oi ON p.id = oi.produto_id
+            LEFT JOIN orcamentos o ON oi.orcamento_numero = o.numero AND DATE(o.created_at) BETWEEN ? AND ?
             WHERE p.ativo = 1
           `
-          const produtosParams: any[] = []
+          const produtosParams: any[] = [startDateStr, endDateStr]
 
           if (categoriaId && categoriaId !== "todos") {
             produtosQuery += ` AND p.tipo = ?`
@@ -144,7 +162,7 @@ export async function GET(request: NextRequest) {
             produtos: produtosData,
             tipos: tiposData,
             total: (produtosData as any[]).length,
-            filtros: { categoriaId, status },
+            filtros: { categoriaId, status, dataInicio: startDateStr, dataFim: endDateStr },
           }
           break
 
@@ -158,9 +176,9 @@ export async function GET(request: NextRequest) {
             FROM orcamentos o
             LEFT JOIN clientes c ON o.cliente_id = c.id
             LEFT JOIN orcamentos_itens oi ON o.numero = oi.orcamento_numero
-            WHERE 1=1
+            WHERE DATE(o.created_at) BETWEEN ? AND ?
           `
-          const orcamentosParams: any[] = []
+          const orcamentosParams: any[] = [startDateStr, endDateStr]
 
           if (status && status !== "todos") {
             orcamentosQuery += ` AND o.situacao = ?`
@@ -191,7 +209,7 @@ export async function GET(request: NextRequest) {
             total: totalOrcamentos,
             valorTotal,
             estatisticas: { aprovados, pendentes, rejeitados },
-            filtros: { status, clienteId },
+            filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr },
           }
           break
 
@@ -204,9 +222,9 @@ export async function GET(request: NextRequest) {
               DATEDIFF(CURDATE(), b.data_vencimento) as dias_vencimento
             FROM boletos b
             LEFT JOIN clientes c ON b.cliente_id = c.id
-            WHERE 1=1
+            WHERE DATE(b.data_vencimento) BETWEEN ? AND ?
           `
-          const boletosParams: any[] = []
+          const boletosParams: any[] = [startDateStr, endDateStr]
 
           if (status && status !== "todos") {
             if (status === "vencidos") {
@@ -257,7 +275,69 @@ export async function GET(request: NextRequest) {
               pendentes: totalBoletos - boletosPagos,
               valorPendente: valorTotalBoletos - valorPago,
             },
-            filtros: { status, clienteId },
+            filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr },
+          }
+          break
+
+        case "ordens_servico":
+          let osQuery = `
+            SELECT 
+              os.id, os.numero, os.cliente_id, c.nome as cliente_nome,
+              os.tecnico_name, os.tipo_servico, os.data_atual, os.data_agendamento,
+              os.data_execucao, COALESCE(os.situacao, 'rascunho') as situacao, os.created_at
+            FROM ordens_servico os
+            LEFT JOIN clientes c ON os.cliente_id = c.id
+            WHERE (DATE(os.created_at) BETWEEN ? AND ? OR DATE(os.data_agendamento) BETWEEN ? AND ?)
+          `
+          const osParams: any[] = [startDateStr, endDateStr, startDateStr, endDateStr]
+
+          if (status && status !== "todos") {
+            osQuery += ` AND os.situacao = ?`
+            osParams.push(status)
+          }
+
+          if (clienteId && clienteId !== "todos") {
+            osQuery += ` AND os.cliente_id = ?`
+            osParams.push(clienteId)
+          }
+
+          osQuery += ` ORDER BY os.created_at DESC`
+
+          const [osData] = await pool.execute(osQuery, osParams)
+
+          // Calcular estatísticas
+          const totalOs = (osData as any[]).length
+          const finalizadas = (osData as any[]).filter(o => o.situacao === "finalizada").length
+          const agendadas = (osData as any[]).filter(o => o.situacao === "agendada").length
+          const emAndamento = (osData as any[]).filter(o => o.situacao === "em_andamento").length
+          const canceladas = (osData as any[]).filter(o => o.situacao === "cancelada").length
+          const rascunhos = (osData as any[]).filter(o => o.situacao === "rascunho").length
+
+          // Agrupamentos
+          const tiposOsMap: Record<string, number> = {}
+          const tecnicosOsMap: Record<string, number> = {}
+
+          ;(osData as any[]).forEach(o => {
+            const ts = o.tipo_servico || "NÃO ESPECIFICADO"
+            tiposOsMap[ts] = (tiposOsMap[ts] || 0) + 1
+
+            const tec = o.tecnico_name || "NÃO ESPECIFICADO"
+            tecnicosOsMap[tec] = (tecnicosOsMap[tec] || 0) + 1
+          })
+
+          data = {
+            ordensServico: osData,
+            total: totalOs,
+            estatisticas: {
+              finalizadas,
+              agendadas,
+              emAndamento,
+              canceladas,
+              rascunhos,
+              tipos: Object.entries(tiposOsMap).map(([nome, total]) => ({ nome, total })),
+              tecnicos: Object.entries(tecnicosOsMap).map(([nome, total]) => ({ nome, total }))
+            },
+            filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr }
           }
           break
 
@@ -271,7 +351,7 @@ export async function GET(request: NextRequest) {
         success: true,
         data,
         tipo,
-        filtros: { periodo, status, clienteId, categoriaId },
+        filtros: { periodo, status, clienteId, categoriaId, dataInicio: startDateStr, dataFim: endDateStr },
       })
     } catch (dbError) {
       console.error("Erro na consulta do banco:", dbError)
