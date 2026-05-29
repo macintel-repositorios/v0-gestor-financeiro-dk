@@ -505,31 +505,31 @@ export default function ProdutosPage() {
 
         <Tabs defaultValue="produtos" className="space-y-4">
           {/* Desktop: TabsList normal */}
-          <TabsList className="hidden md:grid w-full grid-cols-4 bg-white shadow-lg rounded-lg p-1">
+          <TabsList className="hidden md:grid w-full grid-cols-4 bg-white shadow-lg rounded-xl p-1.5 h-12">
             <TabsTrigger
               value="produtos"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white"
+              className="flex items-center gap-2 h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white rounded-lg transition-all"
             >
               <Package className="h-4 w-4" />
               Produtos
             </TabsTrigger>
             <TabsTrigger
               value="servicos"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white"
+              className="flex items-center gap-2 h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg transition-all"
             >
               <Wrench className="h-4 w-4" />
               Serviços
             </TabsTrigger>
             <TabsTrigger
               value="categorias"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+              className="flex items-center gap-2 h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg transition-all"
             >
               <Tag className="h-4 w-4" />
               Categorias
             </TabsTrigger>
             <TabsTrigger
               value="marcas"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white"
+              className="flex items-center gap-2 h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg transition-all"
             >
               <Award className="h-4 w-4" />
               Marcas
@@ -1016,7 +1016,7 @@ export default function ProdutosPage() {
 
             {/* ═══ DESKTOP VIEW — Tabela de serviços ═══ */}
             <Card className="border-0 shadow-lg bg-white hidden md:block">
-              <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
+              <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-white">Lista de Serviços</CardTitle>
