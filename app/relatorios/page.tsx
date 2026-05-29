@@ -857,69 +857,99 @@ export default function RelatoriosPage() {
         {/* Estilo Global de Impressão */}
         <style>{`
           @media print {
-            /* Resetar fundos e forçar cores padrão */
+            /* Definir margens e tamanho do papel A4 */
+            @page {
+              size: A4 portrait;
+              margin: 20mm 15mm 20mm 15mm;
+            }
+
+            /* Resetar fundos e forçar cores padrão de impressão */
             html, body {
               background: white !important;
               color: black !important;
               height: auto !important;
               overflow: visible !important;
+              font-family: 'Inter', sans-serif !important;
             }
 
-            /* Ocultar elementos desnecessários do app e a própria visualização em tela */
+            /* Ocultar elementos de navegação, cabeçalhos do app, botões e sidebar */
             aside,
             header,
             .no-print,
             [role="navigation"],
             button,
-            .fixed {
+            .fixed,
+            #sidebar-root {
               display: none !important;
             }
 
-            /* Resetar estrutura flex e containers de scroll para fluxo vertical contínuo */
-            .flex,
-            .flex-1,
-            main,
-            .mx-auto,
-            .max-w-7xl,
-            div:not(#printable-report-area):not(#printable-report-area *) {
+            /* Resetar a estrutura de layout do Next.js/Tailwind para fluxo natural vertical */
+            html, 
+            body, 
+            #__next, 
+            div.flex.h-screen, 
+            div.flex-1.flex.flex-col, 
+            main.flex-1, 
+            div.mx-auto, 
+            div.max-w-7xl {
               height: auto !important;
               min-height: 0 !important;
               overflow: visible !important;
+              position: static !important;
               display: block !important;
               padding: 0 !important;
               margin: 0 !important;
               border: none !important;
               box-shadow: none !important;
+              background: transparent !important;
             }
 
-            /* Forçar a exibição do bloco de impressão */
+            /* Área principal do relatório impresso */
             #printable-report-area {
               display: block !important;
-              position: absolute !important;
-              left: 0 !important;
-              top: 0 !important;
               width: 100% !important;
-              z-index: 99999 !important;
               background: white !important;
               color: black !important;
               padding: 0 !important;
               margin: 0 !important;
             }
 
-            /* Forçar exibição de tabelas completas */
-            table {
-              width: 100% !important;
-              border-collapse: collapse !important;
-              page-break-inside: auto !important;
+            /* Garantir repetição do cabeçalho da tabela em cada página */
+            thead {
+              display: table-header-group !important;
             }
+            
+            /* Evitar quebras de página no meio de linhas de tabela ou blocos de métricas */
             tr {
               page-break-inside: avoid !important;
               page-break-after: auto !important;
             }
-            th, td {
-              border: 1px solid #ddd !important;
-              padding: 6px !important;
-              text-align: left !important;
+            
+            .grid, .card, .border {
+              page-break-inside: avoid !important;
+            }
+
+            /* Tabelas profissionais com linhas nítidas e cinza suave para leitura */
+            table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+              margin-top: 15px !important;
+              margin-bottom: 15px !important;
+            }
+            th {
+              background-color: #f1f5f9 !important;
+              color: #1e293b !important;
+              font-weight: bold !important;
+              border: 1px solid #cbd5e1 !important;
+              padding: 8px 10px !important;
+              font-size: 10px !important;
+              text-transform: uppercase !important;
+            }
+            td {
+              border: 1px solid #cbd5e1 !important;
+              padding: 8px 10px !important;
+              font-size: 10px !important;
+              color: #334155 !important;
             }
           }
         `}</style>
