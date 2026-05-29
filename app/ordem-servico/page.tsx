@@ -330,6 +330,8 @@ export default function OrdemServicoPage() {
     )
   }
 
+  const hasActiveFilter = searchInput.trim() !== "" || situacaoFilter !== "todas" || tipoServicoFilter !== "todos" || periodoFilter !== "todos"
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30">
       <div className="flex items-center gap-3 mb-4 md:mb-6">
@@ -604,8 +606,24 @@ export default function OrdemServicoPage() {
           </div>
 
           <div className="md:hidden space-y-4">
-            {ordensFiltered.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 text-sm">Nenhuma ordem de serviço encontrada</div>
+            {hasActiveFilter && (
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider px-1">
+                {ordensFiltered.length} ordem{ordensFiltered.length !== 1 ? "s" : ""} de serviço encontrada{ordensFiltered.length !== 1 ? "s" : ""}
+              </p>
+            )}
+
+            {!hasActiveFilter ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver as ordens de serviço</h3>
+                <p className="text-sm text-gray-500">Selecione uma situação, tipo de serviço, período ou digite na busca para começar.</p>
+              </div>
+            ) : ordensFiltered.length === 0 ? (
+              <div className="text-center py-12">
+                <Wrench className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <h3 className="text-base font-medium text-gray-900 mb-1">Nenhuma ordem de serviço encontrada</h3>
+                <p className="text-sm text-gray-500 mb-4">Tente ajustar os filtros de busca</p>
+              </div>
             ) : (
               ordensFiltered.map((os) => (
                 <Card
