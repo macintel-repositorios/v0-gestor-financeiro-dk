@@ -224,7 +224,12 @@ export default function RelatoriosPage() {
   }
 
   const handlePrint = () => {
+    const originalTitle = document.title
+    document.title = getNomeRelatorio()
     window.print()
+    setTimeout(() => {
+      document.title = originalTitle
+    }, 500)
   }
 
   const getNomeRelatorio = () => {
@@ -1001,7 +1006,7 @@ export default function RelatoriosPage() {
             /* Rodapé fixo de página impresso */
             .print-footer {
               position: fixed !important;
-              bottom: -15mm !important;
+              bottom: 0 !important;
               left: 0 !important;
               width: 100% !important;
               background: white !important;
@@ -1354,9 +1359,9 @@ export default function RelatoriosPage() {
               </div>
             </div>
             {/* Rodapé fixo para controle de páginas (impressão) */}
-            <div className="print-footer hidden print:block text-slate-500">
+            <div className="print-footer hidden print:block text-slate-500 fixed bottom-0 w-full left-0 px-8">
               <div className="border-t border-gray-300 pt-2 flex justify-between items-center text-[9px] font-sans">
-                <div>Gestor Financeiro - Relatório de {tipoRelatorio.toUpperCase()}</div>
+                <div>Gestor Financeiro - {getNomeRelatorio()}</div>
                 <div className="print-page-number"></div>
               </div>
             </div>
