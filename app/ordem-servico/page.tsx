@@ -23,6 +23,7 @@ import {
   User,
   FileText,
   CalendarRange,
+  ChevronLeft,
   ChevronRight,
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -38,6 +39,7 @@ export default function OrdemServicoPage() {
   const [searchInput, setSearchInput] = useState("")
   const [loteDialogOpen, setLoteDialogOpen] = useState(false)
   const [expandedOrdemId, setExpandedOrdemId] = useState<number | null>(null)
+  const [pageIndex, setPageIndex] = useState(0)
 
   const [situacaoFilter, setSituacaoFilter] = useState("todas")
   const [tipoServicoFilter, setTipoServicoFilter] = useState("todos")
@@ -97,8 +99,8 @@ export default function OrdemServicoPage() {
             let trimestreCalculo = trimestreAnterior
 
             if (trimestreAnterior < 0) {
-              anoTrimestre = hoje.getFullYear() - 1
-              trimestreCalculo = 3
+               anoTrimestre = hoje.getFullYear() - 1
+               trimestreCalculo = 3
             }
 
             const inicioTrimestre = new Date(anoTrimestre, trimestreCalculo * 3, 1)
@@ -113,8 +115,8 @@ export default function OrdemServicoPage() {
             let semestreCalculo = semestreAnterior
 
             if (semestreAnterior < 0) {
-              anoSemestre = hoje.getFullYear() - 1
-              semestreCalculo = 1
+               anoSemestre = hoje.getFullYear() - 1
+               semestreCalculo = 1
             }
 
             const inicioSemestre = new Date(anoSemestre, semestreCalculo * 6, 1)
@@ -159,9 +161,17 @@ export default function OrdemServicoPage() {
     return filtered
   }, [ordensServico, searchInput, situacaoFilter, tipoServicoFilter, periodoFilter])
 
+  const paginatedOrdens = useMemo(() => {
+    return ordensFiltered.slice(pageIndex * 10, (pageIndex + 1) * 10)
+  }, [ordensFiltered, pageIndex])
+
   useEffect(() => {
     carregarDados()
   }, [])
+
+  useEffect(() => {
+    setPageIndex(0)
+  }, [searchInput, situacaoFilter, tipoServicoFilter, periodoFilter])
 
   const carregarDados = async () => {
     try {
@@ -236,49 +246,49 @@ export default function OrdemServicoPage() {
     switch (situacao) {
       case "rascunho":
         return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">
+          <Badge className="bg-muted text-muted-foreground border-0">
             <AlertCircle className="w-3 h-3 mr-1" />
             Rascunho
           </Badge>
         )
       case "aberta":
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+          <Badge className="bg-yellow-100 dark:bg-yellow-950/50 text-yellow-800 dark:text-yellow-300 border-0">
             <Clock className="w-3 h-3 mr-1" />
             Aberta
           </Badge>
         )
       case "agendada":
         return (
-          <Badge className="bg-cyan-100 text-cyan-800 hover:bg-cyan-200">
+          <Badge className="bg-cyan-100 dark:bg-cyan-950/50 text-cyan-800 dark:text-cyan-300 border-0">
             <Calendar className="w-3 h-3 mr-1" />
             Agendada
           </Badge>
         )
       case "em_andamento":
         return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+          <Badge className="bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border-0">
             <PlayCircle className="w-3 h-3 mr-1" />
             Em Andamento
           </Badge>
         )
       case "concluida":
         return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+          <Badge className="bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300 border-0">
             <CheckCircle className="w-3 h-3 mr-1" />
             Concluída
           </Badge>
         )
       case "cancelada":
         return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">
+          <Badge className="bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300 border-0">
             <XCircle className="w-3 h-3 mr-1" />
             Cancelada
           </Badge>
         )
       default:
         return (
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="border-0">
             <AlertCircle className="w-3 h-3 mr-1" />
             Indefinido
           </Badge>
@@ -303,11 +313,9 @@ export default function OrdemServicoPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30">
-        <div className="flex items-center gap-3 mb-6">
-          {logoMenu && (
-            <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />
-          )}
+      <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+        <div className="flex items-center gap-4 mb-6">
+          <Skeleton className="h-10 w-10 rounded-lg" />
           <div>
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-4 w-64 mt-2" />
@@ -315,8 +323,8 @@ export default function OrdemServicoPage() {
         </div>
 
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <Card key={i}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="border border-border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-4" />
@@ -335,191 +343,203 @@ export default function OrdemServicoPage() {
   const hasActiveFilter = searchInput.trim() !== "" || situacaoFilter !== "todas" || tipoServicoFilter !== "todos" || periodoFilter !== "todos"
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30">
-      <div className="flex items-center gap-3 mb-4 md:mb-6">
-        {logoMenu && (
-          <img
-            src={logoMenu || "/placeholder.svg"}
-            alt="Logo"
-            className="h-6 w-6 md:h-8 md:w-8 object-contain rounded"
-          />
-        )}
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-            Ordem de Serviço
-          </h2>
-          <p className="text-xs md:text-sm text-muted-foreground">Gerencie ordens de serviço e acompanhe execução</p>
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          {logoMenu && (
+            <img
+              src={logoMenu || "/placeholder.svg"}
+              alt="Logo"
+              className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
+            />
+          )}
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+              Ordem de Serviço
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5 font-medium font-medium">Gerencie ordens de serviço e acompanhe execução</p>
+          </div>
+        </div>
+        <div className="hidden md:block">
+          <Link href="/ordem-servico/nova">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all">
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Ordem de Serviço
+            </Button>
+          </Link>
         </div>
       </div>
 
       <div className="md:hidden">
         <Link href="/ordem-servico/nova">
-          <Button className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-5 shadow-md rounded-xl">
+          <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-5 shadow-xs rounded-xl">
             <Plus className="h-5 w-5 mr-2" />
             Nova Ordem de Serviço
           </Button>
         </Link>
       </div>
 
-      <div className="grid gap-2 md:gap-4 grid-cols-2 lg:grid-cols-4">
+      {/* Stats Cards */}
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card
-          className={`bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
-            situacaoFilter === "todas" ? "ring-2 ring-orange-500" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "todas" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handleCardClick("todas")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium text-orange-700">Total</CardTitle>
-            <Wrench className="h-3 w-3 md:h-4 md:w-4 text-orange-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total</CardTitle>
+            <Wrench className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            <div className="text-xl md:text-2xl font-bold text-orange-800">{stats.total}</div>
-            <p className="text-[10px] md:text-xs text-orange-600">ordens cadastradas</p>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.total}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">ordens cadastradas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
-            situacaoFilter === "aberta" ? "ring-2 ring-yellow-500" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "aberta" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handleCardClick("aberta")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium text-yellow-700">Abertas</CardTitle>
-            <Clock className="h-3 w-3 md:h-4 md:w-4 text-yellow-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Abertas</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            <div className="text-xl md:text-2xl font-bold text-yellow-800">{stats.abertas}</div>
-            <p className="text-[10px] md:text-xs text-yellow-600">aguardando</p>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.abertas}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">aguardando</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
-            situacaoFilter === "agendada" ? "ring-2 ring-cyan-500" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "agendada" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handleCardClick("agendada")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium text-cyan-700">Agendadas</CardTitle>
-            <Calendar className="h-3 w-3 md:h-4 md:w-4 text-cyan-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Agendadas</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            <div className="text-xl md:text-2xl font-bold text-cyan-800">{stats.agendadas}</div>
-            <p className="text-[10px] md:text-xs text-cyan-600">visitas agendadas</p>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.agendadas}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">visitas agendadas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
-            situacaoFilter === "em_andamento" ? "ring-2 ring-blue-500" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "em_andamento" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handleCardClick("em_andamento")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium text-blue-700">Andamento</CardTitle>
-            <PlayCircle className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Andamento</CardTitle>
+            <PlayCircle className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            <div className="text-xl md:text-2xl font-bold text-blue-800">{stats.em_andamento}</div>
-            <p className="text-[10px] md:text-xs text-blue-600">executando</p>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.em_andamento}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">executando</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
-            situacaoFilter === "concluida" ? "ring-2 ring-green-500" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "concluida" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handleCardClick("concluida")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium text-green-700">Concluídas</CardTitle>
-            <CheckCircle className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Concluídas</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            <div className="text-xl md:text-2xl font-bold text-green-800">{stats.concluidas}</div>
-            <p className="text-[10px] md:text-xs text-green-600">finalizadas</p>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.concluidas}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">finalizadas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
-            tipoServicoFilter === "preventiva" ? "ring-2 ring-purple-500" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            tipoServicoFilter === "preventiva" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handleTipoServicoCardClick("preventiva")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium text-purple-700">Preventivas</CardTitle>
-            <Wrench className="h-3 w-3 md:h-4 md:w-4 text-purple-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Preventivas</CardTitle>
+            <Wrench className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            <div className="text-xl md:text-2xl font-bold text-purple-800">{stats.preventivas}</div>
-            <p className="text-[10px] md:text-xs text-purple-600">manutenções preventivas</p>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.preventivas}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">manutenções preventivas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
-            tipoServicoFilter === "manutencao" ? "ring-2 ring-indigo-500" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            tipoServicoFilter === "manutencao" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handleTipoServicoCardClick("manutencao")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium text-indigo-700">Manutenções</CardTitle>
-            <Wrench className="h-3 w-3 md:h-4 md:w-4 text-indigo-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Manutenções</CardTitle>
+            <Wrench className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
-            <div className="text-xl md:text-2xl font-bold text-indigo-800">{stats.manutencoes}</div>
-            <p className="text-[10px] md:text-xs text-indigo-600">manutenções corretivas</p>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.manutencoes}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">manutenções corretivas</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-white/60 backdrop-blur-sm border-white/20 shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg p-4 lg:p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Wrench className="h-5 w-5" />
-              <div>
-                <CardTitle className="text-base md:text-lg">Gestão de Ordens de Serviço</CardTitle>
-                <CardDescription className="text-orange-100 text-xs md:text-sm hidden md:block">
-                  Gerencie e acompanhe todas as ordens de serviço
-                </CardDescription>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setLoteDialogOpen(true)}
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-                size="sm"
-              >
-                <CalendarRange className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Preventivas em Lote</span>
-              </Button>
-              <Link href="/ordem-servico/nova">
-                <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30" size="sm">
-                  <Plus className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Nova OS</span>
-                </Button>
-              </Link>
+      {/* OS Management Card */}
+      <Card className="border border-border shadow-sm overflow-hidden bg-card">
+        <CardHeader className="bg-muted/40 border-b border-border p-4 flex flex-row items-center justify-between space-y-0">
+          <div className="flex items-center gap-2">
+            <Wrench className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-sm font-semibold text-foreground">Gestão de Ordens de Serviço</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5 hidden md:block">
+                Gerencie e acompanhe todas as ordens de serviço
+              </CardDescription>
             </div>
           </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setLoteDialogOpen(true)}
+              variant="outline"
+              size="sm"
+              className="border-border bg-card hover:bg-muted text-foreground h-8 px-3 text-xs"
+            >
+              <CalendarRange className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Preventivas em Lote</span>
+            </Button>
+            <Link href="/ordem-servico/nova">
+              <Button variant="outline" size="sm" className="border-border bg-card hover:bg-muted text-foreground h-8 px-3 text-xs">
+                <Plus className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Nova OS</span>
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-2 mb-4">
+        <CardContent className="p-4 md:p-6 pt-4">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/60" />
               <Input
                 placeholder="Buscar..."
-                className="pl-8 text-sm"
+                className="pl-10 text-sm border-border bg-background text-foreground"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <Clock className="h-4 w-4 text-muted-foreground/60 flex-shrink-0" />
               <Select value={situacaoFilter} onValueChange={setSituacaoFilter}>
-                <SelectTrigger className="w-full md:w-48 text-sm">
+                <SelectTrigger className="w-full md:w-48 text-sm border-border bg-background text-foreground">
                   <SelectValue placeholder="Situação" />
                 </SelectTrigger>
                 <SelectContent>
@@ -532,9 +552,9 @@ export default function OrdemServicoPage() {
               </Select>
             </div>
             <div className="flex items-center gap-2">
-              <Wrench className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <Wrench className="h-4 w-4 text-muted-foreground/60 flex-shrink-0" />
               <Select value={tipoServicoFilter} onValueChange={setTipoServicoFilter}>
-                <SelectTrigger className="w-full md:w-48 text-sm">
+                <SelectTrigger className="w-full md:w-48 text-sm border-border bg-background text-foreground">
                   <SelectValue placeholder="Tipo de Serviço" />
                 </SelectTrigger>
                 <SelectContent>
@@ -547,9 +567,9 @@ export default function OrdemServicoPage() {
               </Select>
             </div>
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <Calendar className="h-4 w-4 text-muted-foreground/60 flex-shrink-0" />
               <Select value={periodoFilter} onValueChange={setPeriodoFilter}>
-                <SelectTrigger className="w-full md:w-48 text-sm">
+                <SelectTrigger className="w-full md:w-48 text-sm border-border bg-background text-foreground">
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
                 <SelectContent>
@@ -564,7 +584,8 @@ export default function OrdemServicoPage() {
             </div>
           </div>
 
-          <div className="hidden md:block rounded-lg border border-slate-200 overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
             <ResizableTable<OrdemServico>
               storageKey="ordem-servico-lista"
               columns={[
@@ -576,36 +597,36 @@ export default function OrdemServicoPage() {
                 { key: "situacao",    label: "Situação",         width: 130, sortable: true },
                 { key: "acoes",       label: "Ações",            width: 120, sortable: false, noResize: true },
               ]}
-              data={ordensFiltered}
+              data={paginatedOrdens}
               rowKey={(row) => row.id}
               emptyState={
-                <div className="text-center py-8 text-gray-500">Nenhuma ordem de serviço encontrada</div>
+                <div className="text-center py-8 text-muted-foreground/60">Nenhuma ordem de serviço encontrada</div>
               }
               renderCell={(os, col) => {
                 switch (col) {
-                  case "numero":      return <span className="font-medium">{os.numero}</span>
-                  case "cliente":     return <span>{os.cliente_nome}</span>
-                  case "tipo_servico":return <span>{getTipoServicoLabel(os.tipo_servico)}</span>
-                  case "tecnico":     return <span>{os.tecnico_name}</span>
+                  case "numero":      return <span className="font-medium text-foreground">{os.numero}</span>
+                  case "cliente":     return <span className="text-foreground">{os.cliente_nome}</span>
+                  case "tipo_servico":return <span className="text-foreground">{getTipoServicoLabel(os.tipo_servico)}</span>
+                  case "tecnico":     return <span className="text-foreground">{os.tecnico_name}</span>
                   case "data":
                     return (
-                      <span>{os.data_atual ? new Date(os.data_atual.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"}</span>
+                      <span className="text-foreground">{os.data_atual ? new Date(os.data_atual.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"}</span>
                     )
                   case "situacao":    return getStatusBadge(os.situacao)
                   case "acoes":
                     return (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Link href={`/ordem-servico/${os.id}`}>
-                          <Button variant="outline" size="sm" className="hover:bg-blue-50 bg-transparent">
+                          <Button variant="outline" size="sm" className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
                         <Link href={`/ordem-servico/${os.id}/editar`}>
-                          <Button variant="outline" size="sm" className="hover:bg-green-50 bg-transparent">
+                          <Button variant="outline" size="sm" className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
                             <Edit className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button variant="outline" size="sm" className="hover:bg-red-50 text-red-600 bg-transparent" onClick={() => handleDelete(os.id)}>
+                        <Button variant="outline" size="sm" className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir" onClick={() => handleDelete(os.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -614,26 +635,57 @@ export default function OrdemServicoPage() {
                 }
               }}
             />
+
+            {/* Pagination Controls */}
+            {ordensFiltered.length > 0 && (
+              <div className="p-4 border-t border-border/40 flex items-center justify-between gap-4">
+                <div className="text-[10px] sm:text-xs text-muted-foreground">
+                  Mostrando <span className="font-medium text-foreground">{paginatedOrdens.length}</span> de{" "}
+                  <span className="font-medium text-foreground">{ordensFiltered.length}</span> registros
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
+                    disabled={pageIndex === 0}
+                    className="h-8 px-2 text-xs border-border bg-card"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPageIndex(prev => prev + 1)}
+                    disabled={(pageIndex + 1) * 10 >= ordensFiltered.length}
+                    className="h-8 px-2 text-xs border-border bg-card"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* Mobile View */}
           <div className="md:hidden space-y-4">
             {hasActiveFilter && (
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider px-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
                 {ordensFiltered.length} ordem{ordensFiltered.length !== 1 ? "s" : ""} de serviço encontrada{ordensFiltered.length !== 1 ? "s" : ""}
               </p>
             )}
 
             {!hasActiveFilter ? (
-              <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
-                <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver as ordens de serviço</h3>
-                <p className="text-sm text-gray-500">Selecione uma situação, tipo de serviço, período ou digite na busca para começar.</p>
+              <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-xs">
+                <Search className="mx-auto h-12 w-12 text-muted-foreground/60 mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Busque ou filtre para ver as ordens de serviço</h3>
+                <p className="text-sm text-muted-foreground">Selecione uma situação, tipo de serviço, período ou digite na busca para começar.</p>
               </div>
             ) : ordensFiltered.length === 0 ? (
               <div className="text-center py-12">
-                <Wrench className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                <h3 className="text-base font-medium text-gray-900 mb-1">Nenhuma ordem de serviço encontrada</h3>
-                <p className="text-sm text-gray-500 mb-4">Tente ajustar os filtros de busca</p>
+                <Wrench className="mx-auto h-12 w-12 text-muted-foreground/60 mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Nenhuma ordem de serviço encontrada</h3>
+                <p className="text-sm text-muted-foreground mb-4">Tente ajustar os filtros de busca</p>
               </div>
             ) : (
               ordensFiltered.map((os) => {
@@ -642,67 +694,67 @@ export default function OrdemServicoPage() {
                 return (
                   <div
                     key={os.id}
-                    className={`rounded-xl border transition-all duration-200 overflow-hidden border-gray-200 bg-white ${
-                      isExpanded ? "shadow-lg ring-1 ring-orange-200" : "shadow-sm hover:shadow-md"
+                    className={`rounded-xl border transition-all duration-200 overflow-hidden border-border bg-card ${
+                      isExpanded ? "shadow-lg ring-1 ring-indigo-500" : "shadow-xs hover:shadow-md"
                     }`}
                   >
                     <button
                       type="button"
                       onClick={() => setExpandedOrdemId(isExpanded ? null : os.id)}
-                      className="w-full text-left p-3.5 flex items-center gap-3"
+                      className="w-full text-left p-3.5 flex items-center gap-3 bg-transparent text-foreground"
                     >
-                      {/* Ícone */}
-                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-orange-50 text-orange-700`}>
+                      {/* Icon */}
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300`}>
                         <FileText className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-semibold text-sm text-gray-900 truncate block">OS {os.numero}</span>
-                        <span className="text-[11px] text-gray-500 truncate block font-medium mt-0.5">{os.cliente_nome}</span>
+                        <span className="font-semibold text-sm text-foreground truncate block">OS {os.numero}</span>
+                        <span className="text-[11px] text-muted-foreground truncate block font-medium mt-0.5">{os.cliente_nome}</span>
                       </div>
                       <div className="text-right flex-shrink-0 mr-1">
                         {getStatusBadge(os.situacao)}
                       </div>
-                      <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground/60 transition-transform duration-200 flex-shrink-0 ${
                         isExpanded ? "rotate-90" : ""
                       }`} />
                     </button>
 
                     {isExpanded && (
                       <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                        <div className="border-t border-gray-100 pt-3 space-y-2">
+                        <div className="border-t border-border/40 pt-3 space-y-2">
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                            <div className="bg-muted/40 rounded-lg p-2.5 col-span-2">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <User className="h-3 w-3 text-gray-400" />
-                                <span className="text-[10px] font-medium text-gray-500 uppercase">Cliente</span>
+                                <User className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase">Cliente</span>
                               </div>
-                              <p className="text-xs font-semibold text-gray-800 truncate">{os.cliente_nome}</p>
+                              <p className="text-xs font-semibold text-foreground truncate">{os.cliente_nome}</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-2.5">
+                            <div className="bg-muted/40 rounded-lg p-2.5">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <Wrench className="h-3 w-3 text-gray-400" />
-                                <span className="text-[10px] font-medium text-gray-500 uppercase">Tipo de Serviço</span>
+                                <Wrench className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase">Tipo de Serviço</span>
                               </div>
-                              <p className="text-xs text-gray-800 truncate">{getTipoServicoLabel(os.tipo_servico)}</p>
+                              <p className="text-xs text-foreground truncate">{getTipoServicoLabel(os.tipo_servico)}</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-2.5">
+                            <div className="bg-muted/40 rounded-lg p-2.5">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <Calendar className="h-3 w-3 text-gray-400" />
-                                <span className="text-[10px] font-medium text-gray-500 uppercase">Data</span>
+                                <Calendar className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase">Data</span>
                               </div>
-                              <p className="text-xs text-gray-800">
+                              <p className="text-xs text-foreground">
                                 {os.data_atual
                                   ? new Date(os.data_atual.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR")
                                   : "Não informada"}
                               </p>
                             </div>
                             {os.tecnico_name && (
-                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
+                              <div className="bg-muted/40 rounded-lg p-2.5 col-span-2">
                                 <div className="flex items-center gap-1.5 mb-1">
-                                  <User className="h-3 w-3 text-gray-400" />
-                                  <span className="text-[10px] font-medium text-gray-500 uppercase">Técnico</span>
+                                  <User className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase">Técnico</span>
                                 </div>
-                                <p className="text-xs text-gray-800 truncate">{os.tecnico_name}</p>
+                                <p className="text-xs text-foreground truncate">{os.tecnico_name}</p>
                               </div>
                             )}
                           </div>
@@ -711,7 +763,7 @@ export default function OrdemServicoPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-full h-9 text-xs font-medium text-blue-600 border-blue-200 hover:bg-blue-50"
+                                className="w-full h-9 text-xs font-medium text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 bg-transparent hover:bg-blue-500/10"
                               >
                                 <Eye className="h-3.5 w-3.5 mr-1.5" />
                                 Visualizar
@@ -721,7 +773,7 @@ export default function OrdemServicoPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-full h-9 text-xs font-medium text-green-600 border-green-200 hover:bg-green-50"
+                                className="w-full h-9 text-xs font-medium text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/50 bg-transparent hover:bg-green-500/10"
                               >
                                 <Edit className="h-3.5 w-3.5 mr-1.5" />
                                 Editar
@@ -730,7 +782,7 @@ export default function OrdemServicoPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-9 text-xs font-medium text-red-600 border-red-200 hover:bg-red-50 bg-transparent px-3"
+                              className="h-9 text-xs font-medium text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50 bg-transparent hover:bg-red-500/10 px-3"
                               onClick={() => handleDelete(os.id)}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
