@@ -8,6 +8,7 @@ import { Search, Users, Building2, Phone, Mail, Edit, Trash2, Filter, Plus, MapP
 import { ResizableTable, type ColumnDef } from "@/components/ui/resizable-table"
 import { formatCNPJ, formatCPF, formatPhone } from "@/lib/utils"
 import type { Cliente } from "@/types/database"
+import { ClienteFormDialog } from "@/components/cliente-form-dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,7 @@ export default function ClientesPage() {
   const [logoMenu, setLogoMenu] = useState<string>("")
   const [expandedClientId, setExpandedClientId] = useState<string | null>(null)
   const [pageIndex, setPageIndex] = useState(0)
+  const [isClienteFormOpen, setIsClienteFormOpen] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -282,7 +284,7 @@ export default function ClientesPage() {
   }
 
   const handleNovoCliente = () => {
-    router.push("/clientes/novo")
+    setIsClienteFormOpen(true)
   }
 
   const toggleExpandClient = (id: string) => {
@@ -898,6 +900,12 @@ export default function ClientesPage() {
             )}
           </CardContent>
         </Card>
+        <ClienteFormDialog
+          open={isClienteFormOpen}
+          onOpenChange={setIsClienteFormOpen}
+          asDrawer={true}
+          onSuccess={loadClientes}
+        />
       </div>
     )
   }
