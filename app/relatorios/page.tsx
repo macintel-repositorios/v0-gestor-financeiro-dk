@@ -915,14 +915,15 @@ export default function RelatoriosPage() {
               font-family: 'Inter', sans-serif !important;
             }
 
-            /* Ocultar elementos de navegação, cabeçalhos do app, botões e sidebar */
+            /* Ocultar elementos de navegação, cabeçalhos do app, botões, sidebar e blobs de fundo */
             aside,
             header,
             .no-print,
             [role="navigation"],
             button,
             .fixed,
-            #sidebar-root {
+            #sidebar-root,
+            .pointer-events-none {
               display: none !important;
             }
 
@@ -934,13 +935,15 @@ export default function RelatoriosPage() {
             div.flex-1.flex.flex-col, 
             main.flex-1, 
             div.mx-auto, 
-            div.max-w-7xl {
+            div.max-w-7xl,
+            .min-h-screen {
               height: auto !important;
               min-height: 0 !important;
               overflow: visible !important;
               position: static !important;
               display: block !important;
               padding: 0 !important;
+              padding-bottom: 0 !important;
               margin: 0 !important;
               border: none !important;
               box-shadow: none !important;
