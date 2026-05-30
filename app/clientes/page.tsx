@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Users, Building2, Phone, Mail, Edit, Trash2, Filter, Plus, MapPin, FileText, ChevronRight, UserX, X } from "lucide-react"
+import { Search, Users, Building2, Phone, Mail, Edit, Trash2, Filter, Plus, MapPin, FileText, ChevronLeft, ChevronRight, UserX, X } from "lucide-react"
 import { ResizableTable, type ColumnDef } from "@/components/ui/resizable-table"
 import { formatCNPJ, formatCPF, formatPhone } from "@/lib/utils"
 import type { Cliente } from "@/types/database"
@@ -32,6 +32,7 @@ export default function ClientesPage() {
   const [cardFilter, setCardFilter] = useState<"all" | "empresas" | "com_contrato" | "sem_contrato">("all")
   const [logoMenu, setLogoMenu] = useState<string>("")
   const [expandedClientId, setExpandedClientId] = useState<string | null>(null)
+  const [pageIndex, setPageIndex] = useState(0)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -39,6 +40,10 @@ export default function ClientesPage() {
     loadClientes()
     loadLogoMenu()
   }, [])
+
+  useEffect(() => {
+    setPageIndex(0)
+  }, [searchTerm, distanceFilter, cardFilter])
 
   const loadLogoMenu = async () => {
     try {
@@ -189,6 +194,10 @@ export default function ClientesPage() {
     })
   }, [clientes, searchTerm, distanceFilter, cardFilter])
 
+  const paginatedClientes = useMemo(() => {
+    return filteredClientes.slice(pageIndex * 10, (pageIndex + 1) * 10)
+  }, [filteredClientes, pageIndex])
+
   const getCardFilterLabel = (filter: string) => {
     switch (filter) {
       case "empresas": return "Empresas"
@@ -282,13 +291,11 @@ export default function ClientesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="container mx-auto p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Carregando clientes...</p>
-            </div>
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-sm">Carregando clientes...</p>
           </div>
         </div>
       </div>
@@ -298,182 +305,183 @@ export default function ClientesPage() {
   const hasActiveFilter = searchTerm.trim() !== "" || distanceFilter !== "all" || cardFilter !== "all"
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto p-3 md:p-6 space-y-4 md:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4">
-            {logoMenu && (
-              <img
-                src={logoMenu || "/placeholder.svg"}
-                alt="Logo"
-                className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
-              />
-            )}
-            <div>
-              <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Clientes
-              </h1>
-              <p className="text-sm lg:text-base text-gray-600 mt-1">Gerencie seus clientes e informações de contato</p>
-            </div>
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          {logoMenu && (
+            <img
+              src={logoMenu || "/placeholder.svg"}
+              alt="Logo"
+              className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
+            />
+          )}
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+              Clientes
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5 font-medium">Gerencie seus clientes e informações de contato</p>
           </div>
-          <Button onClick={handleNovoCliente}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Cliente
-          </Button>
         </div>
+        <Button onClick={handleNovoCliente} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all">
+          <Plus className="mr-2 h-4 w-4" />
+          Novo Cliente
+        </Button>
+      </div>
 
-        {/* Stats Cards — clicáveis como filtros */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300 cursor-pointer select-none ${
-              cardFilter === "all" ? "ring-2 ring-blue-400 ring-offset-1" : "opacity-75 hover:opacity-100"
-            }`}
-            onClick={() => handleCardFilterToggle("all")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-              <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total de Clientes</CardTitle>
-              <Users className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
-            </CardHeader>
-            <CardContent className="p-3 lg:p-6 pt-0">
-              <div className="text-lg lg:text-3xl font-bold text-blue-800">{clientes.length}</div>
-              <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5 lg:mt-1">
-                {filteredClientes.length !== clientes.length && `${filteredClientes.length} filtrados`}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 hover:shadow-xl transition-all duration-300 cursor-pointer select-none ${
-              cardFilter === "empresas" ? "ring-2 ring-green-400 ring-offset-1" : "opacity-75 hover:opacity-100"
-            }`}
-            onClick={() => handleCardFilterToggle("empresas")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-              <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Empresas</CardTitle>
-              <Building2 className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
-            </CardHeader>
-            <CardContent className="p-3 lg:p-6 pt-0">
-              <div className="text-lg lg:text-3xl font-bold text-green-800">
-                {clientes.filter((c) => c.cnpj).length}
-              </div>
-              <p className="text-[10px] lg:text-xs text-green-600 mt-0.5 lg:mt-1">Com CNPJ cadastrado</p>
-            </CardContent>
-          </Card>
-
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-xl transition-all duration-300 cursor-pointer select-none ${
-              cardFilter === "com_contrato" ? "ring-2 ring-purple-400 ring-offset-1" : "opacity-75 hover:opacity-100"
-            }`}
-            onClick={() => handleCardFilterToggle("com_contrato")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-              <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Com Contrato</CardTitle>
-              <FileText className="h-3 w-3 lg:h-5 lg:w-5 text-purple-600" />
-            </CardHeader>
-            <CardContent className="p-3 lg:p-6 pt-0">
-              <div className="text-lg lg:text-3xl font-bold text-purple-800">
-                {clientes.filter((c) => c.tem_contrato).length}
-              </div>
-              <p className="text-[10px] lg:text-xs text-purple-600 mt-0.5 lg:mt-1">Contratos ativos</p>
-            </CardContent>
-          </Card>
-
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-xl transition-all duration-300 cursor-pointer select-none ${
-              cardFilter === "sem_contrato" ? "ring-2 ring-orange-400 ring-offset-1" : "opacity-75 hover:opacity-100"
-            }`}
-            onClick={() => handleCardFilterToggle("sem_contrato")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-              <CardTitle className="text-xs lg:text-sm font-medium text-orange-700">Sem Contrato</CardTitle>
-              <UserX className="h-3 w-3 lg:h-5 lg:w-5 text-orange-600" />
-            </CardHeader>
-            <CardContent className="p-3 lg:p-6 pt-0">
-              <div className="text-lg lg:text-3xl font-bold text-orange-800">
-                {clientes.filter((c) => !c.tem_contrato).length}
-              </div>
-              <p className="text-[10px] lg:text-xs text-orange-600 mt-0.5 lg:mt-1">Sem contratos</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Active card filter indicator */}
-        {cardFilter !== "all" && (
-          <div className="flex items-center gap-2 px-1">
-            <Badge className="text-xs bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 pl-2.5 pr-1.5 py-1 gap-1.5">
-              Filtro: {getCardFilterLabel(cardFilter)}
-              <button
-                onClick={() => setCardFilter("all")}
-                className="ml-0.5 rounded-full hover:bg-white/20 p-0.5 transition-colors"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-            <span className="text-xs text-gray-500">
-              {filteredClientes.length} cliente{filteredClientes.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-        )}
-
-        {/* Search and Filters */}
-        <Card className="border-0 shadow-lg bg-gradient-to-r from-white to-gray-50">
-          <CardHeader className="p-3 md:p-6 pb-2 md:pb-3">
-            <CardTitle className="text-base md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Buscar e Filtrar
-            </CardTitle>
-            <CardDescription className="text-xs md:text-sm">Pesquise por nome, código, documento, email, telefone ou cidade</CardDescription>
+      {/* Stats Cards — clicáveis como filtros */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            cardFilter === "all" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => handleCardFilterToggle("all")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total de Clientes</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 md:p-6 pt-0">
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-              {/* Search Input */}
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Digite para buscar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Distance Filter */}
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-gray-400" />
-                <Select value={distanceFilter} onValueChange={setDistanceFilter}>
-                  <SelectTrigger className="w-full sm:w-48 border-gray-200 focus:border-blue-500">
-                    <SelectValue placeholder="Filtrar por distância" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as distâncias</SelectItem>
-                    <SelectItem value="5">Até 5km</SelectItem>
-                    <SelectItem value="10">Até 10km</SelectItem>
-                    <SelectItem value="15">Até 15km</SelectItem>
-                    <SelectItem value="20">Mais de 20km</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {(searchTerm || distanceFilter !== "all") && (
-              <div className="mt-3 md:mt-4 flex flex-wrap gap-2">
-                <p className="text-xs md:text-sm text-gray-600">
-                  Mostrando {filteredClientes.length} de {clientes.length} clientes
-                </p>
-                {searchTerm && (
-                  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
-                    Busca: &quot;{searchTerm}&quot;
-                  </Badge>
-                )}
-                {distanceFilter !== "all" && (
-                  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800">
-                    {getDistanceFilterLabel(distanceFilter)}
-                  </Badge>
-                )}
-              </div>
-            )}
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{clientes.length}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">
+              {filteredClientes.length !== clientes.length ? `${filteredClientes.length} filtrados` : "cadastrados no sistema"}
+            </p>
           </CardContent>
         </Card>
+
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            cardFilter === "empresas" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => handleCardFilterToggle("empresas")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Empresas</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">
+              {clientes.filter((c) => c.cnpj).length}
+            </div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">Com CNPJ cadastrado</p>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            cardFilter === "com_contrato" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => handleCardFilterToggle("com_contrato")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Com Contrato</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">
+              {clientes.filter((c) => c.tem_contrato).length}
+            </div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">Contratos ativos</p>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            cardFilter === "sem_contrato" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => handleCardFilterToggle("sem_contrato")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Sem Contrato</CardTitle>
+            <UserX className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">
+              {clientes.filter((c) => !c.tem_contrato).length}
+            </div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">Sem contratos</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Active card filter indicator */}
+      {cardFilter !== "all" && (
+        <div className="flex items-center gap-2 px-1">
+          <Badge variant="secondary" className="text-xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-150 pl-2.5 pr-1.5 py-1 gap-1.5 font-medium rounded-lg">
+            Filtro: {getCardFilterLabel(cardFilter)}
+            <button
+              onClick={() => setCardFilter("all")}
+              className="ml-0.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/50 p-0.5 transition-colors text-indigo-700 dark:text-indigo-400"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+          <span className="text-xs text-muted-foreground font-medium">
+            {filteredClientes.length} cliente{filteredClientes.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      )}
+
+      {/* Search and Filters */}
+      <Card className="border border-border shadow-sm bg-card">
+        <CardHeader className="p-4 md:p-6 pb-2">
+          <CardTitle className="text-sm font-semibold text-foreground">
+            Buscar e Filtrar
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground mt-0.5">
+            Pesquise por nome, código, documento, email, telefone ou cidade
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-4 md:p-6 pt-0">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/60" />
+              <Input
+                placeholder="Digite para buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-border bg-background text-foreground focus-visible:ring-indigo-500"
+              />
+            </div>
+
+            {/* Distance Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground/60" />
+              <Select value={distanceFilter} onValueChange={setDistanceFilter}>
+                <SelectTrigger className="w-full sm:w-48 border-border bg-background text-foreground focus:ring-indigo-500">
+                  <SelectValue placeholder="Filtrar por distância" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as distâncias</SelectItem>
+                  <SelectItem value="5">Até 5km</SelectItem>
+                  <SelectItem value="10">Até 10km</SelectItem>
+                  <SelectItem value="15">Até 15km</SelectItem>
+                  <SelectItem value="20">Mais de 20km</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {(searchTerm || distanceFilter !== "all") && (
+            <div className="mt-3 md:mt-4 flex flex-wrap gap-2">
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Mostrando {filteredClientes.length} de {clientes.length} clientes
+              </p>
+              {searchTerm && (
+                <Badge variant="secondary" className="text-xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100">
+                  Busca: &quot;{searchTerm}&quot;
+                </Badge>
+              )}
+              {distanceFilter !== "all" && (
+                <Badge variant="secondary" className="text-xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100">
+                  {getDistanceFilterLabel(distanceFilter)}
+                </Badge>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
         {/* ════════════════════════════════════════════════════════════════════
             MOBILE VIEW — Card-based layout (visible only on small screens)
@@ -729,22 +737,23 @@ export default function ClientesPage() {
         {/* ════════════════════════════════════════════════════════════════════
             DESKTOP VIEW — ResizableTable (hidden on mobile)
            ════════════════════════════════════════════════════════════════════ */}
-        <Card className="border-0 shadow-lg bg-white hidden md:block">
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6">
-            <CardTitle className="text-white">Lista de Clientes</CardTitle>
-            <CardDescription className="text-blue-100">
-              {filteredClientes.length} cliente{filteredClientes.length !== 1 ? "s" : ""} encontrado
-              {filteredClientes.length !== 1 ? "s" : ""} • Ordenados por contrato e nome
-            </CardDescription>
+        <Card className="border border-border shadow-sm overflow-hidden hidden md:block">
+          <CardHeader className="bg-muted/40 border-b border-border p-4 flex flex-row items-center justify-between space-y-0">
+            <div>
+              <CardTitle className="text-sm font-semibold text-foreground">Lista de Clientes</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                {filteredClientes.length} cliente{filteredClientes.length !== 1 ? "s" : ""} encontrado{filteredClientes.length !== 1 ? "s" : ""} • Ordenados por contrato e nome
+              </CardDescription>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             {filteredClientes.length === 0 ? (
               <div className="text-center py-12">
-                <Users className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                <h3 className="text-xl font-medium text-gray-900 mb-2">
+                <Users className="mx-auto h-16 w-16 text-muted-foreground/60 mb-4" />
+                <h3 className="text-xl font-medium text-foreground mb-2">
                   {searchTerm || distanceFilter !== "all" ? "Nenhum cliente encontrado" : "Nenhum cliente cadastrado"}
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-muted-foreground mb-6">
                   {searchTerm || distanceFilter !== "all"
                     ? "Tente ajustar os termos de busca ou filtros"
                     : "Comece cadastrando seu primeiro cliente"}
@@ -757,107 +766,138 @@ export default function ClientesPage() {
                 )}
               </div>
             ) : (
-              <ResizableTable<Cliente>
-                storageKey="clientes"
-                columns={[
-                  { key: "codigo",       label: "Código",           width: 100, sortable: true },
-                  { key: "nome",         label: "Nome/Razão Social", width: 220, sortable: true },
-                  { key: "cnpj",         label: "Documento",         width: 160, sortable: false },
-                  { key: "email",        label: "Contato",           width: 230, sortable: false },
-                  { key: "distancia_km", label: "Distância",         width: 100, sortable: true },
-                  { key: "tem_contrato", label: "Contrato",          width: 110, sortable: true },
-                  { key: "acoes",        label: "Ações",             width: 100, sortable: false, noResize: true },
-                ] as ColumnDef<Cliente>[]}
-                data={filteredClientes}
-                rowKey={(row) => row.id}
-                rowClassName={(row) => row.tem_contrato ? "bg-green-50" : ""}
-                renderCell={(cliente, col) => {
-                  switch (col) {
-                    case "codigo":
-                      return <Badge variant="outline" className="font-mono">{cliente.codigo}</Badge>
-                    case "nome":
-                      return (
-                        <div>
-                          <div className="font-medium text-gray-900 truncate">{cliente.nome}</div>
-                          {cliente.contato && <div className="text-sm text-gray-600">Contato: {cliente.contato}</div>}
-                          <Badge
-                            variant={cliente.cnpj ? "default" : "secondary"}
-                            className={`mt-1 ${cliente.cnpj ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
-                          >{getClienteType(cliente.cnpj, cliente.cpf)}</Badge>
-                        </div>
-                      )
-                    case "cnpj":
-                      return <div className="text-sm font-mono">{formatDocument(cliente.cnpj, cliente.cpf)}</div>
-                    case "email":
-                      return (
-                        <div className="space-y-1">
-                          {cliente.email && (
-                            <div className="flex items-center text-sm">
-                              <Mail className="h-3 w-3 mr-1 text-gray-400 flex-shrink-0" />
-                              <span className="text-gray-700 truncate">{cliente.email}</span>
-                            </div>
-                          )}
-                          {cliente.telefone && (
-                            <div className="flex items-center text-sm">
-                              <Phone className="h-3 w-3 mr-1 text-gray-400 flex-shrink-0" />
-                              <span className="text-gray-700">{formatPhone(cliente.telefone)}</span>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    case "distancia_km":
-                      return <Badge variant="outline" className="text-xs font-mono">{getDistanceLabel(cliente.distancia_km)}</Badge>
-                    case "tem_contrato":
-                      return (
-                        <div>
-                          <Badge
-                            variant={cliente.tem_contrato ? "default" : "secondary"}
-                            className={cliente.tem_contrato ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
-                          >{cliente.tem_contrato ? "Sim" : "Não"}</Badge>
-                          {cliente.tem_contrato && cliente.dia_contrato && (
-                            <div className="text-xs text-gray-600 mt-1">Venc: Dia {cliente.dia_contrato}</div>
-                          )}
-                        </div>
-                      )
-                    case "acoes":
-                      return (
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEditCliente(cliente)}
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tem certeza que deseja excluir o cliente &quot;{cliente.nome}&quot;? Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteCliente(cliente)} className="bg-red-600 hover:bg-red-700">
-                                  Excluir Cliente
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      )
-                    default: return null
-                  }
-                }}
-              />
+              <>
+                <ResizableTable<Cliente>
+                  storageKey="clientes"
+                  columns={[
+                    { key: "codigo",       label: "Código",           width: 100, sortable: true },
+                    { key: "nome",         label: "Nome/Razão Social", width: 220, sortable: true },
+                    { key: "cnpj",         label: "Documento",         width: 160, sortable: false },
+                    { key: "email",        label: "Contato",           width: 230, sortable: false },
+                    { key: "distancia_km", label: "Distância",         width: 100, sortable: true },
+                    { key: "tem_contrato", label: "Contrato",          width: 110, sortable: true },
+                    { key: "acoes",        label: "Ações",             width: 100, sortable: false, noResize: true },
+                  ] as ColumnDef<Cliente>[]}
+                  data={paginatedClientes}
+                  rowKey={(row) => row.id}
+                  rowClassName={(row) => row.tem_contrato ? "bg-emerald-500/5 dark:bg-emerald-950/20 hover:bg-emerald-500/10 dark:hover:bg-emerald-950/30" : ""}
+                  renderCell={(cliente, col) => {
+                    switch (col) {
+                      case "codigo":
+                        return <Badge variant="outline" className="font-mono text-xs bg-background text-foreground border-border">{cliente.codigo}</Badge>
+                      case "nome":
+                        return (
+                          <div>
+                            <div className="font-medium text-foreground truncate">{cliente.nome}</div>
+                            {cliente.contato && <div className="text-xs text-muted-foreground">Contato: {cliente.contato}</div>}
+                            <Badge
+                              variant={cliente.cnpj ? "default" : "secondary"}
+                              className={`mt-1 text-[10px] px-1.5 py-0 h-4 ${cliente.cnpj ? "bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300" : "bg-muted text-muted-foreground"}`}
+                            >{getClienteType(cliente.cnpj, cliente.cpf)}</Badge>
+                          </div>
+                        )
+                      case "cnpj":
+                        return <div className="text-sm font-mono text-muted-foreground">{formatDocument(cliente.cnpj, cliente.cpf)}</div>
+                      case "email":
+                        return (
+                          <div className="space-y-1">
+                            {cliente.email && (
+                              <div className="flex items-center text-xs">
+                                <Mail className="h-3.5 w-3.5 mr-1 text-muted-foreground flex-shrink-0" />
+                                <span className="text-foreground truncate">{cliente.email}</span>
+                              </div>
+                            )}
+                            {cliente.telefone && (
+                              <div className="flex items-center text-xs">
+                                <Phone className="h-3.5 w-3.5 mr-1 text-muted-foreground flex-shrink-0" />
+                                <span className="text-foreground">{formatPhone(cliente.telefone)}</span>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      case "distancia_km":
+                        return <Badge variant="outline" className="text-xs font-mono bg-background text-foreground border-border">{getDistanceLabel(cliente.distancia_km)}</Badge>
+                      case "tem_contrato":
+                        return (
+                          <div>
+                            <Badge
+                              variant={cliente.tem_contrato ? "default" : "secondary"}
+                              className={cliente.tem_contrato ? "bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300 border-0" : "bg-muted text-muted-foreground"}
+                            >{cliente.tem_contrato ? "Sim" : "Não"}</Badge>
+                            {cliente.tem_contrato && cliente.dia_contrato && (
+                              <div className="text-[11px] text-muted-foreground mt-1">Venc: Dia {cliente.dia_contrato}</div>
+                            )}
+                          </div>
+                        )
+                      case "acoes":
+                        return (
+                          <div className="flex gap-1 flex-wrap">
+                            <Button variant="outline" size="sm" onClick={() => handleEditCliente(cliente)}
+                              className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm"
+                                  className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir o cliente &quot;{cliente.nome}&quot;? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteCliente(cliente)} className="bg-red-600 hover:bg-red-700">
+                                    Excluir Cliente
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        )
+                      default: return null
+                    }
+                  }}
+                />
+
+                {/* Pagination Controls */}
+                {filteredClientes.length > 0 && (
+                  <div className="p-4 border-t border-border/40 flex items-center justify-between gap-4">
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">
+                      Mostrando <span className="font-medium text-foreground">{paginatedClientes.length}</span> de{" "}
+                      <span className="font-medium text-foreground">{filteredClientes.length}</span> registros
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
+                        disabled={pageIndex === 0}
+                        className="h-8 px-2 text-xs border-border bg-card"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPageIndex(prev => prev + 1)}
+                        disabled={(pageIndex + 1) * 10 >= filteredClientes.length}
+                        className="h-8 px-2 text-xs border-border bg-card"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
       </div>
-    </div>
-  )
-}
+    )
+  }
