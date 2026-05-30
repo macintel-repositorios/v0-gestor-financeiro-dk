@@ -725,7 +725,7 @@ export default function DashboardPage() {
               className="w-full justify-start h-11 hover:bg-slate-100/50 hover:text-foreground rounded-lg group border border-transparent hover:border-border transition-all duration-200 text-xs font-semibold"
               asChild
             >
-              <Link href="/ordem-servico/nova">
+              <Link href="/ordem-servico?nova=true">
                 <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 mr-3 border border-border group-hover:bg-slate-200 transition-colors">
                   <Wrench className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
                 </div>

@@ -29,6 +29,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 import type { OrdemServico } from "@/types/ordem-servico"
 import { LotePreventivasDialog } from "@/components/ordem-servico/lote-preventivas-dialog"
 import { NovaOSDialog } from "@/components/ordem-servico/nova-os-dialog"
@@ -373,12 +374,13 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
           </div>
         </div>
         <div className="hidden md:block">
-          <Link href="/ordem-servico/nova">
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all">
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Ordem de Serviço
-            </Button>
-          </Link>
+          <Button
+            onClick={() => setIsNovaOSOpen(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Ordem de Serviço
+          </Button>
         </div>
       </div>
 
