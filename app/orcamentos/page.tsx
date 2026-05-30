@@ -27,10 +27,12 @@ import {
   ChevronRight,
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
 import { EmitirNfeDialog } from "@/components/nfe/emitir-nfe-dialog"
+import { NovoOrcamentoDialog } from "@/components/orcamentos/novo-orcamento-dialog"
 
 interface Orcamento {
   id: string
@@ -68,13 +70,36 @@ interface Orcamento {
   parcelamento_material?: number
 }
 
-export default function OrcamentosPage() {
+export default function OrcamentosPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    novo?: string
+  }>
+}) {
+  const router = useRouter()
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [loading, setLoading] = useState(true)
   const [logoMenu, setLogoMenu] = useState<string>("")
   const [searchTerm, setSearchTerm] = useState("")
   const [situacaoFilter, setSituacaoFilter] = useState("todos")
   const [expandedOrcamentoId, setExpandedOrcamentoId] = useState<string | null>(null)
+  const [isNovoOrcamentoOpen, setIsNovoOrcamentoOpen] = useState(false)
+
+  // Parse URL Search Params
+  useEffect(() => {
+    if (searchParams) {
+      searchParams.then((params) => {
+        if (params.novo === "true") {
+          setIsNovoOrcamentoOpen(true)
+        }
+        // Clear params to keep URL clean
+        if (Object.keys(params).length > 0) {
+          router.replace("/orcamentos")
+        }
+      })
+    }
+  }, [searchParams, router])
   const [nfseDialogOpen, setNfseDialogOpen] = useState(false)
   const [nfseOrcamento, setNfseOrcamento] = useState<Orcamento | null>(null)
   const [nfeDialogOpen, setNfeDialogOpen] = useState(false)
@@ -599,12 +624,13 @@ export default function OrcamentosPage() {
             {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
             {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
           </Button>
-          <Link href="/orcamentos/novo">
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-xs lg:text-sm font-medium transition-all">
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Orçamento
-            </Button>
-          </Link>
+          <Button
+            onClick={() => setIsNovoOrcamentoOpen(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-xs lg:text-sm font-medium transition-all"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Orçamento
+          </Button>
         </div>
       </div>
 
@@ -1135,6 +1161,12 @@ export default function OrcamentosPage() {
           }}
         />
       )}
+
+      <NovoOrcamentoDialog
+        open={isNovoOrcamentoOpen}
+        onOpenChange={setIsNovoOrcamentoOpen}
+        onSuccess={fetchOrcamentos}
+      />
     </div>
   )
 }
