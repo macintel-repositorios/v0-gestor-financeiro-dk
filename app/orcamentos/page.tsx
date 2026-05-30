@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ResizableTable } from "@/components/ui/resizable-table"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -461,27 +461,27 @@ export default function OrcamentosPage() {
     const statusConfig = {
       pendente: {
         label: "Pendente",
-        className: "bg-amber-100 text-amber-800 border-amber-200",
+        className: "bg-yellow-500/10 text-yellow-500 border-0",
         icon: Calendar,
       },
       aprovado: {
         label: "Aprovado",
-        className: "bg-emerald-100 text-emerald-800 border-emerald-200",
+        className: "bg-emerald-500/10 text-emerald-500 border-0",
         icon: CheckCircle,
       },
       "enviado por email": {
         label: "Enviado",
-        className: "bg-blue-100 text-blue-800 border-blue-200",
+        className: "bg-blue-500/10 text-blue-500 border-0",
         icon: Send,
       },
       "nota fiscal emitida": {
         label: "NF Emitida",
-        className: "bg-purple-100 text-purple-800 border-purple-200",
+        className: "bg-purple-500/10 text-purple-500 border-0",
         icon: FileCheck,
       },
       concluido: {
         label: "Concluído",
-        className: "bg-green-100 text-green-800 border-green-200",
+        className: "bg-emerald-500/10 text-emerald-500 border-0",
         icon: CheckCircle,
       },
     }
@@ -490,8 +490,8 @@ export default function OrcamentosPage() {
     const IconComponent = config.icon
 
     return (
-      <Badge className={`${config.className} whitespace-nowrap text-xs`}>
-        <IconComponent className="h-3 w-3 mr-1" />
+      <Badge className={`${config.className} whitespace-nowrap text-xs gap-1 py-1`}>
+        <IconComponent className="h-3 w-3" />
         {config.label}
       </Badge>
     )
@@ -521,11 +521,6 @@ export default function OrcamentosPage() {
     return tipos[tipo] || tipo
   }
 
-  const truncateText = (text: string, maxLength = 15) => {
-    if (!text) return "-"
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
-  }
-
   const filteredOrcamentos = orcamentos.filter((orcamento) => {
     const matchesSearch =
       orcamento.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -548,189 +543,211 @@ export default function OrcamentosPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="container mx-auto p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Carregando orçamentos...</p>
-            </div>
+      <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="h-10 w-10 bg-muted animate-pulse rounded-lg" />
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-64 bg-muted animate-pulse rounded" />
           </div>
+        </div>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="border border-border bg-card animate-pulse">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="h-4 w-24 bg-muted rounded" />
+                <div className="h-4 w-4 bg-muted rounded" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 w-16 bg-muted rounded" />
+                <div className="h-3 w-32 bg-muted mt-2 rounded" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto p-3 lg:p-6 space-y-3 lg:space-y-6 max-w-full">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2 lg:gap-4">
-            {logoMenu && (
-              <img
-                src={logoMenu || "/placeholder.svg"}
-                alt="Logo"
-                className="h-8 w-8 lg:h-12 lg:w-12 object-contain rounded-lg shadow-md bg-white p-1"
-              />
-            )}
-            <div>
-              <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Orçamentos
-              </h1>
-              <p className="text-xs lg:text-base text-gray-600 mt-1">Gerencie todos os orçamentos do sistema</p>
-            </div>
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full text-foreground bg-background">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          {logoMenu && (
+            <img
+              src={logoMenu || "/placeholder.svg"}
+              alt="Logo"
+              className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
+            />
+          )}
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+              Orçamentos
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5 font-medium">
+              Gerencie e acompanhe todos os orçamentos e faturamentos do sistema
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={toggleOcultarValores}
-              variant="outline"
-              className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 bg-white h-8 lg:h-10 text-xs lg:text-sm hidden md:inline-flex"
-            >
-              {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
-              {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={toggleOcultarValores}
+            variant="outline"
+            className="border-border text-foreground hover:bg-muted/40 h-9 text-xs font-semibold hidden md:inline-flex"
+          >
+            {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+            {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
+          </Button>
+          <Link href="/orcamentos/novo">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-xs lg:text-sm font-medium transition-all">
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Orçamento
             </Button>
-            <Link href="/orcamentos/novo">
-              <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-xs lg:text-sm h-8 lg:h-10">
-                <Plus className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                Novo Orçamento
-              </Button>
-            </Link>
-          </div>
+          </Link>
         </div>
+      </div>
 
-        {/* Stats Cards - Agora clicáveis */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 lg:gap-4">
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              situacaoFilter === "todos" ? "ring-2 ring-blue-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setSituacaoFilter("todos")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
-              <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total</CardTitle>
-              <FileText className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
-              <div className="text-xl lg:text-3xl font-bold text-blue-800">{total}</div>
-              <p className="text-[10px] lg:text-xs text-blue-600 mt-1">Orçamentos</p>
-            </CardContent>
-          </Card>
+      {/* Stats Cards - Clicáveis */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "todos" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setSituacaoFilter("todos")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{total}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">orçamentos</p>
+          </CardContent>
+        </Card>
 
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-amber-50 to-amber-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              situacaoFilter === "pendente" ? "ring-2 ring-amber-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setSituacaoFilter("pendente")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
-              <CardTitle className="text-xs lg:text-sm font-medium text-amber-700">Pendentes</CardTitle>
-              <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-amber-600" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
-              <div className="text-xl lg:text-3xl font-bold text-amber-800">{pendentes}</div>
-              <p className="text-[10px] lg:text-xs text-amber-600 mt-1">Aguardando</p>
-            </CardContent>
-          </Card>
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "pendente" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setSituacaoFilter("pendente")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Pendentes</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{pendentes}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">aguardando</p>
+          </CardContent>
+        </Card>
 
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              situacaoFilter === "aprovado" ? "ring-2 ring-emerald-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setSituacaoFilter("aprovado")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
-              <CardTitle className="text-xs lg:text-sm font-medium text-emerald-700">Aprovados</CardTitle>
-              <CheckCircle className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
-              <div className="text-xl lg:text-3xl font-bold text-emerald-800">{aprovados}</div>
-              <p className="text-[10px] lg:text-xs text-emerald-600 mt-1">Aprovados</p>
-            </CardContent>
-          </Card>
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "aprovado" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setSituacaoFilter("aprovado")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Aprovados</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{aprovados}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">aprovados</p>
+          </CardContent>
+        </Card>
 
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-cyan-50 to-cyan-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              situacaoFilter === "enviado" ? "ring-2 ring-cyan-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setSituacaoFilter("enviado")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
-              <CardTitle className="text-xs lg:text-sm font-medium text-cyan-700">Enviados</CardTitle>
-              <Send className="h-4 w-4 lg:h-5 lg:w-5 text-cyan-600" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
-              <div className="text-xl lg:text-3xl font-bold text-cyan-800">{enviados}</div>
-              <p className="text-[10px] lg:text-xs text-cyan-600 mt-1">Por email</p>
-            </CardContent>
-          </Card>
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "enviado" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setSituacaoFilter("enviado")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Enviados</CardTitle>
+            <Send className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{enviados}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">por email</p>
+          </CardContent>
+        </Card>
 
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              situacaoFilter === "nf-emitida" ? "ring-2 ring-purple-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setSituacaoFilter("nf-emitida")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
-              <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">NF Emitida</CardTitle>
-              <FileCheck className="h-4 w-4 lg:h-5 lg:w-5 text-purple-600" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
-              <div className="text-xl lg:text-3xl font-bold text-purple-800">{notaFiscal}</div>
-              <p className="text-[10px] lg:text-xs text-purple-600 mt-1">Nota fiscal</p>
-            </CardContent>
-          </Card>
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "nf-emitida" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setSituacaoFilter("nf-emitida")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">NF Emitida</CardTitle>
+            <FileCheck className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{notaFiscal}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">faturados</p>
+          </CardContent>
+        </Card>
 
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              situacaoFilter === "concluido" ? "ring-2 ring-green-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setSituacaoFilter("concluido")}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
-              <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Concluídos</CardTitle>
-              <CheckCircle className="h-4 w-4 lg:h-5 lg:w-5 text-green-600" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
-              <div className="text-xl lg:text-3xl font-bold text-green-800">{concluidos}</div>
-              <p className="text-[10px] lg:text-xs text-green-600 mt-1">Finalizados</p>
-            </CardContent>
-          </Card>
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "concluido" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setSituacaoFilter("concluido")}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Concluídos</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground/70" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{concluidos}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">finalizados</p>
+          </CardContent>
+        </Card>
 
-          <Card className="border-0 shadow-lg bg-white rounded-lg overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
-              <CardTitle className="text-xs lg:text-sm font-medium text-indigo-700">Valor Total</CardTitle>
-              <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-indigo-600" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
-              <div className="text-2xl lg:text-3xl font-bold text-indigo-800">
-                {shouldHideValues ? "R$ •••" : formatCurrency(valorTotal)}
-              </div>
-              <p className="text-xs lg:text-sm text-indigo-600 mt-1">Soma total</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="border border-border bg-card col-span-2 md:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Soma Total</CardTitle>
+            <DollarSign className="h-4 w-4 text-indigo-500" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground truncate">
+              {shouldHideValues ? "R$ •••" : formatCurrency(valorTotal)}
+            </div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">valor bruto</p>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Filtros */}
-        <Card className="bg-gradient-to-r from-white to-gray-50">
-          <CardContent className="p-3 lg:p-4">
-            <div className="flex flex-col sm:flex-row gap-2 lg:gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 lg:top-3 h-3 w-3 lg:h-4 lg:w-4 text-gray-400" />
+      {/* Tabela de orçamentos */}
+      <Card className="border border-border bg-card">
+        <CardHeader className="border-b border-border/60 p-4 lg:p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-foreground text-lg">Lista de Orçamentos</CardTitle>
+              <CardDescription className="text-muted-foreground text-xs mt-1">
+                Acompanhe e emita notas fiscais (NF-e/NFS-e) para orçamentos aprovados.
+              </CardDescription>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por número, cliente..."
+                  placeholder="Buscar orçamento..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 lg:pl-10 h-8 lg:h-10 text-xs lg:text-sm"
+                  className="pl-9 h-9 text-xs border-border bg-background text-foreground"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Filter className="h-3 w-3 lg:h-4 lg:w-4 text-gray-400" />
+                <Filter className="h-4 w-4 text-muted-foreground" />
                 <Select value={situacaoFilter} onValueChange={setSituacaoFilter}>
-                  <SelectTrigger className="w-full sm:w-48 h-8 lg:h-10 text-xs lg:text-sm">
-                    <SelectValue placeholder="Filtrar por situação" />
+                  <SelectTrigger className="w-full sm:w-44 h-9 text-xs border-border bg-background">
+                    <SelectValue placeholder="Situação" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todas as situações</SelectItem>
+                    <SelectItem value="todos">Todas situações</SelectItem>
                     <SelectItem value="pendente">Pendentes</SelectItem>
                     <SelectItem value="aprovado">Aprovados</SelectItem>
                     <SelectItem value="enviado">Enviados</SelectItem>
@@ -740,32 +757,22 @@ export default function OrcamentosPage() {
                 </Select>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Tabela Desktop e Cards Mobile */}
-        <div className="border-0 shadow-lg bg-white rounded-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-3 py-2 lg:px-6 lg:py-4">
-            <h2 className="text-base lg:text-xl font-semibold">Lista de Orçamentos</h2>
-            <p className="text-xs lg:text-sm text-purple-100 mt-1">
-              {filteredOrcamentos.length} orçamento{filteredOrcamentos.length !== 1 ? "s" : ""} encontrado
-              {filteredOrcamentos.length !== 1 ? "s" : ""}
-            </p>
           </div>
-
+        </CardHeader>
+        <CardContent className="p-0">
           {filteredOrcamentos.length === 0 ? (
-            <div className="text-center py-8 lg:py-12 px-3">
-              <FileText className="mx-auto h-12 w-12 lg:h-16 lg:w-16 text-gray-400 mb-3 lg:mb-4" />
-              <h3 className="text-lg lg:text-xl font-medium text-gray-900 mb-2">Nenhum orçamento encontrado</h3>
-              <p className="text-sm lg:text-base text-gray-600 mb-4 lg:mb-6">
+            <div className="text-center py-12 px-4">
+              <FileText className="mx-auto h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+              <h3 className="text-lg font-medium text-foreground mb-2">Nenhum orçamento encontrado</h3>
+              <p className="text-sm text-muted-foreground mb-4">
                 {searchTerm || situacaoFilter !== "todos"
                   ? "Tente ajustar os filtros de busca"
                   : "Comece criando seu primeiro orçamento"}
               </p>
               {!searchTerm && situacaoFilter === "todos" && (
                 <Link href="/orcamentos/novo">
-                  <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-xs lg:text-sm">
-                    <Plus className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9">
+                    <Plus className="mr-2 h-4 w-4" />
                     Criar Primeiro Orçamento
                   </Button>
                 </Link>
@@ -775,286 +782,296 @@ export default function OrcamentosPage() {
             <>
               {/* Desktop — tabela redimensionável */}
               <div className="hidden md:block">
-              <ResizableTable
-                storageKey="orcamentos"
-                columns={[
-                  { key: "numero",         label: "Número",         width: 110, sortable: true },
-                  { key: "cliente_nome",   label: "Cliente",         width: 200, sortable: true },
-                  { key: "tipo_servico",   label: "Tipo de Serviço", width: 150, sortable: true },
-                  { key: "data_orcamento", label: "Data",            width: 110, sortable: true },
-                  { key: "valor_total",    label: "Valor Total",     width: 130, sortable: true },
-                  { key: "situacao",       label: "Status",          width: 130, sortable: true },
-                  { key: "acoes",          label: "Ações",          width: 150, sortable: false, noResize: true },
-                ]}
-                data={filteredOrcamentos}
-                rowKey={(row) => row.id}
-                renderCell={(orcamento, col) => {
-                  switch (col) {
-                    case "numero":
-                      return <Badge variant="outline" className="font-mono text-xs">{orcamento.numero}</Badge>
-                    case "cliente_nome":
-                      return (
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <span className="font-medium block truncate">{orcamento.cliente_nome}</span>
-                            {orcamento.cliente_codigo && <div className="text-xs text-gray-500">{orcamento.cliente_codigo}</div>}
+                <ResizableTable
+                  storageKey="orcamentos"
+                  columns={[
+                    { key: "numero", label: "Número", width: 110, sortable: true },
+                    { key: "cliente_nome", label: "Cliente", width: 220, sortable: true },
+                    { key: "tipo_servico", label: "Tipo de Serviço", width: 150, sortable: true },
+                    { key: "data_orcamento", label: "Data", width: 110, sortable: true },
+                    { key: "valor_total", label: "Valor Total", width: 130, sortable: true },
+                    { key: "situacao", label: "Status", width: 130, sortable: true },
+                    { key: "acoes", label: "Ações", width: 160, sortable: false, noResize: true },
+                  ]}
+                  data={filteredOrcamentos}
+                  rowKey={(row) => row.id}
+                  renderCell={(orcamento, col) => {
+                    switch (col) {
+                      case "numero":
+                        return <Badge variant="outline" className="font-mono text-xs text-foreground bg-muted/40 border-border">{orcamento.numero}</Badge>
+                      case "cliente_nome":
+                        return (
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <div className="min-w-0">
+                              <span className="font-medium block truncate text-foreground">{orcamento.cliente_nome}</span>
+                              {orcamento.cliente_codigo && <div className="text-[10px] text-muted-foreground">{orcamento.cliente_codigo}</div>}
+                            </div>
                           </div>
-                        </div>
-                      )
-                    case "tipo_servico":
-                      return (
-                        <div className="flex items-center gap-1">
-                          <Wrench className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                          <span className="text-sm truncate">{getTipoServicoLabel(orcamento.tipo_servico)}</span>
-                        </div>
-                      )
-                    case "data_orcamento":
-                      return (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                          <span className="text-sm">{formatDate(orcamento.data_orcamento)}</span>
-                        </div>
-                      )
-                    case "valor_total":
-                      return (
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="h-3 w-3 text-green-600 flex-shrink-0" />
-                          <span className="font-semibold text-green-600 text-sm">
-                            {shouldHideValues ? "R$ •••" : formatCurrency(Number(orcamento.valor_total))}
-                          </span>
-                        </div>
-                      )
-                    case "situacao":
-                      return getStatusBadge(orcamento.situacao)
-                    case "acoes": {
-                      const notaInfo = notasEmitidas[orcamento.numero]
-                      const nfseJaEmitida = notaInfo?.temNfse || false
-                      const nfeJaEmitida = notaInfo?.temNfe || false
-                      const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
-                      const subtotalMdo = calcularSubtotalMdoOrcamento(orcamento)
-                      const precisaNfse = parcelamentoMdo !== 0 && subtotalMdo > 0
-                      const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
-                      const subtotalMaterial = calcularSubtotalMaterialOrcamento(orcamento)
-                      const precisaNfe = parcelamentoMaterial !== 0 && subtotalMaterial > 0
-                      const mostraNfBtns = orcamento.situacao === "aprovado" || orcamento.situacao === "nota fiscal emitida"
-                      return (
-                        <div className="flex flex-wrap gap-1">
-                          <Link href={`/orcamentos/${orcamento.numero}`}>
-                            <Button size="sm" variant="outline" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0" title="Visualizar">
-                              <Eye className="h-4 w-4" />
+                        )
+                      case "tipo_servico":
+                        return (
+                          <div className="flex items-center gap-1.5">
+                            <Wrench className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm truncate text-foreground">{getTipoServicoLabel(orcamento.tipo_servico)}</span>
+                          </div>
+                        )
+                      case "data_orcamento":
+                        return (
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span className="text-sm text-foreground">{formatDate(orcamento.data_orcamento)}</span>
+                          </div>
+                        )
+                      case "valor_total":
+                        return (
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                            <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">
+                              {shouldHideValues ? "R$ •••" : formatCurrency(Number(orcamento.valor_total))}
+                            </span>
+                          </div>
+                        )
+                      case "situacao":
+                        return getStatusBadge(orcamento.situacao)
+                      case "acoes": {
+                        const notaInfo = notasEmitidas[orcamento.numero]
+                        const nfseJaEmitida = notaInfo?.temNfse || false
+                        const nfeJaEmitida = notaInfo?.temNfe || false
+                        const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
+                        const subtotalMdo = calcularSubtotalMdoOrcamento(orcamento)
+                        const precisaNfse = parcelamentoMdo !== 0 && subtotalMdo > 0
+                        const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
+                        const subtotalMaterial = calcularSubtotalMaterialOrcamento(orcamento)
+                        const precisaNfe = parcelamentoMaterial !== 0 && subtotalMaterial > 0
+                        const mostraNfBtns = orcamento.situacao === "aprovado" || orcamento.situacao === "nota fiscal emitida"
+                        return (
+                          <div className="flex flex-wrap gap-1">
+                            <Link href={`/orcamentos/${orcamento.numero}`}>
+                              <Button size="sm" variant="outline" className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            <Link href={`/orcamentos/${orcamento.numero}/editar`}>
+                              <Button size="sm" variant="outline" className="text-green-600 dark:text-green-400 hover:bg-green-500/10 border-green-200 dark:border-green-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            {mostraNfBtns && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={!precisaNfse || nfseJaEmitida}
+                                onClick={() => !(!precisaNfse || nfseJaEmitida) && handleEmitirNfse(orcamento)}
+                                className={`h-8 w-8 p-0 ${
+                                  !precisaNfse || nfseJaEmitida
+                                    ? "text-muted-foreground border-border bg-muted/20 opacity-50 cursor-not-allowed"
+                                    : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent"
+                                }`}
+                                title={!precisaNfse ? "Sem cobrança" : nfseJaEmitida ? "Já emitida" : "NFS-e"}
+                              >
+                                <FileCheck className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {mostraNfBtns && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={!precisaNfe || nfeJaEmitida}
+                                onClick={() => !(!precisaNfe || nfeJaEmitida) && handleEmitirNfe(orcamento)}
+                                className={`h-8 w-8 p-0 ${
+                                  !precisaNfe || nfeJaEmitida
+                                    ? "text-muted-foreground border-border bg-muted/20 opacity-50 cursor-not-allowed"
+                                    : "text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent"
+                                }`}
+                                title={!precisaNfe ? "Sem material" : nfeJaEmitida ? "Já emitida" : "NF-e"}
+                              >
+                                <Package className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete(orcamento.numero)}
+                              className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0"
+                              title="Excluir"
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          </Link>
-                          <Link href={`/orcamentos/${orcamento.numero}/editar`}>
-                            <Button size="sm" variant="outline" className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Editar">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          {mostraNfBtns && (
-                            <Button size="sm" variant="outline" disabled={!precisaNfse || nfseJaEmitida}
-                              onClick={() => (!(!precisaNfse || nfseJaEmitida)) && handleEmitirNfse(orcamento)}
-                              className={`h-8 w-8 p-0 ${(!precisaNfse || nfseJaEmitida) ? "text-gray-400 border-gray-200 bg-gray-50 opacity-50" : "text-emerald-600 hover:bg-emerald-50 border-emerald-200 bg-transparent"}`}
-                              title={!precisaNfse ? "Sem cobrança" : nfseJaEmitida ? "Já emitida" : "NFS-e"}>
-                              <FileCheck className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {mostraNfBtns && (
-                            <Button size="sm" variant="outline" disabled={!precisaNfe || nfeJaEmitida}
-                              onClick={() => (!(!precisaNfe || nfeJaEmitida)) && handleEmitirNfe(orcamento)}
-                              className={`h-8 w-8 p-0 ${(!precisaNfe || nfeJaEmitida) ? "text-gray-400 border-gray-200 bg-gray-50 opacity-50" : "text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent"}`}
-                              title={!precisaNfe ? "Sem material" : nfeJaEmitida ? "Já emitida" : "NF-e"}>
-                              <Package className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button size="sm" variant="outline" onClick={() => handleDelete(orcamento.numero)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0" title="Excluir">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )
+                          </div>
+                        )
+                      }
+                      default:
+                        return null
                     }
-                    default: return null
-                  }
-                }}
-              />
+                  }}
+                />
               </div>
 
               {/* Mobile — cards compactos */}
-              <div className="md:hidden p-3 space-y-4">
-                {!hasActiveFilter ? (
-                  <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
-                    <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                    <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os orçamentos</h3>
-                    <p className="text-sm text-gray-500">Digite na busca ou selecione uma situação para começar.</p>
-                  </div>
-                ) : filteredOrcamentos.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                    <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum orçamento encontrado</h3>
-                    <p className="text-sm text-gray-500 mb-4">Tente ajustar os filtros de busca.</p>
-                  </div>
-                ) : (
-                  filteredOrcamentos.map((orcamento) => {
-                    const isExpanded = expandedOrcamentoId === orcamento.id
+              <div className="md:hidden p-4 space-y-4">
+                {filteredOrcamentos.map((orcamento) => {
+                  const isExpanded = expandedOrcamentoId === orcamento.id
 
-                    return (
-                      <div
-                        key={orcamento.id}
-                        className={`rounded-xl border transition-all duration-200 overflow-hidden border-gray-200 bg-white ${
-                          isExpanded ? "shadow-lg ring-1 ring-purple-200" : "shadow-sm hover:shadow-md"
-                        }`}
+                  return (
+                    <div
+                      key={orcamento.id}
+                      className={`rounded-xl border transition-all duration-200 overflow-hidden border-border bg-card ${
+                        isExpanded ? "shadow-lg ring-1 ring-indigo-500" : "shadow-xs hover:shadow-sm"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedOrcamentoId(isExpanded ? null : orcamento.id)}
+                        className="w-full text-left p-4 flex items-center gap-3"
                       >
-                        <button
-                          type="button"
-                          onClick={() => setExpandedOrcamentoId(isExpanded ? null : orcamento.id)}
-                          className="w-full text-left p-3.5 flex items-center gap-3"
-                        >
-                          {/* Ícone */}
-                          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-purple-50 text-purple-700`}>
-                            <FileText className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="font-semibold text-sm text-gray-900 truncate block">Orç. {orcamento.numero}</span>
-                            <span className="text-[11px] text-gray-500 truncate block font-medium mt-0.5">{orcamento.cliente_nome}</span>
-                          </div>
-                          <div className="text-right flex-shrink-0 mr-1">
-                            {getStatusBadge(orcamento.situacao)}
-                          </div>
-                          <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
-                            isExpanded ? "rotate-90" : ""
-                          }`} />
-                        </button>
+                        {/* Ícone */}
+                        <div className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-indigo-500/10 text-indigo-500">
+                          <FileText className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="font-semibold text-sm text-foreground truncate block">Orç. {orcamento.numero}</span>
+                          <span className="text-[11px] text-muted-foreground truncate block mt-0.5">{orcamento.cliente_nome}</span>
+                        </div>
+                        <div className="text-right flex-shrink-0 mr-1">
+                          {getStatusBadge(orcamento.situacao)}
+                        </div>
+                        <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
+                          isExpanded ? "rotate-90" : ""
+                        }`} />
+                      </button>
 
-                        {isExpanded && (
-                          <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                            <div className="border-t border-gray-100 pt-3 space-y-2">
-                              <div className="grid grid-cols-2 gap-2">
-                                <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                  <div className="flex items-center gap-1.5 mb-1">
-                                    <User className="h-3 w-3 text-gray-400" />
-                                    <span className="text-[10px] font-medium text-gray-500 uppercase">Cliente</span>
-                                  </div>
-                                  <p className="text-xs font-semibold text-gray-800 truncate">{orcamento.cliente_nome}</p>
+                      {isExpanded && (
+                        <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2 duration-200">
+                          <div className="border-t border-border pt-3 space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-muted/40 rounded-lg p-2.5 col-span-2 border border-border/40">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <User className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase">Cliente</span>
                                 </div>
-                                <div className="bg-gray-50 rounded-lg p-2.5">
-                                  <div className="flex items-center gap-1.5 mb-1">
-                                    <Wrench className="h-3 w-3 text-gray-400" />
-                                    <span className="text-[10px] font-medium text-gray-500 uppercase">Tipo de Serviço</span>
-                                  </div>
-                                  <p className="text-xs text-gray-800 truncate">{getTipoServicoLabel(orcamento.tipo_servico)}</p>
-                                </div>
-                                <div className="bg-gray-50 rounded-lg p-2.5">
-                                  <div className="flex items-center gap-1.5 mb-1">
-                                    <Calendar className="h-3 w-3 text-gray-400" />
-                                    <span className="text-[10px] font-medium text-gray-500 uppercase">Data</span>
-                                  </div>
-                                  <p className="text-xs text-gray-800">{formatDate(orcamento.data_orcamento)}</p>
-                                </div>
-                                <div className="bg-green-50 rounded-lg p-2.5 col-span-2">
-                                  <div className="flex items-center gap-1.5 mb-1">
-                                    <DollarSign className="h-3 w-3 text-green-500" />
-                                    <span className="text-[10px] font-medium text-green-500 uppercase">Valor Total</span>
-                                  </div>
-                                  <p className="text-xs font-bold text-green-700">
-                                    {shouldHideValues ? "R$ •••" : formatCurrency(Number(orcamento.valor_total))}
-                                  </p>
-                                </div>
+                                <p className="text-xs font-semibold text-foreground truncate">{orcamento.cliente_nome}</p>
                               </div>
+                              <div className="bg-muted/40 rounded-lg p-2.5 border border-border/40">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Wrench className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase">Serviço</span>
+                                </div>
+                                <p className="text-xs text-foreground truncate">{getTipoServicoLabel(orcamento.tipo_servico)}</p>
+                              </div>
+                              <div className="bg-muted/40 rounded-lg p-2.5 border border-border/40">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Calendar className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase">Data</span>
+                                </div>
+                                <p className="text-xs text-foreground">{formatDate(orcamento.data_orcamento)}</p>
+                              </div>
+                              <div className="bg-emerald-500/10 rounded-lg p-2.5 col-span-2 border border-emerald-500/10">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <DollarSign className="h-3 w-3 text-emerald-500" />
+                                  <span className="text-[10px] font-medium text-emerald-500 uppercase">Valor Total</span>
+                                </div>
+                                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                                  {shouldHideValues ? "R$ •••" : formatCurrency(Number(orcamento.valor_total))}
+                                </p>
+                              </div>
+                            </div>
 
-                              {/* Ações */}
-                              {(() => {
-                                const mostraNfBtns = orcamento.situacao === "aprovado" || orcamento.situacao === "nota fiscal emitida"
-                                const notaInfo = notasEmitidas[orcamento.numero]
-                                const nfseJaEmitida = notaInfo?.temNfse || false
-                                const nfeJaEmitida = notaInfo?.temNfe || false
-                                
-                                // Lógica para NFS-e
-                                const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
-                                const subtotalMdo = calcularSubtotalMdoOrcamento(orcamento)
-                                const precisaNfse = parcelamentoMdo !== 0 && subtotalMdo > 0
-                                const nfseDesabilitado = !precisaNfse || nfseJaEmitida
-                                
-                                // Lógica para NF-e
-                                const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
-                                const subtotalMaterial = calcularSubtotalMaterialOrcamento(orcamento)
-                                const precisaNfe = parcelamentoMaterial !== 0 && subtotalMaterial > 0
-                                const nfeDesabilitado = !precisaNfe || nfeJaEmitida
+                            {/* Ações */}
+                            {(() => {
+                              const mostraNfBtns = orcamento.situacao === "aprovado" || orcamento.situacao === "nota fiscal emitida"
+                              const notaInfo = notasEmitidas[orcamento.numero]
+                              const nfseJaEmitida = notaInfo?.temNfse || false
+                              const nfeJaEmitida = notaInfo?.temNfe || false
+                              
+                              // Lógica para NFS-e
+                              const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
+                              const subtotalMdo = calcularSubtotalMdoOrcamento(orcamento)
+                              const precisaNfse = parcelamentoMdo !== 0 && subtotalMdo > 0
+                              const nfseDesabilitado = !precisaNfse || nfseJaEmitida
+                              
+                              // Lógica para NF-e
+                              const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
+                              const subtotalMaterial = calcularSubtotalMaterialOrcamento(orcamento)
+                              const precisaNfe = parcelamentoMaterial !== 0 && subtotalMaterial > 0
+                              const nfeDesabilitado = !precisaNfe || nfeJaEmitida
 
-                                return (
-                                  <div className="flex flex-wrap gap-2 pt-1">
-                                    <Link href={`/orcamentos/${orcamento.numero}`} className="flex-1">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="w-full h-9 text-xs font-medium text-blue-600 border-blue-200 hover:bg-blue-50"
-                                      >
-                                        <Eye className="h-3.5 w-3.5 mr-1.5" />
-                                        Visualizar
-                                      </Button>
-                                    </Link>
-                                    <Link href={`/orcamentos/${orcamento.numero}/editar`} className="flex-1">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="w-full h-9 text-xs font-medium text-green-600 border-green-200 hover:bg-green-50"
-                                      >
-                                        <Edit className="h-3.5 w-3.5 mr-1.5" />
-                                        Editar
-                                      </Button>
-                                    </Link>
-                                    {mostraNfBtns && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={nfseDesabilitado}
-                                        className={`h-9 text-xs font-medium border-2 px-3 ${nfseDesabilitado
-                                          ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed opacity-50"
-                                          : "bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-700"
-                                        }`}
-                                        onClick={() => !nfseDesabilitado && handleEmitirNfse(orcamento)}
-                                        title={!precisaNfse ? "Sem cobrança de serviço" : nfseJaEmitida ? "NFS-e já emitida" : "NFS-e"}
-                                      >
-                                        <FileCheck className="h-4 w-4" />
-                                      </Button>
-                                    )}
-                                    {mostraNfBtns && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={nfeDesabilitado}
-                                        className={`h-9 text-xs font-medium border-2 px-3 ${nfeDesabilitado
-                                          ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed opacity-50"
-                                          : "bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700"
-                                        }`}
-                                        onClick={() => !nfeDesabilitado && handleEmitirNfe(orcamento)}
-                                        title={!precisaNfe ? "Sem cobrança de material" : nfeJaEmitida ? "NF-e já emitida" : "NF-e"}
-                                      >
-                                        <Package className="h-4 w-4" />
-                                      </Button>
-                                    )}
+                              return (
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                  <Link href={`/orcamentos/${orcamento.numero}`} className="flex-1">
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="h-9 text-xs bg-red-50 hover:bg-red-100 border-2 border-red-300 text-red-600 font-medium px-3"
-                                      onClick={() => handleDelete(orcamento.numero)}
+                                      className="w-full h-9 text-xs font-medium text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50 bg-transparent hover:bg-indigo-500/10"
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Eye className="h-3.5 w-3.5 mr-1.5" />
+                                      Visualizar
                                     </Button>
-                                  </div>
-                                )
-                              })()}
-                            </div>
+                                  </Link>
+                                  <Link href={`/orcamentos/${orcamento.numero}/editar`} className="flex-1">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="w-full h-9 text-xs font-medium text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/50 bg-transparent hover:bg-green-500/10"
+                                    >
+                                      <Edit className="h-3.5 w-3.5 mr-1.5" />
+                                      Editar
+                                    </Button>
+                                  </Link>
+                                  {mostraNfBtns && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      disabled={nfseDesabilitado}
+                                      className={`h-9 text-xs font-medium border px-3 flex-1 ${
+                                        nfseDesabilitado
+                                          ? "bg-muted border-border text-muted-foreground cursor-not-allowed opacity-50"
+                                          : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-500"
+                                      }`}
+                                      onClick={() => !nfseDesabilitado && handleEmitirNfse(orcamento)}
+                                      title={!precisaNfse ? "Sem cobrança de serviço" : nfseJaEmitida ? "NFS-e já emitida" : "NFS-e"}
+                                    >
+                                      <FileCheck className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  {mostraNfBtns && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      disabled={nfeDesabilitado}
+                                      className={`h-9 text-xs font-medium border px-3 flex-1 ${
+                                        nfeDesabilitado
+                                          ? "bg-muted border-border text-muted-foreground cursor-not-allowed opacity-50"
+                                          : "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-500"
+                                      }`}
+                                      onClick={() => !nfeDesabilitado && handleEmitirNfe(orcamento)}
+                                      title={!precisaNfe ? "Sem cobrança de material" : nfeJaEmitida ? "NF-e já emitida" : "NF-e"}
+                                    >
+                                      <Package className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 text-xs bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-500 font-medium px-3"
+                                    onClick={() => handleDelete(orcamento.numero)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )
+                            })()}
                           </div>
-                        )}
-                      </div>
-                    )
-                  })
-                )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {nfseOrcamento && (
         <EmitirNfseDialog
