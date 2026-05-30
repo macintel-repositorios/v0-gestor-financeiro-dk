@@ -106,10 +106,10 @@ export default function CalendarioPage() {
   }
 
   const getPeriodoBadgeColor = (periodo?: string) => {
-    if (periodo === "manha") return "bg-blue-100 text-blue-800 border-blue-300"
-    if (periodo === "tarde") return "bg-orange-100 text-orange-800 border-orange-300"
-    if (periodo === "integral") return "bg-green-100 text-green-800 border-green-300"
-    return "bg-gray-100 text-gray-800"
+    if (periodo === "manha") return "bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border-0"
+    if (periodo === "tarde") return "bg-orange-100 dark:bg-orange-950/50 text-orange-800 dark:text-orange-300 border-0"
+    if (periodo === "integral") return "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-0"
+    return "bg-muted text-muted-foreground border-0"
   }
 
   const handlePeriodFilterClick = (filter: PeriodFilter) => {
@@ -137,9 +137,9 @@ export default function CalendarioPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30">
-        <div className="flex items-center gap-3 mb-6">
-          <Skeleton className="h-8 w-8" />
+      <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+        <div className="flex items-center gap-4 mb-6">
+          <Skeleton className="h-10 w-10 rounded-lg" />
           <div>
             <Skeleton className="h-8 w-64" />
             <Skeleton className="h-4 w-96 mt-2" />
@@ -154,85 +154,87 @@ export default function CalendarioPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-orange-50/30">
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-4 mb-6">
         {logos.menu && (
-          <img src={logos.menu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />
+          <img
+            src={logos.menu || "/placeholder.svg"}
+            alt="Logo"
+            className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
+          />
         )}
         <div>
-          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
             Calendário de Agendamentos
-          </h2>
-          <p className="text-sm text-muted-foreground">Visualize e gerencie ordens de serviço agendadas</p>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5 font-medium">Visualize e gerencie ordens de serviço agendadas</p>
         </div>
       </div>
 
-      {/* Stats Cards - Made cards clickable for filtering */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
-          className="bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200 cursor-pointer transition-all hover:shadow-md"
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            periodFilter === "all" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          }`}
           onClick={() => setPeriodFilter("all")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-cyan-700">Total Agendadas</CardTitle>
-            <CalendarIcon className="h-4 w-4 text-cyan-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total Agendadas</CardTitle>
+            <CalendarIcon className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-cyan-800">{ordensAgendadas.length}</div>
-            <p className="text-xs text-cyan-600">ordens agendadas</p>
-            {periodFilter === "all" && <Badge className="mt-2 bg-cyan-600 text-white">Filtro ativo</Badge>}
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{ordensAgendadas.length}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">ordens agendadas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer transition-all hover:shadow-md ${
-            periodFilter === "manha" ? "ring-2 ring-blue-600" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            periodFilter === "manha" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handlePeriodFilterClick("manha")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Manhã</CardTitle>
-            <Clock className="h-4 w-4 text-blue-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Manhã</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-800">{totalManha}</div>
-            <p className="text-xs text-blue-600">período da manhã (9h-12h)</p>
-            {periodFilter === "manha" && <Badge className="mt-2 bg-blue-600 text-white">Filtro ativo</Badge>}
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{totalManha}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">período da manhã (9h-12h)</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 cursor-pointer transition-all hover:shadow-md ${
-            periodFilter === "tarde" ? "ring-2 ring-orange-600" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            periodFilter === "tarde" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handlePeriodFilterClick("tarde")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">Tarde</CardTitle>
-            <Clock className="h-4 w-4 text-orange-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Tarde</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-800">{totalTarde}</div>
-            <p className="text-xs text-orange-600">período da tarde (13h-17h)</p>
-            {periodFilter === "tarde" && <Badge className="mt-2 bg-orange-600 text-white">Filtro ativo</Badge>}
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{totalTarde}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">período da tarde (13h-17h)</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer transition-all hover:shadow-md ${
-            periodFilter === "integral" ? "ring-2 ring-green-600" : ""
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            periodFilter === "integral" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => handlePeriodFilterClick("integral")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">Integral</CardTitle>
-            <Clock className="h-4 w-4 text-green-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Integral</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-800">{totalIntegral}</div>
-            <p className="text-xs text-green-600">período integral (9h-17h)</p>
-            {periodFilter === "integral" && <Badge className="mt-2 bg-green-600 text-white">Filtro ativo</Badge>}
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{totalIntegral}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">período integral (9h-17h)</p>
           </CardContent>
         </Card>
       </div>
@@ -240,13 +242,13 @@ export default function CalendarioPage() {
       {/* Calendar and Orders */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Calendar */}
-        <Card className="bg-white/60 backdrop-blur-sm border-white/20 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-t-lg py-3">
+        <Card className="border border-border shadow-sm bg-card overflow-hidden">
+          <CardHeader className="bg-muted/40 border-b border-border p-4">
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5" />
+              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
               <div>
-                <CardTitle className="text-base">Calendário</CardTitle>
-                <CardDescription className="text-cyan-100 text-xs">
+                <CardTitle className="text-sm font-semibold text-foreground">Calendário</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground mt-0.5">
                   Selecione uma data para ver as ordens
                 </CardDescription>
               </div>
@@ -258,50 +260,50 @@ export default function CalendarioPage() {
               onDateSelect={setSelectedDate}
               highlightedDates={getDatesWithOrders()}
               datesWithPeriods={getDatesWithPeriods()}
-              className="rounded-md border shadow-sm"
+              className="rounded-md border shadow-xs"
             />
-            <div className="mt-4 p-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg border-2 border-slate-200 space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                <div className="w-5 h-5 bg-gradient-to-br from-emerald-50 to-teal-100 border-2 border-emerald-300 rounded"></div>
+            <div className="mt-4 p-3 bg-muted/40 rounded-lg border border-border space-y-2">
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                <div className="w-4 h-4 bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded"></div>
                 <span>Dias com agendamentos</span>
               </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                <div className="w-5 h-5 border-2 border-red-500 rounded"></div>
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                <div className="w-4 h-4 border border-indigo-500 rounded"></div>
                 <span>Dia selecionado</span>
               </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-orange-700">
-                <div className="w-5 h-5 bg-orange-50 border-2 border-orange-400 rounded flex items-center justify-center">
-                  <span className="text-[6px] font-bold">Hoje</span>
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                <div className="w-4 h-4 bg-orange-500/10 border border-orange-400 rounded flex items-center justify-center">
+                  <span className="text-[6px] font-bold text-orange-600">Hoje</span>
                 </div>
                 <span>Dia atual</span>
               </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-blue-700">
-                <div className="w-3 h-3 bg-blue-600 border border-blue-800 rounded-full shadow-sm"></div>
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                 <span>Manhã (9h-12h)</span>
               </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-orange-700">
-                <div className="w-3 h-3 bg-orange-600 border border-orange-800 rounded-full shadow-sm"></div>
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                 <span>Tarde (13h-17h)</span>
               </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-green-700">
-                <div className="w-3 h-3 bg-green-600 border border-green-800 rounded-full shadow-sm"></div>
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
                 <span>Integral (9h-17h)</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Orders of Selected Day - Updated to show period badges */}
-        <Card className="bg-white/60 backdrop-blur-sm border-white/20 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg py-3">
+        {/* Orders of Selected Day */}
+        <Card className="border border-border shadow-sm bg-card overflow-hidden">
+          <CardHeader className="bg-muted/40 border-b border-border p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
+                <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <CardTitle className="text-base">
+                  <CardTitle className="text-sm font-semibold text-foreground">
                     Ordens do Dia - {selectedDate?.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                   </CardTitle>
-                  <CardDescription className="text-blue-100 text-xs">
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
                     {ordensDoDay.length} ordem(ns) agendada(s)
                     {periodFilter !== "all" && ` - ${getPeriodoLabel(periodFilter)}`}
                   </CardDescription>
@@ -312,31 +314,31 @@ export default function CalendarioPage() {
           <CardContent className="p-6">
             {ordensDoDay.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <AlertCircle className="h-12 w-12 text-gray-300 mb-3" />
-                <p className="text-gray-500 font-medium">Nenhuma ordem agendada</p>
-                <p className="text-sm text-gray-400 mt-1">
+                <AlertCircle className="h-12 w-12 text-muted-foreground/60 mb-3" />
+                <p className="text-muted-foreground font-medium text-sm">Nenhuma ordem agendada</p>
+                <p className="text-xs text-muted-foreground/80 mt-1">
                   {periodFilter !== "all"
                     ? `Nenhuma ordem para este período (${getPeriodoLabel(periodFilter)}). Clique nos cards acima para mudar o filtro.`
                     : "Selecione outro dia no calendário"}
                 </p>
               </div>
             ) : (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                 {ordensDoDay.map((os) => (
-                  <Card key={os.id} className="border-2 hover:shadow-md transition-shadow">
+                  <Card key={os.id} className="border border-border bg-card hover:border-muted-foreground/30 hover:shadow-xs transition-all duration-200">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <span className="font-bold text-blue-600">OS {os.numero}</span>
+                            <span className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">OS {os.numero}</span>
                             {os.periodo_agendamento && (
-                              <Badge className={`${getPeriodoBadgeColor(os.periodo_agendamento)} border`}>
+                              <Badge className={`${getPeriodoBadgeColor(os.periodo_agendamento)} text-[10px] px-1.5 py-0`}>
                                 <Clock className="w-3 h-3 mr-1" />
                                 {getPeriodoLabel(os.periodo_agendamento)}
                               </Badge>
                             )}
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-xs text-muted-foreground">
                             {os.data_agendamento
                               ? new Date(os.data_agendamento.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR")
                               : "Não informada"}
@@ -345,34 +347,34 @@ export default function CalendarioPage() {
                       </div>
 
                       <div className="space-y-2 mb-3">
-                        <div className="flex items-center gap-2 text-sm">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium text-gray-700">{os.cliente_nome}</span>
+                        <div className="flex items-center gap-2 text-xs">
+                          <User className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="font-medium text-foreground">{os.cliente_nome}</span>
                         </div>
                         {os.cliente_endereco && (
-                          <div className="flex items-start gap-2 text-sm">
-                            <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                            <span className="text-gray-600 text-xs">{os.cliente_endereco}</span>
+                          <div className="flex items-start gap-2 text-xs">
+                            <MapPin className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                            <span className="text-muted-foreground text-[11px]">{os.cliente_endereco}</span>
                           </div>
                         )}
                         {os.tecnico_name && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-600 text-xs">Técnico: {os.tecnico_name}</span>
+                          <div className="flex items-center gap-2 text-xs">
+                            <User className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-muted-foreground text-[11px]">Técnico: {os.tecnico_name}</span>
                           </div>
                         )}
                       </div>
 
-                      <div className="flex gap-2 pt-3 border-t">
+                      <div className="flex gap-2 pt-3 border-t border-border/40">
                         <Link href={`/ordem-servico/${os.id}`} className="flex-1">
-                          <Button variant="outline" size="sm" className="w-full bg-blue-50 hover:bg-blue-100">
-                            <Eye className="h-4 w-4 mr-2" />
+                          <Button variant="outline" size="sm" className="w-full h-8 text-xs border-border bg-card">
+                            <Eye className="h-3.5 w-3.5 mr-1.5" />
                             Visualizar
                           </Button>
                         </Link>
                         {podeExecutar(os.data_agendamento) ? (
                           <Link href={`/ordem-servico/${os.id}/editar`} className="flex-1">
-                            <Button variant="outline" size="sm" className="w-full bg-green-50 hover:bg-green-100">
+                            <Button variant="outline" size="sm" className="w-full h-8 text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 border-emerald-200 dark:border-emerald-900/50">
                               Executar
                             </Button>
                           </Link>
@@ -380,7 +382,7 @@ export default function CalendarioPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 bg-gray-100 text-gray-400 cursor-not-allowed"
+                            className="flex-1 h-8 text-xs bg-muted text-muted-foreground cursor-not-allowed border-border"
                             disabled
                           >
                             Executar
