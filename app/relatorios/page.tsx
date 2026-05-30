@@ -903,7 +903,7 @@ export default function RelatoriosPage() {
             /* Definir margens e tamanho do papel A4 */
             @page {
               size: A4 portrait;
-              margin: 20mm 15mm 20mm 15mm;
+              margin: 20mm 15mm 25mm 15mm; /* bottom margin 25mm to fit footer */
             }
 
             /* Resetar fundos e forçar cores padrão de impressão */
@@ -996,6 +996,19 @@ export default function RelatoriosPage() {
               padding: 8px 10px !important;
               font-size: 10px !important;
               color: #334155 !important;
+            }
+
+            /* Rodapé fixo de página impresso */
+            .print-footer {
+              position: fixed !important;
+              bottom: -15mm !important;
+              left: 0 !important;
+              width: 100% !important;
+              background: white !important;
+              display: block !important;
+            }
+            .print-page-number::after {
+              content: "Página " counter(page);
             }
           }
         `}</style>
@@ -1338,6 +1351,13 @@ export default function RelatoriosPage() {
               <div className="flex flex-col items-center">
                 <div className="border-b border-gray-800 w-48 mb-1"></div>
                 <p className="text-gray-600 uppercase text-[9px] font-bold">Assinatura do Responsável</p>
+              </div>
+            </div>
+            {/* Rodapé fixo para controle de páginas (impressão) */}
+            <div className="print-footer hidden print:block text-slate-500">
+              <div className="border-t border-gray-300 pt-2 flex justify-between items-center text-[9px] font-sans">
+                <div>Gestor Financeiro - Relatório de {tipoRelatorio.toUpperCase()}</div>
+                <div className="print-page-number"></div>
               </div>
             </div>
           </div>
