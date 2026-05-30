@@ -132,7 +132,7 @@ export function ResizableTable<T extends object>({
 
           {/* ── Header ─────────────────────────────────────── */}
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
+            <tr className="bg-muted/40 border-b border-border">
               {columns.map((col) => {
                 const isSorted = sort.key === col.key
                 const isAsc = isSorted && sort.dir === "asc"
@@ -143,15 +143,15 @@ export function ResizableTable<T extends object>({
                   <th
                     key={col.key}
                     className={cn(
-                      "relative select-none px-3 py-2.5 font-semibold text-gray-700 text-xs uppercase tracking-wide",
-                      "border-r border-gray-200 last:border-r-0",
-                      col.sortable && "cursor-pointer hover:bg-gray-100 transition-colors",
+                      "relative select-none px-3 py-2.5 font-semibold text-muted-foreground text-xs uppercase tracking-wide",
+                      "border-r border-border last:border-r-0",
+                      col.sortable && "cursor-pointer hover:bg-muted transition-colors",
                       col.align === "right" && "text-right",
                       col.align === "center" && "text-center",
-                      isSorted && "bg-blue-50 text-blue-700",
+                      isSorted && "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
                       // Sticky column styles
-                      isSticky && "sticky right-0 z-10 bg-gray-50 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.08)]",
-                      isSticky && isSorted && "bg-blue-50"
+                      isSticky && "sticky right-0 z-10 bg-muted/90 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.08)]",
+                      isSticky && isSorted && "bg-indigo-500/15"
                     )}
                     style={{ width: columnWidths[col.key], overflow: "hidden" }}
                     onClick={col.sortable ? () => toggleSort(col.key) : undefined}
@@ -168,11 +168,11 @@ export function ResizableTable<T extends object>({
                       {col.sortable && (
                         <span className="flex-shrink-0">
                           {isAsc ? (
-                            <ChevronUp className="h-3.5 w-3.5 text-blue-600" />
+                            <ChevronUp className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
                           ) : isDesc ? (
-                            <ChevronDown className="h-3.5 w-3.5 text-blue-600" />
+                            <ChevronDown className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
                           ) : (
-                            <ChevronsUpDown className="h-3.5 w-3.5 text-gray-400" />
+                            <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                           )}
                         </span>
                       )}
@@ -190,7 +190,7 @@ export function ResizableTable<T extends object>({
                         onClick={(e) => e.stopPropagation()}
                         title="Arraste para redimensionar"
                       >
-                        <div className="w-0.5 h-4 bg-blue-400 rounded-full" />
+                        <div className="w-0.5 h-4 bg-indigo-400 rounded-full" />
                       </div>
                     )}
                   </th>
@@ -213,8 +213,8 @@ export function ResizableTable<T extends object>({
                   key={rowKey ? rowKey(row, idx) : idx}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   className={cn(
-                    "group border-b border-gray-100 transition-colors",
-                    "hover:bg-blue-50/40",
+                    "group border-b border-border transition-colors text-foreground",
+                    "hover:bg-muted/30",
                     onRowClick && "cursor-pointer",
                     rowClassName?.(row, idx)
                   )}
@@ -229,8 +229,8 @@ export function ResizableTable<T extends object>({
                           col.align === "right" && "text-right",
                           col.align === "center" && "text-center",
                           // Sticky column: solid backgrounds to cover scrolled content
-                          // group-hover:bg-blue-50 matches the row hover so it blends in
-                          isSticky && "sticky right-0 z-10 bg-white group-hover:bg-blue-50/60 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.06)]"
+                          // group-hover:bg-muted matches the row hover so it blends in
+                          isSticky && "sticky right-0 z-10 bg-card group-hover:bg-muted shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.06)]"
                         )}
                         style={{ maxWidth: columnWidths[col.key] }}
                       >

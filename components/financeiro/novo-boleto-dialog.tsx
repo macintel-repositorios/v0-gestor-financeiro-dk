@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -489,24 +490,24 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
   }, [])
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-0 shadow-2xl">
-        <DialogHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-6 flex-shrink-0">
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <div className="p-2 bg-white/20 rounded-lg">
+    <Sheet open={open} onOpenChange={handleClose}>
+      <SheetContent className="w-full sm:max-w-2xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+          <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+            <div className="p-2 bg-muted rounded-lg text-foreground">
               <Plus className="h-5 w-5" />
             </div>
             Novo Boleto
-          </DialogTitle>
-          <DialogDescription className="text-green-100">
+          </SheetTitle>
+          <SheetDescription className="text-muted-foreground text-sm">
             Preencha as informações para gerar o(s) boleto(s)
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto bg-white">
+        <div className="flex-1 overflow-y-auto bg-card">
           <div className="p-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="cliente" className="text-sm font-semibold text-gray-700">
+              <Label htmlFor="cliente" className="text-sm font-semibold text-foreground">
                 Cliente *
               </Label>
               <ClienteCombobox
@@ -516,18 +517,18 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
               />
               <div className="flex items-center gap-4 flex-wrap">
                 {cliente && (
-                  <div className="text-sm text-gray-600">
-                    Selecionado: <span className="font-medium">{cliente.nome}</span>
+                  <div className="text-sm text-muted-foreground">
+                    Selecionado: <span className="font-medium text-foreground">{cliente.nome}</span>
                   </div>
                 )}
                 {contratoInfo?.tem_contrato && contratoInfo?.dia_contrato && (
-                  <div className="flex items-center gap-1 text-sm text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded-md">
+                  <div className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-md">
                     <Calendar className="h-4 w-4" />
                     Dia do Contrato: {contratoInfo.dia_contrato}
                   </div>
                 )}
                 {contratoInfo?.tem_contrato === false && (
-                  <div className="text-sm text-amber-600 font-medium bg-amber-50 px-2 py-1 rounded-md">
+                  <div className="text-sm text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 px-2 py-1 rounded-md">
                     Cliente sem contrato ativo
                   </div>
                 )}
@@ -536,7 +537,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="numero-nota" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="numero-nota" className="text-sm font-semibold text-foreground">
                   Número da Nota *
                 </Label>
                 <Input
@@ -544,7 +545,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   value={numeroNota}
                   onChange={(e) => handleNumeroNotaChange(e.target.value)}
                   placeholder="Digite o número da nota"
-                  className={`border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 ${
+                  className={`border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20 ${
                     numeroNotaError ? "border-red-500 focus:border-red-500" : ""
                   }`}
                 />
@@ -552,7 +553,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="data-nota" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="data-nota" className="text-sm font-semibold text-foreground">
                   Data da Nota *
                 </Label>
                 <Input
@@ -560,12 +561,12 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   type="date"
                   value={dataNota}
                   onChange={(e) => setDataNota(e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="valor-total" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="valor-total" className="text-sm font-semibold text-foreground">
                   Valor Total *
                 </Label>
                 <Input
@@ -575,12 +576,12 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   value={valorTotal}
                   onChange={(e) => setValorTotal(e.target.value)}
                   placeholder="0,00"
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="primeiro-vencimento" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="primeiro-vencimento" className="text-sm font-semibold text-foreground">
                   Primeiro Vencimento *
                 </Label>
                 <Input
@@ -588,32 +589,32 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   type="date"
                   value={primeiroVencimento}
                   onChange={(e) => handleVencimentoChange(e.target.value)}
-                  className={`border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 ${
+                  className={`border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20 ${
                     vencimentoAlerta ? "border-amber-500 focus:border-amber-500" : ""
                   }`}
                 />
                 {validandoVencimento && (
-                  <p className="text-xs text-gray-500">Verificando data...</p>
+                  <p className="text-xs text-muted-foreground">Verificando data...</p>
                 )}
               </div>
             </div>
 
             {vencimentoAlerta && (
-              <Alert className="border-amber-200 bg-amber-50">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-amber-800">
+              <Alert className="border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/20">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <AlertDescription className="text-amber-800 dark:text-amber-300">
                   <div className="flex flex-col gap-2">
-                    <span>{vencimentoAlerta.mensagem}</span>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={usarDataSugerida}
-                      className="w-fit border-amber-300 bg-amber-100 hover:bg-amber-200 text-amber-800"
-                    >
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Usar data sugerida
-                    </Button>
+                     <span>{vencimentoAlerta.mensagem}</span>
+                     <Button
+                       type="button"
+                       variant="outline"
+                       size="sm"
+                       onClick={usarDataSugerida}
+                       className="w-fit border-amber-300 dark:border-amber-800 bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900 text-amber-800 dark:text-amber-200"
+                     >
+                       <Calendar className="h-4 w-4 mr-2" />
+                       Usar data sugerida
+                     </Button>
                   </div>
                 </AlertDescription>
               </Alert>
@@ -621,7 +622,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="numero-parcelas" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="numero-parcelas" className="text-sm font-semibold text-foreground">
                   Número de Parcelas
                 </Label>
                 <Input
@@ -630,12 +631,12 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   min="1"
                   value={numeroParcelas}
                   onChange={(e) => setNumeroParcelas(e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="intervalo" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="intervalo" className="text-sm font-semibold text-foreground">
                   Intervalo (dias)
                 </Label>
                 <Input
@@ -644,14 +645,14 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   min="1"
                   value={intervalo}
                   onChange={(e) => setIntervalo(e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="multa-percentual" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="multa-percentual" className="text-sm font-semibold text-foreground">
                   Multa por Atraso (%)
                 </Label>
                 <Input
@@ -662,13 +663,13 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   max="100"
                   value={multaPercentual}
                   onChange={(e) => setMultaPercentual(e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                   placeholder="2.00"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="juros-mes" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="juros-mes" className="text-sm font-semibold text-foreground">
                   Juros ao Mês (%)
                 </Label>
                 <Input
@@ -679,14 +680,14 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   max="100"
                   value={jurosMesPercentual}
                   onChange={(e) => setJurosMesPercentual(e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                   placeholder="2.00"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="desconto" className="text-sm font-semibold text-gray-700">
+              <Label htmlFor="desconto" className="text-sm font-semibold text-foreground">
                 Desconto (%)
               </Label>
               <Input
@@ -697,14 +698,14 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                 max="100"
                 value={desconto}
                 onChange={(e) => setDesconto(e.target.value)}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                 placeholder="0.00"
               />
             </div>
 
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="instrucao-linha1" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="instrucao-linha1" className="text-sm font-semibold text-foreground">
                   Instrução Linha 1 (impresso no boleto)
                 </Label>
                 <Input
@@ -712,14 +713,14 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   value={instrucaoLinha1}
                   onChange={(e) => setInstrucaoLinha1(e.target.value)}
                   maxLength={100}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                   placeholder="Ex: Pagamento ate o vencimento"
                 />
-                <p className="text-xs text-gray-500">{instrucaoLinha1.length}/100 caracteres</p>
+                <p className="text-xs text-muted-foreground">{instrucaoLinha1.length}/100 caracteres</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="instrucao-linha2" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="instrucao-linha2" className="text-sm font-semibold text-foreground">
                   Instrução Linha 2 (impresso no boleto)
                 </Label>
                 <Input
@@ -727,19 +728,19 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   value={instrucaoLinha2}
                   onChange={(e) => setInstrucaoLinha2(e.target.value)}
                   maxLength={100}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                   placeholder="Ex: Apos vencimento cobrar multa e juros"
                 />
-                <p className="text-xs text-gray-500">{instrucaoLinha2.length}/100 caracteres</p>
+                <p className="text-xs text-muted-foreground">{instrucaoLinha2.length}/100 caracteres</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="forma-pagamento" className="text-sm font-semibold text-gray-700">
+              <Label htmlFor="forma-pagamento" className="text-sm font-semibold text-foreground">
                 Forma de Pagamento
               </Label>
               <Select value={formaPagamento} onValueChange={setFormaPagamento}>
-                <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20">
+                <SelectTrigger className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -752,7 +753,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
 
             {(numeroNota.trim() || descricaoBoletoCustom) && (
               <div className="space-y-2">
-                <Label htmlFor="descricao-produto" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="descricao-produto" className="text-sm font-semibold text-foreground">
                   Descrição do Boleto
                 </Label>
                 <Textarea
@@ -760,9 +761,9 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                   value={descricaoBoletoCustom || gerarDescricao()}
                   onChange={(e) => setDescricaoBoletoCustom(e.target.value)}
                   rows={3}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {descricaoBoletoCustom
                     ? "Descricao preenchida a partir da nota fiscal (editavel)"
                     : "Esta descricao sera enviada automaticamente ao Asaas"}
@@ -771,7 +772,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="observacoes" className="text-sm font-semibold text-gray-700">
+              <Label htmlFor="observacoes" className="text-sm font-semibold text-foreground">
                 Observações
               </Label>
               <Textarea
@@ -780,14 +781,14 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
                 onChange={(e) => setObservacoes(e.target.value)}
                 placeholder="Observações adicionais..."
                 rows={3}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 p-6 pt-0 border-t border-gray-100 bg-white">
-          <Button variant="outline" onClick={handleClose} className="border-gray-200 hover:bg-gray-50 bg-transparent">
+        <div className="flex justify-end gap-3 p-6 border-t border-border bg-muted/30 flex-shrink-0">
+          <Button variant="outline" onClick={handleClose} className="border-border hover:bg-muted bg-card text-foreground">
             Cancelar
           </Button>
           <Button
@@ -795,7 +796,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
             disabled={
               loading || !cliente || !valorTotal || !primeiroVencimento || !numeroNota.trim() || !!numeroNotaError || !!vencimentoAlerta
             }
-            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-200"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all duration-200"
           >
             {loading ? (
               <>
@@ -810,7 +811,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
             )}
           </Button>
         </div>
-      </DialogContent>
+      </SheetContent>
 
       <PreviewParcelasDialog
         open={previewOpen}
@@ -827,7 +828,7 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
         onVoltar={() => setPreviewOpen(false)}
         loading={loading}
       />
-    </Dialog>
+    </Sheet>
   )
 }
 

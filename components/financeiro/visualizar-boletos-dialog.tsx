@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -110,50 +110,50 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
       vencimento.setHours(0, 0, 0, 0)
     }
 
-  const isVencido = (status === "pendente" || status === "aguardando_pagamento") && vencimento && vencimento < hoje
+    const isVencido = (status === "pendente" || status === "aguardando_pagamento") && vencimento && vencimento < hoje
 
-  if (status === "pago") {
-  return (
-  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium px-3 py-1">
-  <CheckCircle className="w-3 h-3 mr-1" />
-  Pago
-  </Badge>
-  )
-  }
+    if (status === "pago") {
+      return (
+        <Badge className="bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-950 font-medium px-3 py-1">
+          <CheckCircle className="w-3 h-3 mr-1" />
+          Pago
+        </Badge>
+      )
+    }
 
-  if (status === "cancelado") {
-  return (
-  <Badge className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 font-medium px-3 py-1">
-  <XCircle className="w-3 h-3 mr-1" />
-  Cancelado
-  </Badge>
-  )
-  }
+    if (status === "cancelado") {
+      return (
+        <Badge className="bg-gray-50/80 dark:bg-muted text-gray-700 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-gray-100 dark:hover:bg-muted font-medium px-3 py-1">
+          <XCircle className="w-3 h-3 mr-1" />
+          Cancelado
+        </Badge>
+      )
+    }
 
-  if (isVencido || status === "vencido") {
-  return (
-  <Badge className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 font-medium px-3 py-1 animate-pulse">
-  <AlertCircle className="w-3 h-3 mr-1" />
-  Vencido
-  </Badge>
-  )
-  }
+    if (isVencido || status === "vencido") {
+      return (
+        <Badge className="bg-red-50/80 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-950 font-medium px-3 py-1 animate-pulse">
+          <AlertCircle className="w-3 h-3 mr-1" />
+          Vencido
+        </Badge>
+      )
+    }
 
-  if (status === "aguardando_pagamento") {
-  return (
-  <Badge className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 font-medium px-3 py-1">
-  <Clock className="w-3 h-3 mr-1" />
-  Aguardando
-  </Badge>
-  )
-  }
+    if (status === "aguardando_pagamento") {
+      return (
+        <Badge className="bg-blue-50/80 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-950/50 font-medium px-3 py-1">
+          <Clock className="w-3 h-3 mr-1" />
+          Aguardando
+        </Badge>
+      )
+    }
 
-  return (
-  <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 font-medium px-3 py-1">
-  <Clock className="w-3 h-3 mr-1" />
-  Pendente
-  </Badge>
-  )
+    return (
+      <Badge className="bg-amber-50/80 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/50 hover:bg-amber-100 dark:hover:bg-amber-950 font-medium px-3 py-1">
+        <Clock className="w-3 h-3 mr-1" />
+        Pendente
+      </Badge>
+    )
   }
 
   const calcularResumo = () => {
@@ -262,232 +262,235 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto border-0 shadow-2xl">
-        <DialogHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white -m-6 mb-6 p-6 rounded-t-lg">
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <div className="p-2 bg-white/20 rounded-lg">
-              <Eye className="h-5 w-5" />
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+      {/* This component is rendered inside Gestão Financeira. Let's return the Sheet */}
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
+          <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+            <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+              <div className="p-2 bg-muted rounded-lg text-foreground">
+                <Eye className="h-5 w-5" />
+              </div>
+              Visualizar Boletos - Nota {numeroBaseLimpo}
+            </SheetTitle>
+            <SheetDescription className="text-muted-foreground text-sm">
+              {clienteNome && `Cliente: ${clienteNome}`}
+              {boletos.length > 0 && ` • ${boletos.length} parcela${boletos.length > 1 ? "s" : ""}`}
+            </SheetDescription>
+          </SheetHeader>
+
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p className="text-muted-foreground text-sm">Carregando boletos...</p>
+              </div>
             </div>
-            Visualizar Boletos - Nota {numeroBaseLimpo}
-          </DialogTitle>
-          <DialogDescription className="text-blue-100">
-            {clienteNome && `Cliente: ${clienteNome}`}
-            {boletos.length > 0 && ` • ${boletos.length} parcela${boletos.length > 1 ? "s" : ""}`}
-          </DialogDescription>
-        </DialogHeader>
+          ) : (
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="border border-border shadow-sm bg-card">
+                  <CardHeader className="pb-2 p-4">
+                    <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground/70" />
+                      Total
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0 p-4">
+                    <div className="text-xl font-bold text-foreground">{resumo.total}</div>
+                    <p className="text-xs text-muted-foreground">{formatCurrency(resumo.valorTotal)}</p>
+                  </CardContent>
+                </Card>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Carregando boletos...</p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-blue-100">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-blue-700 flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Total
+                <Card className="border border-border shadow-sm bg-card">
+                  <CardHeader className="pb-2 p-4">
+                    <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      Pagos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0 p-4">
+                    <div className="text-xl font-bold text-foreground">{resumo.pagos}</div>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{formatCurrency(resumo.valorPago)}</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border border-border shadow-sm bg-card">
+                  <CardHeader className="pb-2 p-4">
+                    <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-amber-500" />
+                      Pendentes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0 p-4">
+                    <div className="text-xl font-bold text-foreground">{resumo.pendentes}</div>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold">{formatCurrency(resumo.valorPendente)}</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border border-border shadow-sm bg-card">
+                  <CardHeader className="pb-2 p-4">
+                    <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                      Vencidos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0 p-4">
+                    <div className="text-xl font-bold text-foreground">{resumo.vencidos}</div>
+                    <p className="text-xs text-red-600 dark:text-red-400 font-semibold">Requer atenção</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {boletos.some((b) => b.asaas_bankslip_url || b.asaas_invoice_url) && boletos.length > 1 && (
+                <div className="flex gap-3 justify-end bg-muted/30 p-4 rounded-lg border border-border">
+                  <Button
+                    onClick={imprimirTodosBoletos}
+                    disabled={printingAll}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all"
+                  >
+                    {printingAll ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Gerando PDF combinado... Aguarde
+                      </>
+                    ) : (
+                      <>
+                        <Printer className="h-4 w-4 mr-2" />
+                        Visualizar / Imprimir Todos ({boletos.filter((b) => b.asaas_bankslip_url || b.asaas_invoice_url).length} parcelas)
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              <Card className="border border-border shadow-sm overflow-hidden bg-card">
+                <CardHeader className="bg-muted/40 border-b border-border p-4">
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    Lista de Parcelas - Nota {numeroBaseLimpo}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="text-2xl font-bold text-blue-800">{resumo.total}</div>
-                  <p className="text-xs text-blue-600">{formatCurrency(resumo.valorTotal)}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-md bg-gradient-to-br from-green-50 to-green-100">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-green-700 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Pagos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="text-2xl font-bold text-green-800">{resumo.pagos}</div>
-                  <p className="text-xs text-green-600">{formatCurrency(resumo.valorPago)}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-md bg-gradient-to-br from-yellow-50 to-yellow-100">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-yellow-700 flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Pendentes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="text-2xl font-bold text-yellow-800">{resumo.pendentes}</div>
-                  <p className="text-xs text-yellow-600">{formatCurrency(resumo.valorPendente)}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-md bg-gradient-to-br from-red-50 to-red-100">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-red-700 flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4" />
-                    Vencidos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="text-2xl font-bold text-red-800">{resumo.vencidos}</div>
-                  <p className="text-xs text-red-600">Requer atenção</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {boletos.some((b) => b.asaas_bankslip_url || b.asaas_invoice_url) && boletos.length > 1 && (
-              <div className="flex gap-3 justify-end bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
-                <Button
-                  onClick={imprimirTodosBoletos}
-                  disabled={printingAll}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md"
-                >
-                  {printingAll ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Gerando PDF combinado... Aguarde
-                    </>
+                <CardContent className="p-0">
+                  {boletos.length === 0 ? (
+                    <div className="text-center py-8">
+                      <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground text-sm">Nenhum boleto encontrado para esta nota</p>
+                    </div>
                   ) : (
-                    <>
-                      <Printer className="h-4 w-4 mr-2" />
-                      Visualizar / Imprimir Todos ({boletos.filter((b) => b.asaas_bankslip_url || b.asaas_invoice_url).length} parcelas)
-                    </>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-muted/10">
+                            <TableHead className="font-semibold text-xs text-muted-foreground">Número Boleto</TableHead>
+                            <TableHead className="font-semibold text-xs text-muted-foreground">Parcela</TableHead>
+                            <TableHead className="font-semibold text-xs text-muted-foreground">Valor</TableHead>
+                            <TableHead className="font-semibold text-xs text-muted-foreground">Vencimento</TableHead>
+                            <TableHead className="font-semibold text-xs text-muted-foreground">Status</TableHead>
+                            <TableHead className="font-semibold text-xs text-muted-foreground">Data Pagamento</TableHead>
+                            <TableHead className="font-semibold text-xs text-muted-foreground">Ações</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {boletos.map((boleto) => (
+                            <TableRow key={boleto.id} className="hover:bg-muted/30 transition-colors border-b border-border">
+                              <TableCell className="font-medium">
+                                <Badge variant="outline" className="font-mono text-xs bg-background text-foreground border-border">
+                                  {boleto.numero}
+                                </Badge>
+                                {boleto.asaas_id && (
+                                  <Badge variant="secondary" className="ml-2 bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 border border-teal-100 dark:border-teal-900/50">
+                                    <CreditCard className="h-3 w-3 mr-1" />
+                                    Asaas
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary" className="font-mono text-xs text-foreground bg-muted border-border">
+                                  {boleto.numero_parcela}/{boleto.total_parcelas}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="font-semibold text-foreground">{formatCurrency(boleto.valor)}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span>{formatDate(boleto.data_vencimento)}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>{getStatusBadge(boleto.status, boleto.data_vencimento)}</TableCell>
+                              <TableCell>
+                                {boleto.data_pagamento ? (
+                                  <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                                    <CheckCircle className="h-3.5 w-3.5" />
+                                    <span>{formatDate(boleto.data_pagamento)}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex flex-col gap-1.5 py-1">
+                                  {boleto.asaas_linha_digitavel && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => copiarLinhaDigitavel(boleto.asaas_linha_digitavel!)}
+                                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 border-border bg-card w-full justify-start h-8"
+                                    >
+                                      <CreditCard className="h-3.5 w-3.5 mr-1.5" />
+                                      Copiar Linha Digitável
+                                    </Button>
+                                  )}
+                                  {boleto.asaas_bankslip_url && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => abrirPDF(boleto.asaas_bankslip_url!)}
+                                      className="text-xs text-foreground hover:bg-muted border-border bg-card w-full justify-start h-8"
+                                    >
+                                      <Download className="h-3.5 w-3.5 mr-1.5" />
+                                      Baixar PDF
+                                    </Button>
+                                  )}
+                                  {boleto.asaas_invoice_url && !boleto.asaas_bankslip_url && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => abrirPDF(boleto.asaas_invoice_url!)}
+                                      className="text-xs text-foreground hover:bg-muted border-border bg-card w-full justify-start h-8"
+                                    >
+                                      <Printer className="h-3.5 w-3.5 mr-1.5" />
+                                      Ver Fatura
+                                    </Button>
+                                  )}
+                                  {!boleto.asaas_id && <span className="text-[10px] text-muted-foreground">Boleto local - enviar ao Asaas</span>}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   )}
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-end pt-2">
+                <Button
+                  onClick={() => onOpenChange(false)}
+                  variant="outline"
+                  className="border-border hover:bg-muted bg-card text-foreground"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Fechar
                 </Button>
               </div>
-            )}
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Lista de Parcelas - Nota {numeroBaseLimpo}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                {boletos.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-600">Nenhum boleto encontrado para esta nota</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gray-50">
-                          <TableHead className="font-semibold">Número Boleto</TableHead>
-                          <TableHead className="font-semibold">Parcela</TableHead>
-                          <TableHead className="font-semibold">Valor</TableHead>
-                          <TableHead className="font-semibold">Vencimento</TableHead>
-                          <TableHead className="font-semibold">Status</TableHead>
-                          <TableHead className="font-semibold">Data Pagamento</TableHead>
-                          <TableHead className="font-semibold">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {boletos.map((boleto) => (
-                          <TableRow key={boleto.id} className="hover:bg-gray-50 transition-colors">
-                            <TableCell className="font-medium">
-                              <Badge variant="outline" className="font-mono">
-                                {boleto.numero}
-                              </Badge>
-                              {boleto.asaas_id && (
-                                <Badge variant="secondary" className="ml-2 bg-teal-100 text-teal-700">
-                                  <CreditCard className="h-3 w-3 mr-1" />
-                                  Asaas
-                                </Badge>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="secondary" className="font-mono">
-                                {boleto.numero_parcela}/{boleto.total_parcelas}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-semibold text-green-600">{formatCurrency(boleto.valor)}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-gray-400" />
-                                <span>{formatDate(boleto.data_vencimento)}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>{getStatusBadge(boleto.status, boleto.data_vencimento)}</TableCell>
-                            <TableCell>
-                              {boleto.data_pagamento ? (
-                                <div className="flex items-center gap-2 text-green-600">
-                                  <CheckCircle className="h-4 w-4" />
-                                  <span>{formatDate(boleto.data_pagamento)}</span>
-                                </div>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-col gap-2">
-                                {boleto.asaas_linha_digitavel && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => copiarLinhaDigitavel(boleto.asaas_linha_digitavel!)}
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 w-full justify-start"
-                                  >
-                                    <CreditCard className="h-4 w-4 mr-2" />
-                                    Copiar Linha Digitável
-                                  </Button>
-                                )}
-                                {boleto.asaas_bankslip_url && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => abrirPDF(boleto.asaas_bankslip_url!)}
-                                    className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 w-full justify-start"
-                                  >
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Baixar PDF
-                                  </Button>
-                                )}
-                                {boleto.asaas_invoice_url && !boleto.asaas_bankslip_url && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => abrirPDF(boleto.asaas_invoice_url!)}
-                                    className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200 w-full justify-start"
-                                  >
-                                    <Printer className="h-4 w-4 mr-2" />
-                                    Ver Fatura
-                                  </Button>
-                                )}
-                                {!boleto.asaas_id && <span className="text-xs text-gray-500">Boleto local - enviar ao Asaas</span>}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-end pt-4">
-              <Button
-                onClick={() => onOpenChange(false)}
-                variant="outline"
-                className="border-gray-200 hover:bg-gray-50"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Fechar
-              </Button>
             </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          )}
+        </SheetContent>
+      </Sheet>
+    </div>
   )
 }

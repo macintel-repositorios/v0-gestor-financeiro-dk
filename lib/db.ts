@@ -7,9 +7,9 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: Number.parseInt(process.env.DB_PORT || "3306"),
-  // Configurações ajustadas para produção (Vercel)
-  connectionLimit: 5,
-  maxIdle: 2,
+  // Configurações ajustadas para desenvolvimento e produção
+  connectionLimit: 25,
+  maxIdle: 10,
   idleTimeout: 30000,
   queueLimit: 0,
   ssl:

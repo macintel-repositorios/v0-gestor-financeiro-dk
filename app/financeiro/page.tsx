@@ -29,6 +29,7 @@ import {
   RefreshCw,
   ChevronRight,
   X,
+  TrendingUp,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -47,6 +48,7 @@ import {
 import { NovoBoletoDialog } from "@/components/financeiro/novo-boleto-dialog"
 import { EditarBoletoDialog } from "@/components/financeiro/editar-boleto-dialog"
 import { VisualizarBoletosDialog } from "@/components/financeiro/visualizar-boletos-dialog"
+import { FluxoCaixaTab } from "@/components/financeiro/fluxo-caixa-tab"
 import Link from "next/link"
 
 interface Boleto {
@@ -351,7 +353,7 @@ export default function FinanceiroPage() {
 
     if (status === "pago") {
       return (
-        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium px-3 py-1">
+        <Badge className="bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-950 font-medium px-3 py-1">
           <CheckCircle className="w-3 h-3 mr-1" />
           Pago
         </Badge>
@@ -360,7 +362,7 @@ export default function FinanceiroPage() {
 
     if (status === "cancelado") {
       return (
-        <Badge className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 font-medium px-3 py-1">
+        <Badge className="bg-gray-50/80 dark:bg-muted text-gray-700 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-gray-100 dark:hover:bg-muted font-medium px-3 py-1">
           <XCircle className="w-3 h-3 mr-1" />
           Cancelado
         </Badge>
@@ -369,7 +371,7 @@ export default function FinanceiroPage() {
 
     if (isVencido || status === "vencido") {
       return (
-        <Badge className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 font-medium px-3 py-1 animate-pulse">
+        <Badge className="bg-red-50/80 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-950 font-medium px-3 py-1 animate-pulse">
           <AlertCircle className="w-3 h-3 mr-1" />
           Vencido
         </Badge>
@@ -378,7 +380,7 @@ export default function FinanceiroPage() {
 
     if (status === "aguardando_pagamento") {
       return (
-        <Badge className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 font-medium px-3 py-1">
+        <Badge className="bg-blue-50/80 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-950/50 font-medium px-3 py-1">
           <Send className="w-3 h-3 mr-1" />
           Aguardando
         </Badge>
@@ -386,7 +388,7 @@ export default function FinanceiroPage() {
     }
 
     return (
-      <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 font-medium px-3 py-1">
+      <Badge className="bg-amber-50/80 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/50 hover:bg-amber-100 dark:hover:bg-amber-950 font-medium px-3 py-1">
         <Clock className="w-3 h-3 mr-1" />
         Pendente
       </Badge>
@@ -593,22 +595,22 @@ export default function FinanceiroPage() {
   const hasActiveFilterRecibos = searchRecibos.trim() !== ""
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-8">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
           {logoMenu && (
             <img
               src={logoMenu || "/placeholder.svg"}
               alt="Logo"
-              className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
+              className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
             />
           )}
           <div>
-            <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
               Gestão Financeira
             </h1>
-            <p className="text-sm lg:text-base text-gray-600 mt-1">Controle de boletos e recibos</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Controle de boletos e recibos</p>
           </div>
         </div>
 
@@ -616,16 +618,16 @@ export default function FinanceiroPage() {
         <Button
           onClick={toggleValoresOcultos}
           variant="outline"
-          className="hidden md:flex items-center gap-2 border-2 hover:bg-gray-50 transition-all duration-200 bg-transparent"
+          className="hidden md:flex items-center gap-2 border border-border hover:bg-muted transition-all duration-200 bg-card text-foreground h-9 px-3 text-sm"
         >
           {valoresOcultos ? (
             <>
-              <EyeOff className="h-5 w-5 text-gray-600" />
+              <EyeOff className="h-4 w-4 text-muted-foreground" />
               <span className="hidden sm:inline font-medium">Mostrar Valores</span>
             </>
           ) : (
             <>
-              <Eye className="h-5 w-5 text-gray-600" />
+              <Eye className="h-4 w-4 text-muted-foreground" />
               <span className="hidden sm:inline font-medium">Ocultar Valores</span>
             </>
           )}
@@ -633,75 +635,72 @@ export default function FinanceiroPage() {
       </div>
 
       {/* Stats Cards - Agora clicáveis */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
-          className={`border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-            statusFilter === "all" ? "ring-2 ring-blue-400 ring-offset-2" : ""
+          className={`border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer ${
+            statusFilter === "all" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setStatusFilter("all")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total</CardTitle>
-            <FileText className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground/70" />
           </CardHeader>
-          <CardContent className="p-3 lg:p-6 pt-0">
-            <p className="text-[10px] lg:text-xs text-blue-600 mb-1">boletos cadastrados</p>
-            <div className="text-lg lg:text-3xl font-bold text-blue-800">{boletosStatsPorPeriodo.total}</div>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{boletosStatsPorPeriodo.total}</div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">boletos no período</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-            statusFilter === "pago" ? "ring-2 ring-green-400 ring-offset-2" : ""
+          className={`border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer ${
+            statusFilter === "pago" ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setStatusFilter("pago")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Boletos Pagos</CardTitle>
-            <CheckCircle className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Boletos Pagos</CardTitle>
+            <CheckCircle className="h-4 w-4 text-emerald-500" />
           </CardHeader>
-          <CardContent className="p-3 lg:p-6 pt-0">
-            <p className="text-[10px] lg:text-xs text-green-600 mb-1">quantidade</p>
-            <div className="text-lg lg:text-3xl font-bold text-green-800">{boletosStatsPorPeriodo.pagos}</div>
-            <p className="text-[10px] lg:text-xs text-green-600 mt-1 font-semibold">
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{boletosStatsPorPeriodo.pagos}</div>
+            <p className="text-[10px] lg:text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
               {formatarValor(boletosStatsPorPeriodo.valorPagos)}
             </p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-yellow-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-            statusFilter === "pendente" ? "ring-2 ring-yellow-400 ring-offset-2" : ""
+          className={`border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer ${
+            statusFilter === "pendente" ? "ring-2 ring-amber-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setStatusFilter("pendente")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Pendentes</CardTitle>
-            <Clock className="h-3 w-3 lg:h-5 lg:w-5 text-yellow-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Pendentes</CardTitle>
+            <Clock className="h-4 w-4 text-amber-500" />
           </CardHeader>
-          <CardContent className="p-3 lg:p-6 pt-0">
-            <p className="text-[10px] lg:text-xs text-yellow-600 mb-1">aguardando pagamento</p>
-            <div className="text-lg lg:text-3xl font-bold text-yellow-800">{boletosStatsPorPeriodo.pendentes}</div>
-            <p className="text-[10px] lg:text-xs text-yellow-600 mt-1 font-semibold">
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{boletosStatsPorPeriodo.pendentes}</div>
+            <p className="text-[10px] lg:text-xs font-semibold text-amber-600 dark:text-amber-400 mt-0.5">
               {formatarValor(boletosStatsPorPeriodo.valorPendentes)}
             </p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border-0 shadow-lg bg-gradient-to-br from-red-50 to-red-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-            statusFilter === "vencido" ? "ring-2 ring-red-400 ring-offset-2" : ""
+          className={`border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer ${
+            statusFilter === "vencido" ? "ring-2 ring-red-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setStatusFilter("vencido")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-red-700">Vencidos</CardTitle>
-            <AlertTriangle className="h-3 w-3 lg:h-5 lg:w-5 text-red-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Vencidos</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
-          <CardContent className="p-3 lg:p-6 pt-0">
-            <p className="text-[10px] lg:text-xs text-red-600 mb-1">requer atenção</p>
-            <div className="text-lg lg:text-3xl font-bold text-red-800">{boletosStatsPorPeriodo.vencidos}</div>
-            <p className="text-[10px] lg:text-xs text-red-600 mt-1 font-semibold">
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">{boletosStatsPorPeriodo.vencidos}</div>
+            <p className="text-[10px] lg:text-xs font-semibold text-red-600 dark:text-red-400 mt-0.5">
               {formatarValor(boletosStatsPorPeriodo.valorVencidos)}
             </p>
           </CardContent>
@@ -709,23 +708,30 @@ export default function FinanceiroPage() {
       </div>
 
       {/* Tabs */}
-      <Card className="border-0 shadow-lg bg-white">
+      <Card className="border border-border shadow-sm bg-card overflow-hidden">
         <Tabs defaultValue="boletos" className="w-full">
-          <div className="border-b bg-gradient-to-r from-green-50 to-blue-50">
-            <TabsList className="grid w-full grid-cols-2 h-auto p-2 bg-transparent">
+          <div className="border-b border-border bg-muted/20 p-2.5">
+            <TabsList className="inline-flex justify-start gap-1 p-1 bg-muted/50 dark:bg-muted/80 rounded-xl h-auto">
               <TabsTrigger
                 value="boletos"
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-sm hover:text-foreground"
               >
                 <FileText className="h-4 w-4" />
                 Boletos ({boletosStatsPorPeriodo.total})
               </TabsTrigger>
               <TabsTrigger
                 value="recibos"
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-sm hover:text-foreground"
               >
                 <DollarSign className="h-4 w-4" />
                 Recibos ({recibosStats.total})
+              </TabsTrigger>
+              <TabsTrigger
+                value="fluxo-caixa"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-sm hover:text-foreground"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Fluxo de Caixa
               </TabsTrigger>
             </TabsList>
           </div>
@@ -734,12 +740,12 @@ export default function FinanceiroPage() {
             {/* Boletos Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Boletos</h2>
-                <p className="text-gray-600">Gerencie todos os boletos emitidos</p>
+                <h2 className="text-xl font-bold text-foreground">Boletos</h2>
+                <p className="text-sm text-muted-foreground">Gerencie todos os boletos emitidos</p>
               </div>
               <Button
                 onClick={() => setShowNovoBoleto(true)}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg h-9 lg:h-12 text-sm lg:text-base"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Boleto
@@ -747,22 +753,22 @@ export default function FinanceiroPage() {
             </div>
 
             {/* Boletos Filters */}
-            <Card className="bg-gradient-to-r from-white to-gray-50">
+            <Card className="border border-border bg-muted/20">
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Buscar boletos..."
                       value={searchBoletos}
                       onChange={(e) => setSearchBoletos(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 border-border bg-background text-foreground"
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-gray-400" />
+                    <Filter className="h-4 w-4 text-muted-foreground" />
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-48">
+                      <SelectTrigger className="w-48 border-border bg-background text-foreground">
                         <SelectValue placeholder="Filtrar por status" />
                       </SelectTrigger>
                       <SelectContent>
@@ -776,9 +782,9 @@ export default function FinanceiroPage() {
                     </Select>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-400" />
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
                     <Select value={periodoFilter} onValueChange={setPeriodoFilter}>
-                      <SelectTrigger className="w-48">
+                      <SelectTrigger className="w-48 border-border bg-background text-foreground">
                         <SelectValue placeholder="Filtrar por período" />
                       </SelectTrigger>
                       <SelectContent>
@@ -797,23 +803,25 @@ export default function FinanceiroPage() {
 
             {/* Desktop Table View */}
             <div className="hidden md:block">
-              <Card>
-                <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
-                  <CardTitle>Lista de Boletos</CardTitle>
-                  <CardDescription className="text-green-100">
-                    {filteredBoletos.length} boleto{filteredBoletos.length !== 1 ? "s" : ""} encontrado{filteredBoletos.length !== 1 ? "s" : ""}
-                  </CardDescription>
+              <Card className="border border-border shadow-sm overflow-hidden">
+                <CardHeader className="bg-muted/40 border-b border-border p-4 flex flex-row items-center justify-between space-y-0">
+                  <div>
+                    <CardTitle className="text-sm font-semibold text-foreground">Lista de Boletos</CardTitle>
+                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                      {filteredBoletos.length} boleto{filteredBoletos.length !== 1 ? "s" : ""} encontrado{filteredBoletos.length !== 1 ? "s" : ""}
+                    </CardDescription>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-0">
                   {filteredBoletos.length === 0 ? (
                     <div className="text-center py-12">
-                      <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                      <h3 className="text-xl font-medium text-gray-900 mb-2">
+                      <FileText className="mx-auto h-16 w-16 text-muted-foreground/60 mb-4" />
+                      <h3 className="text-xl font-medium text-foreground mb-2">
                         {searchBoletos || statusFilter !== "all" || periodoFilter !== "todos"
                           ? "Nenhum boleto encontrado"
                           : "Nenhum boleto cadastrado"}
                       </h3>
-                      <p className="text-gray-600 mb-6">
+                      <p className="text-muted-foreground mb-6">
                         {searchBoletos || statusFilter !== "all" || periodoFilter !== "todos"
                           ? "Tente ajustar os filtros de busca"
                           : "Comece criando seu primeiro boleto"}
@@ -821,7 +829,7 @@ export default function FinanceiroPage() {
                       {!searchBoletos && statusFilter === "all" && periodoFilter === "todos" && (
                         <Button
                           onClick={() => setShowNovoBoleto(true)}
-                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white h-9 lg:h-12 text-sm lg:text-base"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Criar Primeiro Boleto
@@ -846,12 +854,12 @@ export default function FinanceiroPage() {
                       renderCell={(boleto, col) => {
                         switch (col) {
                           case "numero": return <Badge variant="outline" className="font-mono">{boleto.numero}</Badge>
-                          case "cliente_nome": return <div className="font-medium text-gray-900 truncate">{boleto.cliente_nome}</div>
-                          case "valor": return <div className="font-semibold text-green-600">{formatarValor(boleto.valor)}</div>
+                          case "cliente_nome": return <div className="font-medium text-foreground truncate">{boleto.cliente_nome}</div>
+                          case "valor": return <div className="font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(boleto.valor)}</div>
                           case "data_vencimento":
                             return (
                               <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                 <span>{formatDate(boleto.data_vencimento)}</span>
                               </div>
                             )
@@ -859,16 +867,16 @@ export default function FinanceiroPage() {
                             return (
                               <div className="flex items-center gap-2">
                                 <Calendar className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                                <span className="text-blue-700 font-medium">{formatMesEmissao(boleto.created_at)}</span>
+                                <span className="text-blue-700 dark:text-blue-400 font-medium">{formatMesEmissao(boleto.created_at)}</span>
                               </div>
                             )
                           case "status": return getStatusBadge(boleto.status, boleto.data_vencimento)
-                          case "numero_parcela": return <span className="text-gray-700 font-medium">{boleto.numero_parcela}/{boleto.total_parcelas}</span>
+                          case "numero_parcela": return <span className="text-foreground font-medium">{boleto.numero_parcela}/{boleto.total_parcelas}</span>
                           case "acoes":
                             return (
                               <div className="flex gap-1 flex-wrap">
                                 <Button size="sm" variant="outline" onClick={() => handleVisualizarBoleto(boleto)}
-                                  className="text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0" title="Visualizar">
+                                  className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
                                   <Eye className="h-4 w-4" />
                                 </Button>
                                 {!(boleto.status === "pago" && boleto.data_pagamento) && (
@@ -876,31 +884,31 @@ export default function FinanceiroPage() {
                                     {!boleto.asaas_id && (
                                       <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
                                         disabled={enviandoParaAsaas === boleto.id}
-                                        className="border-teal-500 text-teal-600 hover:bg-teal-50 h-8 w-8 p-0" title="Enviar Asaas">
+                                        className="border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 h-8 w-8 p-0" title="Enviar Asaas">
                                         {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                                       </Button>
                                     )}
                                     {boleto.asaas_bankslip_url && (
                                       <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
-                                        className="border-purple-500 text-purple-600 hover:bg-purple-50 h-8 w-8 p-0" title="Imprimir">
+                                        className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir">
                                         <Printer className="h-4 w-4" />
                                       </Button>
                                     )}
                                     {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
                                       <Button size="sm" variant="outline" onClick={() => handleMarcarPago(boleto)}
-                                        className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
+                                        className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
                                         <CheckCircle className="h-4 w-4" />
                                       </Button>
                                     )}
                                     <Button size="sm" variant="outline" onClick={() => handleEditarBoleto(boleto)}
-                                      className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0" title="Editar">
+                                      className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
                                       <Edit className="h-4 w-4" />
                                     </Button>
                                   </>
                                 )}
                                 <Button size="sm" variant="outline" onClick={() => handleExcluirBoleto(boleto)}
                                   disabled={deletingId === boleto.id}
-                                  className="text-red-600 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0" title="Excluir">
+                                  className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
                                   {deletingId === boleto.id ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" /> : <Trash2 className="h-4 w-4" />}
                                 </Button>
                               </div>
@@ -918,23 +926,23 @@ export default function FinanceiroPage() {
             <div className="md:hidden space-y-3">
               {hasActiveFilterBoletos && (
                 <div className="flex justify-between items-center px-1 mb-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {filteredBoletos.length} boleto{filteredBoletos.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               )}
 
               {!hasActiveFilterBoletos ? (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
-                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os boletos</h3>
-                  <p className="text-sm text-gray-500">Digite na busca ou selecione um filtro para começar.</p>
+                <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                  <h3 className="text-base font-medium text-foreground mb-1">Busque ou filtre para ver os boletos</h3>
+                  <p className="text-sm text-muted-foreground">Digite na busca ou selecione um filtro para começar.</p>
                 </div>
               ) : filteredBoletos.length === 0 ? (
                 <div className="text-center py-12">
-                  <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum boleto encontrado</h3>
-                  <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                  <h3 className="text-base font-medium text-foreground mb-1">Nenhum boleto encontrado</h3>
+                  <p className="text-sm text-muted-foreground">Tente ajustar os filtros de busca.</p>
                 </div>
               ) : (
                 filteredBoletos.map((boleto) => {
@@ -944,77 +952,77 @@ export default function FinanceiroPage() {
                       key={boleto.id}
                       className={`rounded-xl border transition-all duration-200 overflow-hidden ${
                         boleto.status === "pago"
-                          ? "border-green-200 bg-gradient-to-r from-green-50/80 to-white"
-                          : "border-gray-200 bg-white"
-                      } ${isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"}`}
+                          ? "border-emerald-500/20 bg-emerald-500/5"
+                          : "border-border bg-card"
+                      } ${isExpanded ? "shadow-lg ring-1 ring-indigo-500" : "shadow-sm hover:shadow-md"}`}
                     >
                       <button
                         type="button"
                         onClick={() => setExpandedBoletoId(prev => prev === boleto.id ? null : boleto.id)}
-                        className="w-full text-left p-3.5 flex items-center gap-3"
+                        className="w-full text-left p-3.5 flex items-center gap-3 bg-transparent text-foreground"
                       >
                         <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
                           boleto.status === "pago"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-blue-100 text-blue-700"
+                            ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400"
+                            : "bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400"
                         }`}>
                           {(boleto.cliente_nome || "?").substring(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900 truncate">
+                            <span className="font-semibold text-sm text-foreground truncate">
                               {boleto.cliente_nome}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-gray-500 font-sans">
+                            <span className="text-[11px] text-muted-foreground font-sans">
                               {boleto.numero}
                             </span>
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-border text-foreground">
                               Parc.: {boleto.numero_parcela}/{boleto.total_parcelas}
                             </Badge>
                             {getStatusBadge(boleto.status, boleto.data_vencimento)}
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0 mr-1">
-                          <div className="text-sm font-bold text-green-600">
+                          <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                             {formatarValor(boleto.valor)}
                           </div>
-                          <div className="text-[10px] text-gray-500">
+                          <div className="text-[10px] text-muted-foreground">
                             Venc: {formatDate(boleto.data_vencimento)}
                           </div>
                         </div>
-                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                        <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                           isExpanded ? "rotate-90" : ""
                         }`} />
                       </button>
 
                       {isExpanded && (
                         <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                          <div className="border-t border-border pt-3 space-y-2">
                             <div className="grid grid-cols-2 gap-2">
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor</span>
-                                <p className="text-xs font-semibold text-green-600">{formatarValor(boleto.valor)}</p>
+                              <div className="bg-muted/50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Valor</span>
+                                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(boleto.valor)}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Vencimento</span>
-                                <p className="text-xs font-semibold text-gray-800">{formatDate(boleto.data_vencimento)}</p>
+                              <div className="bg-muted/50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Vencimento</span>
+                                <p className="text-xs font-semibold text-foreground">{formatDate(boleto.data_vencimento)}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Mês Emissão</span>
-                                <p className="text-xs text-gray-800">{formatMesEmissao(boleto.created_at)}</p>
+                              <div className="bg-muted/50 rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Mês Emissão</span>
+                                <p className="text-xs text-foreground">{formatMesEmissao(boleto.created_at)}</p>
                               </div>
                               {boleto.observacoes && (
-                                <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                  <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Observações</span>
-                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">{boleto.observacoes}</p>
+                                <div className="bg-muted/50 rounded-lg p-2.5 col-span-2">
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Observações</span>
+                                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{boleto.observacoes}</p>
                                 </div>
                               )}
                             </div>
                             <div className="flex flex-wrap gap-2 pt-2">
                               <Button size="sm" variant="outline" onClick={() => handleVisualizarBoleto(boleto)}
-                                className="flex-1 text-xs text-blue-600 hover:bg-blue-50 border-blue-200 bg-white">
+                                className="flex-1 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-card">
                                 <Eye className="h-3.5 w-3.5 mr-1" /> Ver
                               </Button>
                               {!(boleto.status === "pago" && boleto.data_pagamento) && (
@@ -1022,25 +1030,25 @@ export default function FinanceiroPage() {
                                   {!boleto.asaas_id && (
                                     <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
                                       disabled={enviandoParaAsaas === boleto.id}
-                                      className="flex-1 text-xs border-teal-500 text-teal-600 hover:bg-teal-50 bg-white">
+                                      className="flex-1 text-xs border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 bg-card">
                                       {enviandoParaAsaas === boleto.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Send className="h-3.5 w-3.5 mr-1" />}
                                       Asaas
                                     </Button>
                                   )}
                                   {boleto.asaas_bankslip_url && (
                                     <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
-                                      className="flex-1 text-xs border-purple-500 text-purple-600 hover:bg-purple-50 bg-white">
+                                      className="flex-1 text-xs border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 bg-card">
                                       <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir
                                     </Button>
                                   )}
                                   {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
                                     <Button size="sm" variant="outline" onClick={() => handleMarcarPago(boleto)}
-                                      className="flex-1 text-xs text-green-600 hover:bg-green-50 border-green-200 bg-white">
+                                      className="flex-1 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-card">
                                       <CheckCircle className="h-3.5 w-3.5 mr-1" /> Pagar
                                     </Button>
                                   )}
                                   <Button size="sm" variant="outline" onClick={() => handleEditarBoleto(boleto)}
-                                    className="flex-1 text-xs text-green-600 hover:bg-green-50 border-green-200 bg-white">
+                                    className="flex-1 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-card">
                                     <Edit className="h-3.5 w-3.5 mr-1" /> Editar
                                   </Button>
                                 </>
@@ -1064,11 +1072,11 @@ export default function FinanceiroPage() {
             {/* Recibos Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Recibos</h2>
-                <p className="text-gray-600">Gerencie todos os recibos emitidos</p>
+                <h2 className="text-xl font-bold text-foreground">Recibos</h2>
+                <p className="text-sm text-muted-foreground">Gerencie todos os recibos emitidos</p>
               </div>
               <Link href="/financeiro/novo-recibo">
-                <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg h-9 lg:h-12 text-sm lg:text-base">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all">
                   <Plus className="h-4 w-4 mr-2" />
                   Novo Recibo
                 </Button>
@@ -1076,42 +1084,42 @@ export default function FinanceiroPage() {
             </div>
 
             {/* Recibos Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-                  <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total de Recibos</CardTitle>
-                  <DollarSign className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="border border-border shadow-sm bg-card">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+                  <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total de Recibos</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent className="p-3 lg:p-6 pt-0">
-                  <div className="text-lg lg:text-3xl font-bold text-blue-800">{recibosStats.total}</div>
-                  <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5 lg:mt-1">Recibos emitidos</p>
+                <CardContent className="p-4 pt-0">
+                  <div className="text-xl lg:text-2xl font-bold text-foreground">{recibosStats.total}</div>
+                  <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">Recibos emitidos no período</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-                  <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Valor Total</CardTitle>
-                  <DollarSign className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
+              <Card className="border border-border shadow-sm bg-card">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+                  <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Valor Total</CardTitle>
+                  <DollarSign className="h-4 w-4 text-emerald-500" />
                 </CardHeader>
-                <CardContent className="p-3 lg:p-6 pt-0">
-                  <div className="text-lg lg:text-3xl font-bold text-green-800">
+                <CardContent className="p-4 pt-0">
+                  <div className="text-xl lg:text-2xl font-bold text-foreground">
                     {formatarValor(recibosStats.valorTotal)}
                   </div>
-                  <p className="text-[10px] lg:text-xs text-green-600 mt-0.5 lg:mt-1">Valor total dos recibos</p>
+                  <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">Valor acumulado dos recibos</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Recibos Search */}
-            <Card className="bg-gradient-to-r from-white to-gray-50">
+            <Card className="border border-border bg-muted/20">
               <CardContent className="p-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar recibos..."
                     value={searchRecibos}
                     onChange={(e) => setSearchRecibos(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 border-border bg-background text-foreground"
                   />
                 </div>
               </CardContent>
@@ -1119,26 +1127,28 @@ export default function FinanceiroPage() {
 
             {/* Desktop Table View */}
             <div className="hidden md:block">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Lista de Recibos</CardTitle>
-                  <CardDescription>
-                    {filteredRecibos.length} recibo{filteredRecibos.length !== 1 ? "s" : ""} encontrado{filteredRecibos.length !== 1 ? "s" : ""}
-                  </CardDescription>
+              <Card className="border border-border shadow-sm overflow-hidden">
+                <CardHeader className="bg-muted/40 border-b border-border p-4 flex flex-row items-center justify-between space-y-0">
+                  <div>
+                    <CardTitle className="text-sm font-semibold text-foreground">Lista de Recibos</CardTitle>
+                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                      {filteredRecibos.length} recibo{filteredRecibos.length !== 1 ? "s" : ""} encontrado{filteredRecibos.length !== 1 ? "s" : ""}
+                    </CardDescription>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-0">
                   {filteredRecibos.length === 0 ? (
                     <div className="text-center py-12">
-                      <DollarSign className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                      <h3 className="text-xl font-medium text-gray-900 mb-2">
+                      <DollarSign className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+                      <h3 className="text-xl font-medium text-foreground mb-2">
                         {searchRecibos ? "Nenhum recibo encontrado" : "Nenhum recibo cadastrado"}
                       </h3>
-                      <p className="text-gray-600 mb-6">
+                      <p className="text-muted-foreground mb-6">
                         {searchRecibos ? "Tente ajustar os termos de busca" : "Comece criando seu primeiro recibo"}
                       </p>
                       {!searchRecibos && (
                         <Link href="/financeiro/novo-recibo">
-                          <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white h-9 lg:h-12 text-sm lg:text-base">
+                          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all">
                             <Plus className="h-4 w-4 mr-2" />
                             Criar Primeiro Recibo
                           </Button>
@@ -1161,39 +1171,39 @@ export default function FinanceiroPage() {
                       renderCell={(recibo, col) => {
                         switch (col) {
                           case "numero": return <Badge variant="outline" className="font-mono">{recibo.numero}</Badge>
-                          case "cliente_nome": return <div className="font-medium text-gray-900 truncate">{recibo.cliente_nome}</div>
-                          case "descricao": return <div className="max-w-xs truncate">{recibo.descricao}</div>
-                          case "valor": return <div className="font-semibold text-green-600">{formatarValor(recibo.valor)}</div>
+                          case "cliente_nome": return <div className="font-medium text-foreground truncate">{recibo.cliente_nome}</div>
+                          case "descricao": return <div className="max-w-xs truncate text-muted-foreground">{recibo.descricao}</div>
+                          case "valor": return <div className="font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(recibo.valor)}</div>
                           case "data_emissao":
                             return (
                               <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                 <span>{formatDate(recibo.data_emissao)}</span>
                               </div>
                             )
                           case "acoes":
                             return (
                               <div className="flex gap-2">
-                                <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0">
+                                <Button size="sm" variant="outline" className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-border bg-transparent h-8 w-8 p-0">
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0">
+                                <Button size="sm" variant="outline" className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-border bg-transparent h-8 w-8 p-0">
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0">
+                                    <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10 border-border bg-transparent h-8 w-8 p-0">
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
                                   </AlertDialogTrigger>
-                                  <AlertDialogContent>
+                                  <AlertDialogContent className="border-border bg-card text-foreground">
                                     <AlertDialogHeader>
-                                      <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                                      <AlertDialogDescription>Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                      <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-muted-foreground">Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700">Excluir Recibo</AlertDialogAction>
+                                      <AlertDialogCancel className="border-border bg-transparent hover:bg-muted text-foreground">Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700 text-white border-0">Excluir Recibo</AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
@@ -1212,23 +1222,23 @@ export default function FinanceiroPage() {
             <div className="md:hidden space-y-3">
               {hasActiveFilterRecibos && (
                 <div className="flex justify-between items-center px-1 mb-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {filteredRecibos.length} recibo{filteredRecibos.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               )}
 
               {!hasActiveFilterRecibos ? (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
-                  <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <h3 className="text-base font-medium text-gray-700 mb-1">Busque para ver os recibos</h3>
-                  <p className="text-sm text-gray-500">Digite na busca para começar.</p>
+                <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
+                  <Search className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                  <h3 className="text-base font-medium text-foreground mb-1">Busque para ver os recibos</h3>
+                  <p className="text-sm text-muted-foreground">Digite na busca para começar.</p>
                 </div>
               ) : filteredRecibos.length === 0 ? (
                 <div className="text-center py-12">
-                  <DollarSign className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum recibo encontrado</h3>
-                  <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+                  <DollarSign className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                  <h3 className="text-base font-medium text-foreground mb-1">Nenhum recibo encontrado</h3>
+                  <p className="text-sm text-muted-foreground">Tente ajustar os filtros de busca.</p>
                 </div>
               ) : (
                 filteredRecibos.map((recibo) => {
@@ -1236,74 +1246,74 @@ export default function FinanceiroPage() {
                   return (
                     <div
                       key={recibo.id}
-                      className={`rounded-xl border border-gray-200 bg-white transition-all duration-200 overflow-hidden ${
-                        isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"
+                      className={`rounded-xl border border-border bg-card transition-all duration-200 overflow-hidden ${
+                        isExpanded ? "shadow-lg ring-1 ring-indigo-500" : "shadow-sm hover:shadow-md"
                       }`}
                     >
                       <button
                         type="button"
                         onClick={() => setExpandedReciboId(prev => prev === recibo.id ? null : recibo.id)}
-                        className="w-full text-left p-3.5 flex items-center gap-3"
+                        className="w-full text-left p-3.5 flex items-center gap-3 bg-transparent text-foreground"
                       >
-                        <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-blue-50 text-blue-600">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
                           {(recibo.cliente_nome || "?").substring(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900 truncate">
+                            <span className="font-semibold text-sm text-foreground truncate">
                               {recibo.cliente_nome}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-gray-500 font-sans">
+                            <span className="text-[11px] text-muted-foreground font-sans">
                               {recibo.numero}
                             </span>
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-border text-foreground">
                               {formatDate(recibo.data_emissao)}
                             </Badge>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0 mr-1">
-                          <div className="text-sm font-bold text-blue-600">
+                          <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
                             {formatarValor(recibo.valor)}
                           </div>
-                          <div className="text-[10px] text-gray-500 font-medium">
+                          <div className="text-[10px] text-muted-foreground font-medium">
                             {formatDate(recibo.data_emissao)}
                           </div>
                         </div>
-                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                        <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                           isExpanded ? "rotate-90" : ""
                         }`} />
                       </button>
 
                       {isExpanded && (
                         <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                          <div className="border-t border-border pt-3 space-y-2">
                             <div className="grid grid-cols-2 gap-2">
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor</span>
-                                <p className="text-xs font-semibold text-green-600">{formatarValor(recibo.valor)}</p>
+                              <div className="bg-muted/50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Valor</span>
+                                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(recibo.valor)}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Emissão</span>
-                                <p className="text-xs font-semibold text-gray-800">{formatDate(recibo.data_emissao)}</p>
+                              <div className="bg-muted/50 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Emissão</span>
+                                <p className="text-xs font-semibold text-foreground">{formatDate(recibo.data_emissao)}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Descrição</span>
-                                <p className="text-xs text-gray-700 whitespace-pre-wrap">{recibo.descricao}</p>
+                              <div className="bg-muted/50 rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Descrição</span>
+                                <p className="text-xs text-foreground whitespace-pre-wrap">{recibo.descricao}</p>
                               </div>
                               {recibo.observacoes && (
-                                <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                  <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Observações</span>
-                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">{recibo.observacoes}</p>
+                                <div className="bg-muted/50 rounded-lg p-2.5 col-span-2">
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Observações</span>
+                                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{recibo.observacoes}</p>
                                 </div>
                               )}
                             </div>
                             <div className="flex gap-2 pt-2">
-                              <Button size="sm" variant="outline" className="flex-1 text-xs text-blue-600 hover:bg-blue-50 border-blue-200 bg-white">
+                              <Button size="sm" variant="outline" className="flex-1 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-border bg-card">
                                 <Eye className="h-3.5 w-3.5 mr-1" /> Ver
                               </Button>
-                              <Button size="sm" variant="outline" className="flex-1 text-xs text-green-600 hover:bg-green-50 border-green-200 bg-white">
+                              <Button size="sm" variant="outline" className="flex-1 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-border bg-card">
                                 <Edit className="h-3.5 w-3.5 mr-1" /> Editar
                               </Button>
                               <AlertDialog>
@@ -1312,14 +1322,14 @@ export default function FinanceiroPage() {
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent>
+                                <AlertDialogContent className="border-border bg-card text-foreground">
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                                    <AlertDialogDescription>Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                    <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-muted-foreground">Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700">Excluir Recibo</AlertDialogAction>
+                                    <AlertDialogCancel className="border-border bg-transparent hover:bg-muted text-foreground">Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700 text-white border-0">Excluir Recibo</AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
@@ -1332,6 +1342,10 @@ export default function FinanceiroPage() {
                 })
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="fluxo-caixa" className="p-6 space-y-6">
+            <FluxoCaixaTab />
           </TabsContent>
         </Tabs>
       </Card>
@@ -1355,24 +1369,24 @@ export default function FinanceiroPage() {
       />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="border-0 shadow-2xl">
+        <AlertDialogContent className="border-border bg-card text-foreground shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <AlertDialogTitle className="text-xl font-bold text-foreground flex items-center gap-2">
               <AlertCircle className="h-6 w-6 text-red-600" />
               Confirmar Exclusão
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600 text-base">
+            <AlertDialogDescription className="text-muted-foreground text-base">
               Tem certeza que deseja excluir o boleto{" "}
-              <strong className="text-gray-900">{boletoParaExcluir?.numero}</strong>?
+              <strong className="text-foreground">{boletoParaExcluir?.numero}</strong>?
               <br />
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3">
-            <AlertDialogCancel className="border-gray-200 hover:bg-gray-50">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="border-border hover:bg-muted text-foreground bg-transparent">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmarExclusao}
-              className="bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-200 h-9 lg:h-12 text-sm lg:text-base"
+              className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-9 lg:h-12 text-sm lg:text-base border-0"
               disabled={deletingId !== null}
             >
               {deletingId !== null ? (

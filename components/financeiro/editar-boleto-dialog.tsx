@@ -5,13 +5,13 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -169,126 +169,128 @@ export function EditarBoletoDialog({ open, onOpenChange, boleto, onSuccess }: Ed
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] border-0 shadow-2xl">
-        <DialogHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white -m-6 mb-6 p-6 rounded-t-lg">
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <div className="p-2 bg-white/20 rounded-lg">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-2xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+          <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+            <div className="p-2 bg-muted rounded-lg text-foreground">
               <Edit className="h-5 w-5" />
             </div>
             Editar Boleto
-          </DialogTitle>
-          <DialogDescription className="text-blue-100">
+          </SheetTitle>
+          <SheetDescription className="text-muted-foreground text-sm">
             Altere as informações do boleto conforme necessário
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">Número</Label>
-              <Input value={boleto.numero} disabled className="bg-gray-50 border-gray-200 text-gray-600" />
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-foreground">Número</Label>
+                <Input value={boleto.numero} disabled className="bg-muted/50 border-border text-muted-foreground" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-foreground">Parcela</Label>
+                <Input
+                  value={`${boleto.numero_parcela}/${boleto.total_parcelas}`}
+                  disabled
+                  className="bg-muted/50 border-border text-muted-foreground"
+                />
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">Parcela</Label>
-              <Input
-                value={`${boleto.numero_parcela}/${boleto.total_parcelas}`}
-                disabled
-                className="bg-gray-50 border-gray-200 text-gray-600"
-              />
+              <Label className="text-sm font-semibold text-foreground">Cliente</Label>
+              <Input value={boleto.cliente_nome} disabled className="bg-muted/50 border-border text-muted-foreground" />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">Cliente</Label>
-            <Input value={boleto.cliente_nome} disabled className="bg-gray-50 border-gray-200 text-gray-600" />
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="valor" className="text-sm font-semibold text-foreground">
+                  Valor *
+                </Label>
+                <Input
+                  id="valor"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.valor}
+                  onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="data_vencimento" className="text-sm font-semibold text-foreground">
+                  Data de Vencimento *
+                </Label>
+                <Input
+                  id="data_vencimento"
+                  type="date"
+                  value={formData.data_vencimento}
+                  onChange={(e) => setFormData({ ...formData, data_vencimento: e.target.value })}
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
+                  required
+                />
+              </div>
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="valor" className="text-sm font-semibold text-gray-700">
-                Valor *
+              <Label htmlFor="status" className="text-sm font-semibold text-foreground">
+                Status *
               </Label>
-              <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.valor}
-                onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                required
-              />
+              <Select value={formData.status} onValueChange={handleStatusChange}>
+                <SelectTrigger className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20">
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="aguardando_pagamento">Aguardando Pagamento</SelectItem>
+                  <SelectItem value="pago">Pago</SelectItem>
+                  <SelectItem value="vencido">Vencido</SelectItem>
+                  <SelectItem value="cancelado">Cancelado</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            {formData.status === "pago" && (
+              <div className="space-y-2">
+                <Label htmlFor="data_pagamento" className="text-sm font-semibold text-foreground">
+                  Data de Pagamento *
+                </Label>
+                <Input
+                  id="data_pagamento"
+                  type="date"
+                  value={formData.data_pagamento}
+                  onChange={(e) => setFormData({ ...formData, data_pagamento: e.target.value })}
+                  className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
+                  required
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="data_vencimento" className="text-sm font-semibold text-gray-700">
-                Data de Vencimento *
+              <Label htmlFor="observacoes" className="text-sm font-semibold text-foreground">
+                Observações
               </Label>
-              <Input
-                id="data_vencimento"
-                type="date"
-                value={formData.data_vencimento}
-                onChange={(e) => setFormData({ ...formData, data_vencimento: e.target.value })}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                required
+              <Textarea
+                id="observacoes"
+                value={formData.observacoes}
+                onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                placeholder="Observações adicionais..."
+                className="border-border bg-background text-foreground focus:border-indigo-500 focus:ring-indigo-500/20 min-h-[80px]"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="status" className="text-sm font-semibold text-gray-700">
-              Status *
-            </Label>
-            <Select value={formData.status} onValueChange={handleStatusChange}>
-              <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20">
-                <SelectValue placeholder="Selecione o status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pendente">Pendente</SelectItem>
-                <SelectItem value="aguardando_pagamento">Aguardando Pagamento</SelectItem>
-                <SelectItem value="pago">Pago</SelectItem>
-                <SelectItem value="vencido">Vencido</SelectItem>
-                <SelectItem value="cancelado">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {formData.status === "pago" && (
-            <div className="space-y-2">
-              <Label htmlFor="data_pagamento" className="text-sm font-semibold text-gray-700">
-                Data de Pagamento *
-              </Label>
-              <Input
-                id="data_pagamento"
-                type="date"
-                value={formData.data_pagamento}
-                onChange={(e) => setFormData({ ...formData, data_pagamento: e.target.value })}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                required
-              />
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="observacoes" className="text-sm font-semibold text-gray-700">
-              Observações
-            </Label>
-            <Textarea
-              id="observacoes"
-              value={formData.observacoes}
-              onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-              placeholder="Observações adicionais..."
-              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 min-h-[80px]"
-            />
-          </div>
-
-          <DialogFooter className="gap-3 pt-4">
+          <SheetFooter className="gap-3 p-6 border-t border-border bg-muted/30 flex-shrink-0">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
-              className="border-gray-200 hover:bg-gray-50"
+              className="border-border hover:bg-muted bg-card text-foreground"
             >
               <X className="h-4 w-4 mr-2" />
               Cancelar
@@ -296,7 +298,7 @@ export function EditarBoletoDialog({ open, onOpenChange, boleto, onSuccess }: Ed
             <Button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all duration-200"
             >
               {loading ? (
                 <>
@@ -310,9 +312,9 @@ export function EditarBoletoDialog({ open, onOpenChange, boleto, onSuccess }: Ed
                 </>
               )}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

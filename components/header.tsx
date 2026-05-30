@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { useTheme } from "next-themes"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +33,8 @@ import {
   ChevronDown,
   Clock,
   X,
+  Sun,
+  Moon,
 } from "lucide-react"
 import Link from "next/link"
 import { useSidebar } from "./sidebar-provider"
@@ -57,6 +60,8 @@ interface BoletoVencido {
 export function Header() {
   const { toggleSidebar } = useSidebar()
   const { user, logout } = useAuth()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [feriados, setFeriados] = useState<Feriado[]>([])
   const [boletosVencidos, setBoletosVencidos] = useState<BoletoVencido[]>([])
   const [currentDate, setCurrentDate] = useState("")
@@ -64,6 +69,10 @@ export function Header() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     loadNotifications()
@@ -295,6 +304,23 @@ export function Header() {
               <Search className="w-5 h-5 text-foreground" />
             )}
           </Button>
+
+          {/* Alternar Tema (Dark Mode) */}
+          {mounted && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-muted rounded-xl h-10 w-10 text-foreground"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label="Alternar Tema"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-5 h-5 text-amber-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-foreground" />
+              )}
+            </Button>
+          )}
 
           {/* Notificações */}
           <Popover open={isNotificationOpen} onOpenChange={setIsNotificationOpen}>

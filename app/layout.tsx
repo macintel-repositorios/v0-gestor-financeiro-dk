@@ -5,6 +5,7 @@ import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { Toaster } from "sonner"
 import { LayoutContent } from "@/components/layout-content"
+import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -48,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" className="bg-background">
+    <html lang="pt-BR" className="bg-background" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -60,8 +61,10 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${plusJakarta.variable} font-sans`}>
         <AuthProvider>
-          <LayoutContent>{children}</LayoutContent>
-          <Toaster position="top-right" />
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <LayoutContent>{children}</LayoutContent>
+            <Toaster position="top-right" />
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
