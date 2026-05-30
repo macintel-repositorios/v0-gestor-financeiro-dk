@@ -918,6 +918,7 @@ export default function RelatoriosPage() {
               height: auto !important;
               overflow: visible !important;
               font-family: 'Inter', sans-serif !important;
+              counter-reset: page;
             }
 
             /* Ocultar elementos de navegação, cabeçalhos do app, botões, sidebar e blobs de fundo */
@@ -1011,6 +1012,7 @@ export default function RelatoriosPage() {
               width: 100% !important;
               background: white !important;
               display: block !important;
+              counter-increment: page;
             }
             .print-page-number::after {
               content: "Página " counter(page);
