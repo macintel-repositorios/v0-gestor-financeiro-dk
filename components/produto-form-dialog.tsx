@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,16 +14,17 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Save, RefreshCw, Lock, Loader2 } from "lucide-react"
 import { MarcaCombobox } from "@/components/marca-combobox"
-
+ 
 interface Categoria {
   id: number
   nome: string
   codigo: string
 }
-
+ 
 interface ProdutoFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  asDrawer?: boolean
   produto?: {
     id: number
     codigo: string
@@ -43,7 +45,7 @@ interface ProdutoFormDialogProps {
   onSuccess?: (produtoCriado?: any) => void
 }
 
-export function ProdutoFormDialog({ open, onOpenChange, produto, onSuccess }: ProdutoFormDialogProps) {
+export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produto, onSuccess }: ProdutoFormDialogProps) {
   const [loading, setLoading] = useState(false)
   const [loadingProduto, setLoadingProduto] = useState(false)
   const [categorias, setCategorias] = useState<Categoria[]>([])
@@ -360,17 +362,281 @@ export function ProdutoFormDialog({ open, onOpenChange, produto, onSuccess }: Pr
   }
 
   if (loadingProduto) {
+    const loadingContent = (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Carregando dados do produto...</p>
+        </div>
+      </div>
+    )
+
+    if (asDrawer) {
+      return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent className="w-full sm:max-w-2xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+            {loadingContent}
+          </SheetContent>
+        </Sheet>
+      )
+    }
+
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl">
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600">Carregando dados do produto...</p>
-            </div>
-          </div>
+          {loadingContent}
         </DialogContent>
       </Dialog>
+    )
+  }
+
+  const renderForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Código */}
+        <div>
+          <Label htmlFor="codigo">Código *</Label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                id="codigo"
+                value={codigo || (gerandoCodigo ? "" : "")}
+                placeholder={gerandoCodigo ? "Gerando..." : !categoriaId ? "Selecione a categoria" : !isServicoCategory && (!marca || marca === "Nenhuma marca") ? "Selecione a marca" : "Aguardando geração..."}
+                readOnly
+                className="bg-gray-50 text-gray-600 cursor-not-allowed pr-8"
+                required
+              />
+              <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            </div>
+            {!isEdicao && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={gerarCodigo}
+                disabled={
+                  gerandoCodigo || !categoriaId || (!isServicoCategory && (!marca || marca === "Nenhuma marca"))
+                }
+                className="px-3 bg-transparent"
+                title="Regenerar código"
+              >
+                {gerandoCodigo ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
+            )}
+          </div>
+          {!isEdicao ? (
+            <p className="text-xs text-gray-500 mt-1">Código gerado automaticamente baseado na categoria e marca</p>
+          ) : (
+            <p className="text-xs text-gray-500 mt-1">O código não pode ser alterado após a criação</p>
+          )}
+        </div>
+
+        {/* Descrição */}
+        <div>
+          <Label htmlFor="descricao">Descrição *</Label>
+          <Input
+            id="descricao"
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            placeholder="Descrição do produto"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Categoria */}
+        <div>
+          <Label htmlFor="categoria">Categoria *</Label>
+          <Select value={categoriaId || undefined} onValueChange={setCategoriaId} required>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione uma categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              {categorias.map((categoria) => {
+                const val = categoria.id ? categoria.id.toString().trim() : ""
+                if (!val) return null
+                return (
+                  <SelectItem key={val} value={val}>
+                    {categoria.nome} ({categoria.codigo})
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Marca */}
+        <div>
+          <Label htmlFor="marca">Marca {!isServicoCategory && "*"}</Label>
+          <MarcaCombobox
+            value={marca}
+            onValueChange={setMarca}
+            placeholder={isServicoCategory ? "N/A para serviços" : "Selecione uma marca"}
+            disabled={isServicoCategory}
+            className={isServicoCategory ? "bg-gray-50 text-gray-400" : ""}
+          />
+          {isServicoCategory && <p className="text-xs text-gray-500 mt-1">Marca não é aplicável para serviços</p>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* NCM */}
+        <div>
+          <Label htmlFor="ncm">NCM</Label>
+          <Input id="ncm" value={ncm} onChange={(e) => setNcm(e.target.value)} placeholder="Código NCM" />
+        </div>
+
+        {/* Unidade */}
+        <div>
+          <Label htmlFor="unidade">Unidade</Label>
+          <Select value={unidade} onValueChange={setUnidade}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="UN">Unidade</SelectItem>
+              <SelectItem value="MT">Metro</SelectItem>
+              <SelectItem value="PC">Peça</SelectItem>
+              <SelectItem value="PCT">Pacote</SelectItem>
+              <SelectItem value="CJ">Conjunto</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Valor de Custo */}
+        <div>
+          <Label htmlFor="valor_custo">Valor de Custo (R$)</Label>
+          <Input
+            id="valor_custo"
+            type="number"
+            step="0.01"
+            min="0"
+            value={valorCusto}
+            onChange={(e) => setValorCusto(Number.parseFloat(e.target.value) || 0)}
+          />
+        </div>
+
+        {/* Margem de Lucro */}
+        <div>
+          <Label htmlFor="margem_lucro">Margem de Lucro (%)</Label>
+          <Input
+            id="margem_lucro"
+            type="number"
+            step="0.01"
+            min="0"
+            value={margemLucro}
+            onChange={(e) => setMargemLucro(Number.parseFloat(e.target.value) || 0)}
+          />
+          <p className="text-xs text-gray-500 mt-1">Usado para calcular valor unitário</p>
+        </div>
+
+        {/* Valor Unitário */}
+        <div>
+          <Label htmlFor="valor_unitario">Valor Unitário (R$)</Label>
+          <div className="relative">
+            <Input
+              id="valor_unitario"
+              type="number"
+              step="0.01"
+              min="0"
+              value={valorUnitario}
+              readOnly
+              className="bg-gray-50 text-gray-600 cursor-not-allowed"
+            />
+            <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Calculado: Custo × ((Margem/100) + 1)</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Valor Mão de Obra */}
+        <div>
+          <Label htmlFor="valor_mao_obra">Valor Mão de Obra (R$)</Label>
+          <Input
+            id="valor_mao_obra"
+            type="number"
+            step="0.01"
+            min="0"
+            value={valorMaoObra}
+            onChange={(e) => setValorMaoObra(Number.parseFloat(e.target.value) || 180)}
+          />
+          <p className="text-xs text-gray-500 mt-1">Padrão: R$ 180,00</p>
+        </div>
+
+        {/* Estoque Atual */}
+        <div>
+          <Label htmlFor="estoque_atual">Estoque Atual</Label>
+          <Input
+            id="estoque_atual"
+            type="number"
+            min="0"
+            value={estoqueAtual}
+            onChange={(e) => setEstoqueAtual(Number.parseInt(e.target.value) || 0)}
+          />
+        </div>
+
+        {/* Estoque Mínimo */}
+        <div>
+          <Label htmlFor="estoque_minimo">Estoque Mínimo</Label>
+          <Input
+            id="estoque_minimo"
+            type="number"
+            min="0"
+            value={estoqueMinimo}
+            onChange={(e) => setEstoqueMinimo(Number.parseInt(e.target.value) || 1)}
+          />
+          <p className="text-xs text-gray-500 mt-1">Padrão: 1</p>
+        </div>
+      </div>
+
+      {/* Observações */}
+      <div>
+        <Label htmlFor="observacoes">Observações</Label>
+        <Textarea
+          id="observacoes"
+          value={observacoes}
+          onChange={(e) => setObservacoes(e.target.value)}
+          placeholder="Observações adicionais sobre o produto"
+          rows={3}
+          className="resize-none"
+        />
+      </div>
+
+      {/* Ativo */}
+      <div className="flex items-center space-x-2">
+        <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
+        <Label htmlFor="ativo">Produto ativo</Label>
+      </div>
+
+      <div className="flex justify-end gap-2 pt-4 border-t border-border mt-4">
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={loading}>
+          <Save className="h-4 w-4 mr-2" />
+          {loading ? "Salvando..." : isEdicao ? "Atualizar" : "Criar Produto"}
+        </Button>
+      </div>
+    </form>
+  )
+
+  if (asDrawer) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full sm:max-w-2xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+          <SheetHeader className="mb-4">
+            <SheetTitle>{isEdicao ? "Editar Produto" : "Novo Produto"}</SheetTitle>
+            <SheetDescription>
+              {isEdicao ? "Edite as informações do produto" : "Preencha as informações do novo produto"}
+            </SheetDescription>
+          </SheetHeader>
+          {renderForm()}
+        </SheetContent>
+      </Sheet>
     )
   }
 
@@ -383,238 +649,7 @@ export function ProdutoFormDialog({ open, onOpenChange, produto, onSuccess }: Pr
             {isEdicao ? "Edite as informações do produto" : "Preencha as informações do novo produto"}
           </DialogDescription>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Código */}
-            <div>
-              <Label htmlFor="codigo">Código *</Label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Input
-                    id="codigo"
-                    value={codigo || (gerandoCodigo ? "" : "")}
-                    placeholder={gerandoCodigo ? "Gerando..." : !categoriaId ? "Selecione a categoria" : !isServicoCategory && (!marca || marca === "Nenhuma marca") ? "Selecione a marca" : "Aguardando geração..."}
-                    readOnly
-                    className="bg-gray-50 text-gray-600 cursor-not-allowed pr-8"
-                    required
-                  />
-                  <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                </div>
-                {!isEdicao && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={gerarCodigo}
-                    disabled={
-                      gerandoCodigo || !categoriaId || (!isServicoCategory && (!marca || marca === "Nenhuma marca"))
-                    }
-                    className="px-3 bg-transparent"
-                    title="Regenerar código"
-                  >
-                    {gerandoCodigo ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                  </Button>
-                )}
-              </div>
-              {!isEdicao ? (
-                <p className="text-xs text-gray-500 mt-1">Código gerado automaticamente baseado na categoria e marca</p>
-              ) : (
-                <p className="text-xs text-gray-500 mt-1">O código não pode ser alterado após a criação</p>
-              )}
-            </div>
-
-            {/* Descrição */}
-            <div>
-              <Label htmlFor="descricao">Descrição *</Label>
-              <Input
-                id="descricao"
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-                placeholder="Descrição do produto"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Categoria */}
-            <div>
-              <Label htmlFor="categoria">Categoria *</Label>
-              <Select value={categoriaId || undefined} onValueChange={setCategoriaId} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categorias.map((categoria) => {
-                    const val = categoria.id ? categoria.id.toString().trim() : ""
-                    if (!val) return null
-                    return (
-                      <SelectItem key={val} value={val}>
-                        {categoria.nome} ({categoria.codigo})
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Marca */}
-            <div>
-              <Label htmlFor="marca">Marca {!isServicoCategory && "*"}</Label>
-              <MarcaCombobox
-                value={marca}
-                onValueChange={setMarca}
-                placeholder={isServicoCategory ? "N/A para serviços" : "Selecione uma marca"}
-                disabled={isServicoCategory}
-                className={isServicoCategory ? "bg-gray-50 text-gray-400" : ""}
-              />
-              {isServicoCategory && <p className="text-xs text-gray-500 mt-1">Marca não é aplicável para serviços</p>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* NCM */}
-            <div>
-              <Label htmlFor="ncm">NCM</Label>
-              <Input id="ncm" value={ncm} onChange={(e) => setNcm(e.target.value)} placeholder="Código NCM" />
-            </div>
-
-            {/* Unidade */}
-            <div>
-              <Label htmlFor="unidade">Unidade</Label>
-              <Select value={unidade} onValueChange={setUnidade}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="UN">Unidade</SelectItem>
-                  <SelectItem value="MT">Metro</SelectItem>
-                  <SelectItem value="PC">Peça</SelectItem>
-                  <SelectItem value="PCT">Pacote</SelectItem>
-                  <SelectItem value="CJ">Conjunto</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Valor de Custo */}
-            <div>
-              <Label htmlFor="valor_custo">Valor de Custo (R$)</Label>
-              <Input
-                id="valor_custo"
-                type="number"
-                step="0.01"
-                min="0"
-                value={valorCusto}
-                onChange={(e) => setValorCusto(Number.parseFloat(e.target.value) || 0)}
-              />
-            </div>
-
-            {/* Margem de Lucro */}
-            <div>
-              <Label htmlFor="margem_lucro">Margem de Lucro (%)</Label>
-              <Input
-                id="margem_lucro"
-                type="number"
-                step="0.01"
-                min="0"
-                value={margemLucro}
-                onChange={(e) => setMargemLucro(Number.parseFloat(e.target.value) || 0)}
-              />
-              <p className="text-xs text-gray-500 mt-1">Usado para calcular valor unitário</p>
-            </div>
-
-            {/* Valor Unitário */}
-            <div>
-              <Label htmlFor="valor_unitario">Valor Unitário (R$)</Label>
-              <div className="relative">
-                <Input
-                  id="valor_unitario"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={valorUnitario}
-                  readOnly
-                  className="bg-gray-50 text-gray-600 cursor-not-allowed"
-                />
-                <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Calculado: Custo × ((Margem/100) + 1)</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Valor Mão de Obra */}
-            <div>
-              <Label htmlFor="valor_mao_obra">Valor Mão de Obra (R$)</Label>
-              <Input
-                id="valor_mao_obra"
-                type="number"
-                step="0.01"
-                min="0"
-                value={valorMaoObra}
-                onChange={(e) => setValorMaoObra(Number.parseFloat(e.target.value) || 180)}
-              />
-              <p className="text-xs text-gray-500 mt-1">Padrão: R$ 180,00</p>
-            </div>
-
-            {/* Estoque Atual */}
-            <div>
-              <Label htmlFor="estoque_atual">Estoque Atual</Label>
-              <Input
-                id="estoque_atual"
-                type="number"
-                min="0"
-                value={estoqueAtual}
-                onChange={(e) => setEstoqueAtual(Number.parseInt(e.target.value) || 0)}
-              />
-            </div>
-
-            {/* Estoque Mínimo */}
-            <div>
-              <Label htmlFor="estoque_minimo">Estoque Mínimo</Label>
-              <Input
-                id="estoque_minimo"
-                type="number"
-                min="0"
-                value={estoqueMinimo}
-                onChange={(e) => setEstoqueMinimo(Number.parseInt(e.target.value) || 1)}
-              />
-              <p className="text-xs text-gray-500 mt-1">Padrão: 1</p>
-            </div>
-          </div>
-
-          {/* Observações */}
-          <div>
-            <Label htmlFor="observacoes">Observações</Label>
-            <Textarea
-              id="observacoes"
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
-              placeholder="Observações adicionais sobre o produto"
-              rows={3}
-              className="resize-none"
-            />
-          </div>
-
-          {/* Ativo */}
-          <div className="flex items-center space-x-2">
-            <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
-            <Label htmlFor="ativo">Produto ativo</Label>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={loading}>
-              <Save className="h-4 w-4 mr-2" />
-              {loading ? "Salvando..." : isEdicao ? "Atualizar" : "Criar Produto"}
-            </Button>
-          </div>
-        </form>
+        {renderForm()}
       </DialogContent>
     </Dialog>
   )

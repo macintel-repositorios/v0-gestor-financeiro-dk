@@ -13,6 +13,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -21,15 +28,16 @@ import { useToast } from "@/hooks/use-toast"
 import { Plus, Save, User, Lock, Search, MapPinned } from 'lucide-react'
 import { useCep } from "@/hooks/use-cep"
 import { useDistancia } from "@/hooks/use-distancia"
-
+ 
 interface ClienteFormDialogProps {
   children?: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
   onSuccess?: (cliente: any) => void
+  asDrawer?: boolean
 }
-
-export function ClienteFormDialog({ children, open, onOpenChange, onSuccess }: ClienteFormDialogProps) {
+ 
+export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asDrawer = false }: ClienteFormDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { buscarCep, loading: loadingCep } = useCep()
@@ -235,7 +243,312 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess }: C
     }
   }
 
-  const DialogComponent = (
+  const renderForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Dados Básicos */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Dados Básicos</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="nome">Nome *</Label>
+            <Input
+              id="nome"
+              value={formData.nome}
+              onChange={(e) => handleInputChange("nome", e.target.value)}
+              placeholder="Nome do cliente"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="codigo">Código *</Label>
+            <div className="relative">
+              <Input
+                id="codigo"
+                value={formData.codigo}
+                readOnly={true}
+                placeholder="Gerado automaticamente"
+                className="bg-gray-50 text-gray-600"
+              />
+              <Lock className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Gerado pelos primeiros 6 dígitos do documento</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {documentoUtilizado !== "cpf" && (
+            <div>
+              <Label htmlFor="cnpj">CNPJ</Label>
+              <Input
+                id="cnpj"
+                value={formData.cnpj}
+                onChange={(e) => handleInputChange("cnpj", e.target.value)}
+                placeholder="00.000.000/0000-00"
+                disabled={documentoUtilizado === "cpf"}
+              />
+              {documentoUtilizado === "cnpj" && (
+                <p className="text-xs text-green-600 mt-1">✓ Usado para gerar o código</p>
+              )}
+            </div>
+          )}
+          {documentoUtilizado !== "cnpj" && (
+            <div>
+              <Label htmlFor="cpf">CPF</Label>
+              <Input
+                id="cpf"
+                value={formData.cpf}
+                onChange={(e) => handleInputChange("cpf", e.target.value)}
+                placeholder="000.000.000-00"
+                disabled={documentoUtilizado === "cnpj"}
+              />
+              {documentoUtilizado === "cpf" && (
+                <p className="text-xs text-green-600 mt-1">✓ Usado para gerar o código</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Contato */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Contato</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              placeholder="email@exemplo.com"
+            />
+          </div>
+          <div>
+            <Label htmlFor="telefone">Telefone</Label>
+            <Input
+              id="telefone"
+              value={formData.telefone}
+              onChange={(e) => handleInputChange("telefone", e.target.value)}
+              placeholder="(00) 00000-0000"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Endereço */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Endereço</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="cep">CEP</Label>
+            <div className="relative">
+              <Input
+                id="cep"
+                value={formData.cep}
+                onChange={(e) => handleCepChange(e.target.value)}
+                placeholder="00000-000"
+                maxLength={9}
+              />
+              {(loadingCep || loadingDistancia) && (
+                <Search className="absolute right-3 top-2.5 h-4 w-4 text-blue-500 animate-spin" />
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Preenche endereço e distância</p>
+          </div>
+          <div>
+            <Label htmlFor="bairro">Bairro</Label>
+            <Input
+              id="bairro"
+              value={formData.bairro}
+              onChange={(e) => handleInputChange("bairro", e.target.value)}
+              placeholder="Nome do bairro"
+            />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="endereco">Endereço</Label>
+          <Textarea
+            id="endereco"
+            value={formData.endereco}
+            onChange={(e) => handleInputChange("endereco", e.target.value)}
+            placeholder="Rua, número, complemento..."
+            rows={2}
+          />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <Label htmlFor="cidade">Cidade</Label>
+            <Input
+              id="cidade"
+              value={formData.cidade}
+              onChange={(e) => handleInputChange("cidade", e.target.value)}
+              placeholder="Nome da cidade"
+            />
+          </div>
+          <div>
+            <Label htmlFor="estado">Estado</Label>
+            <Input
+              id="estado"
+              value={formData.estado}
+              onChange={(e) => handleInputChange("estado", e.target.value.toUpperCase())}
+              placeholder="SP"
+              maxLength={2}
+              className="uppercase"
+            />
+          </div>
+          <div>
+            <Label htmlFor="distancia_km">Distância (Km)</Label>
+            <div className="relative">
+              <Input
+                id="distancia_km"
+                type="number"
+                step="0.1"
+                value={formData.distancia_km}
+                readOnly={true}
+                placeholder="Calculado automaticamente"
+                className="bg-gray-50 text-gray-600"
+              />
+              <MapPinned className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Calculado pelo CEP</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Informações do Síndico */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Informações do Síndico (Opcional)</h3>
+        <div>
+          <Label htmlFor="sindico">Nome do Síndico</Label>
+          <Input
+            id="sindico"
+            value={formData.sindico}
+            onChange={(e) => handleInputChange("sindico", e.target.value)}
+            placeholder="Nome completo do síndico"
+          />
+        </div>
+      </div>
+
+      {/* Informacoes Fiscais */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Informacoes Fiscais</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="contribuinte_icms_dialog">Contribuinte ICMS</Label>
+            <Select
+              value={String(formData.contribuinte_icms)}
+              onValueChange={(value) => {
+                const numValue = Number(value)
+                handleInputChange("contribuinte_icms", numValue)
+                if (numValue !== 1) {
+                  handleInputChange("inscricao_estadual", "")
+                }
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Nao Contribuinte</SelectItem>
+                <SelectItem value="1">Contribuinte ICMS</SelectItem>
+                <SelectItem value="2">Contribuinte Isento</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500 mt-1">A maioria dos clientes e Nao Contribuinte</p>
+          </div>
+          {formData.contribuinte_icms === 1 && (
+            <div>
+              <Label htmlFor="inscricao_estadual_dialog">Inscricao Estadual *</Label>
+              <Input
+                id="inscricao_estadual_dialog"
+                value={formData.inscricao_estadual}
+                onChange={(e) => handleInputChange("inscricao_estadual", e.target.value.replace(/[^\d]/g, ""))}
+                placeholder="Ex: 123456789"
+                maxLength={14}
+                required
+              />
+              <p className="text-xs text-amber-600 mt-1">Obrigatorio para Contribuinte ICMS</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Administradora */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Administradora (Opcional)</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="nome_adm">Nome da Administradora</Label>
+            <Input
+              id="nome_adm"
+              value={formData.nome_adm}
+              onChange={(e) => handleInputChange("nome_adm", e.target.value)}
+              placeholder="Nome da administradora"
+            />
+          </div>
+          <div>
+            <Label htmlFor="contato_adm">Contato</Label>
+            <Input
+              id="contato_adm"
+              value={formData.contato_adm}
+              onChange={(e) => handleInputChange("contato_adm", e.target.value)}
+              placeholder="Nome do contato"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="telefone_adm">Telefone</Label>
+            <Input
+              id="telefone_adm"
+              value={formData.telefone_adm}
+              onChange={(e) => handleInputChange("telefone_adm", e.target.value)}
+              placeholder="(00) 00000-0000"
+            />
+          </div>
+          <div>
+            <Label htmlFor="email_adm">Email</Label>
+            <Input
+              id="email_adm"
+              type="email"
+              value={formData.email_adm}
+              onChange={(e) => handleInputChange("email_adm", e.target.value)}
+              placeholder="email@administradora.com"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-2 justify-end pt-4 border-t border-border">
+        <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={loading} className="w-full sm:w-auto">
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={loading || !formData.nome.trim() || (!formData.cnpj && !formData.cpf)} className="w-full sm:w-auto">
+          <Save className="h-4 w-4 mr-2" />
+          {loading ? "Salvando..." : "Salvar Cliente"}
+        </Button>
+      </div>
+    </form>
+  )
+
+  if (asDrawer) {
+    return (
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetContent className="w-full sm:max-w-2xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+          <SheetHeader className="mb-4">
+            <SheetTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Novo Cliente
+            </SheetTitle>
+            <SheetDescription>Cadastre um novo cliente no sistema</SheetDescription>
+          </SheetHeader>
+          {renderForm()}
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
+  return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {!isControlled && (
         <DialogTrigger asChild>
@@ -255,295 +568,8 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess }: C
           </DialogTitle>
           <DialogDescription>Cadastre um novo cliente no sistema</DialogDescription>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Dados Básicos */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Dados Básicos</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="nome">Nome *</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => handleInputChange("nome", e.target.value)}
-                  placeholder="Nome do cliente"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="codigo">Código *</Label>
-                <div className="relative">
-                  <Input
-                    id="codigo"
-                    value={formData.codigo}
-                    readOnly={true}
-                    placeholder="Gerado automaticamente"
-                    className="bg-gray-50 text-gray-600"
-                  />
-                  <Lock className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Gerado pelos primeiros 6 dígitos do documento</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {documentoUtilizado !== "cpf" && (
-                <div>
-                  <Label htmlFor="cnpj">CNPJ</Label>
-                  <Input
-                    id="cnpj"
-                    value={formData.cnpj}
-                    onChange={(e) => handleInputChange("cnpj", e.target.value)}
-                    placeholder="00.000.000/0000-00"
-                    disabled={documentoUtilizado === "cpf"}
-                  />
-                  {documentoUtilizado === "cnpj" && (
-                    <p className="text-xs text-green-600 mt-1">✓ Usado para gerar o código</p>
-                  )}
-                </div>
-              )}
-              {documentoUtilizado !== "cnpj" && (
-                <div>
-                  <Label htmlFor="cpf">CPF</Label>
-                  <Input
-                    id="cpf"
-                    value={formData.cpf}
-                    onChange={(e) => handleInputChange("cpf", e.target.value)}
-                    placeholder="000.000.000-00"
-                    disabled={documentoUtilizado === "cnpj"}
-                  />
-                  {documentoUtilizado === "cpf" && (
-                    <p className="text-xs text-green-600 mt-1">✓ Usado para gerar o código</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Contato */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Contato</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="email@exemplo.com"
-                />
-              </div>
-              <div>
-                <Label htmlFor="telefone">Telefone</Label>
-                <Input
-                  id="telefone"
-                  value={formData.telefone}
-                  onChange={(e) => handleInputChange("telefone", e.target.value)}
-                  placeholder="(00) 00000-0000"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Endereço */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Endereço</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="cep">CEP</Label>
-                <div className="relative">
-                  <Input
-                    id="cep"
-                    value={formData.cep}
-                    onChange={(e) => handleCepChange(e.target.value)}
-                    placeholder="00000-000"
-                    maxLength={9}
-                  />
-                  {(loadingCep || loadingDistancia) && (
-                    <Search className="absolute right-3 top-2.5 h-4 w-4 text-blue-500 animate-spin" />
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Preenche endereço e distância</p>
-              </div>
-              <div>
-                <Label htmlFor="bairro">Bairro</Label>
-                <Input
-                  id="bairro"
-                  value={formData.bairro}
-                  onChange={(e) => handleInputChange("bairro", e.target.value)}
-                  placeholder="Nome do bairro"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="endereco">Endereço</Label>
-              <Textarea
-                id="endereco"
-                value={formData.endereco}
-                onChange={(e) => handleInputChange("endereco", e.target.value)}
-                placeholder="Rua, número, complemento..."
-                rows={2}
-              />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="cidade">Cidade</Label>
-                <Input
-                  id="cidade"
-                  value={formData.cidade}
-                  onChange={(e) => handleInputChange("cidade", e.target.value)}
-                  placeholder="Nome da cidade"
-                />
-              </div>
-              <div>
-                <Label htmlFor="estado">Estado</Label>
-                <Input
-                  id="estado"
-                  value={formData.estado}
-                  onChange={(e) => handleInputChange("estado", e.target.value.toUpperCase())}
-                  placeholder="SP"
-                  maxLength={2}
-                  className="uppercase"
-                />
-              </div>
-              <div>
-                <Label htmlFor="distancia_km">Distância (Km)</Label>
-                <div className="relative">
-                  <Input
-                    id="distancia_km"
-                    type="number"
-                    step="0.1"
-                    value={formData.distancia_km}
-                    readOnly={true}
-                    placeholder="Calculado automaticamente"
-                    className="bg-gray-50 text-gray-600"
-                  />
-                  <MapPinned className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Calculado pelo CEP</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Informações do Síndico */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Informações do Síndico (Opcional)</h3>
-            <div>
-              <Label htmlFor="sindico">Nome do Síndico</Label>
-              <Input
-                id="sindico"
-                value={formData.sindico}
-                onChange={(e) => handleInputChange("sindico", e.target.value)}
-                placeholder="Nome completo do síndico"
-              />
-            </div>
-          </div>
-
-          {/* Informacoes Fiscais */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Informacoes Fiscais</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="contribuinte_icms_dialog">Contribuinte ICMS</Label>
-                <Select
-                  value={String(formData.contribuinte_icms)}
-                  onValueChange={(value) => {
-                    const numValue = Number(value)
-                    handleInputChange("contribuinte_icms", numValue)
-                    if (numValue !== 1) {
-                      handleInputChange("inscricao_estadual", "")
-                    }
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">Nao Contribuinte</SelectItem>
-                    <SelectItem value="1">Contribuinte ICMS</SelectItem>
-                    <SelectItem value="2">Contribuinte Isento</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-500 mt-1">A maioria dos clientes e Nao Contribuinte</p>
-              </div>
-              {formData.contribuinte_icms === 1 && (
-                <div>
-                  <Label htmlFor="inscricao_estadual_dialog">Inscricao Estadual *</Label>
-                  <Input
-                    id="inscricao_estadual_dialog"
-                    value={formData.inscricao_estadual}
-                    onChange={(e) => handleInputChange("inscricao_estadual", e.target.value.replace(/[^\d]/g, ""))}
-                    placeholder="Ex: 123456789"
-                    maxLength={14}
-                    required
-                  />
-                  <p className="text-xs text-amber-600 mt-1">Obrigatorio para Contribuinte ICMS</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Administradora */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Administradora (Opcional)</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="nome_adm">Nome da Administradora</Label>
-                <Input
-                  id="nome_adm"
-                  value={formData.nome_adm}
-                  onChange={(e) => handleInputChange("nome_adm", e.target.value)}
-                  placeholder="Nome da administradora"
-                />
-              </div>
-              <div>
-                <Label htmlFor="contato_adm">Contato</Label>
-                <Input
-                  id="contato_adm"
-                  value={formData.contato_adm}
-                  onChange={(e) => handleInputChange("contato_adm", e.target.value)}
-                  placeholder="Nome do contato"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="telefone_adm">Telefone</Label>
-                <Input
-                  id="telefone_adm"
-                  value={formData.telefone_adm}
-                  onChange={(e) => handleInputChange("telefone_adm", e.target.value)}
-                  placeholder="(00) 00000-0000"
-                />
-              </div>
-              <div>
-                <Label htmlFor="email_adm">Email</Label>
-                <Input
-                  id="email_adm"
-                  type="email"
-                  value={formData.email_adm}
-                  onChange={(e) => handleInputChange("email_adm", e.target.value)}
-                  placeholder="email@administradora.com"
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={loading} className="w-full sm:w-auto">
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={loading || !formData.nome.trim() || (!formData.cnpj && !formData.cpf)} className="w-full sm:w-auto">
-              <Save className="h-4 w-4 mr-2" />
-              {loading ? "Salvando..." : "Salvar Cliente"}
-            </Button>
-          </DialogFooter>
-        </form>
+        {renderForm()}
       </DialogContent>
     </Dialog>
   )
-
-  return DialogComponent
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -27,7 +27,9 @@ import {
   Send,
   Loader2,
   RefreshCw,
+  ChevronLeft,
   ChevronRight,
+  ArrowUpDown,
   X,
   TrendingUp,
 } from "lucide-react"
@@ -121,6 +123,8 @@ export default function FinanceiroPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [expandedBoletoId, setExpandedBoletoId] = useState<number | null>(null)
   const [expandedReciboId, setExpandedReciboId] = useState<number | null>(null)
+  const [pageIndexBoletos, setPageIndexBoletos] = useState(0)
+  const [pageIndexRecibos, setPageIndexRecibos] = useState(0)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -138,6 +142,14 @@ export default function FinanceiroPage() {
 
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
+
+  useEffect(() => {
+    setPageIndexBoletos(0)
+  }, [searchBoletos, statusFilter, periodoFilter])
+
+  useEffect(() => {
+    setPageIndexRecibos(0)
+  }, [searchRecibos])
 
   const loadLogoMenu = async () => {
     try {
@@ -578,6 +590,14 @@ export default function FinanceiroPage() {
       .reduce((acc, b) => acc + (typeof b.valor === "number" ? b.valor : 0), 0),
   }
 
+  const paginatedBoletos = useMemo(() => {
+    return filteredBoletos.slice(pageIndexBoletos * 10, (pageIndexBoletos + 1) * 10)
+  }, [filteredBoletos, pageIndexBoletos])
+
+  const paginatedRecibos = useMemo(() => {
+    return filteredRecibos.slice(pageIndexRecibos * 10, (pageIndexRecibos + 1) * 10)
+  }, [filteredRecibos, pageIndexRecibos])
+
   if (loading) {
     return (
       <div className="p-6">
@@ -837,86 +857,116 @@ export default function FinanceiroPage() {
                       )}
                     </div>
                   ) : (
-                    <ResizableTable
-                      storageKey="financeiro-boletos"
-                      columns={[
-                        { key: "numero",          label: "Número",      width: 110, sortable: true },
-                        { key: "cliente_nome",    label: "Cliente",      width: 180, sortable: true },
-                        { key: "valor",           label: "Valor",        width: 120, sortable: true },
-                        { key: "data_vencimento", label: "Vencimento",   width: 130, sortable: true },
-                        { key: "created_at",      label: "Mês Emissão", width: 130, sortable: true },
-                        { key: "status",          label: "Status",       width: 130, sortable: true },
-                        { key: "numero_parcela",  label: "Parcela",      width: 80,  sortable: true },
-                        { key: "acoes",           label: "Ações",        width: 160, sortable: false, noResize: true },
-                      ]}
-                      data={filteredBoletos}
-                      rowKey={(row) => row.id}
-                      renderCell={(boleto, col) => {
-                        switch (col) {
-                          case "numero": return <Badge variant="outline" className="font-mono">{boleto.numero}</Badge>
-                          case "cliente_nome": return <div className="font-medium text-foreground truncate">{boleto.cliente_nome}</div>
-                          case "valor": return <div className="font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(boleto.valor)}</div>
-                          case "data_vencimento":
-                            return (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                <span>{formatDate(boleto.data_vencimento)}</span>
-                              </div>
-                            )
-                          case "created_at":
-                            return (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                                <span className="text-blue-700 dark:text-blue-400 font-medium">{formatMesEmissao(boleto.created_at)}</span>
-                              </div>
-                            )
-                          case "status": return getStatusBadge(boleto.status, boleto.data_vencimento)
-                          case "numero_parcela": return <span className="text-foreground font-medium">{boleto.numero_parcela}/{boleto.total_parcelas}</span>
-                          case "acoes":
-                            return (
-                              <div className="flex gap-1 flex-wrap">
-                                <Button size="sm" variant="outline" onClick={() => handleVisualizarBoleto(boleto)}
-                                  className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                {!(boleto.status === "pago" && boleto.data_pagamento) && (
-                                  <>
-                                    {!boleto.asaas_id && (
-                                      <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
-                                        disabled={enviandoParaAsaas === boleto.id}
-                                        className="border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 h-8 w-8 p-0" title="Enviar Asaas">
-                                        {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    <>
+                      <ResizableTable
+                        storageKey="financeiro-boletos"
+                        columns={[
+                          { key: "numero",          label: "Número",      width: 110, sortable: true },
+                          { key: "cliente_nome",    label: "Cliente",      width: 180, sortable: true },
+                          { key: "valor",           label: "Valor",        width: 120, sortable: true },
+                          { key: "data_vencimento", label: "Vencimento",   width: 130, sortable: true },
+                          { key: "created_at",      label: "Mês Emissão", width: 130, sortable: true },
+                          { key: "status",          label: "Status",       width: 130, sortable: true },
+                          { key: "numero_parcela",  label: "Parcela",      width: 80,  sortable: true },
+                          { key: "acoes",           label: "Ações",        width: 160, sortable: false, noResize: true },
+                        ]}
+                        data={paginatedBoletos}
+                        rowKey={(row) => row.id}
+                        renderCell={(boleto, col) => {
+                          switch (col) {
+                            case "numero": return <Badge variant="outline" className="font-mono text-xs bg-background text-foreground border-border">{boleto.numero}</Badge>
+                            case "cliente_nome": return <div className="font-medium text-foreground truncate">{boleto.cliente_nome}</div>
+                            case "valor": return <div className="font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(boleto.valor)}</div>
+                            case "data_vencimento":
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                  <span>{formatDate(boleto.data_vencimento)}</span>
+                                </div>
+                              )
+                            case "created_at":
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                                  <span className="text-blue-700 dark:text-blue-400 font-medium">{formatMesEmissao(boleto.created_at)}</span>
+                                </div>
+                              )
+                            case "status": return getStatusBadge(boleto.status, boleto.data_vencimento)
+                            case "numero_parcela": return <span className="text-foreground font-medium">{boleto.numero_parcela}/{boleto.total_parcelas}</span>
+                            case "acoes":
+                              return (
+                                <div className="flex gap-1 flex-wrap">
+                                  <Button size="sm" variant="outline" onClick={() => handleVisualizarBoleto(boleto)}
+                                    className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  {!(boleto.status === "pago" && boleto.data_pagamento) && (
+                                    <>
+                                      {!boleto.asaas_id && (
+                                        <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
+                                          disabled={enviandoParaAsaas === boleto.id}
+                                          className="border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 h-8 w-8 p-0" title="Enviar Asaas">
+                                          {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                        </Button>
+                                      )}
+                                      {boleto.asaas_bankslip_url && (
+                                        <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
+                                          className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir">
+                                          <Printer className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                      {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
+                                        <Button size="sm" variant="outline" onClick={() => handleMarcarPago(boleto)}
+                                          className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
+                                          <CheckCircle className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                      <Button size="sm" variant="outline" onClick={() => handleEditarBoleto(boleto)}
+                                        className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
+                                        <Edit className="h-4 w-4" />
                                       </Button>
-                                    )}
-                                    {boleto.asaas_bankslip_url && (
-                                      <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
-                                        className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir">
-                                        <Printer className="h-4 w-4" />
-                                      </Button>
-                                    )}
-                                    {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
-                                      <Button size="sm" variant="outline" onClick={() => handleMarcarPago(boleto)}
-                                        className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
-                                        <CheckCircle className="h-4 w-4" />
-                                      </Button>
-                                    )}
-                                    <Button size="sm" variant="outline" onClick={() => handleEditarBoleto(boleto)}
-                                      className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                  </>
-                                )}
-                                <Button size="sm" variant="outline" onClick={() => handleExcluirBoleto(boleto)}
-                                  disabled={deletingId === boleto.id}
-                                  className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
-                                  {deletingId === boleto.id ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" /> : <Trash2 className="h-4 w-4" />}
-                                </Button>
-                              </div>
-                            )
-                          default: return null
-                        }
-                      }}
-                    />
+                                    </>
+                                  )}
+                                  <Button size="sm" variant="outline" onClick={() => handleExcluirBoleto(boleto)}
+                                    disabled={deletingId === boleto.id}
+                                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
+                                    {deletingId === boleto.id ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" /> : <Trash2 className="h-4 w-4" />}
+                                  </Button>
+                                </div>
+                              )
+                            default: return null
+                          }
+                        }}
+                      />
+
+                      {/* Pagination Controls */}
+                      <div className="p-4 border-t border-border/40 flex items-center justify-between gap-4">
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">
+                          Mostrando <span className="font-medium text-foreground">{paginatedBoletos.length}</span> de{" "}
+                          <span className="font-medium text-foreground">{filteredBoletos.length}</span> registros
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPageIndexBoletos(prev => Math.max(0, prev - 1))}
+                            disabled={pageIndexBoletos === 0}
+                            className="h-8 px-2 text-xs border-border bg-card"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPageIndexBoletos(prev => prev + 1)}
+                            disabled={(pageIndexBoletos + 1) * 10 >= filteredBoletos.length}
+                            className="h-8 px-2 text-xs border-border bg-card"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
@@ -1156,63 +1206,93 @@ export default function FinanceiroPage() {
                       )}
                     </div>
                   ) : (
-                    <ResizableTable
-                      storageKey="financeiro-recibos"
-                      columns={[
-                        { key: "numero",       label: "Número",      width: 110, sortable: true },
-                        { key: "cliente_nome", label: "Cliente",      width: 180, sortable: true },
-                        { key: "descricao",    label: "Descrição",    width: 220, sortable: false },
-                        { key: "valor",        label: "Valor",        width: 120, sortable: true },
-                        { key: "data_emissao", label: "Data Emissão", width: 130, sortable: true },
-                        { key: "acoes",        label: "Ações",        width: 120, sortable: false, noResize: true },
-                      ]}
-                      data={filteredRecibos}
-                      rowKey={(row) => row.id}
-                      renderCell={(recibo, col) => {
-                        switch (col) {
-                          case "numero": return <Badge variant="outline" className="font-mono">{recibo.numero}</Badge>
-                          case "cliente_nome": return <div className="font-medium text-foreground truncate">{recibo.cliente_nome}</div>
-                          case "descricao": return <div className="max-w-xs truncate text-muted-foreground">{recibo.descricao}</div>
-                          case "valor": return <div className="font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(recibo.valor)}</div>
-                          case "data_emissao":
-                            return (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                <span>{formatDate(recibo.data_emissao)}</span>
-                              </div>
-                            )
-                          case "acoes":
-                            return (
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline" className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-border bg-transparent h-8 w-8 p-0">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="outline" className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-border bg-transparent h-8 w-8 p-0">
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10 border-border bg-transparent h-8 w-8 p-0">
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent className="border-border bg-card text-foreground">
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
-                                      <AlertDialogDescription className="text-muted-foreground">Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel className="border-border bg-transparent hover:bg-muted text-foreground">Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700 text-white border-0">Excluir Recibo</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            )
-                          default: return null
-                        }
-                      }}
-                    />
+                    <>
+                      <ResizableTable
+                        storageKey="financeiro-recibos"
+                        columns={[
+                          { key: "numero",       label: "Número",      width: 110, sortable: true },
+                          { key: "cliente_nome", label: "Cliente",      width: 180, sortable: true },
+                          { key: "descricao",    label: "Descrição",    width: 220, sortable: false },
+                          { key: "valor",        label: "Valor",        width: 120, sortable: true },
+                          { key: "data_emissao", label: "Data Emissão", width: 130, sortable: true },
+                          { key: "acoes",        label: "Ações",        width: 120, sortable: false, noResize: true },
+                        ]}
+                        data={paginatedRecibos}
+                        rowKey={(row) => row.id}
+                        renderCell={(recibo, col) => {
+                          switch (col) {
+                            case "numero": return <Badge variant="outline" className="font-mono text-xs bg-background text-foreground border-border">{recibo.numero}</Badge>
+                            case "cliente_nome": return <div className="font-medium text-foreground truncate">{recibo.cliente_nome}</div>
+                            case "descricao": return <div className="max-w-xs truncate text-muted-foreground text-xs">{recibo.descricao}</div>
+                            case "valor": return <div className="font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(recibo.valor)}</div>
+                            case "data_emissao":
+                              return (
+                                <div className="flex items-center gap-2 text-xs">
+                                  <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                  <span>{formatDate(recibo.data_emissao)}</span>
+                                </div>
+                              )
+                            case "acoes":
+                              return (
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-border bg-transparent h-8 w-8 p-0">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="sm" variant="outline" className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-border bg-transparent h-8 w-8 p-0">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10 border-border bg-transparent h-8 w-8 p-0">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="border-border bg-card text-foreground">
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-muted-foreground">Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel className="border-border bg-transparent hover:bg-muted text-foreground">Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700 text-white border-0">Excluir Recibo</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              )
+                            default: return null
+                          }
+                        }}
+                      />
+
+                      {/* Pagination Controls */}
+                      <div className="p-4 border-t border-border/40 flex items-center justify-between gap-4">
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">
+                          Mostrando <span className="font-medium text-foreground">{paginatedRecibos.length}</span> de{" "}
+                          <span className="font-medium text-foreground">{filteredRecibos.length}</span> registros
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPageIndexRecibos(prev => Math.max(0, prev - 1))}
+                            disabled={pageIndexRecibos === 0}
+                            className="h-8 px-2 text-xs border-border bg-card"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPageIndexRecibos(prev => prev + 1)}
+                            disabled={(pageIndexRecibos + 1) * 10 >= filteredRecibos.length}
+                            className="h-8 px-2 text-xs border-border bg-card"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
