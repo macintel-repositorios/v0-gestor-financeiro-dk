@@ -31,6 +31,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { OrdemServico } from "@/types/ordem-servico"
 import { LotePreventivasDialog } from "@/components/ordem-servico/lote-preventivas-dialog"
+import { NovaOSDialog } from "@/components/ordem-servico/nova-os-dialog"
 
 export default function OrdemServicoPage() {
   const [loading, setLoading] = useState(true)
@@ -40,6 +41,7 @@ export default function OrdemServicoPage() {
   const [loteDialogOpen, setLoteDialogOpen] = useState(false)
   const [expandedOrdemId, setExpandedOrdemId] = useState<number | null>(null)
   const [pageIndex, setPageIndex] = useState(0)
+  const [isNovaOSOpen, setIsNovaOSOpen] = useState(false)
 
   const [situacaoFilter, setSituacaoFilter] = useState("todas")
   const [tipoServicoFilter, setTipoServicoFilter] = useState("todos")
@@ -372,12 +374,13 @@ export default function OrdemServicoPage() {
       </div>
 
       <div className="md:hidden">
-        <Link href="/ordem-servico/nova">
-          <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-5 shadow-xs rounded-xl">
-            <Plus className="h-5 w-5 mr-2" />
-            Nova Ordem de Serviço
-          </Button>
-        </Link>
+        <Button
+          onClick={() => setIsNovaOSOpen(true)}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-5 shadow-xs rounded-xl"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Nova Ordem de Serviço
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -517,12 +520,15 @@ export default function OrdemServicoPage() {
               <CalendarRange className="h-4 w-4 md:mr-2" />
               <span className="hidden md:inline">Preventivas em Lote</span>
             </Button>
-            <Link href="/ordem-servico/nova">
-              <Button variant="outline" size="sm" className="border-border bg-card hover:bg-muted text-foreground h-8 px-3 text-xs">
-                <Plus className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Nova OS</span>
-              </Button>
-            </Link>
+            <Button
+              onClick={() => setIsNovaOSOpen(true)}
+              variant="outline"
+              size="sm"
+              className="border-border bg-card hover:bg-muted text-foreground h-8 px-3 text-xs"
+            >
+              <Plus className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Nova OS</span>
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-4">
@@ -800,6 +806,7 @@ export default function OrdemServicoPage() {
       </Card>
 
       <LotePreventivasDialog open={loteDialogOpen} onOpenChange={setLoteDialogOpen} onSuccess={carregarDados} />
+      <NovaOSDialog open={isNovaOSOpen} onOpenChange={setIsNovaOSOpen} onSuccess={carregarDados} />
     </div>
   )
 }
