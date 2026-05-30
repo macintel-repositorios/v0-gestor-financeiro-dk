@@ -203,12 +203,13 @@ export async function GET(request: NextRequest) {
           const aprovados = (orcamentosData as any[]).filter((o) => o.situacao === "aprovado").length
           const pendentes = (orcamentosData as any[]).filter((o) => o.situacao === "pendente").length
           const rejeitados = (orcamentosData as any[]).filter((o) => o.situacao === "rejeitado").length
+          const concluidos = (orcamentosData as any[]).filter((o) => o.situacao === "concluido" || o.situacao === "concluído").length
 
           data = {
             orcamentos: orcamentosData,
             total: totalOrcamentos,
             valorTotal,
-            estatisticas: { aprovados, pendentes, rejeitados },
+            estatisticas: { aprovados, pendentes, rejeitados, concluidos },
             filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr },
           }
           break
@@ -338,6 +339,213 @@ export async function GET(request: NextRequest) {
               tecnicos: Object.entries(tecnicosOsMap).map(([nome, total]) => ({ nome, total }))
             },
             filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr }
+          }
+          break
+
+        case "notas_fiscais":
+          let nfQuery = `
+            SELECT 
+              nf.id, nf.numero_nfe as numero, nf.serie, nf.chave_acesso, nf.valor_total as valor,
+              nf.status, nf.data_emissao, c.nome as cliente_nome
+            FROM nfe_emitidas nf
+            LEFT JOIN clientes c ON nf.cliente_id = c.id
+            WHERE DATE(nf.data_emissao) BETWEEN ? AND ?
+          `
+          const nfParams: any[] = [startDateStr, endDateStr]
+          if (status && status !== "todos") {
+            nfQuery += ` AND nf.status = ?`
+            nfParams.push(status)
+          }
+          if (clienteId && clienteId !== "todos") {
+            nfQuery += ` AND nf.cliente_id = ?`
+            nfParams.push(clienteId)
+          }
+          nfQuery += ` ORDER BY nf.data_emissao DESC`
+          const [nfData] = await pool.execute(nfQuery, nfParams)
+          const totalNf = (nfData as any[]).length
+          const valorTotalNf = (nfData as any[]).reduce((sum, n) => sum + (Number.parseFloat(n.valor) || 0), 0)
+          const autorizadas = (nfData as any[]).filter(n => n.status === "autorizada" || n.status === "transmitida" || n.status === "sucesso").length
+          const canceladasNf = (nfData as any[]).filter(n => n.status === "cancelada" || n.status === "cancelado").length
+          data = {
+            notasFiscais: nfData,
+            total: totalNf,
+            valorTotal: valorTotalNf,
+            estatisticas: { autorizadas, canceladas: canceladasNf },
+            filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr }
+          }
+          break
+
+        case "propostas_contratos":
+          let propQuery = `
+            SELECT 
+              p.id, p.numero, p.valor_total_proposta as valor, p.status, p.data_proposta, p.tipo,
+              c.nome as cliente_nome
+            FROM proposta_contratos p
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            WHERE DATE(p.data_proposta) BETWEEN ? AND ?
+          `
+          const propParams: any[] = [startDateStr, endDateStr]
+          if (status && status !== "todos") {
+            propQuery += ` AND p.status = ?`
+            propParams.push(status)
+          }
+          if (clienteId && clienteId !== "todos") {
+            propQuery += ` AND p.cliente_id = ?`
+            propParams.push(clienteId)
+          }
+          propQuery += ` ORDER BY p.data_proposta DESC`
+          const [propData] = await pool.execute(propQuery, propParams)
+          const totalProp = (propData as any[]).length
+          const valorTotalProp = (propData as any[]).reduce((sum, p) => sum + (Number.parseFloat(p.valor) || 0), 0)
+          const rascunhosProp = (propData as any[]).filter(p => p.status === "rascunho").length
+          const enviadasProp = (propData as any[]).filter(p => p.status === "enviada").length
+          const aprovadasProp = (propData as any[]).filter(p => p.status === "aprovada" || p.status === "aprovado").length
+          const rejeitadasProp = (propData as any[]).filter(p => p.status === "rejeitada" || p.status === "rejeitado").length
+          data = {
+            propostas: propData,
+            total: totalProp,
+            valorTotal: valorTotalProp,
+            estatisticas: { rascunhos: rascunhosProp, enviadas: enviadasProp, aprovadas: aprovadasProp, rejeitadas: rejeitadasProp },
+            filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr }
+          }
+          break
+
+        case "contratos_ativos":
+          let contQuery = `
+            SELECT 
+              cc.id, cc.numero, cc.valor_mensal as valor, cc.status, cc.data_inicio, cc.data_fim,
+              c.nome as cliente_nome
+            FROM contratos_conservacao cc
+            LEFT JOIN clientes c ON cc.cliente_id = c.id
+            WHERE DATE(cc.data_inicio) BETWEEN ? AND ?
+          `
+          const contParams: any[] = [startDateStr, endDateStr]
+          if (status && status !== "todos") {
+            contQuery += ` AND cc.status = ?`
+            contParams.push(status)
+          }
+          if (clienteId && clienteId !== "todos") {
+            contQuery += ` AND cc.cliente_id = ?`
+            contParams.push(clienteId)
+          }
+          contQuery += ` ORDER BY cc.data_inicio DESC`
+          const [contData] = await pool.execute(contQuery, contParams)
+          const totalCont = (contData as any[]).length
+          const valorTotalCont = (contData as any[]).reduce((sum, c) => sum + (Number.parseFloat(c.valor) || 0), 0)
+          const ativosCont = (contData as any[]).filter(c => c.status === "ativo").length
+          const suspensosCont = (contData as any[]).filter(c => c.status === "suspenso").length
+          const canceladosCont = (contData as any[]).filter(c => c.status === "cancelado").length
+          data = {
+            contratos: contData,
+            total: totalCont,
+            valorTotal: valorTotalCont,
+            estatisticas: { ativos: ativosCont, suspensos: suspensosCont, cancelados: canceladosCont },
+            filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr }
+          }
+          break
+
+        case "usuarios":
+          let userQuery = `
+            SELECT 
+              u.id, u.nome, u.email, u.tipo, u.ativo, u.created_at
+            FROM usuarios u
+            WHERE 1=1
+          `
+          const userParams: any[] = []
+          if (status && status !== "todos") {
+            const isAtivo = status === "ativo" ? 1 : 0
+            userQuery += ` AND u.ativo = ?`
+            userParams.push(isAtivo)
+          }
+          userQuery += ` ORDER BY u.nome ASC`
+          const [userData] = await pool.execute(userQuery, userParams)
+          const totalUser = (userData as any[]).length
+          const ativosUser = (userData as any[]).filter(u => u.ativo === 1 || u.ativo === true).length
+          const inativosUser = totalUser - ativosUser
+          data = {
+            usuarios: userData,
+            total: totalUser,
+            estatisticas: { ativos: ativosUser, inativos: inativosUser },
+            filtros: { status }
+          }
+          break
+
+        case "logs_sistema":
+          let logQuery = `
+            SELECT 
+              l.id, l.usuario_nome, l.acao, l.modulo, l.tipo, l.ip_address, l.data_hora
+            FROM logs_sistema l
+            WHERE DATE(l.data_hora) BETWEEN ? AND ?
+          `
+          const logParams: any[] = [startDateStr, endDateStr]
+          if (status && status !== "todos") {
+            logQuery += ` AND l.tipo = ?`
+            logParams.push(status)
+          }
+          logQuery += ` ORDER BY l.data_hora DESC LIMIT 500`
+          const [logData] = await pool.execute(logQuery, logParams)
+          const totalLog = (logData as any[]).length
+          const infoLogs = (logData as any[]).filter(l => l.tipo?.toLowerCase() === "info").length
+          const warnLogs = (logData as any[]).filter(l => l.tipo?.toLowerCase() === "warning" || l.tipo?.toLowerCase() === "warn").length
+          const errorLogs = (logData as any[]).filter(l => l.tipo?.toLowerCase() === "error").length
+          data = {
+            logs: logData,
+            total: totalLog,
+            estatisticas: { info: infoLogs, warning: warnLogs, error: errorLogs },
+            filtros: { status, dataInicio: startDateStr, dataFim: endDateStr }
+          }
+          break
+
+        case "feriados":
+          let ferQuery = `
+            SELECT 
+              f.id, f.data, f.nome, f.tipo, f.recorrente, f.ativo
+            FROM feriados f
+            WHERE 1=1
+          `
+          const ferParams: any[] = []
+          if (status && status !== "todos") {
+            ferQuery += ` AND f.tipo = ?`
+            ferParams.push(status)
+          }
+          ferQuery += ` ORDER BY f.data ASC`
+          const [ferData] = await pool.execute(ferQuery, ferParams)
+          const totalFer = (ferData as any[]).length
+          const nacionais = (ferData as any[]).filter(f => f.tipo === "nacional").length
+          const estaduais = (ferData as any[]).filter(f => f.tipo === "estadual").length
+          const municipais = (ferData as any[]).filter(f => f.tipo === "municipal").length
+          const personalizados = (ferData as any[]).filter(f => f.tipo === "personalizado").length
+          data = {
+            feriados: ferData,
+            total: totalFer,
+            estatisticas: { nacionais, estaduais, municipais, personalizados },
+            filtros: { status }
+          }
+          break
+
+        case "equipamentos":
+          let equipQuery = `
+            SELECT 
+              e.id, e.nome, e.categoria, e.valor_hora, e.descricao, e.ativo
+            FROM equipamentos e
+            WHERE 1=1
+          `
+          const equipParams: any[] = []
+          if (status && status !== "todos") {
+            const isAtivo = status === "ativo" ? 1 : 0
+            equipQuery += ` AND e.ativo = ?`
+            equipParams.push(isAtivo)
+          }
+          equipQuery += ` ORDER BY e.nome ASC`
+          const [equipData] = await pool.execute(equipQuery, equipParams)
+          const totalEquip = (equipData as any[]).length
+          const ativosEquip = (equipData as any[]).filter(e => e.ativo === 1 || e.ativo === true).length
+          const inativosEquip = totalEquip - ativosEquip
+          data = {
+            equipamentos: equipData,
+            total: totalEquip,
+            estatisticas: { ativos: ativosEquip, inativos: inativosEquip },
+            filtros: { status }
           }
           break
 

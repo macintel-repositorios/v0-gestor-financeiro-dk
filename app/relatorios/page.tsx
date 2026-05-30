@@ -251,6 +251,27 @@ export default function RelatoriosPage() {
       case "produtos":
         nome += "de Produtos & Serviços"
         break
+      case "notas_fiscais":
+        nome += "de Notas Fiscais"
+        break
+      case "propostas_contratos":
+        nome += "de Propostas de Contratos"
+        break
+      case "contratos_ativos":
+        nome += "de Contratos Ativos"
+        break
+      case "usuarios":
+        nome += "de Usuários"
+        break
+      case "logs_sistema":
+        nome += "de Logs do Sistema"
+        break
+      case "feriados":
+        nome += "de Feriados"
+        break
+      case "equipamentos":
+        nome += "de Equipamentos"
+        break
       default:
         nome += "Geral"
     }
@@ -263,6 +284,7 @@ export default function RelatoriosPage() {
       if (status === "pendente") statusLabel = "Pendentes"
       if (status === "aprovado") statusLabel = "Aprovados"
       if (status === "rejeitado") statusLabel = "Rejeitados"
+      if (status === "concluido" || status === "concluído") statusLabel = "Concluídos"
       if (status === "finalizada") statusLabel = "Finalizadas"
       if (status === "agendada") statusLabel = "Agendadas"
       if (status === "em_andamento") statusLabel = "Em Andamento"
@@ -270,6 +292,20 @@ export default function RelatoriosPage() {
       if (status === "rascunho") statusLabel = "Rascunhos"
       if (status === "baixo_estoque") statusLabel = "Baixo Estoque"
       if (status === "sem_estoque") statusLabel = "Sem Estoque"
+      if (status === "autorizada") statusLabel = "Autorizadas"
+      if (status === "enviada") statusLabel = "Enviadas"
+      if (status === "aprovada") statusLabel = "Aprovadas"
+      if (status === "rejeitada") statusLabel = "Rejeitadas"
+      if (status === "ativo") statusLabel = "Ativos"
+      if (status === "suspenso") statusLabel = "Suspensos"
+      if (status === "finalizado") statusLabel = "Finalizados"
+      if (status === "info") statusLabel = "Informação"
+      if (status === "warning") statusLabel = "Aviso"
+      if (status === "error") statusLabel = "Erro"
+      if (status === "nacional") statusLabel = "Nacionais"
+      if (status === "estadual") statusLabel = "Estaduais"
+      if (status === "municipal") statusLabel = "Municipais"
+      if (status === "personalizado") statusLabel = "Personalizados"
       
       nome += ` (${statusLabel})`
     }
@@ -310,10 +346,40 @@ export default function RelatoriosPage() {
       rows = (relatorioData.boletos as any[]).map((b: any) => [
         b.numero, b.cliente_nome, formatDate(b.data_vencimento), b.data_pagamento ? formatDate(b.data_pagamento) : "-", b.valor, b.status
       ])
-    } else if (tipoRelatorio === "ordens_servico" && relatorioData.ordensServico) {
-      headers = ["Número", "Cliente", "Técnico", "Tipo Serviço", "Data Agendamento", "Status"]
-      rows = (relatorioData.ordensServico as any[]).map((os: any) => [
-        os.numero, os.cliente_nome, os.tecnico_name, os.tipo_servico, os.data_agendamento ? formatDate(os.data_agendamento) : "-", os.situacao
+    } else if (tipoRelatorio === "notas_fiscais" && relatorioData.notasFiscais) {
+      headers = ["Número NF-e", "Série", "Chave de Acesso", "Cliente", "Data Emissão", "Valor Total", "Status"]
+      rows = relatorioData.notasFiscais.map((nf: any) => [
+        nf.numero, nf.serie, nf.chave_acesso, nf.cliente_nome, formatDate(nf.data_emissao), nf.valor, nf.status
+      ])
+    } else if (tipoRelatorio === "propostas_contratos" && relatorioData.propostas) {
+      headers = ["Número Proposta", "Cliente", "Data Proposta", "Tipo", "Valor Total", "Status"]
+      rows = relatorioData.propostas.map((p: any) => [
+        p.numero, p.cliente_nome, formatDate(p.data_proposta), p.tipo, p.valor, p.status
+      ])
+    } else if (tipoRelatorio === "contratos_ativos" && relatorioData.contratos) {
+      headers = ["Número Contrato", "Cliente", "Data Início", "Data Fim", "Valor Mensal", "Status"]
+      rows = relatorioData.contratos.map((c: any) => [
+        c.numero, c.cliente_nome, formatDate(c.data_inicio), c.data_fim ? formatDate(c.data_fim) : "-", c.valor, c.status
+      ])
+    } else if (tipoRelatorio === "usuarios" && relatorioData.usuarios) {
+      headers = ["ID", "Nome", "Email", "Tipo", "Ativo", "Data Criação"]
+      rows = relatorioData.usuarios.map((u: any) => [
+        u.id, u.nome, u.email, u.tipo, u.ativo ? "Sim" : "Não", formatDate(u.created_at)
+      ])
+    } else if (tipoRelatorio === "logs_sistema" && relatorioData.logs) {
+      headers = ["ID", "Usuário", "Ação", "Módulo", "Tipo", "IP", "Data/Hora"]
+      rows = relatorioData.logs.map((l: any) => [
+        l.id, l.usuario_nome, l.acao, l.modulo, l.tipo, l.ip_address, formatDate(l.data_hora)
+      ])
+    } else if (tipoRelatorio === "feriados" && relatorioData.feriados) {
+      headers = ["Data", "Nome", "Tipo", "Recorrente", "Ativo"]
+      rows = relatorioData.feriados.map((f: any) => [
+        formatDate(f.data), f.nome, f.tipo, f.recorrente ? "Sim" : "Não", f.ativo ? "Sim" : "Não"
+      ])
+    } else if (tipoRelatorio === "equipamentos" && relatorioData.equipamentos) {
+      headers = ["ID", "Nome", "Categoria", "Valor Hora", "Descrição", "Ativo"]
+      rows = relatorioData.equipamentos.map((e: any) => [
+        e.id, e.nome, e.categoria, e.valor_hora, e.descricao || "-", e.ativo ? "Sim" : "Não"
       ])
     }
 
@@ -362,6 +428,13 @@ export default function RelatoriosPage() {
               <SelectItem value="ordens_servico">🔧 Relatório de Ordens de Serviço</SelectItem>
               <SelectItem value="clientes">👥 Relatório de Clientes</SelectItem>
               <SelectItem value="produtos">📦 Relatório de Produtos</SelectItem>
+              <SelectItem value="notas_fiscais">🧾 Relatório de Notas Fiscais</SelectItem>
+              <SelectItem value="propostas_contratos">💼 Relatório de Propostas de Contrato</SelectItem>
+              <SelectItem value="contratos_ativos">🤝 Relatório de Contratos Ativos</SelectItem>
+              <SelectItem value="usuarios">👥 Relatório de Usuários</SelectItem>
+              <SelectItem value="logs_sistema">📋 Relatório de Logs do Sistema</SelectItem>
+              <SelectItem value="feriados">📅 Relatório de Feriados</SelectItem>
+              <SelectItem value="equipamentos">🛠️ Relatório de Equipamentos</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -411,7 +484,7 @@ export default function RelatoriosPage() {
         )}
 
         {/* Filtros de Status */}
-        {(tipoRelatorio === "orcamentos" || tipoRelatorio === "financeiro" || tipoRelatorio === "ordens_servico") && (
+        {(tipoRelatorio === "orcamentos" || tipoRelatorio === "financeiro" || tipoRelatorio === "ordens_servico" || tipoRelatorio === "notas_fiscais" || tipoRelatorio === "propostas_contratos" || tipoRelatorio === "contratos_ativos" || tipoRelatorio === "usuarios" || tipoRelatorio === "logs_sistema" || tipoRelatorio === "feriados" || tipoRelatorio === "equipamentos") && (
           <div>
             <Label htmlFor="status" className="font-semibold text-gray-700">Status</Label>
             <Select value={status} onValueChange={setStatus}>
@@ -425,6 +498,7 @@ export default function RelatoriosPage() {
                     <SelectItem value="pendente">Pendentes</SelectItem>
                     <SelectItem value="aprovado">Aprovados</SelectItem>
                     <SelectItem value="rejeitado">Rejeitados</SelectItem>
+                    <SelectItem value="concluido">Concluídos</SelectItem>
                   </>
                 )}
                 {tipoRelatorio === "financeiro" && (
@@ -442,6 +516,50 @@ export default function RelatoriosPage() {
                     <SelectItem value="em_andamento">Em Andamento</SelectItem>
                     <SelectItem value="finalizada">Finalizada</SelectItem>
                     <SelectItem value="cancelada">Cancelada</SelectItem>
+                  </>
+                )}
+                {tipoRelatorio === "notas_fiscais" && (
+                  <>
+                    <SelectItem value="autorizada">Autorizadas</SelectItem>
+                    <SelectItem value="cancelada">Canceladas</SelectItem>
+                    <SelectItem value="erro">Com Erro</SelectItem>
+                  </>
+                )}
+                {tipoRelatorio === "propostas_contratos" && (
+                  <>
+                    <SelectItem value="rascunho">Rascunho</SelectItem>
+                    <SelectItem value="enviada">Enviada</SelectItem>
+                    <SelectItem value="aprovada">Aprovada</SelectItem>
+                    <SelectItem value="rejeitada">Rejeitada</SelectItem>
+                  </>
+                )}
+                {tipoRelatorio === "contratos_ativos" && (
+                  <>
+                    <SelectItem value="ativo">Ativo</SelectItem>
+                    <SelectItem value="suspenso">Suspenso</SelectItem>
+                    <SelectItem value="cancelado">Cancelado</SelectItem>
+                    <SelectItem value="finalizado">Finalizado</SelectItem>
+                  </>
+                )}
+                {(tipoRelatorio === "usuarios" || tipoRelatorio === "equipamentos") && (
+                  <>
+                    <SelectItem value="ativo">Ativos</SelectItem>
+                    <SelectItem value="inativo">Inativos</SelectItem>
+                  </>
+                )}
+                {tipoRelatorio === "logs_sistema" && (
+                  <>
+                    <SelectItem value="info">Informação (Info)</SelectItem>
+                    <SelectItem value="warning">Aviso (Warning)</SelectItem>
+                    <SelectItem value="error">Erro (Error)</SelectItem>
+                  </>
+                )}
+                {tipoRelatorio === "feriados" && (
+                  <>
+                    <SelectItem value="nacional">Nacional</SelectItem>
+                    <SelectItem value="estadual">Estadual</SelectItem>
+                    <SelectItem value="municipal">Municipal</SelectItem>
+                    <SelectItem value="personalizado">Personalizado</SelectItem>
                   </>
                 )}
               </SelectContent>
@@ -485,7 +603,7 @@ export default function RelatoriosPage() {
         )}
 
         {/* Cliente */}
-        {(tipoRelatorio === "clientes" || tipoRelatorio === "orcamentos" || tipoRelatorio === "financeiro" || tipoRelatorio === "ordens_servico") && (
+        {(tipoRelatorio === "clientes" || tipoRelatorio === "orcamentos" || tipoRelatorio === "financeiro" || tipoRelatorio === "ordens_servico" || tipoRelatorio === "notas_fiscais" || tipoRelatorio === "propostas_contratos" || tipoRelatorio === "contratos_ativos") && (
           <div>
             <Label htmlFor="cliente" className="font-semibold text-gray-700">Cliente</Label>
             <ClienteFilter value={clienteId} onValueChange={setClienteId} clientes={clientes} />
@@ -1116,6 +1234,13 @@ export default function RelatoriosPage() {
                 {tipoRelatorio === "orcamentos" && renderOrcamentos()}
                 {tipoRelatorio === "financeiro" && renderFinanceiro()}
                 {tipoRelatorio === "ordens_servico" && renderOrdensServico()}
+                {tipoRelatorio === "notas_fiscais" && renderNotasFiscais()}
+                {tipoRelatorio === "propostas_contratos" && renderPropostasContratos()}
+                {tipoRelatorio === "contratos_ativos" && renderContratosAtivos()}
+                {tipoRelatorio === "usuarios" && renderUsuarios()}
+                {tipoRelatorio === "logs_sistema" && renderLogs()}
+                {tipoRelatorio === "feriados" && renderFeriados()}
+                {tipoRelatorio === "equipamentos" && renderEquipamentos()}
               </div>
             )}
 
@@ -1206,6 +1331,73 @@ export default function RelatoriosPage() {
                         <th className="p-2">Situação</th>
                       </>
                     )}
+                    {tipoRelatorio === "notas_fiscais" && (
+                      <>
+                        <th className="p-2 border-r border-gray-300">Nº / Série</th>
+                        <th className="p-2 border-r border-gray-300">Chave de Acesso</th>
+                        <th className="p-2 border-r border-gray-300">Cliente</th>
+                        <th className="p-2 border-r border-gray-300">Emissão</th>
+                        <th className="p-2 border-r border-gray-300 text-right">Valor</th>
+                        <th className="p-2">Status</th>
+                      </>
+                    )}
+                    {tipoRelatorio === "propostas_contratos" && (
+                      <>
+                        <th className="p-2 border-r border-gray-300">Nº Proposta</th>
+                        <th className="p-2 border-r border-gray-300">Cliente</th>
+                        <th className="p-2 border-r border-gray-300">Data Proposta</th>
+                        <th className="p-2 border-r border-gray-300">Tipo</th>
+                        <th className="p-2 border-r border-gray-300 text-right">Valor Total</th>
+                        <th className="p-2">Status</th>
+                      </>
+                    )}
+                    {tipoRelatorio === "contratos_ativos" && (
+                      <>
+                        <th className="p-2 border-r border-gray-300">Nº Contrato</th>
+                        <th className="p-2 border-r border-gray-300">Cliente</th>
+                        <th className="p-2 border-r border-gray-300">Início</th>
+                        <th className="p-2 border-r border-gray-300">Fim / Vencimento</th>
+                        <th className="p-2 border-r border-gray-300 text-right">Valor Mensal</th>
+                        <th className="p-2">Status</th>
+                      </>
+                    )}
+                    {tipoRelatorio === "usuarios" && (
+                      <>
+                        <th className="p-2 border-r border-gray-300">Nome</th>
+                        <th className="p-2 border-r border-gray-300 font-mono">E-mail</th>
+                        <th className="p-2 border-r border-gray-300">Nível / Tipo</th>
+                        <th className="p-2 border-r border-gray-300">Criado em</th>
+                        <th className="p-2 text-center">Status</th>
+                      </>
+                    )}
+                    {tipoRelatorio === "logs_sistema" && (
+                      <>
+                        <th className="p-2 border-r border-gray-300">Data/Hora</th>
+                        <th className="p-2 border-r border-gray-300">Usuário</th>
+                        <th className="p-2 border-r border-gray-300">Ação</th>
+                        <th className="p-2 border-r border-gray-300">Módulo</th>
+                        <th className="p-2 border-r border-gray-300">Tipo</th>
+                        <th className="p-2 font-mono">Endereço IP</th>
+                      </>
+                    )}
+                    {tipoRelatorio === "feriados" && (
+                      <>
+                        <th className="p-2 border-r border-gray-300">Data</th>
+                        <th className="p-2 border-r border-gray-300">Nome</th>
+                        <th className="p-2 border-r border-gray-300">Tipo</th>
+                        <th className="p-2 border-r border-gray-300 text-center">Recorrente</th>
+                        <th className="p-2 text-center">Status</th>
+                      </>
+                    )}
+                    {tipoRelatorio === "equipamentos" && (
+                      <>
+                        <th className="p-2 border-r border-gray-300">Nome</th>
+                        <th className="p-2 border-r border-gray-300">Categoria</th>
+                        <th className="p-2 border-r border-gray-300 text-right">Valor Hora</th>
+                        <th className="p-2 border-r border-gray-300">Descrição</th>
+                        <th className="p-2 text-center">Status</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-300">
@@ -1254,6 +1446,73 @@ export default function RelatoriosPage() {
                       <td className="p-2 uppercase">{os.situacao}</td>
                     </tr>
                   ))}
+                  {tipoRelatorio === "notas_fiscais" && relatorioData.notasFiscais?.map((nf: any) => (
+                    <tr key={nf.id}>
+                      <td className="p-2 border-r border-gray-300 font-mono">#{nf.numero} / S.{nf.serie}</td>
+                      <td className="p-2 border-r border-gray-300 font-mono text-[9px]">{nf.chave_acesso || "-"}</td>
+                      <td className="p-2 border-r border-gray-300">{nf.cliente_nome}</td>
+                      <td className="p-2 border-r border-gray-300">{formatDate(nf.data_emissao)}</td>
+                      <td className="p-2 text-right font-bold">{formatCurrency(nf.valor)}</td>
+                      <td className="p-2 uppercase">{nf.status}</td>
+                    </tr>
+                  ))}
+                  {tipoRelatorio === "propostas_contratos" && relatorioData.propostas?.map((p: any) => (
+                    <tr key={p.id}>
+                      <td className="p-2 border-r border-gray-300 font-mono">#{p.numero}</td>
+                      <td className="p-2 border-r border-gray-300">{p.cliente_nome}</td>
+                      <td className="p-2 border-r border-gray-300">{formatDate(p.data_proposta)}</td>
+                      <td className="p-2 border-r border-gray-300 uppercase">{p.tipo}</td>
+                      <td className="p-2 text-right font-bold">{formatCurrency(p.valor)}</td>
+                      <td className="p-2 uppercase">{p.status}</td>
+                    </tr>
+                  ))}
+                  {tipoRelatorio === "contratos_ativos" && relatorioData.contratos?.map((c: any) => (
+                    <tr key={c.id}>
+                      <td className="p-2 border-r border-gray-300 font-mono">#{c.numero}</td>
+                      <td className="p-2 border-r border-gray-300">{c.cliente_nome}</td>
+                      <td className="p-2 border-r border-gray-300">{formatDate(c.data_inicio)}</td>
+                      <td className="p-2 border-r border-gray-300">{c.data_fim ? formatDate(c.data_fim) : "Indeterminado"}</td>
+                      <td className="p-2 text-right font-bold">{formatCurrency(c.valor)}</td>
+                      <td className="p-2 uppercase">{c.status}</td>
+                    </tr>
+                  ))}
+                  {tipoRelatorio === "usuarios" && relatorioData.usuarios?.map((u: any) => (
+                    <tr key={u.id}>
+                      <td className="p-2 border-r border-gray-300">{u.nome}</td>
+                      <td className="p-2 border-r border-gray-300 font-mono">{u.email}</td>
+                      <td className="p-2 border-r border-gray-300 uppercase">{u.tipo}</td>
+                      <td className="p-2 border-r border-gray-300">{formatDate(u.created_at)}</td>
+                      <td className="p-2 text-center">{u.ativo ? "ATIVO" : "INATIVO"}</td>
+                    </tr>
+                  ))}
+                  {tipoRelatorio === "logs_sistema" && relatorioData.logs?.map((l: any) => (
+                    <tr key={l.id}>
+                      <td className="p-2 border-r border-gray-300 font-mono">{formatDate(l.data_hora)}</td>
+                      <td className="p-2 border-r border-gray-300">{l.usuario_nome || "Sistema"}</td>
+                      <td className="p-2 border-r border-gray-300">{l.acao}</td>
+                      <td className="p-2 border-r border-gray-300 uppercase">{l.modulo}</td>
+                      <td className="p-2 border-r border-gray-300 uppercase">{l.tipo}</td>
+                      <td className="p-2 font-mono">{l.ip_address || "-"}</td>
+                    </tr>
+                  ))}
+                  {tipoRelatorio === "feriados" && relatorioData.feriados?.map((f: any) => (
+                    <tr key={f.id}>
+                      <td className="p-2 border-r border-gray-300">{formatDate(f.data)}</td>
+                      <td className="p-2 border-r border-gray-300">{f.nome}</td>
+                      <td className="p-2 border-r border-gray-300 uppercase">{f.tipo}</td>
+                      <td className="p-2 border-r border-gray-300 text-center">{f.recorrente ? "SIM" : "NÃO"}</td>
+                      <td className="p-2 text-center">{f.ativo ? "ATIVO" : "INATIVO"}</td>
+                    </tr>
+                  ))}
+                  {tipoRelatorio === "equipamentos" && relatorioData.equipamentos?.map((e: any) => (
+                    <tr key={e.id}>
+                      <td className="p-2 border-r border-gray-300">{e.nome}</td>
+                      <td className="p-2 border-r border-gray-300 uppercase">{e.categoria}</td>
+                      <td className="p-2 border-r border-gray-300 text-right">{formatCurrency(e.valor_hora)}</td>
+                      <td className="p-2 border-r border-gray-300 text-[10px]">{e.descricao || "-"}</td>
+                      <td className="p-2 text-center">{e.ativo ? "ATIVO" : "INATIVO"}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -1283,7 +1542,7 @@ export default function RelatoriosPage() {
               )}
 
               {tipoRelatorio === "orcamentos" && (
-                <div className="grid grid-cols-4 gap-4 text-center">
+                <div className="grid grid-cols-5 gap-4 text-center">
                   <div className="border border-gray-300 p-2 rounded">
                     <div className="text-[10px] uppercase text-gray-500 font-bold">Total Orçamentos</div>
                     <div className="text-sm font-bold">{relatorioData.total || 0}</div>
@@ -1291,7 +1550,7 @@ export default function RelatoriosPage() {
                   </div>
                   <div className="border border-gray-300 p-2 rounded bg-gray-50">
                     <div className="text-[10px] uppercase text-gray-500 font-bold">Aprovados</div>
-                    <div className="text-sm font-bold">{relatorioData.estatisticas?.aprovados || 0}</div>
+                    <div className="text-sm font-bold text-green-700">{relatorioData.estatisticas?.aprovados || 0}</div>
                   </div>
                   <div className="border border-gray-300 p-2 rounded">
                     <div className="text-[10px] uppercase text-gray-500 font-bold">Pendentes</div>
@@ -1299,7 +1558,11 @@ export default function RelatoriosPage() {
                   </div>
                   <div className="border border-gray-300 p-2 rounded">
                     <div className="text-[10px] uppercase text-gray-500 font-bold">Rejeitados</div>
-                    <div className="text-sm font-bold">{relatorioData.estatisticas?.rejeitados || 0}</div>
+                    <div className="text-sm font-bold text-red-600">{relatorioData.estatisticas?.rejeitados || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Concluídos</div>
+                    <div className="text-sm font-bold text-blue-600">{relatorioData.estatisticas?.concluidos || 0}</div>
                   </div>
                 </div>
               )}
@@ -1340,6 +1603,132 @@ export default function RelatoriosPage() {
                 <div className="border border-gray-300 p-3 rounded">
                   <div className="text-[10px] uppercase text-gray-500 font-bold">Total de Itens / Produtos no Catálogo</div>
                   <div className="text-xl font-bold">{relatorioData.total || 0} itens listados</div>
+                </div>
+              )}
+
+              {tipoRelatorio === "notas_fiscais" && (
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Total Faturado</div>
+                    <div className="text-lg font-bold">{formatCurrency(relatorioData.valorTotal || 0)}</div>
+                    <div className="text-[10px] text-gray-600">({relatorioData.total || 0} notas)</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded bg-gray-50">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Autorizadas</div>
+                    <div className="text-sm font-bold text-green-700">{relatorioData.estatisticas?.autorizadas || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Canceladas</div>
+                    <div className="text-sm font-bold text-red-600">{relatorioData.estatisticas?.canceladas || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "propostas_contratos" && (
+                <div className="grid grid-cols-4 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Valor Total Proposta</div>
+                    <div className="text-lg font-bold">{formatCurrency(relatorioData.valorTotal || 0)}</div>
+                    <div className="text-[10px] text-gray-600">({relatorioData.total || 0} propostas)</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded bg-gray-50">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Aprovadas</div>
+                    <div className="text-sm font-bold text-green-700">{relatorioData.estatisticas?.aprovadas || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Enviadas</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.enviadas || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Rejeitadas</div>
+                    <div className="text-sm font-bold text-red-650">{relatorioData.estatisticas?.rejeitadas || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "contratos_ativos" && (
+                <div className="grid grid-cols-4 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Mensalidade Total</div>
+                    <div className="text-lg font-bold">{formatCurrency(relatorioData.valorTotal || 0)}/mês</div>
+                    <div className="text-[10px] text-gray-600">({relatorioData.total || 0} contratos)</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded bg-gray-50">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Ativos</div>
+                    <div className="text-sm font-bold text-green-700">{relatorioData.estatisticas?.ativos || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Suspensos</div>
+                    <div className="text-sm font-bold text-amber-700">{relatorioData.estatisticas?.suspensos || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Cancelados</div>
+                    <div className="text-sm font-bold text-red-650">{relatorioData.estatisticas?.cancelados || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "usuarios" && (
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded bg-gray-50">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Usuários Ativos</div>
+                    <div className="text-lg font-bold text-green-700">{relatorioData.estatisticas?.ativos || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Usuários Inativos</div>
+                    <div className="text-lg font-bold text-slate-650">{relatorioData.estatisticas?.inativos || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "logs_sistema" && (
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Informações (Info)</div>
+                    <div className="text-lg font-bold text-blue-700">{relatorioData.estatisticas?.info || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded bg-gray-50">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Alertas (Warning)</div>
+                    <div className="text-lg font-bold text-amber-700">{relatorioData.estatisticas?.warning || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Erros Críticos</div>
+                    <div className="text-lg font-bold text-red-600">{relatorioData.estatisticas?.error || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "feriados" && (
+                <div className="grid grid-cols-4 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Nacionais</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.nacionais || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Estaduais</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.estaduais || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Municipais</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.municipais || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Personalizados</div>
+                    <div className="text-sm font-bold">{relatorioData.estatisticas?.personalizados || 0}</div>
+                  </div>
+                </div>
+              )}
+
+              {tipoRelatorio === "equipamentos" && (
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="border border-gray-300 p-2 rounded bg-gray-50">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Ativos</div>
+                    <div className="text-lg font-bold text-green-700">{relatorioData.estatisticas?.ativos || 0}</div>
+                  </div>
+                  <div className="border border-gray-300 p-2 rounded">
+                    <div className="text-[10px] uppercase text-gray-500 font-bold">Inativos</div>
+                    <div className="text-lg font-bold text-red-650">{relatorioData.estatisticas?.inativos || 0}</div>
+                  </div>
                 </div>
               )}
             </div>
