@@ -11,8 +11,9 @@ export async function GET(request: NextRequest) {
     const categoriaId = searchParams.get("categoriaId")
     const dataInicio = searchParams.get("dataInicio")
     const dataFim = searchParams.get("dataFim")
+    const tipoNota = searchParams.get("tipoNota") || "todos"
 
-    console.log("Gerando relatório:", { tipo, periodo, status, clienteId, categoriaId, dataInicio, dataFim })
+    console.log("Gerando relatório:", { tipo, periodo, status, clienteId, categoriaId, dataInicio, dataFim, tipoNota })
 
     // Determinar datas de início e fim
     let startDateStr = ""
@@ -343,35 +344,69 @@ export async function GET(request: NextRequest) {
           break
 
         case "notas_fiscais":
-          let nfQuery = `
-            SELECT 
-              nf.id, nf.numero_nfe as numero, nf.serie, nf.chave_acesso, nf.valor_total as valor,
-              nf.status, nf.data_emissao, c.nome as cliente_nome
-            FROM nfe_emitidas nf
-            LEFT JOIN clientes c ON nf.cliente_id = c.id
-            WHERE DATE(nf.data_emissao) BETWEEN ? AND ?
-          `
-          const nfParams: any[] = [startDateStr, endDateStr]
-          if (status && status !== "todos") {
-            nfQuery += ` AND nf.status = ?`
-            nfParams.push(status)
+          let nfs: any[] = []
+
+          // 1. Query Product Invoices (nfe_emitidas)
+          if (tipoNota === "todos" || tipoNota === "produto") {
+            let prodQuery = `
+              SELECT 
+                nf.id, nf.numero_nfe as numero, nf.serie, nf.chave_acesso, nf.valor_total as valor,
+                nf.status, nf.data_emissao, c.nome as cliente_nome, 'produto' as tipo_nota
+              FROM nfe_emitidas nf
+              LEFT JOIN clientes c ON nf.cliente_id = c.id
+              WHERE DATE(nf.data_emissao) BETWEEN ? AND ?
+            `
+            const prodParams: any[] = [startDateStr, endDateStr]
+            if (status && status !== "todos") {
+              prodQuery += ` AND nf.status = ?`
+              prodParams.push(status)
+            }
+            if (clienteId && clienteId !== "todos") {
+              prodQuery += ` AND nf.cliente_id = ?`
+              prodParams.push(clienteId)
+            }
+            const [prodData] = await pool.execute(prodQuery, prodParams)
+            nfs = nfs.concat(prodData)
           }
-          if (clienteId && clienteId !== "todos") {
-            nfQuery += ` AND nf.cliente_id = ?`
-            nfParams.push(clienteId)
+
+          // 2. Query Service Invoices (notas_fiscais)
+          if (tipoNota === "todos" || tipoNota === "servico") {
+            let servQuery = `
+              SELECT 
+                nf.id, nf.numero_nfse as numero, nf.serie_rps as serie, nf.codigo_verificacao as chave_acesso, nf.valor_total as valor,
+                nf.status, nf.data_emissao, c.nome as cliente_nome, 'servico' as tipo_nota
+              FROM notas_fiscais nf
+              LEFT JOIN clientes c ON nf.cliente_id = c.id
+              WHERE DATE(nf.data_emissao) BETWEEN ? AND ?
+            `
+            const servParams: any[] = [startDateStr, endDateStr]
+            if (status && status !== "todos") {
+              let servStatus = status
+              if (status === "autorizada") servStatus = "emitida"
+              servQuery += ` AND nf.status = ?`
+              servParams.push(servStatus)
+            }
+            if (clienteId && clienteId !== "todos") {
+              servQuery += ` AND nf.cliente_id = ?`
+              servParams.push(clienteId)
+            }
+            const [servData] = await pool.execute(servQuery, servParams)
+            nfs = nfs.concat(servData)
           }
-          nfQuery += ` ORDER BY nf.data_emissao DESC`
-          const [nfData] = await pool.execute(nfQuery, nfParams)
-          const totalNf = (nfData as any[]).length
-          const valorTotalNf = (nfData as any[]).reduce((sum, n) => sum + (Number.parseFloat(n.valor) || 0), 0)
-          const autorizadas = (nfData as any[]).filter(n => n.status === "autorizada" || n.status === "transmitida" || n.status === "sucesso").length
-          const canceladasNf = (nfData as any[]).filter(n => n.status === "cancelada" || n.status === "cancelado").length
+
+          // Sort by emission date desc
+          nfs.sort((a, b) => new Date(b.data_emissao).getTime() - new Date(a.data_emissao).getTime())
+
+          const totalNf = nfs.length
+          const valorTotalNf = nfs.reduce((sum, n) => sum + (Number.parseFloat(n.valor) || 0), 0)
+          const autorizadas = nfs.filter(n => n.status === "autorizada" || n.status === "transmitida" || n.status === "sucesso" || n.status === "emitida").length
+          const canceladasNf = nfs.filter(n => n.status === "cancelada" || n.status === "cancelado").length
           data = {
-            notasFiscais: nfData,
+            notasFiscais: nfs,
             total: totalNf,
             valorTotal: valorTotalNf,
             estatisticas: { autorizadas, canceladas: canceladasNf },
-            filtros: { status, clienteId, dataInicio: startDateStr, dataFim: endDateStr }
+            filtros: { status, clienteId, tipoNota, dataInicio: startDateStr, dataFim: endDateStr }
           }
           break
 
@@ -508,6 +543,23 @@ export async function GET(request: NextRequest) {
             ferQuery += ` AND f.tipo = ?`
             ferParams.push(status)
           }
+
+          if (periodo && periodo !== "todos" && periodo !== "todos_meses") {
+            if (periodo === "este_mes") {
+              ferQuery += ` AND MONTH(f.data) = MONTH(CURDATE())`
+            } else if (periodo === "mes_passado") {
+              ferQuery += ` AND MONTH(f.data) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))`
+            } else if (periodo === "mes_seguinte") {
+              ferQuery += ` AND MONTH(f.data) = MONTH(DATE_ADD(CURDATE(), INTERVAL 1 MONTH))`
+            } else if (periodo === "trimestre_atual") {
+              ferQuery += ` AND QUARTER(f.data) = QUARTER(CURDATE())`
+            } else if (periodo === "quadrimestre_atual") {
+              ferQuery += ` AND CEIL(MONTH(f.data) / 4) = CEIL(MONTH(CURDATE()) / 4)`
+            } else if (periodo === "semestre_atual") {
+              ferQuery += ` AND CEIL(MONTH(f.data) / 6) = CEIL(MONTH(CURDATE()) / 6)`
+            }
+          }
+
           ferQuery += ` ORDER BY f.data ASC`
           const [ferData] = await pool.execute(ferQuery, ferParams)
           const totalFer = (ferData as any[]).length
@@ -519,7 +571,7 @@ export async function GET(request: NextRequest) {
             feriados: ferData,
             total: totalFer,
             estatisticas: { nacionais, estaduais, municipais, personalizados },
-            filtros: { status }
+            filtros: { status, periodo }
           }
           break
 
@@ -536,16 +588,29 @@ export async function GET(request: NextRequest) {
             equipQuery += ` AND e.ativo = ?`
             equipParams.push(isAtivo)
           }
+
+          if (categoriaId && categoriaId !== "todos") {
+            equipQuery += ` AND e.categoria = ?`
+            equipParams.push(categoriaId)
+          }
+
           equipQuery += ` ORDER BY e.nome ASC`
           const [equipData] = await pool.execute(equipQuery, equipParams)
+
+          // Fetch unique categories
+          const [categoriasEquip] = await pool.execute(
+            `SELECT DISTINCT categoria FROM equipamentos WHERE ativo = 1 AND categoria IS NOT NULL AND categoria != '' ORDER BY categoria`
+          )
+
           const totalEquip = (equipData as any[]).length
           const ativosEquip = (equipData as any[]).filter(e => e.ativo === 1 || e.ativo === true).length
           const inativosEquip = totalEquip - ativosEquip
           data = {
             equipamentos: equipData,
             total: totalEquip,
+            categorias: (categoriasEquip as any[]).map(c => c.categoria),
             estatisticas: { ativos: ativosEquip, inativos: inativosEquip },
-            filtros: { status }
+            filtros: { status, categoriaId }
           }
           break
 

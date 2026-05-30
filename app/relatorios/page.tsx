@@ -38,6 +38,9 @@ export default function RelatoriosPage() {
   const [status, setStatus] = useState("todos")
   const [clienteId, setClienteId] = useState("todos")
   const [categoriaId, setCategoriaId] = useState("todos")
+  const [tipoNota, setTipoNota] = useState("todos")
+  const [categoriaEquipamento, setCategoriaEquipamento] = useState("todos")
+  const [categoriasEquipamentos, setCategoriasEquipamentos] = useState<string[]>([])
   
   const [relatorioData, setRelatorioData] = useState<RelatorioData | null>(null)
   const [logoMenu, setLogoMenu] = useState<string>("")
@@ -173,10 +176,12 @@ export default function RelatoriosPage() {
         dataFim,
         status,
         clienteId,
-        categoriaId,
+        categoriaId: tipoRelatorio === "equipamentos" ? categoriaEquipamento : categoriaId,
+        tipoNota,
+        periodo: periodoPreset,
       })
 
-      console.log("Gerando relatório com filtros:", { tipoRelatorio, dataInicio, dataFim, status, clienteId, categoriaId })
+      console.log("Gerando relatório com filtros:", { tipoRelatorio, dataInicio, dataFim, status, clienteId, categoriaId, tipoNota, periodoPreset })
 
       const response = await fetch(`/api/relatorios?${params}`)
       const responseText = await response.text()
@@ -196,6 +201,9 @@ export default function RelatoriosPage() {
         setRelatorioData(result.data)
         if (result.data.tipos) {
           setTipos(result.data.tipos.map((t: any) => ({ id: t.tipo, nome: t.tipo })))
+        }
+        if (result.data.categorias) {
+          setCategoriasEquipamentos(result.data.categorias)
         }
         toast({
           title: "Sucesso!",
@@ -347,9 +355,9 @@ export default function RelatoriosPage() {
         b.numero, b.cliente_nome, formatDate(b.data_vencimento), b.data_pagamento ? formatDate(b.data_pagamento) : "-", b.valor, b.status
       ])
     } else if (tipoRelatorio === "notas_fiscais" && relatorioData.notasFiscais) {
-      headers = ["Número NF-e", "Série", "Chave de Acesso", "Cliente", "Data Emissão", "Valor Total", "Status"]
+      headers = ["Número", "Série", "Tipo", "Chave/Cód. Verificação", "Cliente", "Data Emissão", "Valor Total", "Status"]
       rows = relatorioData.notasFiscais.map((nf: any) => [
-        nf.numero, nf.serie, nf.chave_acesso, nf.cliente_nome, formatDate(nf.data_emissao), nf.valor, nf.status
+        nf.numero, nf.serie, nf.tipo_nota === "servico" ? "Serviço" : "Produto", nf.chave_acesso, nf.cliente_nome, formatDate(nf.data_emissao), nf.valor, nf.status
       ])
     } else if (tipoRelatorio === "propostas_contratos" && relatorioData.propostas) {
       headers = ["Número Proposta", "Cliente", "Data Proposta", "Tipo", "Valor Total", "Status"]
@@ -417,6 +425,15 @@ export default function RelatoriosPage() {
               setStatus("todos")
               setClienteId("todos")
               setCategoriaId("todos")
+              setCategoriaEquipamento("todos")
+              setTipoNota("todos")
+              if (value === "feriados") {
+                setPeriodoPreset("todos_meses")
+              } else if (value === "equipamentos" || value === "logs_sistema") {
+                setPeriodoPreset("todos")
+              } else {
+                setPeriodoPreset("este_mes")
+              }
             }}
           >
             <SelectTrigger className="bg-white border-gray-200 mt-1">
@@ -440,25 +457,41 @@ export default function RelatoriosPage() {
         </div>
 
         {/* Preset de Período */}
-        <div>
-          <Label htmlFor="preset-periodo" className="font-semibold text-gray-700">Período</Label>
-          <Select value={periodoPreset} onValueChange={setPeriodoPreset}>
-            <SelectTrigger className="bg-white border-gray-200 mt-1">
-              <SelectValue placeholder="Selecione o período" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="este_mes">Este Mês</SelectItem>
-              <SelectItem value="mes_passado">Mês Passado</SelectItem>
-              <SelectItem value="30">Últimos 30 Dias</SelectItem>
-              <SelectItem value="90">Últimos 90 Dias</SelectItem>
-              <SelectItem value="este_ano">Este Ano</SelectItem>
-              <SelectItem value="personalizado">Personalizado...</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {tipoRelatorio !== "equipamentos" && tipoRelatorio !== "logs_sistema" && (
+          <div>
+            <Label htmlFor="preset-periodo" className="font-semibold text-gray-700">Período</Label>
+            <Select value={periodoPreset} onValueChange={setPeriodoPreset}>
+              <SelectTrigger className="bg-white border-gray-200 mt-1">
+                <SelectValue placeholder="Selecione o período" />
+              </SelectTrigger>
+              <SelectContent>
+                {tipoRelatorio === "feriados" ? (
+                  <>
+                    <SelectItem value="todos_meses">Todos os meses</SelectItem>
+                    <SelectItem value="mes_passado">Mês anterior</SelectItem>
+                    <SelectItem value="este_mes">Mês atual</SelectItem>
+                    <SelectItem value="mes_seguinte">Mês posterior</SelectItem>
+                    <SelectItem value="trimestre_atual">Trimestre atual</SelectItem>
+                    <SelectItem value="quadrimestre_atual">Quadrimestre atual</SelectItem>
+                    <SelectItem value="semestre_atual">Semestre atual</SelectItem>
+                  </>
+                ) : (
+                  <>
+                    <SelectItem value="este_mes">Este Mês</SelectItem>
+                    <SelectItem value="mes_passado">Mês Passado</SelectItem>
+                    <SelectItem value="30">Últimos 30 Dias</SelectItem>
+                    <SelectItem value="90">Últimos 90 Dias</SelectItem>
+                    <SelectItem value="este_ano">Este Ano</SelectItem>
+                    <SelectItem value="personalizado">Personalizado...</SelectItem>
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Datas Customizadas */}
-        {periodoPreset === "personalizado" && (
+        {periodoPreset === "personalizado" && tipoRelatorio !== "feriados" && (
           <div className="grid grid-cols-2 gap-2 animate-in slide-in-from-top-2 duration-200">
             <div>
               <Label htmlFor="data-inicio" className="text-xs text-gray-600">Início</Label>
@@ -483,13 +516,52 @@ export default function RelatoriosPage() {
           </div>
         )}
 
-        {/* Filtros de Status */}
+        {/* Tipo de Nota (apenas notas fiscais) */}
+        {tipoRelatorio === "notas_fiscais" && (
+          <div>
+            <Label htmlFor="tipoNota" className="font-semibold text-gray-700">Tipo de Nota</Label>
+            <Select value={tipoNota} onValueChange={setTipoNota}>
+              <SelectTrigger className="bg-white border-gray-200 mt-1">
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os tipos</SelectItem>
+                <SelectItem value="servico">Nota de Serviço (NFS-e)</SelectItem>
+                <SelectItem value="produto">Nota de Produto (NF-e)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Categoria de Equipamento */}
+        {tipoRelatorio === "equipamentos" && (
+          <div>
+            <Label htmlFor="categoriaEquipamento" className="font-semibold text-gray-700">Categoria</Label>
+            <Select value={categoriaEquipamento} onValueChange={setCategoriaEquipamento}>
+              <SelectTrigger className="bg-white border-gray-200 mt-1">
+                <SelectValue placeholder="Selecione a categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todas</SelectItem>
+                {categoriasEquipamentos.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Filtros de Status / Nível / Tipo */}
         {(tipoRelatorio === "orcamentos" || tipoRelatorio === "financeiro" || tipoRelatorio === "ordens_servico" || tipoRelatorio === "notas_fiscais" || tipoRelatorio === "propostas_contratos" || tipoRelatorio === "contratos_ativos" || tipoRelatorio === "usuarios" || tipoRelatorio === "logs_sistema" || tipoRelatorio === "feriados" || tipoRelatorio === "equipamentos") && (
           <div>
-            <Label htmlFor="status" className="font-semibold text-gray-700">Status</Label>
+            <Label htmlFor="status" className="font-semibold text-gray-700">
+              {tipoRelatorio === "logs_sistema" ? "Nível / Tipo" : "Status"}
+            </Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger className="bg-white border-gray-200 mt-1">
-                <SelectValue placeholder="Selecione o status" />
+                <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
@@ -1056,7 +1128,12 @@ export default function RelatoriosPage() {
                 <tbody className="divide-y divide-gray-150">
                   {relatorioData.notasFiscais.map((nf: any) => (
                     <tr key={nf.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-4 font-semibold font-mono text-xs">#{nf.numero} / S.{nf.serie}</td>
+                      <td className="p-4 font-semibold font-mono text-xs">
+                        #{nf.numero} / S.{nf.serie}
+                        <Badge variant="outline" className="ml-2 text-[9px] uppercase">
+                          {nf.tipo_nota === "servico" ? "Serviço" : "Produto"}
+                        </Badge>
+                      </td>
                       <td className="p-4 text-xs font-mono text-gray-500 max-w-[150px] truncate">{nf.chave_acesso || "-"}</td>
                       <td className="p-4 font-medium text-gray-900">{nf.cliente_nome}</td>
                       <td className="p-4 text-xs">{formatDate(nf.data_emissao)}</td>
@@ -1064,7 +1141,7 @@ export default function RelatoriosPage() {
                       <td className="p-4 text-center">
                         <Badge
                           variant={
-                            nf.status === "autorizada" || nf.status === "transmitida" || nf.status === "sucesso"
+                            nf.status === "autorizada" || nf.status === "transmitida" || nf.status === "sucesso" || nf.status === "emitida"
                               ? "default"
                               : "destructive"
                           }
@@ -1805,6 +1882,7 @@ export default function RelatoriosPage() {
                     {tipoRelatorio === "notas_fiscais" && (
                       <>
                         <th className="p-2 border-r border-gray-300">Nº / Série</th>
+                        <th className="p-2 border-r border-gray-300">Tipo</th>
                         <th className="p-2 border-r border-gray-300">Chave de Acesso</th>
                         <th className="p-2 border-r border-gray-300">Cliente</th>
                         <th className="p-2 border-r border-gray-300">Emissão</th>
@@ -1920,6 +1998,7 @@ export default function RelatoriosPage() {
                   {tipoRelatorio === "notas_fiscais" && relatorioData.notasFiscais?.map((nf: any) => (
                     <tr key={nf.id}>
                       <td className="p-2 border-r border-gray-300 font-mono">#{nf.numero} / S.{nf.serie}</td>
+                      <td className="p-2 border-r border-gray-300 uppercase text-[9px]">{nf.tipo_nota === "servico" ? "Serviço" : "Produto"}</td>
                       <td className="p-2 border-r border-gray-300 font-mono text-[9px]">{nf.chave_acesso || "-"}</td>
                       <td className="p-2 border-r border-gray-300">{nf.cliente_nome}</td>
                       <td className="p-2 border-r border-gray-300">{formatDate(nf.data_emissao)}</td>
