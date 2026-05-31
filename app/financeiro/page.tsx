@@ -1081,7 +1081,7 @@ export default function FinanceiroPage() {
                               {boleto.cliente_nome}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 mt-0.5">
+                          <div className="flex flex-wrap items-center gap-2 mt-0.5">
                             <span className="text-[11px] text-muted-foreground font-sans">
                               {boleto.numero}
                             </span>
@@ -1442,7 +1442,7 @@ export default function FinanceiroPage() {
                               {recibo.cliente_nome}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 mt-0.5">
+                          <div className="flex flex-wrap items-center gap-2 mt-0.5">
                             <span className="text-[11px] text-muted-foreground font-sans">
                               {recibo.numero}
                             </span>

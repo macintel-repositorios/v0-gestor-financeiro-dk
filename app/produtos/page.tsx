@@ -958,7 +958,156 @@ export default function ProdutosPage({
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              {renderProdutoTable(filteredProdutos)}
+              {/* Desktop View */}
+              <div className="hidden md:block">
+                {renderProdutoTable(filteredProdutos)}
+              </div>
+
+              {/* Mobile View */}
+              <div className="md:hidden p-4 space-y-3">
+                {!hasActiveFilter ? (
+                  <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
+                    <Search className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
+                    <h3 className="text-base font-medium text-foreground mb-1">Busque ou filtre para ver os produtos</h3>
+                    <p className="text-sm text-muted-foreground">Digite na busca ou selecione um filtro para começar.</p>
+                  </div>
+                ) : filteredProdutos.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
+                    <h3 className="text-base font-medium text-foreground mb-1">Nenhum produto encontrado</h3>
+                    <p className="text-sm text-muted-foreground">Tente ajustar os filtros de busca.</p>
+                  </div>
+                ) : (
+                  filteredProdutos.map((produto) => {
+                    const isExpanded = expandedProdutoId === produto.id
+                    const isLowStock = produto.estoque <= produto.estoque_minimo && produto.estoque_minimo > 0
+
+                    return (
+                      <div
+                        key={produto.id}
+                        className={`rounded-xl border transition-all duration-200 overflow-hidden bg-card ${
+                          isExpanded ? "shadow-lg ring-1 ring-indigo-500 border-indigo-500" : "border-border shadow-sm"
+                        }`}
+                      >
+                        {/* Main card trigger */}
+                        <button
+                          type="button"
+                          onClick={() => setExpandedProdutoId(expandedProdutoId === produto.id ? null : produto.id)}
+                          className="w-full text-left p-3.5 flex items-center gap-3 bg-transparent text-foreground"
+                        >
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-muted text-muted-foreground">
+                            {produto.codigo ? produto.codigo.slice(-2).toUpperCase() : "PR"}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-sm text-foreground break-words whitespace-normal leading-tight">
+                                {produto.descricao}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                              <span className="text-[11px] text-muted-foreground font-mono">
+                                {produto.codigo}
+                              </span>
+                              {produto.categoria_nome && produto.categoria_nome !== "0" && (
+                                <Badge className="text-[10px] px-1.5 py-0 h-4 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-0">
+                                  {produto.categoria_nome}
+                                </Badge>
+                              )}
+                              <span className="text-[11px] font-semibold text-emerald-650 dark:text-emerald-400">
+                                {formatCurrency(produto.valor_unitario)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
+                            isExpanded ? "rotate-90" : ""
+                          }`} />
+                        </button>
+
+                        {/* Expanded details */}
+                        {isExpanded && (
+                          <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
+                            <div className="border-t border-border/40 pt-3 space-y-2">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-muted/40 rounded-lg p-2.5">
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-1">Preço Venda</span>
+                                  <p className="text-xs font-semibold text-emerald-650 dark:text-emerald-400">
+                                    {formatCurrency(produto.valor_unitario)}
+                                  </p>
+                                </div>
+                                <div className="bg-muted/40 rounded-lg p-2.5">
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-1">Estoque</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <p className="text-xs font-semibold text-foreground">{produto.estoque} {produto.unidade}</p>
+                                    {isLowStock ? (
+                                      <Badge className="bg-red-500/10 text-red-500 border-0 text-[9px] px-1 py-0 h-3.5">
+                                        Baixo
+                                      </Badge>
+                                    ) : (
+                                      <Badge className="bg-emerald-500/10 text-emerald-500 border-0 text-[9px] px-1 py-0 h-3.5">
+                                        OK
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                {produto.marca_nome && produto.marca_nome !== "0" && (
+                                  <div className="bg-muted/40 rounded-lg p-2.5">
+                                    <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-1">Marca</span>
+                                    <p className="text-xs text-foreground truncate">{produto.marca_nome}</p>
+                                  </div>
+                                )}
+                                {produto.ncm && (
+                                  <div className="bg-muted/40 rounded-lg p-2.5">
+                                    <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-1">NCM</span>
+                                    <p className="text-xs font-mono text-foreground">{produto.ncm}</p>
+                                  </div>
+                                )}
+                              </div>
+
+                              {produto.observacoes && (
+                                <div className="bg-muted/40 rounded-lg p-2.5">
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-1">Observações</span>
+                                  <p className="text-xs text-foreground whitespace-pre-wrap">{produto.observacoes}</p>
+                                </div>
+                              )}
+
+                              <div className="flex gap-2 pt-1">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 h-9 text-xs font-medium text-indigo-650 dark:text-indigo-400 border-indigo-500/20 hover:bg-indigo-500/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedProdutoEdit(produto)
+                                    setIsEditarProdutoOpen(true)
+                                  }}
+                                >
+                                  <Edit className="h-3.5 w-3.5 mr-1.5" />
+                                  Editar
+                                </Button>
+                                <ProdutoDeleteDialog
+                                  produto={produto}
+                                  onSuccess={reloadAll}
+                                  trigger={
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-9 text-xs font-medium text-red-500 dark:text-red-400 border-red-500/20 hover:bg-red-500/10 bg-transparent px-3"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

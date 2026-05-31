@@ -517,16 +517,16 @@ export default function ClientesPage() {
           )}
 
           {!hasActiveFilter ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
-              <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-              <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os clientes</h3>
-              <p className="text-sm text-gray-500">Digite na busca ou selecione um filtro para começar.</p>
+            <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
+              <Search className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
+              <h3 className="text-base font-medium text-foreground mb-1">Busque ou filtre para ver os clientes</h3>
+              <p className="text-sm text-muted-foreground">Digite na busca ou selecione um filtro para começar.</p>
             </div>
           ) : filteredClientes.length === 0 ? (
             <div className="text-center py-12">
-              <Users className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-              <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum cliente encontrado</h3>
-              <p className="text-sm text-gray-500 mb-4">Tente ajustar os filtros de busca.</p>
+              <Users className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
+              <h3 className="text-base font-medium text-foreground mb-1">Nenhum cliente encontrado</h3>
+              <p className="text-sm text-muted-foreground mb-4">Tente ajustar os filtros de busca.</p>
             </div>
           ) : (
             filteredClientes.map((cliente) => {
@@ -537,23 +537,23 @@ export default function ClientesPage() {
                   key={cliente.id}
                   className={`rounded-xl border transition-all duration-200 overflow-hidden ${
                     cliente.tem_contrato
-                      ? "border-green-200 bg-gradient-to-r from-green-50/80 to-white"
-                      : "border-gray-200 bg-white"
-                  } ${isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"}`}
+                      ? "border-green-500/20 bg-gradient-to-r from-green-500/5 to-card"
+                      : "border-border bg-card"
+                  } ${isExpanded ? "shadow-lg ring-1 ring-indigo-500" : "shadow-sm hover:shadow-md"}`}
                 >
                   {/* Card principal — sempre visível */}
                   <button
                     type="button"
                     onClick={() => toggleExpandClient(cliente.id)}
-                    className="w-full text-left p-3.5 flex items-center gap-3"
+                    className="w-full text-left p-3.5 flex items-center gap-3 bg-transparent text-foreground"
                   >
                     {/* Avatar / Iniciais */}
                     <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
                       cliente.tem_contrato
-                        ? "bg-green-100 text-green-700"
+                        ? "bg-green-500/10 text-green-550 dark:text-green-400"
                         : cliente.cnpj
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-600"
+                          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                          : "bg-muted text-muted-foreground"
                     }`}>
                       {(cliente.nome || "?").substring(0, 2).toUpperCase()}
                     </div>
@@ -561,24 +561,24 @@ export default function ClientesPage() {
                     {/* Info principal */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-gray-900 break-words whitespace-normal leading-tight">
+                        <span className="font-semibold text-sm text-foreground break-words whitespace-normal leading-tight">
                           {cliente.nome}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[11px] text-gray-500 font-mono">
+                        <span className="text-[11px] text-muted-foreground font-mono">
                           {cliente.codigo}
                         </span>
                         <Badge
                           variant="secondary"
-                          className={`text-[10px] px-1.5 py-0 h-4 ${
-                            cliente.cnpj ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                          className={`text-[10px] px-1.5 py-0 h-4 border-0 ${
+                            cliente.cnpj ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-muted text-muted-foreground"
                           }`}
                         >
                           {getClienteType(cliente.cnpj, cliente.cpf)}
                         </Badge>
                         {cliente.tem_contrato && (
-                          <Badge className="text-[10px] px-1.5 py-0 h-4 bg-green-100 text-green-700 border-0">
+                          <Badge className="text-[10px] px-1.5 py-0 h-4 bg-green-500/10 text-green-550 dark:text-green-400 border-0">
                             Contrato
                           </Badge>
                         )}
@@ -586,7 +586,7 @@ export default function ClientesPage() {
                     </div>
 
                     {/* Chevron */}
-                    <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                    <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                       isExpanded ? "rotate-90" : ""
                     }`} />
                   </button>
@@ -594,41 +594,41 @@ export default function ClientesPage() {
                   {/* Conteúdo expandido — mini cards */}
                   {isExpanded && (
                     <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                      <div className="border-t border-gray-100 pt-3 space-y-2">
+                      <div className="border-t border-border/40 pt-3 space-y-2">
                         {/* Grid de mini cards */}
                         <div className="grid grid-cols-2 gap-2">
                           {/* Documento */}
-                          <div className="bg-gray-50 rounded-lg p-2.5">
+                          <div className="bg-muted/40 rounded-lg p-2.5">
                             <div className="flex items-center gap-1.5 mb-1">
-                              <FileText className="h-3 w-3 text-gray-400" />
-                              <span className="text-[10px] font-medium text-gray-500 uppercase">Documento</span>
+                              <FileText className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase">Documento</span>
                             </div>
-                            <p className="text-xs font-mono text-gray-800 truncate">
+                            <p className="text-xs font-mono text-foreground truncate">
                               {formatDocument(cliente.cnpj, cliente.cpf)}
                             </p>
                           </div>
 
                           {/* Distância */}
-                          <div className="bg-gray-50 rounded-lg p-2.5">
+                          <div className="bg-muted/40 rounded-lg p-2.5">
                             <div className="flex items-center gap-1.5 mb-1">
-                              <MapPin className="h-3 w-3 text-gray-400" />
-                              <span className="text-[10px] font-medium text-gray-500 uppercase">Distância</span>
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase">Distância</span>
                             </div>
-                            <p className="text-xs font-semibold text-gray-800">
+                            <p className="text-xs font-semibold text-foreground">
                               {getDistanceLabel(cliente.distancia_km)}
                             </p>
                           </div>
 
                           {/* Telefone */}
                           {cliente.telefone && (
-                            <div className="bg-gray-50 rounded-lg p-2.5">
+                            <div className="bg-muted/40 rounded-lg p-2.5">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <Phone className="h-3 w-3 text-gray-400" />
-                                <span className="text-[10px] font-medium text-gray-500 uppercase">Telefone</span>
+                                <Phone className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase">Telefone</span>
                               </div>
                               <a
                                 href={`tel:${cliente.telefone}`}
-                                className="text-xs text-blue-600 font-medium"
+                                className="text-xs text-blue-500 dark:text-blue-400 font-medium"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {formatPhone(cliente.telefone)}
@@ -638,14 +638,14 @@ export default function ClientesPage() {
 
                           {/* Email */}
                           {cliente.email && (
-                            <div className="bg-gray-50 rounded-lg p-2.5">
+                            <div className="bg-muted/40 rounded-lg p-2.5">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <Mail className="h-3 w-3 text-gray-400" />
-                                <span className="text-[10px] font-medium text-gray-500 uppercase">Email</span>
+                                <Mail className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase">Email</span>
                               </div>
                               <a
                                 href={`mailto:${cliente.email}`}
-                                className="text-xs text-blue-600 font-medium truncate block"
+                                className="text-xs text-blue-500 dark:text-blue-400 font-medium truncate block"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {cliente.email}
@@ -655,23 +655,23 @@ export default function ClientesPage() {
 
                           {/* Contato */}
                           {cliente.contato && (
-                            <div className="bg-gray-50 rounded-lg p-2.5">
+                            <div className="bg-muted/40 rounded-lg p-2.5">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <Users className="h-3 w-3 text-gray-400" />
-                                <span className="text-[10px] font-medium text-gray-500 uppercase">Contato</span>
+                                <Users className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase">Contato</span>
                               </div>
-                              <p className="text-xs text-gray-800 truncate">{cliente.contato}</p>
+                              <p className="text-xs text-foreground truncate">{cliente.contato}</p>
                             </div>
                           )}
 
                           {/* Contrato */}
                           {cliente.tem_contrato && (
-                            <div className="bg-green-50 rounded-lg p-2.5">
+                            <div className="bg-green-500/10 rounded-lg p-2.5">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <FileText className="h-3 w-3 text-green-500" />
-                                <span className="text-[10px] font-medium text-green-600 uppercase">Contrato</span>
+                                <FileText className="h-3 w-3 text-green-400" />
+                                <span className="text-[10px] font-medium text-green-400 uppercase">Contrato</span>
                               </div>
-                              <p className="text-xs font-semibold text-green-800">
+                              <p className="text-xs font-semibold text-green-400">
                                 {cliente.dia_contrato ? `Venc: Dia ${cliente.dia_contrato}` : "Ativo"}
                               </p>
                             </div>
@@ -679,12 +679,12 @@ export default function ClientesPage() {
 
                           {/* Cidade */}
                           {cliente.cidade && (
-                            <div className="bg-gray-50 rounded-lg p-2.5">
+                            <div className="bg-muted/40 rounded-lg p-2.5">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <Building2 className="h-3 w-3 text-gray-400" />
-                                <span className="text-[10px] font-medium text-gray-500 uppercase">Cidade</span>
+                                <Building2 className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase">Cidade</span>
                               </div>
-                              <p className="text-xs text-gray-800 truncate">
+                              <p className="text-xs text-foreground truncate">
                                 {cliente.cidade}{cliente.estado ? ` - ${cliente.estado}` : ""}
                               </p>
                             </div>
@@ -693,12 +693,12 @@ export default function ClientesPage() {
 
                         {/* Endereço completo se existir */}
                         {cliente.endereco && (
-                          <div className="bg-gray-50 rounded-lg p-2.5">
+                          <div className="bg-muted/40 rounded-lg p-2.5">
                             <div className="flex items-center gap-1.5 mb-1">
-                              <MapPin className="h-3 w-3 text-gray-400" />
-                              <span className="text-[10px] font-medium text-gray-500 uppercase">Endereço</span>
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase">Endereço</span>
                             </div>
-                            <p className="text-xs text-gray-800">
+                            <p className="text-xs text-foreground">
                               {cliente.endereco}{cliente.bairro ? ` - ${cliente.bairro}` : ""}
                             </p>
                           </div>
@@ -709,7 +709,7 @@ export default function ClientesPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 h-9 text-xs font-medium text-blue-600 border-blue-200 hover:bg-blue-50"
+                            className="flex-1 h-9 text-xs font-medium text-blue-500 dark:text-blue-400 border-blue-500/20 hover:bg-blue-500/10"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleEditCliente(cliente)
@@ -721,7 +721,7 @@ export default function ClientesPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-9 text-xs font-medium text-red-600 border-red-200 hover:bg-red-50 bg-transparent px-3"
+                            className="h-9 text-xs font-medium text-red-500 dark:text-red-400 border-red-500/20 hover:bg-red-500/10 bg-transparent px-3"
                             onClick={(e) => {
                               e.stopPropagation()
                               setClienteToDelete(cliente)

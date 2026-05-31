@@ -970,12 +970,12 @@ export default function ContratosPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900 break-words whitespace-normal leading-tight">
+                            <span className="font-semibold text-sm text-foreground break-words whitespace-normal leading-tight">
                               {proposta.cliente_nome}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-gray-500 font-mono">
+                            <span className="text-[11px] text-muted-foreground font-mono">
                               {proposta.numero}
                             </span>
                             <Badge variant="outline" className="capitalize text-[10px] px-1.5 py-0 h-4">
@@ -984,32 +984,30 @@ export default function ContratosPage() {
                             {getStatusBadge(proposta.status)}
                           </div>
                         </div>
-                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
-                          isExpanded ? "rotate-90" : ""
-                        }`} />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0" />
                       </button>
 
                       {isExpanded && (
                         <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                          <div className="border-t border-border/40 pt-3 space-y-2">
                             <div className="grid grid-cols-2 gap-2">
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Frequência</span>
-                                <p className="text-xs font-semibold text-gray-800 capitalize">{proposta.frequencia}</p>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Frequência</span>
+                                <p className="text-xs font-semibold text-foreground capitalize">{proposta.frequencia}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor Total</span>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Valor Total</span>
                                 <p className="text-xs font-semibold text-green-600">
                                   {shouldHideValues ? "R$ •••" : formatCurrency(proposta.valor_total_proposta)}
                                 </p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Data Proposta</span>
-                                <p className="text-xs text-gray-800">{formatDate(proposta.data_proposta)}</p>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Data Proposta</span>
+                                <p className="text-xs text-foreground">{formatDate(proposta.data_proposta)}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Validade</span>
-                                <p className="text-xs text-gray-800">{proposta.data_validade ? formatDate(proposta.data_validade) : "-"}</p>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Validade</span>
+                                <p className="text-xs text-foreground">{proposta.data_validade ? formatDate(proposta.data_validade) : "-"}</p>
                               </div>
                             </div>
                             <div className="flex gap-2 pt-2">
@@ -1311,12 +1309,12 @@ export default function ContratosPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900 break-words whitespace-normal leading-tight">
+                            <span className="font-semibold text-sm text-foreground break-words whitespace-normal leading-tight">
                               {contrato.cliente_nome}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-gray-500 font-mono">
+                            <span className="text-[11px] text-muted-foreground font-mono">
                               {contrato.numero}
                             </span>
                             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
@@ -1325,21 +1323,19 @@ export default function ContratosPage() {
                             {getContratoStatusBadge(contrato.status)}
                           </div>
                         </div>
-                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
-                          isExpanded ? "rotate-90" : ""
-                        }`} />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0" />
                       </button>
 
                       {isExpanded && (
                         <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                          <div className="border-t border-border/40 pt-3 space-y-2">
                             {equipamentos.length > 0 && (
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-1">Equipamentos</span>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-1">Equipamentos</span>
                                 <div className="space-y-1">
                                   {equipamentos.map((eq, idx) => (
-                                    <div key={idx} className="flex items-center gap-1.5 text-xs text-gray-600">
-                                      <Package className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                    <div key={idx} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                      <Package className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                                       <span>{eq.nome}</span>
                                       {eq.quantidade > 1 && <Badge variant="secondary" className="text-[9px] h-3.5 px-1 py-0">x{eq.quantidade}</Badge>}
                                     </div>
@@ -1349,30 +1345,30 @@ export default function ContratosPage() {
                             )}
 
                             {contrato.equipamentos_consignacao && (
-                              <div className="bg-amber-50 rounded-lg p-2.5 border border-amber-100">
-                                <span className="text-[10px] font-medium text-amber-700 uppercase block mb-0.5">Consignado</span>
-                                <p className="text-xs text-amber-800 font-medium">{contrato.equipamentos_consignacao}</p>
+                              <div className="bg-amber-500/10 rounded-lg p-2.5 border border-amber-500/20">
+                                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400 uppercase block mb-0.5">Consignado</span>
+                                <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">{contrato.equipamentos_consignacao}</p>
                               </div>
                             )}
 
                             <div className="grid grid-cols-2 gap-2">
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor Mensal</span>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Valor Mensal</span>
                                 <p className="text-xs font-semibold text-green-600">
                                   {shouldHideValues ? "R$ •••" : formatCurrency(contrato.valor_mensal)}
                                 </p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Prazo</span>
-                                <p className="text-xs font-semibold text-gray-800">{formatPrazo(contrato.prazo_meses)}</p>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Prazo</span>
+                                <p className="text-xs font-semibold text-foreground">{formatPrazo(contrato.prazo_meses)}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Início</span>
-                                <p className="text-xs text-gray-800">{formatDate(contrato.data_inicio)}</p>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Início</span>
+                                <p className="text-xs text-foreground">{formatDate(contrato.data_inicio)}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Fim / Término</span>
-                                <p className="text-xs text-gray-800">{formatDate(contrato.data_fim)}</p>
+                              <div className="bg-muted/40 rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Fim / Término</span>
+                                <p className="text-xs text-foreground">{formatDate(contrato.data_fim)}</p>
                               </div>
                             </div>
 
