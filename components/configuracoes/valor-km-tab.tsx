@@ -106,9 +106,9 @@ export function ValorKmTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Carregando configurações...</p>
         </div>
       </div>
@@ -118,21 +118,21 @@ export function ValorKmTab() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold flex items-center gap-2">🚗 Valor por Quilômetro</h2>
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-foreground">🚗 Valor por Quilômetro</h2>
         <p className="text-muted-foreground">Configure o valor cobrado por quilômetro rodado</p>
       </div>
 
       <div className="grid gap-6">
-        <Card>
+        <Card className="border border-border bg-card text-foreground">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">💰 Valor por Quilômetro</CardTitle>
-            <CardDescription>Configure o valor cobrado por quilômetro rodado nas visitas técnicas</CardDescription>
+            <CardTitle className="flex items-center gap-2 text-foreground">💰 Valor por Quilômetro</CardTitle>
+            <CardDescription className="text-muted-foreground">Configure o valor cobrado por quilômetro rodado nas visitas técnicas</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="valor-km">Valor por KM (R$)</Label>
+                  <Label htmlFor="valor-km" className="text-muted-foreground">Valor por KM (R$)</Label>
                   <Input
                     id="valor-km"
                     type="number"
@@ -140,96 +140,97 @@ export function ValorKmTab() {
                     min="0"
                     value={config.valor_por_km || ""}
                     onChange={(e) => setConfig({ ...config, valor_por_km: Number(e.target.value) })}
-                    className="text-lg font-semibold"
+                    className="text-lg font-semibold bg-background border-border text-foreground"
                     placeholder="1.50"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="descricao">Descrição (opcional)</Label>
+                  <Label htmlFor="descricao" className="text-muted-foreground">Descrição (opcional)</Label>
                   <Input
                     id="descricao"
                     value={config.descricao || ""}
                     onChange={(e) => setConfig({ ...config, descricao: e.target.value })}
                     placeholder="Descrição da configuração"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="aplicacao">Aplicação (opcional)</Label>
+                  <Label htmlFor="aplicacao" className="text-muted-foreground">Aplicação (opcional)</Label>
                   <Input
                     id="aplicacao"
                     value={config.aplicacao || ""}
                     onChange={(e) => setConfig({ ...config, aplicacao: e.target.value })}
                     placeholder="Onde será aplicado"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <Button
                   onClick={handleSalvar}
-                  className="w-full"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                   disabled={saving || !config.valor_por_km || config.valor_por_km <= 0}
                 >
-                  {saving ? "Salvando..." : "💾 Salvar"}
+                  {saving ? "Salvando..." : "💾 Salvar Configurações"}
                 </Button>
-                <div className="space-y-2">
+                <div className="space-y-2 pt-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-green-600">Valor atual: R$ {formatarValor(config.valor_por_km)}</span>
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                    <span className="text-sm text-emerald-400 font-medium">Valor atual: R$ {formatarValor(config.valor_por_km)}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm">Valor cobrado por quilômetro rodado</span>
+                    <MapPin className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm text-muted-foreground">Valor cobrado por quilômetro rodado</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm">Usado em orçamentos e contratos</span>
+                    <FileText className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm text-muted-foreground">Usado em orçamentos e contratos</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Calculator className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm">Cálculo: ida + volta (× 2)</span>
+                    <Calculator className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm text-muted-foreground">Cálculo: ida + volta (× 2)</span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <Calculator className="w-4 h-4" />
+              <div className="bg-purple-500/5 border border-purple-500/20 p-5 rounded-xl space-y-4">
+                <h4 className="font-semibold text-foreground flex items-center gap-2 border-b border-purple-500/20 pb-2">
+                  <Calculator className="w-5 h-5 text-purple-400" />
                   Calculadora de Exemplo
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div>
-                    <Label className="text-sm">Fórmula:</Label>
-                    <p className="text-sm text-muted-foreground">
+                    <Label className="text-sm text-muted-foreground">Fórmula:</Label>
+                    <p className="text-sm text-purple-400 font-semibold mt-0.5">
                       Distância × R$ {formatarValor(config.valor_por_km)} × 2 × Duração
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="text-xs">Distância (km)</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Distância (km)</Label>
                       <Input
                         type="number"
                         min="0"
                         value={distanciaExemplo}
                         onChange={(e) => setDistanciaExemplo(Number(e.target.value))}
-                        className="h-8"
+                        className="h-9 bg-background border-border text-foreground"
                       />
                     </div>
-                    <div>
-                      <Label className="text-xs">Duração (dias)</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Duração (dias)</Label>
                       <Input
                         type="number"
                         min="1"
                         value={duracaoExemplo}
                         onChange={(e) => setDuracaoExemplo(Number(e.target.value))}
-                        className="h-8"
+                        className="h-9 bg-background border-border text-foreground"
                       />
                     </div>
                   </div>
-                  <div className="bg-white p-2 rounded border">
-                    <p className="text-sm font-semibold">Exemplos:</p>
-                    <p className="text-xs">10km × 1 dia = R$ {calcularExemplo(10, 1)}</p>
-                    <p className="text-xs">15km × 3 dias = R$ {calcularExemplo(15, 3)}</p>
-                    <p className="text-xs">
-                      {distanciaExemplo}km × {duracaoExemplo} dia(s) = R${" "}
-                      {calcularExemplo(distanciaExemplo, duracaoExemplo)}
+                  <div className="bg-background border border-border p-3 rounded-lg text-sm space-y-1">
+                    <p className="text-sm font-semibold text-foreground border-b border-border pb-1.5 mb-1.5">Resultados:</p>
+                    <p className="text-xs text-muted-foreground">10km × 1 dia = <span className="text-purple-400 font-medium">R$ {calcularExemplo(10, 1)}</span></p>
+                    <p className="text-xs text-muted-foreground">15km × 3 dias = <span className="text-purple-400 font-medium">R$ {calcularExemplo(15, 3)}</span></p>
+                    <p className="text-xs text-foreground font-semibold pt-1 border-t border-border mt-1">
+                      {distanciaExemplo}km × {duracaoExemplo} dia(s) = <span className="text-purple-400">R$ {calcularExemplo(distanciaExemplo, duracaoExemplo)}</span>
                     </p>
                   </div>
                 </div>
@@ -238,21 +239,21 @@ export function ValorKmTab() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-border bg-card text-foreground">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">📋 Aplicado em:</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-foreground">📋 Aplicado em:</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">
+                  <Badge variant="outline" className="bg-purple-500/10 border-purple-500/20 text-purple-400">
                     <Calculator className="w-3 h-3 mr-1" />
                     Cálculo de orçamentos (custo distância)
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">
+                  <Badge variant="outline" className="bg-purple-500/10 border-purple-500/20 text-purple-400">
                     <FileText className="w-3 h-3 mr-1" />
                     Contratos de serviços
                   </Badge>
@@ -260,13 +261,13 @@ export function ValorKmTab() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">
+                  <Badge variant="outline" className="bg-purple-500/10 border-purple-500/20 text-purple-400">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     Propostas de conservação
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">
+                  <Badge variant="outline" className="bg-purple-500/10 border-purple-500/20 text-purple-400">
                     <DollarSign className="w-3 h-3 mr-1" />
                     Relatórios financeiros
                   </Badge>
@@ -276,9 +277,9 @@ export function ValorKmTab() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-border bg-card text-foreground">
           <CardHeader>
-            <CardTitle>▶ Informações Técnicas</CardTitle>
+            <CardTitle className="text-foreground">▶ Informações Técnicas</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm text-muted-foreground space-y-1">

@@ -473,21 +473,28 @@ export function LayoutTab() {
   }
 
   if (loading) {
-    return <div className="text-center py-8">Carregando configurações...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando configurações...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold flex items-center gap-2">📄 Layout de Impressão</h2>
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-foreground">📄 Layout de Impressão</h2>
         <p className="text-muted-foreground">Configure o layout para impressão de documentos</p>
       </div>
 
       <div className="grid gap-6">
         {/* Seção do Papel Timbrado */}
-        <Card className="border-blue-200 bg-blue-50/30">
+        <Card className="border border-purple-500/20 bg-purple-500/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               📋 Papel Timbrado
               <span className="text-sm font-normal text-muted-foreground">- Folha em branco com logo e cabeçalho</span>
             </CardTitle>
@@ -500,21 +507,21 @@ export function LayoutTab() {
               </p>
 
               <div className="flex gap-3">
-                <Button onClick={handleVisualizarPapelTimbrado} variant="outline" className="flex-1 bg-transparent">
+                <Button onClick={handleVisualizarPapelTimbrado} variant="outline" className="flex-1 bg-transparent border-border text-foreground hover:bg-muted">
                   <Eye className="h-4 w-4 mr-2" />
                   Visualizar Papel Timbrado
                 </Button>
-                <Button onClick={handleImprimirPapelTimbrado} className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleImprimirPapelTimbrado} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white">
                   <Printer className="h-4 w-4 mr-2" />
                   Imprimir Papel Timbrado
                 </Button>
               </div>
 
               {/* Preview Miniatura */}
-              <div className="border rounded-lg p-4 bg-white">
+              <div className="border border-border rounded-lg p-4 bg-muted/40">
                 <p className="text-xs text-muted-foreground mb-3 text-center font-medium">Preview Miniatura</p>
                 <div
-                  className="border shadow-sm mx-auto bg-white"
+                  className="border border-slate-300 shadow-sm mx-auto bg-white text-black"
                   style={{
                     width: "210px",
                     height: "297px",
@@ -524,7 +531,7 @@ export function LayoutTab() {
                   }}
                 >
                   {/* Header */}
-                  <div className="text-center border-b pb-2 mb-2">
+                  <div className="text-center border-b border-slate-200 pb-2 mb-2">
                     {logoImpressao?.dados && (
                       <img
                         src={logoImpressao.dados || "/placeholder.svg"}
@@ -535,7 +542,7 @@ export function LayoutTab() {
                     )}
                     {config.cabecalho && (
                       <div
-                        className="text-[4px] leading-tight"
+                        className="text-[4px] leading-tight text-slate-800"
                         dangerouslySetInnerHTML={{ __html: config.cabecalho }}
                       />
                     )}
@@ -547,7 +554,7 @@ export function LayoutTab() {
                   {/* Footer */}
                   {config.rodape && (
                     <div
-                      className="text-center border-t pt-2 mt-2 text-[4px] leading-tight"
+                      className="text-center border-t border-slate-200 pt-2 mt-2 text-[4px] leading-tight text-slate-800"
                       dangerouslySetInnerHTML={{ __html: config.rodape }}
                     />
                   )}
@@ -558,21 +565,21 @@ export function LayoutTab() {
         </Card>
 
         {/* Logo para Documentos */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
-            <CardTitle>Logo para Documentos</CardTitle>
+            <CardTitle className="text-foreground">Logo para Documentos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
-              <div className="text-blue-600">📷 Logo de Impressão</div>
+              <div className="text-purple-400">📷 Logo de Impressão</div>
               <p className="text-sm text-muted-foreground">
                 {logoImpressao
                   ? "O logo de impressão configurado na aba 'Logos do Sistema' será usado automaticamente nos documentos."
                   : "Nenhum logo de impressão configurado. Configure um logo na aba 'Logos do Sistema'."}
               </p>
             </div>
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium mb-2">Preview do Logo Atual</p>
+            <div className="mt-4 p-4 bg-muted/40 border border-border rounded-lg">
+              <p className="text-sm font-medium mb-2 text-foreground">Preview do Logo Atual</p>
               {logoImpressao && logoImpressao.dados ? (
                 <img
                   src={logoImpressao.dados || "/placeholder.svg"}
@@ -580,7 +587,7 @@ export function LayoutTab() {
                   className="max-h-16 object-contain"
                 />
               ) : (
-                <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
+                <div className="w-16 h-16 bg-muted border border-border rounded-lg flex items-center justify-center text-muted-foreground">
                   <ImageIcon className="h-8 w-8" />
                 </div>
               )}
@@ -594,75 +601,79 @@ export function LayoutTab() {
         </Card>
 
         {/* Informações da Empresa */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
-            <CardTitle>Informações da Empresa</CardTitle>
+            <CardTitle className="text-foreground">Informações da Empresa</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="empresa-nome">Nome da Empresa</Label>
+                <Label htmlFor="empresa-nome" className="text-muted-foreground">Nome da Empresa</Label>
                 <Input
                   id="empresa-nome"
                   value={config.empresa_nome || ""}
                   onChange={(e) => handleInputChange("empresa_nome", e.target.value)}
                   placeholder="Nome da sua empresa"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="empresa-cnpj">CNPJ</Label>
+                <Label htmlFor="empresa-cnpj" className="text-muted-foreground">CNPJ</Label>
                 <Input
                   id="empresa-cnpj"
                   value={config.empresa_cnpj || ""}
                   onChange={(e) => handleInputChange("empresa_cnpj", formatarCNPJ(e.target.value))}
                   placeholder="00.000.000/0000-00"
                   maxLength={18}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
-                <Label htmlFor="empresa-cep">CEP</Label>
+                <Label htmlFor="empresa-cep" className="text-muted-foreground">CEP</Label>
                 <Input
                   id="empresa-cep"
                   value={config.empresa_cep || ""}
                   onChange={(e) => formatarCEP(e.target.value)}
                   placeholder="00000-000"
                   maxLength={9}
-                  className={loadingCep ? "pr-10" : ""}
+                  className={`bg-background border-border text-foreground ${loadingCep ? "pr-10" : ""}`}
                 />
                 {loadingCep && (
                   <div className="absolute right-3 top-9">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500"></div>
                   </div>
                 )}
               </div>
               <div>
-                <Label htmlFor="empresa-bairro">Bairro</Label>
+                <Label htmlFor="empresa-bairro" className="text-muted-foreground">Bairro</Label>
                 <Input
                   id="empresa-bairro"
                   value={config.empresa_bairro || ""}
                   onChange={(e) => handleInputChange("empresa_bairro", e.target.value)}
                   placeholder="Nome do bairro"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="empresa-cidade">Cidade</Label>
+                <Label htmlFor="empresa-cidade" className="text-muted-foreground">Cidade</Label>
                 <Input
                   id="empresa-cidade"
                   value={config.empresa_cidade || ""}
                   onChange={(e) => handleInputChange("empresa_cidade", e.target.value)}
                   placeholder="Nome da cidade"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="empresa-uf">UF</Label>
+                <Label htmlFor="empresa-uf" className="text-muted-foreground">UF</Label>
                 <Select value={config.empresa_uf} onValueChange={(value) => handleInputChange("empresa_uf", value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue placeholder="UF" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-border text-foreground">
                     {estadosBrasil.map((uf) => (
                       <SelectItem key={uf} value={uf}>
                         {uf}
@@ -674,40 +685,41 @@ export function LayoutTab() {
             </div>
 
             <div>
-              <Label htmlFor="empresa-endereco">Endereço</Label>
+              <Label htmlFor="empresa-endereco" className="text-muted-foreground">Endereço</Label>
               <Input
                 id="empresa-endereco"
                 value={config.empresa_endereco || ""}
                 onChange={(e) => handleInputChange("empresa_endereco", e.target.value)}
                 placeholder="Rua, número, complemento"
+                className="bg-background border-border text-foreground"
               />
 
               {buscandoCoordenadas && (
-                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                  <span className="text-sm text-blue-700">Buscando coordenadas...</span>
+                <div className="mt-2 p-3 bg-purple-500/10 border border-purple-500/20 rounded-md flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
+                  <span className="text-sm text-purple-400">Buscando coordenadas...</span>
                 </div>
               )}
 
               {coordenadas && !buscandoCoordenadas && (
-                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="mt-2 p-3 bg-purple-500/10 border border-purple-500/20 rounded-md">
                   <div className="flex items-start gap-2">
-                    <MapPin className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <MapPin className="h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-blue-900">Coordenadas Geográficas</p>
-                      <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-blue-700">
+                      <p className="text-sm font-medium text-foreground">Coordenadas Geográficas</p>
+                      <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                         <div>
-                          <span className="font-medium">Latitude:</span> {Number(coordenadas.lat).toFixed(6)}
+                          <span className="font-medium text-foreground">Latitude:</span> {Number(coordenadas.lat).toFixed(6)}
                         </div>
                         <div>
-                          <span className="font-medium">Longitude:</span> {Number(coordenadas.lng).toFixed(6)}
+                          <span className="font-medium text-foreground">Longitude:</span> {Number(coordenadas.lng).toFixed(6)}
                         </div>
                       </div>
                       <a
                         href={`https://www.google.com/maps?q=${Number(coordenadas.lat)},${Number(coordenadas.lng)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 inline-block"
+                        className="text-xs text-purple-400 hover:text-purple-300 underline mt-1 inline-block"
                       >
                         Ver no Google Maps →
                       </a>
@@ -719,32 +731,35 @@ export function LayoutTab() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="empresa-telefone">Telefone</Label>
+                <Label htmlFor="empresa-telefone" className="text-muted-foreground">Telefone</Label>
                 <Input
                   id="empresa-telefone"
                   value={config.empresa_telefone || ""}
                   onChange={(e) => handleInputChange("empresa_telefone", formatarTelefone(e.target.value))}
                   placeholder="(11) 99999-9999"
                   maxLength={15}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="empresa-email">E-mail</Label>
+                <Label htmlFor="empresa-email" className="text-muted-foreground">E-mail</Label>
                 <Input
                   id="empresa-email"
                   type="email"
                   value={config.empresa_email || ""}
                   onChange={(e) => handleInputChange("empresa_email", e.target.value)}
                   placeholder="contato@empresa.com"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="empresa-site">Site</Label>
+                <Label htmlFor="empresa-site" className="text-muted-foreground">Site</Label>
                 <Input
                   id="empresa-site"
                   value={config.empresa_site || ""}
                   onChange={(e) => handleInputChange("empresa_site", e.target.value)}
                   placeholder="www.empresa.com"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
@@ -752,43 +767,45 @@ export function LayoutTab() {
         </Card>
 
         {/* Informações do Representante Legal */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
-            <CardTitle>Representante Legal</CardTitle>
+            <CardTitle className="text-foreground">Representante Legal</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="representante-legal">Nome do Representante</Label>
+                <Label htmlFor="representante-legal" className="text-muted-foreground">Nome do Representante</Label>
                 <Input
                   id="representante-legal"
                   value={config.empresa_representante_legal || ""}
                   onChange={(e) => handleInputChange("empresa_representante_legal", e.target.value)}
                   placeholder="Nome completo do representante"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="representante-nacionalidade">Nacionalidade</Label>
+                <Label htmlFor="representante-nacionalidade" className="text-muted-foreground">Nacionalidade</Label>
                 <Input
                   id="representante-nacionalidade"
                   value={config.representante_nacionalidade || ""}
                   onChange={(e) => handleInputChange("representante_nacionalidade", e.target.value)}
                   placeholder="Brasileiro(a)"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="representante-estado-civil">Estado Civil</Label>
+                <Label htmlFor="representante-estado-civil" className="text-muted-foreground">Estado Civil</Label>
                 <Select
                   value={config.representante_estado_civil}
                   onValueChange={(value) => handleInputChange("representante_estado_civil", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-border text-foreground">
                     {estadosCivis.map((estado) => (
                       <SelectItem key={estado} value={estado}>
                         {estado}
@@ -798,23 +815,25 @@ export function LayoutTab() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="representante-rg">RG</Label>
+                <Label htmlFor="representante-rg" className="text-muted-foreground">RG</Label>
                 <Input
                   id="representante-rg"
                   value={config.representante_rg || ""}
                   onChange={(e) => handleInputChange("representante_rg", formatarRG(e.target.value))}
                   placeholder="00.000.000-0"
                   maxLength={12}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="representante-cpf">CPF</Label>
+                <Label htmlFor="representante-cpf" className="text-muted-foreground">CPF</Label>
                 <Input
                   id="representante-cpf"
                   value={config.representante_cpf || ""}
                   onChange={(e) => handleInputChange("representante_cpf", formatarCPF(e.target.value))}
                   placeholder="000.000.000-00"
                   maxLength={14}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
@@ -822,22 +841,22 @@ export function LayoutTab() {
         </Card>
 
         {/* Configurações de Página */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
-            <CardTitle>Configurações de Página</CardTitle>
+            <CardTitle className="text-foreground">Configurações de Página</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="tamanho-papel">Tamanho do Papel</Label>
+                <Label htmlFor="tamanho-papel" className="text-muted-foreground">Tamanho do Papel</Label>
                 <Select
                   value={config.tamanho_papel}
                   onValueChange={(value) => handleInputChange("tamanho_papel", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-border text-foreground">
                     <SelectItem value="A4">A4 (210 x 297 mm)</SelectItem>
                     <SelectItem value="A3">A3 (297 x 420 mm)</SelectItem>
                     <SelectItem value="Letter">Letter (216 x 279 mm)</SelectItem>
@@ -845,12 +864,12 @@ export function LayoutTab() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="orientacao">Orientação</Label>
+                <Label htmlFor="orientacao" className="text-muted-foreground">Orientação</Label>
                 <Select value={config.orientacao} onValueChange={(value) => handleInputChange("orientacao", value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-border text-foreground">
                     <SelectItem value="retrato">Retrato</SelectItem>
                     <SelectItem value="paisagem">Paisagem</SelectItem>
                   </SelectContent>
@@ -861,46 +880,50 @@ export function LayoutTab() {
         </Card>
 
         {/* Margens */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
-            <CardTitle>Margens (em mm)</CardTitle>
+            <CardTitle className="text-foreground">Margens (em mm)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <Label htmlFor="margem-superior">Superior</Label>
+                <Label htmlFor="margem-superior" className="text-muted-foreground">Superior</Label>
                 <Input
                   id="margem-superior"
                   type="number"
                   value={config.margem_superior}
                   onChange={(e) => handleInputChange("margem_superior", Number(e.target.value))}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="margem-inferior">Inferior</Label>
+                <Label htmlFor="margem-inferior" className="text-muted-foreground">Inferior</Label>
                 <Input
                   id="margem-inferior"
                   type="number"
                   value={config.margem_inferior}
                   onChange={(e) => handleInputChange("margem_inferior", Number(e.target.value))}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="margem-esquerda">Esquerda</Label>
+                <Label htmlFor="margem-esquerda" className="text-muted-foreground">Esquerda</Label>
                 <Input
                   id="margem-esquerda"
                   type="number"
                   value={config.margem_esquerda}
                   onChange={(e) => handleInputChange("margem_esquerda", Number(e.target.value))}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="margem-direita">Direita</Label>
+                <Label htmlFor="margem-direita" className="text-muted-foreground">Direita</Label>
                 <Input
                   id="margem-direita"
                   type="number"
                   value={config.margem_direita}
                   onChange={(e) => handleInputChange("margem_direita", Number(e.target.value))}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
@@ -908,36 +931,38 @@ export function LayoutTab() {
         </Card>
 
         {/* Cabeçalho e Rodapé */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
-            <CardTitle>Cabeçalho e Rodapé</CardTitle>
+            <CardTitle className="text-foreground">Cabeçalho e Rodapé</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="cabecalho">Texto do Cabeçalho</Label>
+              <Label htmlFor="cabecalho" className="text-muted-foreground">Texto do Cabeçalho</Label>
               <Textarea
                 id="cabecalho"
                 placeholder="Antenas Coletivas, Automatizadores de Portões de Veículos, Fechaduras elétricas e Eletrônica, CFTV e Alarmes, Controle de acesso, Bombas e Recondicionamento total de emergência e sensores."
                 value={config.cabecalho || ""}
                 onChange={(e) => handleInputChange("cabecalho", e.target.value)}
                 rows={3}
+                className="bg-background border-border text-foreground"
               />
             </div>
             <div>
-              <Label htmlFor="rodape">Texto do Rodapé</Label>
+              <Label htmlFor="rodape" className="text-muted-foreground">Texto do Rodapé</Label>
               <Textarea
                 id="rodape"
                 placeholder="Rua José Roberto Farte, 719 - WhatsApp 4 118 9814 - 18 Brotas - São Paulo/SP"
                 value={config.rodape || ""}
                 onChange={(e) => handleInputChange("rodape", e.target.value)}
                 rows={2}
+                className="bg-background border-border text-foreground"
               />
             </div>
           </CardContent>
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={handleSalvar} disabled={saving} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={handleSalvar} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700 text-white">
             {saving ? "Salvando..." : "Salvar Configurações"}
           </Button>
         </div>

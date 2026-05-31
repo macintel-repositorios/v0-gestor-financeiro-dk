@@ -73,51 +73,51 @@ export function AsaasTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <div className="p-3 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl shadow-lg">
-          <CreditCard className="h-8 w-8 text-white" />
+        <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl shadow-lg">
+          <CreditCard className="h-8 w-8 text-purple-400" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Configuracoes do Asaas</h2>
-          <p className="text-gray-600">Configure a integracao com o Asaas para emissao de boletos</p>
+          <h2 className="text-2xl font-bold text-foreground">Configurações do Asaas</h2>
+          <p className="text-muted-foreground">Configure a integração com o Asaas para emissão de boletos</p>
         </div>
       </div>
 
       {/* Status da conexão */}
-      <Card className="border-0 shadow-md">
+      <Card className="border border-border bg-card text-foreground">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5 text-teal-600" />
-            Status da Integracao
+          <CardTitle className="flex items-center gap-2 text-foreground">
+            <Settings className="h-5 w-5 text-purple-400" />
+            Status da Integração
           </CardTitle>
-          <CardDescription>Verifique o status da conexao com o Asaas</CardDescription>
+          <CardDescription className="text-muted-foreground">Verifique o status da conexão com o Asaas</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-background border border-border rounded-lg gap-4">
             <div className="flex items-center gap-3">
               {connectionStatus === "connected" ? (
                 <>
-                  <CheckCircle2 className="h-6 w-6 text-green-500" />
+                  <CheckCircle2 className="h-6 w-6 text-emerald-400" />
                   <div>
-                    <p className="font-medium text-green-700">Conectado</p>
-                    <p className="text-sm text-gray-600">
-                      Ambiente: {environment === "sandbox" ? "Sandbox (Testes)" : "Producao"}
+                    <p className="font-medium text-emerald-400">Conectado</p>
+                    <p className="text-sm text-muted-foreground">
+                      Ambiente: {environment === "sandbox" ? "Sandbox (Testes)" : "Produção"}
                     </p>
                   </div>
                 </>
               ) : connectionStatus === "disconnected" ? (
                 <>
-                  <AlertCircle className="h-6 w-6 text-red-500" />
+                  <AlertCircle className="h-6 w-6 text-red-400" />
                   <div>
-                    <p className="font-medium text-red-700">Desconectado</p>
-                    <p className="text-sm text-gray-600">Configure a API Key nas variaveis de ambiente</p>
+                    <p className="font-medium text-red-400">Desconectado</p>
+                    <p className="text-sm text-muted-foreground">Configure a API Key nas variáveis de ambiente</p>
                   </div>
                 </>
               ) : (
                 <>
-                  <AlertCircle className="h-6 w-6 text-gray-400" />
+                  <AlertCircle className="h-6 w-6 text-muted-foreground" />
                   <div>
-                    <p className="font-medium text-gray-700">Status desconhecido</p>
-                    <p className="text-sm text-gray-600">Clique em testar conexao</p>
+                    <p className="font-medium text-foreground">Status desconhecido</p>
+                    <p className="text-sm text-muted-foreground">Clique em testar conexão</p>
                   </div>
                 </>
               )}
@@ -125,7 +125,7 @@ export function AsaasTab() {
             <Button
               onClick={handleTestConnection}
               disabled={testing}
-              className="bg-teal-600 hover:bg-teal-700"
+              className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
             >
               {testing ? (
                 <>
@@ -133,7 +133,7 @@ export function AsaasTab() {
                   Testando...
                 </>
               ) : (
-                "Testar Conexao"
+                "Testar Conexão"
               )}
             </Button>
           </div>
@@ -141,44 +141,44 @@ export function AsaasTab() {
       </Card>
 
       {/* Instruções de configuração */}
-      <Card className="border-0 shadow-md">
+      <Card className="border border-border bg-card text-foreground">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ExternalLink className="h-5 w-5 text-blue-600" />
-            Configuracao
+          <CardTitle className="flex items-center gap-2 text-foreground">
+            <ExternalLink className="h-5 w-5 text-purple-400" />
+            Configuração
           </CardTitle>
-          <CardDescription>Como configurar a integracao com o Asaas</CardDescription>
+          <CardDescription className="text-muted-foreground">Como configurar a integração com o Asaas</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="font-medium text-blue-800 mb-2">Variaveis de Ambiente Necessarias:</h4>
+          <div className="p-4 bg-purple-500/5 rounded-lg border border-purple-500/20">
+            <h4 className="font-medium text-purple-400 mb-2">Variáveis de Ambiente Necessárias:</h4>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="font-mono text-xs">ASAAS_API_KEY</Badge>
-                <span className="text-sm text-gray-600">- Sua chave de API do Asaas</span>
+                <Badge variant="outline" className="font-mono text-xs border-border bg-muted/40 text-muted-foreground">ASAAS_API_KEY</Badge>
+                <span className="text-sm text-muted-foreground">- Sua chave de API do Asaas</span>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="font-mono text-xs">ASAAS_ENVIRONMENT</Badge>
-                <span className="text-sm text-gray-600">- sandbox ou production (padrao: production)</span>
+                <Badge variant="outline" className="font-mono text-xs border-border bg-muted/40 text-muted-foreground">ASAAS_ENVIRONMENT</Badge>
+                <span className="text-sm text-muted-foreground">- sandbox ou production (padrão: production)</span>
               </div>
             </div>
           </div>
 
-          <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-            <h4 className="font-medium text-amber-800 mb-2">Como obter a API Key:</h4>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+          <div className="p-4 bg-amber-500/5 rounded-lg border border-amber-500/20">
+            <h4 className="font-medium text-amber-400 mb-2">Como obter a API Key:</h4>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Acesse sua conta no Asaas</li>
-              <li>Va em Configuracoes &gt; Integracoes</li>
+              <li>Vá em Configurações &gt; Integrações</li>
               <li>Clique em "Gerar nova chave de API"</li>
               <li>Copie a chave gerada</li>
-              <li>Configure a variavel ASAAS_API_KEY no Vercel</li>
+              <li>Configure a variável ASAAS_API_KEY no Vercel/Painel de Hospedagem</li>
             </ol>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-border text-foreground hover:bg-muted bg-transparent"
               onClick={() => window.open("https://www.asaas.com/", "_blank")}
             >
               <ExternalLink className="h-4 w-4 mr-2" />
@@ -186,43 +186,43 @@ export function AsaasTab() {
             </Button>
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-border text-foreground hover:bg-muted bg-transparent"
               onClick={() => window.open("https://docs.asaas.com/", "_blank")}
             >
               <ExternalLink className="h-4 w-4 mr-2" />
-              Documentacao
+              Documentação
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Funcionalidades */}
-      <Card className="border-0 shadow-md">
+      <Card className="border border-border bg-card text-foreground">
         <CardHeader>
-          <CardTitle>Funcionalidades Disponiveis</CardTitle>
-          <CardDescription>Recursos disponiveis com a integracao Asaas</CardDescription>
+          <CardTitle className="text-foreground">Funcionalidades Disponíveis</CardTitle>
+          <CardDescription className="text-muted-foreground">Recursos disponíveis com a integração Asaas</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3">
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <span className="text-gray-700">Emissao de Boletos Bancarios</span>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex items-center gap-3 p-3 bg-purple-500/5 border border-purple-500/10 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-purple-400" />
+              <span className="text-muted-foreground text-sm">Emissão de Boletos Bancários</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <span className="text-gray-700">Gerenciamento de Clientes</span>
+            <div className="flex items-center gap-3 p-3 bg-purple-500/5 border border-purple-500/10 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-purple-400" />
+              <span className="text-muted-foreground text-sm">Gerenciamento de Clientes</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <span className="text-gray-700">Linha Digitavel e Codigo de Barras</span>
+            <div className="flex items-center gap-3 p-3 bg-purple-500/5 border border-purple-500/10 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-purple-400" />
+              <span className="text-muted-foreground text-sm">Linha Digitável e Código de Barras</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <span className="text-gray-700">PDF do Boleto para Impressao</span>
+            <div className="flex items-center gap-3 p-3 bg-purple-500/5 border border-purple-500/10 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-purple-400" />
+              <span className="text-muted-foreground text-sm">PDF do Boleto para Impressão</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <span className="text-gray-700">Multa e Juros Automaticos</span>
+            <div className="flex items-center gap-3 p-3 bg-purple-500/5 border border-purple-500/10 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-purple-400" />
+              <span className="text-muted-foreground text-sm">Multa e Juros Automáticos</span>
             </div>
           </div>
         </CardContent>

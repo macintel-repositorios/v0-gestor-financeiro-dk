@@ -250,8 +250,8 @@ export function LogosTab() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando logos...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando logos...</p>
         </div>
       </div>
     )
@@ -266,8 +266,8 @@ export function LogosTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Camera className="h-5 w-5" />
+          <h3 className="text-lg font-semibold flex items-center gap-2 text-foreground">
+            <Camera className="h-5 w-5 text-purple-400" />
             Logos do Sistema
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -277,10 +277,10 @@ export function LogosTab() {
       </div>
 
       {/* Alerta informativo sobre favicon */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Importante sobre o Favicon:</strong> Faça upload de um arquivo .ICO (recomendado) ou .PNG/.JPG de
+      <Alert className="border-border bg-muted/20 text-foreground">
+        <Info className="h-4 w-4 text-purple-400" />
+        <AlertDescription className="text-muted-foreground">
+          <strong className="text-foreground">Importante sobre o Favicon:</strong> Faça upload de um arquivo .ICO (recomendado) ou .PNG/.JPG de
           32x32 pixels. O favicon aparecerá na aba do navegador e nos favoritos. Após o upload, aguarde alguns segundos
           e recarregue a página.
         </AlertDescription>
@@ -288,20 +288,20 @@ export function LogosTab() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Favicon - Ícone do Sistema */}
-        <Card className="border-2 border-blue-200 bg-blue-50/30">
+        <Card className="border border-purple-500/20 bg-purple-500/5">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                <CardTitle className="text-base flex items-center gap-2 text-foreground">
+                  <AlertCircle className="h-4 w-4 text-purple-400" />
                   Favicon (Ícone do Navegador)
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-muted-foreground">
                   Arquivo .ICO, .PNG ou .JPG que aparece na aba do navegador e favoritos
                 </CardDescription>
               </div>
               {logoFavicon && (
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                   <Check className="h-3 w-3 mr-1" />
                   Ativo
                 </Badge>
@@ -310,7 +310,7 @@ export function LogosTab() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="logo-favicon">Arquivo do Favicon (.ICO recomendado)</Label>
+              <Label htmlFor="logo-favicon" className="text-muted-foreground">Arquivo do Favicon (.ICO recomendado)</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="logo-favicon"
@@ -318,7 +318,7 @@ export function LogosTab() {
                   accept=".ico,image/x-icon,image/vnd.microsoft.icon,image/png,image/jpeg"
                   onChange={(e) => handleFileChange(e, "favicon")}
                   disabled={uploading}
-                  className="flex-1"
+                  className="flex-1 bg-background border-border text-foreground"
                 />
               </div>
               <p className="text-xs text-muted-foreground">
@@ -329,13 +329,13 @@ export function LogosTab() {
             </div>
 
             {logoFavicon && (
-              <div className="border rounded-lg p-4 space-y-3 bg-white">
+              <div className="border border-border rounded-lg p-4 space-y-3 bg-muted/40">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Favicon salvo ({logoFavicon.formato?.toUpperCase()})</p>
-                  <Badge variant="outline">{formatBytes(logoFavicon.tamanho)}</Badge>
+                  <p className="text-sm font-medium text-foreground">Favicon salvo ({logoFavicon.formato?.toUpperCase()})</p>
+                  <Badge variant="outline" className="border-border text-muted-foreground">{formatBytes(logoFavicon.tamanho)}</Badge>
                 </div>
 
-                <div className="flex items-center justify-center bg-slate-50 rounded-lg p-4 min-h-[100px]">
+                <div className="flex items-center justify-center bg-background border border-border rounded-lg p-4 min-h-[100px]">
                   <img
                     src={
                       logoFavicon.dados.startsWith("data:")
@@ -350,7 +350,7 @@ export function LogosTab() {
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Dimensões: {logoFavicon.dimensoes}</span>
-                  <span className="text-green-600">Preview (32x32)</span>
+                  <span className="text-emerald-400">Preview (32x32)</span>
                 </div>
 
                 <Button
@@ -368,15 +368,15 @@ export function LogosTab() {
         </Card>
 
         {/* Logo do Menu */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">Logo do Menu</CardTitle>
-                <CardDescription>Logo exibido na barra lateral do sistema</CardDescription>
+                <CardTitle className="text-base text-foreground">Logo do Menu</CardTitle>
+                <CardDescription className="text-muted-foreground">Logo exibido na barra lateral do sistema</CardDescription>
               </div>
               {logoMenu && (
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                   <Check className="h-3 w-3 mr-1" />
                   Ativo
                 </Badge>
@@ -385,7 +385,7 @@ export function LogosTab() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="logo-menu">Arquivo do Logo</Label>
+              <Label htmlFor="logo-menu" className="text-muted-foreground">Arquivo do Logo</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="logo-menu"
@@ -393,20 +393,20 @@ export function LogosTab() {
                   accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml"
                   onChange={(e) => handleFileChange(e, "menu")}
                   disabled={uploading}
-                  className="flex-1"
+                  className="flex-1 bg-background border-border text-foreground"
                 />
               </div>
               <p className="text-xs text-muted-foreground">Formatos suportados: PNG, JPG, GIF, WebP, SVG (máx. 5MB)</p>
             </div>
 
             {logoMenu && (
-              <div className="border rounded-lg p-4 space-y-3">
+              <div className="border border-border rounded-lg p-4 space-y-3 bg-muted/40">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Logo salvo ({logoMenu.formato?.toUpperCase()})</p>
-                  <Badge variant="outline">{formatBytes(logoMenu.tamanho)}</Badge>
+                  <p className="text-sm font-medium text-foreground">Logo salvo ({logoMenu.formato?.toUpperCase()})</p>
+                  <Badge variant="outline" className="border-border text-muted-foreground">{formatBytes(logoMenu.tamanho)}</Badge>
                 </div>
 
-                <div className="flex items-center justify-center bg-slate-50 rounded-lg p-4 min-h-[100px]">
+                <div className="flex items-center justify-center bg-background border border-border rounded-lg p-4 min-h-[100px]">
                   <img
                     src={
                       logoMenu.dados.startsWith("data:")
@@ -420,7 +420,7 @@ export function LogosTab() {
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Dimensões: {logoMenu.dimensoes}</span>
-                  <span className="text-green-600">Preview</span>
+                  <span className="text-emerald-400">Preview</span>
                 </div>
 
                 <Button
@@ -438,15 +438,15 @@ export function LogosTab() {
         </Card>
 
         {/* Logo de Impressão */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">Logo de Impressão</CardTitle>
-                <CardDescription>Logo usado em documentos e relatórios impressos</CardDescription>
+                <CardTitle className="text-base text-foreground">Logo de Impressão</CardTitle>
+                <CardDescription className="text-muted-foreground">Logo usado em documentos e relatórios impressos</CardDescription>
               </div>
               {logoImpressao && (
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                   <Check className="h-3 w-3 mr-1" />
                   Ativo
                 </Badge>
@@ -455,7 +455,7 @@ export function LogosTab() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="logo-impressao">Arquivo do Logo</Label>
+              <Label htmlFor="logo-impressao" className="text-muted-foreground">Arquivo do Logo</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="logo-impressao"
@@ -463,20 +463,20 @@ export function LogosTab() {
                   accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml"
                   onChange={(e) => handleFileChange(e, "impressao")}
                   disabled={uploading}
-                  className="flex-1"
+                  className="flex-1 bg-background border-border text-foreground"
                 />
               </div>
               <p className="text-xs text-muted-foreground">Formatos suportados: PNG, JPG, GIF, WebP, SVG (máx. 5MB)</p>
             </div>
 
             {logoImpressao && (
-              <div className="border rounded-lg p-4 space-y-3">
+              <div className="border border-border rounded-lg p-4 space-y-3 bg-muted/40">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Logo salvo ({logoImpressao.formato?.toUpperCase()})</p>
-                  <Badge variant="outline">{formatBytes(logoImpressao.tamanho)}</Badge>
+                  <p className="text-sm font-medium text-foreground">Logo salvo ({logoImpressao.formato?.toUpperCase()})</p>
+                  <Badge variant="outline" className="border-border text-muted-foreground">{formatBytes(logoImpressao.tamanho)}</Badge>
                 </div>
 
-                <div className="flex items-center justify-center bg-slate-50 rounded-lg p-4 min-h-[100px]">
+                <div className="flex items-center justify-center bg-background border border-border rounded-lg p-4 min-h-[100px]">
                   <img
                     src={
                       logoImpressao.dados.startsWith("data:")
@@ -490,7 +490,7 @@ export function LogosTab() {
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Dimensões: {logoImpressao.dimensoes}</span>
-                  <span className="text-green-600">Preview</span>
+                  <span className="text-emerald-400">Preview</span>
                 </div>
 
                 <Button
@@ -508,15 +508,15 @@ export function LogosTab() {
         </Card>
 
         {/* Logo do Sistema */}
-        <Card>
+        <Card className="border border-border bg-card">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">Logo do Sistema</CardTitle>
-                <CardDescription>Logo principal usado no sistema</CardDescription>
+                <CardTitle className="text-base text-foreground">Logo do Sistema</CardTitle>
+                <CardDescription className="text-muted-foreground">Logo principal usado no sistema</CardDescription>
               </div>
               {logoSistema && (
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                   <Check className="h-3 w-3 mr-1" />
                   Ativo
                 </Badge>
@@ -525,7 +525,7 @@ export function LogosTab() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="logo-sistema">Arquivo do Logo</Label>
+              <Label htmlFor="logo-sistema" className="text-muted-foreground">Arquivo do Logo</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="logo-sistema"
@@ -533,20 +533,20 @@ export function LogosTab() {
                   accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml"
                   onChange={(e) => handleFileChange(e, "sistema")}
                   disabled={uploading}
-                  className="flex-1"
+                  className="flex-1 bg-background border-border text-foreground"
                 />
               </div>
               <p className="text-xs text-muted-foreground">Formatos suportados: PNG, JPG, GIF, WebP, SVG (máx. 5MB)</p>
             </div>
 
             {logoSistema && (
-              <div className="border rounded-lg p-4 space-y-3">
+              <div className="border border-border rounded-lg p-4 space-y-3 bg-muted/40">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Logo salvo ({logoSistema.formato?.toUpperCase()})</p>
-                  <Badge variant="outline">{formatBytes(logoSistema.tamanho)}</Badge>
+                  <p className="text-sm font-medium text-foreground">Logo salvo ({logoSistema.formato?.toUpperCase()})</p>
+                  <Badge variant="outline" className="border-border text-muted-foreground">{formatBytes(logoSistema.tamanho)}</Badge>
                 </div>
 
-                <div className="flex items-center justify-center bg-slate-50 rounded-lg p-4 min-h-[100px]">
+                <div className="flex items-center justify-center bg-background border border-border rounded-lg p-4 min-h-[100px]">
                   <img
                     src={
                       logoSistema.dados.startsWith("data:")
@@ -560,7 +560,7 @@ export function LogosTab() {
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Dimensões: {logoSistema.dimensoes}</span>
-                  <span className="text-green-600">Preview</span>
+                  <span className="text-emerald-400">Preview</span>
                 </div>
 
                 <Button
@@ -579,12 +579,12 @@ export function LogosTab() {
       </div>
 
       {uploading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-96">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
+          <Card className="w-96 border-border bg-card">
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Processando logo...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Processando logo...</p>
               </div>
             </CardContent>
           </Card>

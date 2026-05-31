@@ -7,13 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ResizableTable } from "@/components/ui/resizable-table"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   AlertDialog,
@@ -220,10 +220,10 @@ export function FeriadosTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <Calendar className="h-8 w-8 animate-spin mx-auto mb-2" />
-          <p>Carregando feriados...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando feriados...</p>
         </div>
       </div>
     )
@@ -233,56 +233,58 @@ export function FeriadosTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Calendar className="h-6 w-6" />
+          <h2 className="text-2xl font-bold flex items-center gap-2 text-foreground">
+            <Calendar className="h-6 w-6 text-purple-400" />
             Feriados
           </h2>
           <p className="text-muted-foreground">Gerencie os feriados do ano</p>
         </div>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+        <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Feriado
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adicionar Feriado</DialogTitle>
-              <DialogDescription>
+          </SheetTrigger>
+          <SheetContent className="bg-card text-foreground border-l border-border shadow-2xl w-full sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle className="text-foreground">Adicionar Feriado</SheetTitle>
+              <SheetDescription className="text-muted-foreground">
                 Preencha os dados do novo feriado que será adicionado ao calendário.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="data">Data</Label>
+              </SheetDescription>
+            </SheetHeader>
+            <div className="space-y-4 mt-6">
+              <div className="space-y-2">
+                <Label htmlFor="data" className="text-muted-foreground">Data</Label>
                 <Input
                   id="data"
                   type="date"
                   value={novoFeriado.data}
                   onChange={(e) => setNovoFeriado({ ...novoFeriado, data: e.target.value })}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
-              <div>
-                <Label htmlFor="nome">Nome do Feriado</Label>
+              <div className="space-y-2">
+                <Label htmlFor="nome" className="text-muted-foreground">Nome do Feriado</Label>
                 <Input
                   id="nome"
                   value={novoFeriado.nome}
                   onChange={(e) => setNovoFeriado({ ...novoFeriado, nome: e.target.value })}
                   placeholder="Ex: Dia do Trabalhador"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
-              <div>
-                <Label htmlFor="tipo">Tipo</Label>
+              <div className="space-y-2">
+                <Label htmlFor="tipo" className="text-muted-foreground">Tipo</Label>
                 <Select
                   value={novoFeriado.tipo}
                   onValueChange={(value) => setNovoFeriado({ ...novoFeriado, tipo: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-border text-foreground">
                     <SelectItem value="nacional">Nacional</SelectItem>
                     <SelectItem value="estadual">Estadual</SelectItem>
                     <SelectItem value="municipal">Municipal</SelectItem>
@@ -290,18 +292,18 @@ export function FeriadosTab() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => setDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleAdicionar}>Adicionar</Button>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={handleAdicionar}>Adicionar</Button>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </SheetContent>
+        </Sheet>
       </div>
 
-      <Card>
+      <Card className="border border-border bg-card text-foreground">
         <CardContent className="p-0">
           {/* DESKTOP VIEW */}
           <div className="hidden md:block">
@@ -320,15 +322,16 @@ export function FeriadosTab() {
               }
               renderCell={(feriado, col) => {
                 switch (col) {
-                  case "data": return <span className="font-medium">{formatarData(feriado.data)}</span>
-                  case "nome": return <span>{feriado.nome}</span>
-                  case "tipo": return <span>{getTipoLabel(feriado.tipo)}</span>
+                  case "data": return <span className="font-medium text-foreground">{formatarData(feriado.data)}</span>
+                  case "nome": return <span className="text-foreground">{feriado.nome}</span>
+                  case "tipo": return <span className="text-muted-foreground">{getTipoLabel(feriado.tipo)}</span>
                   case "acoes":
                     return (
                       <div className="flex items-center justify-center gap-2">
                         <Button 
                           variant="ghost" 
                           size="sm" 
+                          className="border border-border text-foreground hover:bg-muted bg-transparent"
                           onClick={() => {
                             setEditingFeriado({ ...feriado, data: formatarDataParaInput(feriado.data) })
                             setEditDialogOpen(true)
@@ -339,6 +342,7 @@ export function FeriadosTab() {
                         <Button 
                           variant="ghost" 
                           size="sm"
+                          className="border border-border text-foreground hover:bg-muted bg-transparent"
                           onClick={() => {
                             setFeriadoParaDeletar(feriado)
                             setDeleteConfirmOpen(true)
@@ -364,8 +368,8 @@ export function FeriadosTab() {
                 return (
                   <div
                     key={feriado.id}
-                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-white ${
-                      isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"
+                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-card border-border ${
+                      isExpanded ? "shadow-lg ring-1 ring-purple-500/20 bg-muted/20" : "shadow-sm hover:shadow-md"
                     }`}
                   >
                     <button
@@ -373,36 +377,36 @@ export function FeriadosTab() {
                       onClick={() => setExpandedFeriadoId(prev => prev === feriado.id ? null : feriado.id)}
                       className="w-full text-left p-3.5 flex items-center gap-3"
                     >
-                      <div className="h-10 w-10 flex-shrink-0 bg-blue-50 text-blue-700 rounded-full flex items-center justify-center">
+                      <div className="h-10 w-10 flex-shrink-0 bg-purple-500/10 text-purple-400 rounded-full flex items-center justify-center">
                         <Calendar className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-semibold text-sm text-gray-900 truncate block">
+                        <span className="font-semibold text-sm text-foreground truncate block">
                           {feriado.nome}
                         </span>
-                        <span className="text-[11px] text-gray-500 block">
+                        <span className="text-[11px] text-muted-foreground block">
                           {formatarData(feriado.data)}
                         </span>
                       </div>
                       <div className="text-right flex-shrink-0 mr-1">
-                        <Badge variant="outline" className="text-[10px]">{getTipoLabel(feriado.tipo)}</Badge>
+                        <Badge variant="outline" className="text-[10px] bg-purple-500/10 border-purple-500/20 text-purple-400">{getTipoLabel(feriado.tipo)}</Badge>
                       </div>
-                      <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                         isExpanded ? "rotate-90" : ""
                       }`} />
                     </button>
 
                     {isExpanded && (
                       <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                        <div className="border-t border-gray-100 pt-3 space-y-2">
+                        <div className="border-t border-border pt-3 space-y-2">
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-gray-50 rounded-lg p-2.5">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Data</span>
-                              <p className="text-xs font-semibold text-gray-800">{formatarData(feriado.data)}</p>
+                            <div className="bg-background border border-border rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Data</span>
+                              <p className="text-xs font-semibold text-foreground">{formatarData(feriado.data)}</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-2.5">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Tipo</span>
-                              <p className="text-xs text-gray-800">{getTipoLabel(feriado.tipo)}</p>
+                            <div className="bg-background border border-border rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Tipo</span>
+                              <p className="text-xs text-foreground">{getTipoLabel(feriado.tipo)}</p>
                             </div>
                           </div>
 
@@ -410,7 +414,7 @@ export function FeriadosTab() {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="flex-1 text-xs hover:bg-blue-50 bg-white" 
+                              className="flex-1 text-xs border-border text-foreground hover:bg-muted bg-transparent" 
                               onClick={() => {
                                 setEditingFeriado({ ...feriado, data: formatarDataParaInput(feriado.data) })
                                 setEditDialogOpen(true)
@@ -421,7 +425,7 @@ export function FeriadosTab() {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="flex-1 text-xs hover:bg-red-50 text-red-600 bg-white"
+                              className="flex-1 text-xs border-border hover:bg-red-500/10 text-red-400 bg-transparent"
                               onClick={() => {
                                 setFeriadoParaDeletar(feriado)
                                 setDeleteConfirmOpen(true)
@@ -441,28 +445,28 @@ export function FeriadosTab() {
         </CardContent>
       </Card>
 
-      {/* SINGLE EDIT DIALOG */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Feriado</DialogTitle>
-            <DialogDescription>Altere os dados do feriado conforme necessário.</DialogDescription>
-          </DialogHeader>
+      {/* SINGLE EDIT SHEET */}
+      <Sheet open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <SheetContent className="bg-card text-foreground border-l border-border shadow-2xl w-full sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle className="text-foreground">Editar Feriado</SheetTitle>
+            <SheetDescription className="text-muted-foreground">Altere os dados do feriado conforme necessário.</SheetDescription>
+          </SheetHeader>
           {editingFeriado && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="edit-data">Data</Label>
-                <Input id="edit-data" type="date" value={editingFeriado.data} onChange={(e) => setEditingFeriado({ ...editingFeriado, data: e.target.value })} />
+            <div className="space-y-4 mt-6">
+              <div className="space-y-2">
+                <Label htmlFor="edit-data" className="text-muted-foreground">Data</Label>
+                <Input id="edit-data" type="date" value={editingFeriado.data} onChange={(e) => setEditingFeriado({ ...editingFeriado, data: e.target.value })} className="bg-background border-border text-foreground" />
               </div>
-              <div>
-                <Label htmlFor="edit-nome">Nome do Feriado</Label>
-                <Input id="edit-nome" value={editingFeriado.nome} onChange={(e) => setEditingFeriado({ ...editingFeriado, nome: e.target.value })} />
+              <div className="space-y-2">
+                <Label htmlFor="edit-nome" className="text-muted-foreground">Nome do Feriado</Label>
+                <Input id="edit-nome" value={editingFeriado.nome} onChange={(e) => setEditingFeriado({ ...editingFeriado, nome: e.target.value })} className="bg-background border-border text-foreground" />
               </div>
-              <div>
-                <Label htmlFor="edit-tipo">Tipo</Label>
+              <div className="space-y-2">
+                <Label htmlFor="edit-tipo" className="text-muted-foreground">Tipo</Label>
                 <Select value={editingFeriado.tipo} onValueChange={(value) => setEditingFeriado({ ...editingFeriado, tipo: value })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-card border-border text-foreground">
                     <SelectItem value="nacional">Nacional</SelectItem>
                     <SelectItem value="estadual">Estadual</SelectItem>
                     <SelectItem value="municipal">Municipal</SelectItem>
@@ -470,27 +474,27 @@ export function FeriadosTab() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => { setEditDialogOpen(false); setEditingFeriado(null); }}>Cancelar</Button>
-                <Button onClick={handleEditar}>Salvar</Button>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => { setEditDialogOpen(false); setEditingFeriado(null); }}>Cancelar</Button>
+                <Button onClick={handleEditar} className="bg-purple-600 hover:bg-purple-700 text-white">Salvar</Button>
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       {/* SINGLE DELETE CONFIRM DIALOG */}
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card text-foreground border border-border shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-foreground">Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               Tem certeza que deseja remover o feriado "{feriadoParaDeletar?.nome}"? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => { setDeleteConfirmOpen(false); setFeriadoParaDeletar(null); }}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
+            <AlertDialogCancel className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => { setDeleteConfirmOpen(false); setFeriadoParaDeletar(null); }}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700 text-white" onClick={() => {
               if (feriadoParaDeletar) {
                 handleRemover(feriadoParaDeletar.id)
               }

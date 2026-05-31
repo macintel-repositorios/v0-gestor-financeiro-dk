@@ -7,13 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ResizableTable } from "@/components/ui/resizable-table"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -195,10 +195,10 @@ export function VisitasTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p>Carregando configurações...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando configurações...</p>
         </div>
       </div>
     )
@@ -208,13 +208,13 @@ export function VisitasTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">📋 Visitas Técnicas</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2 text-foreground">📋 Visitas Técnicas</h2>
           <p className="text-muted-foreground">Configure os percentuais de desconto por quantidade de visitas</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
+        <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
             <Button
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-purple-600 hover:bg-purple-700 text-white"
               onClick={() => {
                 setEditingIndex(null)
                 setNovaConfig({ quantidade_visitas: getProximaQuantidade(), percentual_desconto: 0 })
@@ -223,19 +223,19 @@ export function VisitasTab() {
               <Plus className="h-4 w-4 mr-2" />
               Adicionar
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingIndex !== null ? "Editar Configuração" : "Adicionar Configuração"}</DialogTitle>
-              <DialogDescription>
+          </SheetTrigger>
+          <SheetContent className="bg-card text-foreground border-l border-border shadow-2xl w-full sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle className="text-foreground">{editingIndex !== null ? "Editar Configuração" : "Adicionar Configuração"}</SheetTitle>
+              <SheetDescription className="text-muted-foreground">
                 {editingIndex !== null
                   ? "Edite os dados da configuração de visita técnica."
                   : "Adicione uma nova configuração de desconto por quantidade de visitas."}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="quantidade">Quantidade de Visitas</Label>
+              </SheetDescription>
+            </SheetHeader>
+            <div className="space-y-4 mt-6">
+              <div className="space-y-2">
+                <Label htmlFor="quantidade" className="text-muted-foreground">Quantidade de Visitas</Label>
                 <Input
                   id="quantidade"
                   type="number"
@@ -247,10 +247,11 @@ export function VisitasTab() {
                       quantidade_visitas: Number(e.target.value),
                     })
                   }
+                  className="bg-background border-border text-foreground"
                 />
               </div>
-              <div>
-                <Label htmlFor="percentual">Percentual de Desconto (%)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="percentual" className="text-muted-foreground">Percentual de Desconto (%)</Label>
                 <Input
                   id="percentual"
                   type="number"
@@ -264,13 +265,14 @@ export function VisitasTab() {
                       percentual_desconto: Number(e.target.value),
                     })
                   }
+                  className="bg-background border-border text-foreground"
                 />
               </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={fecharDialog}>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={fecharDialog}>
                   Cancelar
                 </Button>
-                <Button onClick={editingIndex !== null ? handleSalvarEdicao : handleAdicionar} disabled={saving}>
+                <Button onClick={editingIndex !== null ? handleSalvarEdicao : handleAdicionar} disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white">
                   {saving ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -285,11 +287,11 @@ export function VisitasTab() {
                 </Button>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </SheetContent>
+        </Sheet>
       </div>
 
-      <Card>
+      <Card className="border border-border bg-card text-foreground">
         <CardContent className="p-0">
           {/* DESKTOP VIEW */}
           <div className="hidden md:block">
@@ -311,29 +313,29 @@ export function VisitasTab() {
               renderCell={(config, col, idx) => {
                 switch (col) {
                   case "quantidade_visitas":
-                    return <span className="font-medium">{config.quantidade_visitas} {config.quantidade_visitas === 1 ? "visita" : "visitas"}</span>
+                    return <span className="font-medium text-foreground">{config.quantidade_visitas} {config.quantidade_visitas === 1 ? "visita" : "visitas"}</span>
                   case "percentual_desconto":
-                    return <span className="text-blue-600 font-medium">{config.percentual_desconto}%</span>
+                    return <span className="text-purple-400 font-medium">{config.percentual_desconto}%</span>
                   case "acoes":
                     return (
                       <div className="flex items-center justify-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleEditar(idx)}>
+                        <Button variant="ghost" size="sm" className="border border-border text-foreground hover:bg-muted bg-transparent" onClick={() => handleEditar(idx)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm"><Trash2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" className="border border-border text-foreground hover:bg-muted bg-transparent"><Trash2 className="h-4 w-4" /></Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="bg-card text-foreground border border-border shadow-2xl">
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                              <AlertDialogDescription>
+                              <AlertDialogTitle className="text-foreground">Confirmar exclusão</AlertDialogTitle>
+                              <AlertDialogDescription className="text-muted-foreground">
                                 Tem certeza que deseja remover a configuração para {config.quantidade_visitas} {config.quantidade_visitas === 1 ? "visita" : "visitas"}?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleRemover(idx)}>Remover</AlertDialogAction>
+                              <AlertDialogCancel className="border-border text-foreground hover:bg-muted bg-transparent">Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleRemover(idx)} className="bg-red-600 hover:bg-red-700 text-white">Remover</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -358,8 +360,8 @@ export function VisitasTab() {
                 return (
                   <div
                     key={`${config.quantidade_visitas}-${idx}`}
-                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-white ${
-                      isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"
+                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-card border-border ${
+                      isExpanded ? "shadow-lg ring-1 ring-purple-500/20 bg-muted/20" : "shadow-sm hover:shadow-md"
                     }`}
                   >
                     <button
@@ -367,59 +369,59 @@ export function VisitasTab() {
                       onClick={() => setExpandedVisitaIndex(prev => prev === idx ? null : idx)}
                       className="w-full text-left p-3.5 flex items-center gap-3"
                     >
-                      <div className="h-10 w-10 flex-shrink-0 bg-blue-50 text-blue-700 rounded-full flex items-center justify-center font-bold text-sm">
+                      <div className="h-10 w-10 flex-shrink-0 bg-purple-500/10 text-purple-400 rounded-full flex items-center justify-center font-bold text-sm">
                         V{config.quantidade_visitas}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-semibold text-sm text-gray-900 truncate block">
+                        <span className="font-semibold text-sm text-foreground truncate block">
                           {config.quantidade_visitas} {config.quantidade_visitas === 1 ? "visita" : "visitas"}
                         </span>
-                        <span className="text-[11px] text-gray-500 block">
+                        <span className="text-[11px] text-muted-foreground block">
                           Desconto aplicado
                         </span>
                       </div>
                       <div className="text-right flex-shrink-0 mr-1">
-                        <span className="text-sm font-bold text-blue-600">{config.percentual_desconto}%</span>
+                        <span className="text-sm font-bold text-purple-400">{config.percentual_desconto}%</span>
                       </div>
-                      <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                         isExpanded ? "rotate-90" : ""
                       }`} />
                     </button>
 
                     {isExpanded && (
                       <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                        <div className="border-t border-gray-100 pt-3 space-y-2">
+                        <div className="border-t border-border pt-3 space-y-2">
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-gray-50 rounded-lg p-2.5">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Visitas</span>
-                              <p className="text-xs font-semibold text-gray-800">{config.quantidade_visitas}</p>
+                            <div className="bg-background border border-border rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Visitas</span>
+                              <p className="text-xs font-semibold text-foreground">{config.quantidade_visitas}</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-2.5">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Desconto</span>
-                              <p className="text-xs font-semibold text-blue-600">{config.percentual_desconto}%</p>
+                            <div className="bg-background border border-border rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Desconto</span>
+                              <p className="text-xs font-semibold text-purple-400">{config.percentual_desconto}%</p>
                             </div>
                           </div>
 
                           <div className="flex gap-2 pt-2">
-                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-blue-50 bg-white" onClick={() => handleEditar(idx)}>
+                            <Button variant="outline" size="sm" className="flex-1 text-xs border-border text-foreground hover:bg-muted bg-transparent" onClick={() => handleEditar(idx)}>
                               <Edit className="w-4 h-4 mr-2" />Editar
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-red-50 text-red-600 bg-white">
+                                <Button variant="outline" size="sm" className="flex-1 text-xs border-border hover:bg-red-500/10 text-red-400 bg-transparent">
                                   <Trash2 className="h-4 w-4 mr-2" />Remover
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
+                              <AlertDialogContent className="bg-card text-foreground border border-border shadow-2xl">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                                  <AlertDialogDescription>
+                                  <AlertDialogTitle className="text-foreground">Confirmar exclusão</AlertDialogTitle>
+                                  <AlertDialogDescription className="text-muted-foreground">
                                     Tem certeza que deseja remover a configuração para {config.quantidade_visitas} {config.quantidade_visitas === 1 ? "visita" : "visitas"}?
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleRemover(idx)}>Remover</AlertDialogAction>
+                                  <AlertDialogCancel className="border-border text-foreground hover:bg-muted bg-transparent">Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleRemover(idx)} className="bg-red-600 hover:bg-red-700 text-white">Remover</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
@@ -436,9 +438,9 @@ export function VisitasTab() {
       </Card>
 
       {configs.length > 0 && (
-        <Card>
+        <Card className="border border-border bg-card">
           <CardContent className="p-4">
-            <h3 className="font-semibold mb-2">Como funciona:</h3>
+            <h3 className="font-semibold mb-2 text-foreground">Como funciona:</h3>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• O desconto é aplicado automaticamente nos orçamentos</li>
               <li>• Baseado na quantidade de visitas técnicas necessárias</li>

@@ -342,10 +342,10 @@ export function BackupTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
             Sistema de Backup
           </h2>
-          <p className="text-gray-600 mt-1">Faça backup completo do banco de dados e arquivos do sistema</p>
+          <p className="text-muted-foreground mt-1">Faça backup completo do banco de dados e arquivos do sistema</p>
         </div>
         <Button
           onClick={() => {
@@ -355,26 +355,26 @@ export function BackupTab() {
           }}
           variant="outline"
           size="sm"
-          className="border-orange-200 text-orange-600 hover:bg-orange-50"
+          className="border-border text-foreground hover:bg-muted bg-transparent"
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw className="h-4 w-4 mr-2 text-purple-400" />
           Atualizar
         </Button>
       </div>
 
       {/* Progress Bar */}
       {loading && (
-        <Card className="border-orange-200">
+        <Card className="border-purple-500/20 bg-purple-500/5">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="animate-spin">
-                <RefreshCw className="h-5 w-5 text-orange-600" />
+                <RefreshCw className="h-5 w-5 text-purple-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium mb-2">Criando backup...</p>
-                <Progress value={progress} className="h-2" />
+                <p className="text-sm font-medium mb-2 text-foreground">Criando backup...</p>
+                <Progress value={progress} className="h-2 bg-muted" />
               </div>
-              <span className="text-sm text-gray-500">{progress}%</span>
+              <span className="text-sm text-muted-foreground">{progress}%</span>
             </div>
           </CardContent>
         </Card>
@@ -382,15 +382,15 @@ export function BackupTab() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Backup do Banco de Dados */}
-        <Card className="border-blue-200">
+        <Card className="border-border bg-card text-foreground">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Database className="h-5 w-5 text-blue-600" />
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <Database className="h-5 w-5 text-purple-400" />
               </div>
               <div>
-                <CardTitle className="text-lg">Backup do Banco de Dados</CardTitle>
-                <CardDescription>Faça backup das tabelas e dados do MySQL</CardDescription>
+                <CardTitle className="text-lg text-foreground">Backup do Banco de Dados</CardTitle>
+                <CardDescription className="text-muted-foreground">Faça backup das tabelas e dados do MySQL</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -403,23 +403,23 @@ export function BackupTab() {
                   checked={includeData}
                   onCheckedChange={(checked) => setIncludeData(checked as boolean)}
                 />
-                <label htmlFor="include-data" className="text-sm font-medium">
+                <label htmlFor="include-data" className="text-sm font-medium text-muted-foreground cursor-pointer">
                   Incluir dados das tabelas
                 </label>
               </div>
             </div>
 
-            <Separator />
+            <Separator className="border-border" />
 
             {/* Lista de Tabelas */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium">Tabelas ({tables.length})</h4>
+                <h4 className="font-medium text-foreground">Tabelas ({tables.length})</h4>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setSelectedTables(tables.map((t) => t.name))}>
+                  <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => setSelectedTables(tables.map((t) => t.name))}>
                     Todas
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setSelectedTables([])}>
+                  <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => setSelectedTables([])}>
                     Nenhuma
                   </Button>
                 </div>
@@ -428,13 +428,13 @@ export function BackupTab() {
               {loadingTables ? (
                 <div className="space-y-2">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />
+                    <div key={i} className="h-10 bg-muted/40 rounded animate-pulse" />
                   ))}
                 </div>
               ) : (
-                <div className="max-h-64 overflow-y-auto space-y-2 border rounded-lg p-3">
+                <div className="max-h-64 overflow-y-auto space-y-2 border border-border rounded-lg p-3 bg-background">
                   {tables.map((table) => (
-                    <div key={table.name} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                    <div key={table.name} className="flex items-center justify-between p-2 hover:bg-muted/30 rounded border border-transparent hover:border-border transition-all">
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id={`table-${table.name}`}
@@ -447,13 +447,13 @@ export function BackupTab() {
                             }
                           }}
                         />
-                        <label htmlFor={`table-${table.name}`} className="text-sm font-medium">
+                        <label htmlFor={`table-${table.name}`} className="text-sm font-medium text-foreground cursor-pointer">
                           {table.name}
                         </label>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Badge variant="secondary">{table.rows} linhas</Badge>
-                        <Badge variant="outline">{formatBytes(table.size)}</Badge>
+                      <div className="flex items-center gap-2 text-xs">
+                        <Badge variant="outline" className="bg-muted text-muted-foreground border-border">{table.rows} linhas</Badge>
+                        <Badge variant="outline" className="bg-muted text-muted-foreground border-border">{formatBytes(table.size)}</Badge>
                       </div>
                     </div>
                   ))}
@@ -464,7 +464,7 @@ export function BackupTab() {
             <Button
               onClick={createDatabaseBackup}
               disabled={loading || selectedTables.length === 0}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
             >
               <Database className="h-4 w-4 mr-2" />
               Criar Backup do Banco
@@ -473,15 +473,15 @@ export function BackupTab() {
         </Card>
 
         {/* Backup do Sistema */}
-        <Card className="border-green-200">
+        <Card className="border-border bg-card text-foreground">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <HardDrive className="h-5 w-5 text-green-600" />
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <HardDrive className="h-5 w-5 text-purple-400" />
               </div>
               <div>
-                <CardTitle className="text-lg">Backup do Sistema</CardTitle>
-                <CardDescription>Faça backup completo dos arquivos do projeto</CardDescription>
+                <CardTitle className="text-lg text-foreground">Backup do Sistema</CardTitle>
+                <CardDescription className="text-muted-foreground">Faça backup completo dos arquivos do projeto</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -489,45 +489,45 @@ export function BackupTab() {
             {/* Informações do Sistema */}
             {loadingSystem ? (
               <div className="space-y-2">
-                <div className="h-4 bg-gray-100 rounded animate-pulse" />
-                <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4" />
+                <div className="h-4 bg-muted/40 rounded animate-pulse" />
+                <div className="h-4 bg-muted/40 rounded animate-pulse w-3/4" />
               </div>
             ) : (
               systemInfo && (
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-3 text-sm border border-border p-4 bg-muted/20 rounded-xl">
                   <div>
-                    <span className="text-gray-500">Tamanho:</span>
-                    <span className="ml-2 font-medium">{formatBytes(systemInfo.projectSize)}</span>
+                    <span className="text-muted-foreground">Tamanho:</span>
+                    <span className="ml-2 font-medium text-foreground">{formatBytes(systemInfo.projectSize)}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Node.js:</span>
-                    <span className="ml-2 font-medium">{systemInfo.nodeVersion}</span>
+                    <span className="text-muted-foreground">Node.js:</span>
+                    <span className="ml-2 font-medium text-foreground">{systemInfo.nodeVersion}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Plataforma:</span>
-                    <span className="ml-2 font-medium">{systemInfo.platform}</span>
+                    <span className="text-muted-foreground">Plataforma:</span>
+                    <span className="ml-2 font-medium text-foreground">{systemInfo.platform}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Uptime:</span>
-                    <span className="ml-2 font-medium">{formatUptime(systemInfo.uptime)}</span>
+                    <span className="text-muted-foreground">Uptime:</span>
+                    <span className="ml-2 font-medium text-foreground">{formatUptime(systemInfo.uptime)}</span>
                   </div>
                   {systemInfo.dependencies && (
                     <div>
-                      <span className="text-gray-500">Deps:</span>
-                      <span className="ml-2 font-medium">{systemInfo.dependencies}</span>
+                      <span className="text-muted-foreground">Deps:</span>
+                      <span className="ml-2 font-medium text-foreground">{systemInfo.dependencies}</span>
                     </div>
                   )}
                   {systemInfo.version && (
                     <div>
-                      <span className="text-gray-500">Versão:</span>
-                      <span className="ml-2 font-medium">{systemInfo.version}</span>
+                      <span className="text-muted-foreground">Versão:</span>
+                      <span className="ml-2 font-medium text-foreground">{systemInfo.version}</span>
                     </div>
                   )}
                 </div>
               )
             )}
 
-            <Separator />
+            <Separator className="border-border" />
 
             {/* Opções */}
             <div className="space-y-3">
@@ -537,10 +537,10 @@ export function BackupTab() {
                   checked={includeNodeModules}
                   onCheckedChange={(checked) => setIncludeNodeModules(checked as boolean)}
                 />
-                <label htmlFor="include-node-modules" className="text-sm font-medium">
+                <label htmlFor="include-node-modules" className="text-sm font-medium text-muted-foreground cursor-pointer">
                   Incluir node_modules
                 </label>
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="outline" className="text-xs bg-muted text-muted-foreground border-border">
                   +~200MB
                 </Badge>
               </div>
@@ -551,7 +551,7 @@ export function BackupTab() {
                   checked={includeLogs}
                   onCheckedChange={(checked) => setIncludeLogs(checked as boolean)}
                 />
-                <label htmlFor="include-logs" className="text-sm font-medium">
+                <label htmlFor="include-logs" className="text-sm font-medium text-muted-foreground cursor-pointer">
                   Incluir arquivos de log
                 </label>
               </div>
@@ -562,18 +562,18 @@ export function BackupTab() {
                   checked={includeBackups}
                   onCheckedChange={(checked) => setIncludeBackups(checked as boolean)}
                 />
-                <label htmlFor="include-backups" className="text-sm font-medium">
+                <label htmlFor="include-backups" className="text-sm font-medium text-muted-foreground cursor-pointer">
                   Incluir backups anteriores
                 </label>
               </div>
             </div>
 
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
-                <div className="text-sm text-amber-800">
+                <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5" />
+                <div className="text-sm text-amber-500">
                   <p className="font-medium">Atenção:</p>
-                  <p>O backup do sistema pode ser grande e demorar alguns minutos.</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">O backup do sistema pode ser grande e demorar alguns minutos.</p>
                 </div>
               </div>
             </div>
@@ -581,7 +581,7 @@ export function BackupTab() {
             <Button
               onClick={createSystemBackup}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
             >
               <Archive className="h-4 w-4 mr-2" />
               Criar Backup do Sistema
@@ -591,15 +591,15 @@ export function BackupTab() {
       </div>
 
       {/* Lista de Backups */}
-      <Card className="border-purple-200">
+      <Card className="border-border bg-card text-foreground">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Folder className="h-5 w-5 text-purple-600" />
+            <div className="p-2 bg-purple-500/10 rounded-lg">
+              <Folder className="h-5 w-5 text-purple-400" />
             </div>
             <div>
-              <CardTitle className="text-lg">Backups Existentes</CardTitle>
-              <CardDescription>Gerencie os arquivos de backup criados</CardDescription>
+              <CardTitle className="text-lg text-foreground">Backups Existentes</CardTitle>
+              <CardDescription className="text-muted-foreground">Gerencie os arquivos de backup criados</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -607,28 +607,24 @@ export function BackupTab() {
           {loadingBackups ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
+                <div key={i} className="h-16 bg-muted/40 rounded animate-pulse" />
               ))}
             </div>
           ) : backupFiles.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Archive className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <div className="text-center py-8 text-muted-foreground">
+              <Archive className="h-12 w-12 mx-auto mb-3 opacity-50 text-purple-400" />
               <p>Nenhum backup encontrado</p>
-              <p className="text-sm">Crie seu primeiro backup usando as opções acima</p>
+              <p className="text-sm text-muted-foreground">Crie seu primeiro backup usando as opções acima</p>
             </div>
           ) : (
             <div className="space-y-3">
               {backupFiles.map((backup) => (
                 <div
                   key={backup.filename}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/30 bg-background/50 hover:border-border transition-all"
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        backup.type === "database" ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"
-                      }`}
-                    >
+                    <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
                       {backup.type === "database" ? (
                         <Database className="h-4 w-4" />
                       ) : (
@@ -636,28 +632,28 @@ export function BackupTab() {
                       )}
                     </div>
                     <div>
-                      <p className="font-medium">{backup.filename}</p>
-                      <div className="flex items-center gap-3 text-sm text-gray-500">
+                      <p className="font-medium text-foreground text-sm sm:text-base break-all max-w-[200px] sm:max-w-md">{backup.filename}</p>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-1">
                         <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
+                          <Calendar className="h-3 w-3 text-purple-400" />
                           {format(backup.created, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                         </span>
                         <span>{formatBytes(backup.size)}</span>
-                        <Badge variant={backup.type === "database" ? "default" : "secondary"}>
+                        <Badge variant="outline" className="border-border text-muted-foreground bg-muted/40">
                           {backup.type === "database" ? "Banco" : "Sistema"}
                         </Badge>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => downloadBackup(backup.filename)}>
+                    <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => downloadBackup(backup.filename)}>
                       <Download className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => deleteBackup(backup.filename)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-400 hover:text-red-300 border-border hover:bg-red-500/10 bg-transparent"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

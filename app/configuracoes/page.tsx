@@ -60,7 +60,7 @@ export default function ConfiguracoesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto p-6 space-y-6 pb-32 md:pb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -68,105 +68,105 @@ export default function ConfiguracoesPage() {
               <img
                 src={logoMenu || "/placeholder.svg"}
                 alt="Logo"
-                className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
+                className="h-12 w-12 object-contain rounded-lg shadow-md bg-card p-1 border border-border"
               />
             )}
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
                 Configurações
               </h1>
-              <p className="text-gray-600 mt-1">Configure as opções do sistema</p>
+              <p className="text-muted-foreground mt-1">Configure as opções do sistema</p>
             </div>
           </div>
           <Button
             onClick={handleExportarConfiguracoes}
             variant="outline"
-            className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 bg-transparent hidden md:flex"
+            className="border-border text-foreground hover:bg-muted bg-transparent hidden md:flex"
           >
             <Download className="h-4 w-4 mr-2" />
             Exportar Configurações
           </Button>
         </div>
 
-        <Card className="border-0 shadow-lg bg-white">
+        <Card className="border border-border shadow-2xl bg-card text-foreground">
           <CardContent className="p-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              {/* Desktop: Grid 9 colunas agora */}
-              <div className="hidden md:block border-b bg-gradient-to-r from-indigo-50 to-purple-50">
-                <TabsList className="grid w-full grid-cols-11 h-auto p-2 bg-transparent">
+              {/* Desktop: Grid 11 colunas */}
+              <div className="hidden md:block border-b border-border bg-muted/20">
+                <TabsList className="grid w-full grid-cols-11 h-auto p-2 bg-transparent gap-1">
                   <TabsTrigger
                     value="logos"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <ImageIcon className="h-4 w-4" />
                     Logos
                   </TabsTrigger>
                   <TabsTrigger
                     value="layout"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Layout className="h-4 w-4" />
                     Layout
                   </TabsTrigger>
                   <TabsTrigger
                     value="equipamentos"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-green-500/10 data-[state=active]:text-green-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Wrench className="h-4 w-4" />
                     Equipamentos
                   </TabsTrigger>
                   <TabsTrigger
                     value="feriados"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Calendar className="h-4 w-4" />
                     Feriados
                   </TabsTrigger>
                   <TabsTrigger
                     value="visitas"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Settings className="h-4 w-4" />
                     Visitas
                   </TabsTrigger>
                   <TabsTrigger
                     value="valor-km"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-red-500/10 data-[state=active]:text-red-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Car className="h-4 w-4" />
                     Valor KM
                   </TabsTrigger>
                   <TabsTrigger
                     value="termos"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-teal-500/10 data-[state=active]:text-teal-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <FileText className="h-4 w-4" />
                     Termos
                   </TabsTrigger>
                   <TabsTrigger
                     value="backup"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-orange-500/10 data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Database className="h-4 w-4" />
                     Backup
                   </TabsTrigger>
                   <TabsTrigger
                     value="asaas"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-cyan-500/10 data-[state=active]:text-cyan-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <CreditCard className="h-4 w-4" />
                     Asaas
                   </TabsTrigger>
                   <TabsTrigger
                     value="nfse"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-emerald-500/10 data-[state=active]:text-emerald-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <FileCheck className="h-4 w-4" />
                     NFS-e
                   </TabsTrigger>
                   <TabsTrigger
                     value="nfe"
-                    className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+                    className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-400 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Package className="h-4 w-4" />
                     NF-e
@@ -174,82 +174,82 @@ export default function ConfiguracoesPage() {
                 </TabsList>
               </div>
 
-              {/* Mobile: Grid 4x2 fixo no rodapé */}
-              <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-2xl">
-                <TabsList className="grid grid-cols-5 grid-rows-3 w-full h-auto p-2 gap-1 bg-gradient-to-r from-indigo-50 to-purple-50">
+              {/* Mobile: Grid fixo no rodapé */}
+              <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border shadow-2xl">
+                <TabsList className="grid grid-cols-5 grid-rows-3 w-full h-auto p-2 gap-1 bg-muted/20">
                   <TabsTrigger
                     value="logos"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <ImageIcon className="h-4 w-4" />
                     <span>Logos</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="layout"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <Layout className="h-4 w-4" />
                     <span>Layout</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="equipamentos"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-green-500/10 data-[state=active]:text-green-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <Wrench className="h-4 w-4" />
                     <span>Equip.</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="feriados"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <Calendar className="h-4 w-4" />
                     <span>Feriados</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="visitas"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <Settings className="h-4 w-4" />
                     <span>Visitas</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="valor-km"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-red-500/10 data-[state=active]:text-red-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <Car className="h-4 w-4" />
                     <span>KM</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="termos"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-teal-500/10 data-[state=active]:text-teal-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <FileText className="h-4 w-4" />
                     <span>Termos</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="backup"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-orange-500/10 data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <Database className="h-4 w-4" />
                     <span>Backup</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="asaas"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-cyan-500/10 data-[state=active]:text-cyan-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <CreditCard className="h-4 w-4" />
                     <span>Asaas</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="nfse"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-emerald-500/10 data-[state=active]:text-emerald-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <FileCheck className="h-4 w-4" />
                     <span>NFS-e</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="nfe"
-                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-400 text-muted-foreground hover:text-foreground rounded"
                   >
                     <Package className="h-4 w-4" />
                     <span>NF-e</span>
@@ -257,7 +257,7 @@ export default function ConfiguracoesPage() {
                 </TabsList>
               </div>
 
-              <div className="p-6">
+              <div className="p-6 text-foreground bg-card">
                 <TabsContent value="logos" className="mt-0">
                   <LogosTab />
                 </TabsContent>

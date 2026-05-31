@@ -8,13 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ResizableTable } from "@/components/ui/resizable-table"
 import { Plus, Edit, Trash2, ChevronRight } from "lucide-react"
@@ -162,50 +162,58 @@ export function EquipamentosTab() {
   }
 
   if (loading) {
-    return <div>Carregando equipamentos...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando equipamentos...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Equipamentos</h3>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
+        <h3 className="text-lg font-medium text-foreground">Equipamentos</h3>
+        <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
+            <Button onClick={resetForm} className="bg-purple-600 hover:bg-purple-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Novo Equipamento
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingEquipamento ? "Editar Equipamento" : "Novo Equipamento"}</DialogTitle>
-              <DialogDescription>
+          </SheetTrigger>
+          <SheetContent className="bg-card text-foreground border-l border-border shadow-2xl w-full sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle className="text-foreground">{editingEquipamento ? "Editar Equipamento" : "Novo Equipamento"}</SheetTitle>
+              <SheetDescription className="text-muted-foreground">
                 {editingEquipamento
                   ? "Altere as informações do equipamento abaixo."
                   : "Preencha as informações para criar um novo equipamento."}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="nome">Nome do Equipamento *</Label>
+              </SheetDescription>
+            </SheetHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+              <div className="space-y-2">
+                <Label htmlFor="nome" className="text-muted-foreground">Nome do Equipamento *</Label>
                 <Input
                   id="nome"
                   value={formData.nome}
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                   placeholder="Ex: Sistema de Interfones"
                   required
+                  className="bg-background border-border text-foreground"
                 />
               </div>
-              <div>
-                <Label htmlFor="categoria">Categoria *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="categoria" className="text-muted-foreground">Categoria *</Label>
                 <Select
                   value={formData.categoria}
                   onValueChange={(value) => setFormData({ ...formData, categoria: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-border text-foreground">
                     {CATEGORIAS.map((categoria) => (
                       <SelectItem key={categoria.value} value={categoria.value}>
                         {categoria.label}
@@ -214,8 +222,8 @@ export function EquipamentosTab() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="valor_hora">Valor por Hora (R$) *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="valor_hora" className="text-muted-foreground">Valor por Hora (R$) *</Label>
                 <Input
                   id="valor_hora"
                   type="number"
@@ -225,35 +233,37 @@ export function EquipamentosTab() {
                   onChange={(e) => setFormData({ ...formData, valor_hora: e.target.value })}
                   placeholder="0.00"
                   required
+                  className="bg-background border-border text-foreground"
                 />
               </div>
-              <div>
-                <Label htmlFor="descricao">Descrição</Label>
+              <div className="space-y-2">
+                <Label htmlFor="descricao" className="text-muted-foreground">Descrição</Label>
                 <Input
                   id="descricao"
                   value={formData.descricao}
                   onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
                   placeholder="Descrição opcional do equipamento"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => setDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button type="submit">{editingEquipamento ? "Atualizar" : "Criar"}</Button>
+                <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white">{editingEquipamento ? "Atualizar" : "Criar"}</Button>
               </div>
             </form>
-          </DialogContent>
-        </Dialog>
+          </SheetContent>
+        </Sheet>
       </div>
 
-      <Card>
+      <Card className="border border-border bg-card">
         <CardHeader>
-          <CardTitle>Lista de Equipamentos</CardTitle>
+          <CardTitle className="text-foreground">Lista de Equipamentos</CardTitle>
         </CardHeader>
         <CardContent>
           {equipamentos.length === 0 ? (
-            <p className="text-center text-gray-500 py-4">Nenhum equipamento cadastrado</p>
+            <p className="text-center text-muted-foreground py-4">Nenhum equipamento cadastrado</p>
           ) : (
             <>
               {/* DESKTOP VIEW */}
@@ -271,17 +281,17 @@ export function EquipamentosTab() {
                   rowKey={(row) => row.id}
                   renderCell={(equipamento, col) => {
                     switch (col) {
-                      case "nome": return <span className="font-medium">{equipamento.nome}</span>
-                      case "categoria": return <span>{getCategoriaLabel(equipamento.categoria)}</span>
-                      case "valor_hora": return <span>{formatCurrency(equipamento.valor_hora)}</span>
-                      case "descricao": return <span className="truncate max-w-xs">{equipamento.descricao || "-"}</span>
+                      case "nome": return <span className="font-medium text-foreground">{equipamento.nome}</span>
+                      case "categoria": return <span className="text-muted-foreground">{getCategoriaLabel(equipamento.categoria)}</span>
+                      case "valor_hora": return <span className="text-foreground">{formatCurrency(equipamento.valor_hora)}</span>
+                      case "descricao": return <span className="truncate max-w-xs text-muted-foreground">{equipamento.descricao || "-"}</span>
                       case "acoes":
                         return (
                           <div className="flex justify-end space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => handleEdit(equipamento)}>
+                            <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => handleEdit(equipamento)}>
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleDelete(equipamento.id)}>
+                            <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => handleDelete(equipamento.id)}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -299,8 +309,8 @@ export function EquipamentosTab() {
                   return (
                     <div
                       key={equipamento.id}
-                      className={`rounded-xl border transition-all duration-200 overflow-hidden bg-white ${
-                        isExpanded ? "shadow-lg ring-1 ring-green-200" : "shadow-sm hover:shadow-md"
+                      className={`rounded-xl border transition-all duration-200 overflow-hidden bg-card border-border ${
+                        isExpanded ? "shadow-lg ring-1 ring-purple-500/20 bg-muted/20" : "shadow-sm hover:shadow-md"
                       }`}
                     >
                       <button
@@ -308,50 +318,50 @@ export function EquipamentosTab() {
                         onClick={() => setExpandedEquipamentoId(prev => prev === equipamento.id ? null : equipamento.id)}
                         className="w-full text-left p-3.5 flex items-center gap-3"
                       >
-                        <div className="h-10 w-10 flex-shrink-0 bg-green-50 text-green-700 rounded-full flex items-center justify-center text-sm font-bold">
+                        <div className="h-10 w-10 flex-shrink-0 bg-purple-500/10 text-purple-400 rounded-full flex items-center justify-center text-sm font-bold">
                           {equipamento.nome.slice(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <span className="font-semibold text-sm text-gray-900 truncate block">
+                          <span className="font-semibold text-sm text-foreground truncate block">
                             {equipamento.nome}
                           </span>
-                          <span className="text-[11px] text-gray-500 block">
+                          <span className="text-[11px] text-muted-foreground block">
                             {getCategoriaLabel(equipamento.categoria)}
                           </span>
                         </div>
                         <div className="text-right flex-shrink-0 mr-1">
-                          <div className="text-sm font-bold text-green-600">{formatCurrency(equipamento.valor_hora)}/h</div>
+                          <div className="text-sm font-bold text-purple-400">{formatCurrency(equipamento.valor_hora)}/h</div>
                         </div>
-                        <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                        <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                           isExpanded ? "rotate-90" : ""
                         }`} />
                       </button>
 
                       {isExpanded && (
                         <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                          <div className="border-t border-gray-100 pt-3 space-y-2">
+                          <div className="border-t border-border pt-3 space-y-2">
                             <div className="grid grid-cols-2 gap-2">
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Valor por Hora</span>
-                                <p className="text-xs font-semibold text-green-600">{formatCurrency(equipamento.valor_hora)}</p>
+                              <div className="bg-background border border-border rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Valor por Hora</span>
+                                <p className="text-xs font-semibold text-purple-400">{formatCurrency(equipamento.valor_hora)}</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Categoria</span>
-                                <p className="text-xs text-gray-800">{getCategoriaLabel(equipamento.categoria)}</p>
+                              <div className="bg-background border border-border rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Categoria</span>
+                                <p className="text-xs text-foreground">{getCategoriaLabel(equipamento.categoria)}</p>
                               </div>
                               {equipamento.descricao && (
-                                <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                  <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Descrição</span>
-                                  <p className="text-xs text-gray-800">{equipamento.descricao}</p>
+                                <div className="bg-background border border-border rounded-lg p-2.5 col-span-2">
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Descrição</span>
+                                  <p className="text-xs text-foreground">{equipamento.descricao}</p>
                                 </div>
                               )}
                             </div>
 
                             <div className="flex gap-2 pt-2">
-                              <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-blue-50 bg-white" onClick={() => handleEdit(equipamento)}>
+                              <Button variant="outline" size="sm" className="flex-1 text-xs border-border text-foreground hover:bg-muted bg-transparent" onClick={() => handleEdit(equipamento)}>
                                 <Edit className="w-4 h-4 mr-2" />Editar
                               </Button>
-                              <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-red-50 text-red-600 bg-white" onClick={() => handleDelete(equipamento.id)}>
+                              <Button variant="outline" size="sm" className="flex-1 text-xs border-border hover:bg-red-500/10 text-red-400 bg-transparent" onClick={() => handleDelete(equipamento.id)}>
                                 <Trash2 className="w-4 h-4 mr-2" />Excluir
                               </Button>
                             </div>
