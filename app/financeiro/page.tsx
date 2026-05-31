@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ResizableTable } from "@/components/ui/resizable-table"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import {
   DollarSign,
   FileText,
@@ -32,6 +33,7 @@ import {
   ArrowUpDown,
   X,
   TrendingUp,
+  ExternalLink,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -125,6 +127,7 @@ export default function FinanceiroPage() {
   const [expandedReciboId, setExpandedReciboId] = useState<number | null>(null)
   const [pageIndexBoletos, setPageIndexBoletos] = useState(0)
   const [pageIndexRecibos, setPageIndexRecibos] = useState(0)
+  const [previewBoletoUrl, setPreviewBoletoUrl] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -220,9 +223,9 @@ export default function FinanceiroPage() {
 
   const handleImprimirBoleto = async (boleto: Boleto) => {
     if (boleto.asaas_bankslip_url) {
-      window.open(boleto.asaas_bankslip_url, "_blank")
+      setPreviewBoletoUrl(boleto.asaas_bankslip_url)
     } else if (boleto.asaas_invoice_url) {
-      window.open(boleto.asaas_invoice_url, "_blank")
+      setPreviewBoletoUrl(boleto.asaas_invoice_url)
     } else {
       toast({
         title: "PDF não disponível",
@@ -908,7 +911,7 @@ export default function FinanceiroPage() {
                                         </Button>
                                       )}
                                       {boleto.asaas_bankslip_url && (
-                                        <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
+                                        <Button variant="outline" size="sm" onClick={() => handleImprimirBoleto(boleto)}
                                           className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir">
                                           <Printer className="h-4 w-4" />
                                         </Button>
@@ -1084,7 +1087,7 @@ export default function FinanceiroPage() {
                                     </Button>
                                   )}
                                   {boleto.asaas_bankslip_url && (
-                                    <Button variant="outline" size="sm" onClick={() => window.open(boleto.asaas_bankslip_url || "#", "_blank")}
+                                    <Button variant="outline" size="sm" onClick={() => handleImprimirBoleto(boleto)}
                                       className="flex-1 text-xs border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 bg-card">
                                       <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir
                                     </Button>
@@ -1448,6 +1451,32 @@ export default function FinanceiroPage() {
         onOpenChange={setShowVisualizarBoletos}
         numeroBase={boletoParaVisualizar}
       />
+
+      <Sheet open={!!previewBoletoUrl} onOpenChange={(open) => !open && setPreviewBoletoUrl(null)}>
+        <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
+          <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+            <SheetTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2 text-foreground">
+                <Printer className="h-5 w-5 text-indigo-500" />
+                Imprimir Boleto
+              </span>
+              <div className="flex gap-2 mr-6">
+                <Button
+                  size="sm"
+                  onClick={() => window.open(previewBoletoUrl!, "_blank")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Abrir em Nova Aba
+                </Button>
+              </div>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 bg-white">
+            <iframe src={previewBoletoUrl!} className="w-full h-full border-0" title="PDF Preview" />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="border-border bg-card text-foreground shadow-2xl">

@@ -19,6 +19,7 @@ import {
   Printer,
   Download,
   CreditCard,
+  ExternalLink,
 } from "lucide-react"
 
 interface Boleto {
@@ -189,8 +190,10 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
     alert("Linha digitável copiada para a área de transferência!")
   }
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
   const abrirPDF = (url: string) => {
-    window.open(url, "_blank")
+    setPreviewUrl(url)
   }
 
   const imprimirTodosBoletos = async () => {
@@ -232,16 +235,7 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
       }
 
       const pdfUrl = URL.createObjectURL(blob)
-      const newTab = window.open(pdfUrl, "_blank")
-      if (!newTab) {
-        // If popup blocked, download instead
-        const a = document.createElement("a")
-        a.href = pdfUrl
-        a.download = `boletos-nota-${numeroBaseLimpo}.pdf`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-      }
+      setPreviewUrl(pdfUrl)
     } catch (error) {
       console.error("Erro ao combinar PDFs:", error)
       // Fallback: open each PDF in a separate tab
@@ -489,6 +483,32 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
               </div>
             </div>
           )}
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={!!previewUrl} onOpenChange={(open) => !open && setPreviewUrl(null)}>
+        <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
+          <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+            <SheetTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2 text-foreground">
+                <Printer className="h-5 w-5 text-indigo-500" />
+                Imprimir Boleto
+              </span>
+              <div className="flex gap-2 mr-6">
+                <Button
+                  size="sm"
+                  onClick={() => window.open(previewUrl!, "_blank")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Abrir em Nova Aba
+                </Button>
+              </div>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 bg-white">
+            <iframe src={previewUrl!} className="w-full h-full border-0" title="PDF Preview" />
+          </div>
         </SheetContent>
       </Sheet>
     </div>
