@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -394,14 +394,14 @@ export function EmitirNfeDialog({ open, onOpenChange, onSuccess, dadosOrigem }: 
   )
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl w-[85vw] max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-blue-600" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+          <SheetTitle className="flex items-center gap-2 text-foreground">
+            <Package className="h-5 w-5 text-blue-500" />
             Emitir NF-e Material (SEFAZ)
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription className="text-muted-foreground text-sm">
             {form.origem !== "avulsa" ? (
               <span>
                 {"Emissao a partir de "}
@@ -413,10 +413,10 @@ export function EmitirNfeDialog({ open, onOpenChange, onSuccess, dadosOrigem }: 
             ) : (
               "Emissao de Nota Fiscal Eletronica de Material/Produto (SEFAZ - Modelo 55)"
             )}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Dados da Nota */}
           <div className="p-4 bg-muted/30 rounded-lg space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -969,8 +969,8 @@ export function EmitirNfeDialog({ open, onOpenChange, onSuccess, dadosOrigem }: 
           </div>
         )}
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+        <SheetFooter className="p-6 border-t border-border bg-muted/30 gap-2 flex-row justify-end flex-shrink-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading} className="border-border hover:bg-muted bg-card text-foreground">
             Cancelar
           </Button>
           <Button
@@ -990,8 +990,8 @@ export function EmitirNfeDialog({ open, onOpenChange, onSuccess, dadosOrigem }: 
               </>
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

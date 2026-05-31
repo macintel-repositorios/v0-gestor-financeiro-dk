@@ -27,6 +27,13 @@ interface RelatorioData {
   valorTotal?: number
   estatisticas?: any
   filtros?: any
+  usuarios?: any[]
+  logs?: any[]
+  feriados?: any[]
+  equipamentos?: any[]
+  notasFiscais?: any[]
+  propostas?: any[]
+  contratos?: any[]
 }
 
 export default function RelatoriosPage() {
@@ -441,10 +448,10 @@ export default function RelatoriosPage() {
 
   const renderFiltros = () => {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 text-foreground">
         {/* Tipo de Relatório */}
         <div>
-          <Label htmlFor="tipo" className="font-semibold text-gray-700">Tipo de Relatório</Label>
+          <Label htmlFor="tipo" className="font-semibold text-foreground">Tipo de Relatório</Label>
           <Select
             value={tipoRelatorio}
             onValueChange={(value) => {
@@ -464,10 +471,10 @@ export default function RelatoriosPage() {
               }
             }}
           >
-            <SelectTrigger className="bg-white border-gray-200 mt-1">
+            <SelectTrigger className="bg-background border-border text-foreground mt-1">
               <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-card border-border text-foreground">
               <SelectItem value="financeiro">📊 Relatório Financeiro (Boletos)</SelectItem>
               <SelectItem value="orcamentos">📝 Relatório de Orçamentos</SelectItem>
               <SelectItem value="ordens_servico">🔧 Relatório de Ordens de Serviço</SelectItem>
@@ -487,12 +494,12 @@ export default function RelatoriosPage() {
         {/* Preset de Período */}
         {tipoRelatorio !== "equipamentos" && tipoRelatorio !== "logs_sistema" && tipoRelatorio !== "usuarios" && (
           <div>
-            <Label htmlFor="preset-periodo" className="font-semibold text-gray-700">Período</Label>
+            <Label htmlFor="preset-periodo" className="font-semibold text-foreground">Período</Label>
             <Select value={periodoPreset} onValueChange={setPeriodoPreset}>
-              <SelectTrigger className="bg-white border-gray-200 mt-1">
+              <SelectTrigger className="bg-background border-border text-foreground mt-1">
                 <SelectValue placeholder="Selecione o período" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border text-foreground">
                 {tipoRelatorio === "feriados" ? (
                   <>
                     <SelectItem value="todos_meses">Todos os meses</SelectItem>
@@ -522,23 +529,23 @@ export default function RelatoriosPage() {
         {periodoPreset === "personalizado" && tipoRelatorio !== "feriados" && (
           <div className="grid grid-cols-2 gap-2 animate-in slide-in-from-top-2 duration-200">
             <div>
-              <Label htmlFor="data-inicio" className="text-xs text-gray-600">Início</Label>
+              <Label htmlFor="data-inicio" className="text-xs text-muted-foreground">Início</Label>
               <Input
                 id="data-inicio"
                 type="date"
                 value={dataInicio}
                 onChange={(e) => setDataInicio(e.target.value)}
-                className="bg-white border-gray-200 mt-0.5"
+                className="bg-background border-border text-foreground mt-0.5"
               />
             </div>
             <div>
-              <Label htmlFor="data-fim" className="text-xs text-gray-600">Fim</Label>
+              <Label htmlFor="data-fim" className="text-xs text-muted-foreground">Fim</Label>
               <Input
                 id="data-fim"
                 type="date"
                 value={dataFim}
                 onChange={(e) => setDataFim(e.target.value)}
-                className="bg-white border-gray-200 mt-0.5"
+                className="bg-background border-border text-foreground mt-0.5"
               />
             </div>
           </div>
@@ -547,12 +554,12 @@ export default function RelatoriosPage() {
         {/* Tipo de Nota (apenas notas fiscais) */}
         {tipoRelatorio === "notas_fiscais" && (
           <div>
-            <Label htmlFor="tipoNota" className="font-semibold text-gray-700">Tipo de Nota</Label>
+            <Label htmlFor="tipoNota" className="font-semibold text-foreground">Tipo de Nota</Label>
             <Select value={tipoNota} onValueChange={setTipoNota}>
-              <SelectTrigger className="bg-white border-gray-200 mt-1">
+              <SelectTrigger className="bg-background border-border text-foreground mt-1">
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border text-foreground">
                 <SelectItem value="todos">Todos os tipos</SelectItem>
                 <SelectItem value="servico">Nota de Serviço (NFS-e)</SelectItem>
                 <SelectItem value="produto">Nota de Produto (NF-e)</SelectItem>
@@ -564,12 +571,12 @@ export default function RelatoriosPage() {
         {/* Categoria de Equipamento */}
         {tipoRelatorio === "equipamentos" && (
           <div>
-            <Label htmlFor="categoriaEquipamento" className="font-semibold text-gray-700">Categoria</Label>
+            <Label htmlFor="categoriaEquipamento" className="font-semibold text-foreground">Categoria</Label>
             <Select value={categoriaEquipamento} onValueChange={setCategoriaEquipamento}>
-              <SelectTrigger className="bg-white border-gray-200 mt-1">
+              <SelectTrigger className="bg-background border-border text-foreground mt-1">
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border text-foreground">
                 <SelectItem value="todos">Todas</SelectItem>
                 {categoriasEquipamentos.map((cat) => (
                   <SelectItem key={cat} value={cat}>
@@ -584,12 +591,12 @@ export default function RelatoriosPage() {
         {/* Nível do Usuário (Apenas para relatório de usuários) */}
         {tipoRelatorio === "usuarios" && (
           <div>
-            <Label htmlFor="nivelUsuario" className="font-semibold text-gray-700">Nível / Tipo</Label>
+            <Label htmlFor="nivelUsuario" className="font-semibold text-foreground">Nível / Tipo</Label>
             <Select value={nivelUsuario} onValueChange={setNivelUsuario}>
-              <SelectTrigger className="bg-white border-gray-200 mt-1">
+              <SelectTrigger className="bg-background border-border text-foreground mt-1">
                 <SelectValue placeholder="Todos os níveis" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border text-foreground">
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="tecnico">Técnico</SelectItem>
@@ -603,14 +610,14 @@ export default function RelatoriosPage() {
         {/* Filtros de Status / Nível / Tipo */}
         {(tipoRelatorio === "orcamentos" || tipoRelatorio === "financeiro" || tipoRelatorio === "ordens_servico" || tipoRelatorio === "notas_fiscais" || tipoRelatorio === "propostas_contratos" || tipoRelatorio === "contratos_ativos" || tipoRelatorio === "usuarios" || tipoRelatorio === "logs_sistema" || tipoRelatorio === "feriados" || tipoRelatorio === "equipamentos") && (
           <div>
-            <Label htmlFor="status" className="font-semibold text-gray-700">
+            <Label htmlFor="status" className="font-semibold text-foreground">
               {tipoRelatorio === "logs_sistema" ? "Tipo" : "Status"}
             </Label>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="bg-white border-gray-200 mt-1">
+              <SelectTrigger className="bg-background border-border text-foreground mt-1">
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border text-foreground">
                 <SelectItem value="todos">Todos</SelectItem>
                 {tipoRelatorio === "orcamentos" && (
                   <>
@@ -695,12 +702,12 @@ export default function RelatoriosPage() {
         {tipoRelatorio === "produtos" && (
           <>
             <div>
-              <Label htmlFor="categoria" className="font-semibold text-gray-700">Tipo de Produto</Label>
+              <Label htmlFor="categoria" className="font-semibold text-foreground">Tipo de Produto</Label>
               <Select value={categoriaId} onValueChange={setCategoriaId}>
-                <SelectTrigger className="bg-white border-gray-200 mt-1">
+                <SelectTrigger className="bg-background border-border text-foreground mt-1">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card border-border text-foreground">
                   <SelectItem value="todos">Todos</SelectItem>
                   {tipos.map((tipo) => (
                     <SelectItem key={tipo.id} value={tipo.id.toString()}>
@@ -711,12 +718,12 @@ export default function RelatoriosPage() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="situacao-estoque" className="font-semibold text-gray-700">Situação do Estoque</Label>
+              <Label htmlFor="situacao-estoque" className="font-semibold text-foreground">Situação do Estoque</Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="bg-white border-gray-200 mt-1">
+                <SelectTrigger className="bg-background border-border text-foreground mt-1">
                   <SelectValue placeholder="Selecione a situação" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card border-border text-foreground">
                   <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="baixo_estoque">Baixo Estoque</SelectItem>
                   <SelectItem value="sem_estoque">Sem Estoque</SelectItem>
@@ -729,7 +736,7 @@ export default function RelatoriosPage() {
         {/* Cliente */}
         {(tipoRelatorio === "clientes" || tipoRelatorio === "orcamentos" || tipoRelatorio === "financeiro" || tipoRelatorio === "ordens_servico" || tipoRelatorio === "notas_fiscais" || tipoRelatorio === "propostas_contratos" || tipoRelatorio === "contratos_ativos") && (
           <div>
-            <Label htmlFor="cliente" className="font-semibold text-gray-700">Cliente</Label>
+            <Label htmlFor="cliente" className="font-semibold text-foreground">Cliente</Label>
             <ClienteFilter value={clienteId} onValueChange={setClienteId} clientes={clientes} />
           </div>
         )}
@@ -1624,7 +1631,7 @@ export default function RelatoriosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pb-12">
+    <div className="min-h-screen bg-background text-foreground pb-12">
       <div className="container mx-auto p-4 md:p-6 space-y-6">
         
         {/* Estilo Global de Impressão */}
@@ -1645,7 +1652,7 @@ export default function RelatoriosPage() {
               font-family: 'Inter', sans-serif !important;
             }
 
-            /* Ocultar elementos de navegação, cabeçalhos do app, botões, sidebar e blobs de fundo */
+            /* Ocultar elements de navegação, cabeçalhos do app, botões, sidebar e blobs de fundo */
             aside,
             header,
             .no-print,
@@ -1741,20 +1748,20 @@ export default function RelatoriosPage() {
         `}</style>
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-250/50 pb-6 no-print">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/40 pb-6 no-print">
           <div className="flex items-center gap-4">
             {logoMenu && (
               <img
                 src={logoMenu || "/placeholder.svg"}
                 alt="Logo"
-                className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
+                className="h-12 w-12 object-contain rounded-lg shadow-md bg-muted p-1"
               />
             )}
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
                 Relatórios
               </h1>
-              <p className="text-gray-600 mt-1">Análises detalhadas, exportação e impressão de dados</p>
+              <p className="text-muted-foreground mt-1">Análises detalhadas, exportação e impressão de dados</p>
             </div>
           </div>
 
@@ -1762,9 +1769,9 @@ export default function RelatoriosPage() {
             <div className="flex gap-2">
               <Button
                 onClick={handlePrint}
-                className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="bg-muted/40 border border-border text-foreground hover:bg-muted/60 flex items-center gap-2"
               >
-                <Printer className="h-4 w-4" />
+                <Printer className="h-4 w-4 text-purple-400" />
                 Imprimir
               </Button>
               <Button
@@ -1781,13 +1788,13 @@ export default function RelatoriosPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 no-print">
           {/* Filtros Lateral */}
           <div className="lg:col-span-1">
-            <Card className="border-0 shadow-lg bg-white sticky top-6">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4">
-                <CardTitle className="text-white flex items-center gap-2 text-base">
-                  <Filter className="h-5 w-5" />
+            <Card className="border border-border bg-card text-foreground sticky top-6">
+              <CardHeader className="bg-gradient-to-r from-purple-950/60 via-pink-950/60 to-purple-950/60 text-white rounded-t-lg p-4">
+                <CardTitle className="text-foreground flex items-center gap-2 text-base">
+                  <Filter className="h-5 w-5 text-purple-400" />
                   Parâmetros de Filtro
                 </CardTitle>
-                <CardDescription className="text-blue-100 text-xs">Configure o relatório abaixo</CardDescription>
+                <CardDescription className="text-muted-foreground text-xs">Configure o relatório abaixo</CardDescription>
               </CardHeader>
               <CardContent className="p-4">
                 {renderFiltros()}
@@ -1795,7 +1802,7 @@ export default function RelatoriosPage() {
                 <Button
                   onClick={gerarRelatorio}
                   disabled={loading}
-                  className="w-full mt-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
+                  className="w-full mt-5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium"
                 >
                   {loading ? (
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -1811,13 +1818,13 @@ export default function RelatoriosPage() {
           {/* Resultados na Tela */}
           <div className="lg:col-span-3 space-y-6">
             {error && (
-              <Card className="border-red-200 bg-red-50">
+              <Card className="border-red-900 bg-red-950/20 text-red-200">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-3 text-red-800">
+                  <div className="flex items-center gap-3 text-red-400">
                     <AlertCircle className="h-5 w-5" />
                     <div>
-                      <h3 className="font-medium">Erro ao gerar relatório</h3>
-                      <p className="text-sm mt-1">{error}</p>
+                      <h3 className="font-medium text-red-200">Erro ao gerar relatório</h3>
+                      <p className="text-sm mt-1 text-red-300/80">{error}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1825,11 +1832,11 @@ export default function RelatoriosPage() {
             )}
 
             {loading && (
-              <Card className="border-0 shadow-lg bg-white">
+              <Card className="border border-border bg-card text-foreground shadow-lg">
                 <CardContent className="p-12 text-center">
-                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">Processando relatório...</h3>
-                  <p className="text-gray-600">Aguarde enquanto estruturamos os dados do banco.</p>
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                  <h3 className="text-xl font-medium text-foreground mb-2">Processando relatório...</h3>
+                  <p className="text-muted-foreground">Aguarde enquanto estruturamos os dados do banco.</p>
                 </CardContent>
               </Card>
             )}
@@ -2400,22 +2407,23 @@ function ClienteFilter({ value, onValueChange, clientes }: ClienteFilterProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between bg-white text-gray-800 border border-gray-250 h-9 font-normal hover:bg-gray-50 mt-1"
+          className="w-full justify-between bg-background text-foreground border border-border h-9 font-normal hover:bg-muted/40 mt-1"
         >
           <span className="truncate">{selectedClienteName}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-0" align="start">
-        <Command shouldFilter={false}>
+      <PopoverContent className="w-[280px] p-0 bg-card border-border text-foreground" align="start">
+        <Command shouldFilter={false} className="bg-card text-foreground">
           <CommandInput 
             placeholder="Buscar cliente..." 
             value={search} 
             onValueChange={setSearch} 
+            className="border-none focus:ring-0 text-foreground bg-transparent"
           />
-          <CommandList>
-            <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
-            <CommandGroup>
+          <CommandList className="bg-card text-foreground">
+            <CommandEmpty className="text-muted-foreground p-2 text-sm text-center">Nenhum cliente encontrado.</CommandEmpty>
+            <CommandGroup className="bg-card text-foreground">
               <CommandItem
                 value="todos"
                 onSelect={() => {
@@ -2423,8 +2431,9 @@ function ClienteFilter({ value, onValueChange, clientes }: ClienteFilterProps) {
                   setOpen(false)
                   setSearch("")
                 }}
+                className="text-foreground hover:bg-muted/40 cursor-pointer"
               >
-                <Check className={cn("mr-2 h-4 w-4", value === "todos" ? "opacity-100" : "opacity-0")} />
+                <Check className={cn("mr-2 h-4 w-4 text-purple-400", value === "todos" ? "opacity-100" : "opacity-0")} />
                 Todos os Clientes
               </CommandItem>
               {filtered.slice(0, 50).map((cliente) => (
@@ -2436,13 +2445,14 @@ function ClienteFilter({ value, onValueChange, clientes }: ClienteFilterProps) {
                     setOpen(false)
                     setSearch("")
                   }}
+                  className="text-foreground hover:bg-muted/40 cursor-pointer"
                 >
-                  <Check className={cn("mr-2 h-4 w-4", value === cliente.id.toString() ? "opacity-100" : "opacity-0")} />
+                  <Check className={cn("mr-2 h-4 w-4 text-purple-400", value === cliente.id.toString() ? "opacity-100" : "opacity-0")} />
                   {cliente.nome}
                 </CommandItem>
               ))}
               {filtered.length > 50 && (
-                <div className="text-[10px] text-gray-400 text-center py-1 border-t border-gray-100 mt-1">
+                <div className="text-[10px] text-muted-foreground text-center py-1 border-t border-border mt-1">
                   Continue digitando para filtrar...
                 </div>
               )}

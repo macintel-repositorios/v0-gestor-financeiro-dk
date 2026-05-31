@@ -85,7 +85,7 @@ export default function UsuariosPage() {
 
     // Filtro do Card
     if (tipoCardFilter === "ativo") {
-      filtrados = filtrados.filter((u) => u.ativo === 1)
+      filtrados = filtrados.filter((u) => u.ativo === true || (u.ativo as any) === 1)
     } else if (tipoCardFilter === "admin") {
       filtrados = filtrados.filter((u) => u.tipo === "admin")
     } else if (tipoCardFilter === "tecnico") {
@@ -105,17 +105,17 @@ export default function UsuariosPage() {
     setUsuariosFiltrados(filtrados)
   }, [busca, usuarios, tipoCardFilter])
 
-  const getStatusBadge = (ativo: number) => {
-    if (ativo === 1) {
+  const getStatusBadge = (ativo: boolean | number) => {
+    if (ativo === true || ativo === 1) {
       return (
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+        <Badge className="bg-green-950/40 text-green-400 border border-green-900/50 hover:bg-green-950/60">
           <CheckCircle className="w-3 h-3 mr-1" />
           Ativo
         </Badge>
       )
     } else {
       return (
-        <Badge className="bg-red-100 text-red-800 hover:bg-red-200">
+        <Badge className="bg-red-950/40 text-red-400 border border-red-900/50 hover:bg-red-950/60">
           <XCircle className="w-3 h-3 mr-1" />
           Inativo
         </Badge>
@@ -127,28 +127,28 @@ export default function UsuariosPage() {
     switch (tipo) {
       case "admin":
         return (
-          <Badge className="bg-purple-100 text-purple-800">
+          <Badge className="bg-purple-950/40 text-purple-400 border border-purple-900/50">
             <Crown className="w-3 h-3 mr-1" />
             Admin
           </Badge>
         )
       case "tecnico":
         return (
-          <Badge className="bg-blue-100 text-blue-800">
+          <Badge className="bg-blue-950/40 text-blue-400 border border-blue-900/50">
             <Shield className="w-3 h-3 mr-1" />
             Técnico
           </Badge>
         )
       case "usuario":
         return (
-          <Badge className="bg-green-100 text-green-800">
+          <Badge className="bg-zinc-800 text-zinc-300 border border-zinc-700">
             <User className="w-3 h-3 mr-1" />
             Usuário
           </Badge>
         )
       case "vendedor":
         return (
-          <Badge className="bg-yellow-100 text-yellow-800">
+          <Badge className="bg-yellow-950/40 text-yellow-400 border border-yellow-900/50">
             <Shield className="w-3 h-3 mr-1" />
             Vendedor
           </Badge>
@@ -164,7 +164,7 @@ export default function UsuariosPage() {
 
     if (permissoesArray.length === 0) {
       return (
-        <Badge variant="outline" className="text-xs">
+        <Badge variant="outline" className="text-xs bg-muted/20 border-border text-muted-foreground">
           Sem permissões
         </Badge>
       )
@@ -188,12 +188,12 @@ export default function UsuariosPage() {
     return (
       <div className="flex flex-wrap gap-1">
         {permissoesArray.slice(0, 3).map((permissao) => (
-          <Badge key={permissao} variant="outline" className="text-xs">
+          <Badge key={permissao} variant="outline" className="text-xs bg-muted/20 border-border text-muted-foreground">
             {permissoesLabels[permissao] || permissao}
           </Badge>
         ))}
         {permissoesArray.length > 3 && (
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs bg-muted/20 border-border text-muted-foreground">
             +{permissoesArray.length - 3}
           </Badge>
         )}
@@ -232,27 +232,27 @@ export default function UsuariosPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-purple-50/30">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-background text-foreground min-h-screen">
         <div className="flex items-center gap-3 mb-6">
           {logoMenu && (
             <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />
           )}
           <div>
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-64 mt-2" />
+            <Skeleton className="h-8 w-48 bg-muted" />
+            <Skeleton className="h-4 w-64 mt-2 bg-muted" />
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="bg-card border-border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-4" />
+                <Skeleton className="h-4 w-24 bg-muted" />
+                <Skeleton className="h-4 w-4 bg-muted" />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-8 w-16" />
-                <Skeleton className="h-3 w-32 mt-2" />
+                <Skeleton className="h-8 w-16 bg-muted" />
+                <Skeleton className="h-3 w-32 mt-2 bg-muted" />
               </CardContent>
             </Card>
           ))}
@@ -261,18 +261,18 @@ export default function UsuariosPage() {
     )
   }
 
-  const usuariosAtivos = usuarios.filter((u) => u.ativo === 1).length
+  const usuariosAtivos = usuarios.filter((u) => u.ativo === true || (u.ativo as any) === 1).length
   const usuariosAdmin = usuarios.filter((u) => u.tipo === "admin").length
   const usuariosTecnicos = usuarios.filter((u) => u.tipo === "tecnico").length
 
   const hasActiveFilterUsuarios = busca.trim() !== "" || tipoCardFilter !== "todos"
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-purple-50/30">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-background text-foreground min-h-screen">
       <div className="flex items-center gap-3 mb-6">
         {logoMenu && <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />}
         <div>
-          <h2 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
             Gestão de Usuários
           </h2>
           <p className="text-sm lg:text-base text-muted-foreground">
@@ -285,87 +285,87 @@ export default function UsuariosPage() {
         <Card 
           onClick={() => setTipoCardFilter("todos")}
           className={cn(
-            "bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-purple-950/20 border-purple-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-purple-950/30",
             tipoCardFilter === "todos" ? "ring-2 ring-purple-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Total de Usuários</CardTitle>
-            <Users className="h-3 w-3 lg:h-5 lg:w-5 text-purple-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-purple-400">Total de Usuários</CardTitle>
+            <Users className="h-3 w-3 lg:h-5 lg:w-5 text-purple-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-6 pt-0">
-            <div className="text-lg lg:text-3xl font-bold text-purple-800">{usuarios.length}</div>
-            <p className="text-[10px] lg:text-xs text-purple-600 mt-0.5 lg:mt-1">usuários cadastrados</p>
+            <div className="text-lg lg:text-3xl font-bold text-purple-200">{usuarios.length}</div>
+            <p className="text-[10px] lg:text-xs text-purple-400/80 mt-0.5 lg:mt-1">usuários cadastrados</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoCardFilter("ativo")}
           className={cn(
-            "bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-green-950/20 border-green-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-green-950/30",
             tipoCardFilter === "ativo" ? "ring-2 ring-green-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Usuários Ativos</CardTitle>
-            <CheckCircle className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-green-400">Usuários Ativos</CardTitle>
+            <CheckCircle className="h-3 w-3 lg:h-5 lg:w-5 text-green-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-6 pt-0">
-            <div className="text-lg lg:text-3xl font-bold text-green-800">{usuariosAtivos}</div>
-            <p className="text-[10px] lg:text-xs text-green-600 mt-0.5 lg:mt-1">com acesso liberado</p>
+            <div className="text-lg lg:text-3xl font-bold text-green-200">{usuariosAtivos}</div>
+            <p className="text-[10px] lg:text-xs text-green-400/80 mt-0.5 lg:mt-1">com acesso liberado</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoCardFilter("admin")}
           className={cn(
-            "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-blue-950/20 border-blue-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-blue-950/30",
             tipoCardFilter === "admin" ? "ring-2 ring-blue-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Administradores</CardTitle>
-            <Crown className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-blue-400">Administradores</CardTitle>
+            <Crown className="h-3 w-3 lg:h-5 lg:w-5 text-blue-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-6 pt-0">
-            <div className="text-lg lg:text-3xl font-bold text-blue-800">{usuariosAdmin}</div>
-            <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5 lg:mt-1">com acesso total</p>
+            <div className="text-lg lg:text-3xl font-bold text-blue-200">{usuariosAdmin}</div>
+            <p className="text-[10px] lg:text-xs text-blue-400/80 mt-0.5 lg:mt-1">com acesso total</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoCardFilter("tecnico")}
           className={cn(
-            "bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-yellow-950/20 border-yellow-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-yellow-950/30",
             tipoCardFilter === "tecnico" ? "ring-2 ring-yellow-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Técnicos</CardTitle>
-            <Shield className="h-3 w-3 lg:h-5 lg:w-5 text-yellow-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-yellow-400">Técnicos</CardTitle>
+            <Shield className="h-3 w-3 lg:h-5 lg:w-5 text-yellow-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-6 pt-0">
-            <div className="text-lg lg:text-3xl font-bold text-yellow-800">{usuariosTecnicos}</div>
-            <p className="text-[10px] lg:text-xs text-yellow-600 mt-0.5 lg:mt-1">perfil técnico</p>
+            <div className="text-lg lg:text-3xl font-bold text-yellow-200">{usuariosTecnicos}</div>
+            <p className="text-[10px] lg:text-xs text-yellow-400/80 mt-0.5 lg:mt-1">perfil técnico</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-white/60 backdrop-blur-sm border-white/20 shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-4 lg:p-6">
+      <Card className="bg-card border-border shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-purple-950/60 via-pink-950/60 to-purple-950/60 text-white border-b border-border/40 rounded-t-lg p-4 lg:p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <UserCog className="h-5 w-5" />
+              <UserCog className="h-5 w-5 text-purple-400" />
               <div>
-                <CardTitle>Gestão de Usuários</CardTitle>
-                <CardDescription className="text-purple-100">Gerencie usuários e permissões do sistema</CardDescription>
+                <CardTitle className="text-foreground">Gestão de Usuários</CardTitle>
+                <CardDescription className="text-muted-foreground">Gerencie usuários e permissões do sistema</CardDescription>
               </div>
             </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                className="bg-muted/40 hover:bg-muted/60 text-foreground border-border"
                 onClick={carregarUsuarios}
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
@@ -381,7 +381,7 @@ export default function UsuariosPage() {
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar por nome ou email..."
-                className="pl-8"
+                className="pl-8 bg-background border-border text-foreground"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
               />
@@ -415,15 +415,15 @@ export default function UsuariosPage() {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarImage src="/placeholder.svg" alt={usuario.nome} />
-                          <AvatarFallback>{usuario.nome.split(" ").map((n) => n[0]).join("").toUpperCase()}</AvatarFallback>
+                          <AvatarFallback className="bg-muted text-foreground">{usuario.nome.split(" ").map((n) => n[0]).join("").toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <span className="font-medium">{usuario.nome}</span>
+                          <span className="font-medium text-foreground">{usuario.nome}</span>
                           {usuario.telefone && <p className="text-xs text-muted-foreground">{usuario.telefone}</p>}
                         </div>
                       </div>
                     )
-                  case "email": return <span className="truncate">{usuario.email}</span>
+                  case "email": return <span className="truncate text-foreground">{usuario.email}</span>
                   case "tipo": return getTipoBadge(usuario.tipo)
                   case "permissoes": return getPermissoesBadges(usuario.permissoes)
                   case "ativo": return getStatusBadge(usuario.ativo)
@@ -431,8 +431,8 @@ export default function UsuariosPage() {
                   case "acoes":
                     return (
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="hover:bg-blue-50 bg-transparent" onClick={() => handleEditar(usuario)}>Editar</Button>
-                        <Button variant="outline" size="sm" className="hover:bg-red-50 text-red-600 bg-transparent" onClick={() => handleExcluir(usuario)}>Excluir</Button>
+                        <Button variant="outline" size="sm" className="hover:bg-blue-950/40 text-foreground border-border bg-transparent" onClick={() => handleEditar(usuario)}>Editar</Button>
+                        <Button variant="outline" size="sm" className="hover:bg-red-950/40 text-red-400 border-border bg-transparent" onClick={() => handleExcluir(usuario)}>Excluir</Button>
                       </div>
                     )
                   default: return null
@@ -444,16 +444,16 @@ export default function UsuariosPage() {
           {/* MOBILE VIEW */}
           <div className="md:hidden space-y-3">
             {!hasActiveFilterUsuarios ? (
-              <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
-                <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os usuários</h3>
-                <p className="text-sm text-gray-500">Digite na busca ou selecione um card de filtro para começar.</p>
+              <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
+                <Search className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Busque ou filtre para ver os usuários</h3>
+                <p className="text-sm text-muted-foreground">Digite na busca ou selecione um card de filtro para começar.</p>
               </div>
             ) : usuariosFiltrados.length === 0 ? (
               <div className="text-center py-12">
-                <Users className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum usuário encontrado</h3>
-                <p className="text-sm text-gray-500">Tente ajustar os filtros de busca.</p>
+                <Users className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Nenhum usuário encontrado</h3>
+                <p className="text-sm text-muted-foreground">Tente ajustar os filtros de busca.</p>
               </div>
             ) : (
               usuariosFiltrados.map((usuario) => {
@@ -461,8 +461,8 @@ export default function UsuariosPage() {
                 return (
                   <div
                     key={usuario.id}
-                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-white ${
-                      isExpanded ? "shadow-lg ring-1 ring-purple-200" : "shadow-sm hover:shadow-md"
+                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-card border-border ${
+                      isExpanded ? "shadow-lg ring-1 ring-purple-900/50" : "shadow-sm hover:shadow-md"
                     }`}
                   >
                     <button
@@ -472,10 +472,10 @@ export default function UsuariosPage() {
                     >
                       <Avatar className="h-10 w-10 flex-shrink-0">
                         <AvatarImage src="/placeholder.svg" alt={usuario.nome} />
-                        <AvatarFallback>{usuario.nome.split(" ").map((n) => n[0]).join("").toUpperCase()}</AvatarFallback>
+                        <AvatarFallback className="bg-muted text-foreground">{usuario.nome.split(" ").map((n) => n[0]).join("").toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <span className="font-semibold text-sm text-gray-900 truncate block">
+                        <span className="font-semibold text-sm text-foreground truncate block">
                           {usuario.nome}
                         </span>
                         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -483,38 +483,38 @@ export default function UsuariosPage() {
                           {getStatusBadge(usuario.ativo)}
                         </div>
                       </div>
-                      <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                         isExpanded ? "rotate-90" : ""
                       }`} />
                     </button>
 
                     {isExpanded && (
                       <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                        <div className="border-t border-gray-100 pt-3 space-y-2">
+                        <div className="border-t border-border pt-3 space-y-2">
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-gray-50 rounded-lg p-2.5">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Email</span>
-                              <p className="text-xs text-gray-800 truncate">{usuario.email}</p>
+                            <div className="bg-muted/40 border border-border rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Email</span>
+                              <p className="text-xs text-foreground truncate">{usuario.email}</p>
                             </div>
                             {usuario.telefone && (
-                              <div className="bg-gray-50 rounded-lg p-2.5">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Telefone</span>
-                                <p className="text-xs text-gray-800">{usuario.telefone}</p>
+                              <div className="bg-muted/40 border border-border rounded-lg p-2.5">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Telefone</span>
+                                <p className="text-xs text-foreground">{usuario.telefone}</p>
                               </div>
                             )}
-                            <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Permissões</span>
+                            <div className="bg-muted/40 border border-border rounded-lg p-2.5 col-span-2">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Permissões</span>
                               <div className="mt-1">{getPermissoesBadges(usuario.permissoes)}</div>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Último Acesso</span>
-                              <p className="text-xs text-gray-800">{formatarData(usuario.ultimo_acesso)}</p>
+                            <div className="bg-muted/40 border border-border rounded-lg p-2.5 col-span-2">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Último Acesso</span>
+                              <p className="text-xs text-foreground">{formatarData(usuario.ultimo_acesso)}</p>
                             </div>
                           </div>
 
                           <div className="flex gap-2 pt-2">
-                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-blue-50 bg-white" onClick={() => handleEditar(usuario)}>Editar</Button>
-                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-red-50 text-red-600 bg-white" onClick={() => handleExcluir(usuario)}>Excluir</Button>
+                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-blue-950/40 border-border bg-card text-foreground" onClick={() => handleEditar(usuario)}>Editar</Button>
+                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:bg-red-950/40 text-red-400 border-border bg-card" onClick={() => handleExcluir(usuario)}>Excluir</Button>
                           </div>
                         </div>
                       </div>

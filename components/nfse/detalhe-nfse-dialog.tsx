@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
@@ -109,17 +109,19 @@ export function DetalheNfseDialog({ open, onOpenChange, notaId, onPrint, onBolet
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-emerald-600" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-2xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+          <SheetTitle className="flex items-center gap-2 text-foreground">
+            <FileText className="h-5 w-5 text-emerald-500" />
             Detalhes da NFS-e
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription className="text-muted-foreground text-sm">
             {nota?.numero_nfse ? `Nota ${nota.numero_nfse}` : `RPS ${nota?.numero_rps || ""}`}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -127,28 +129,28 @@ export function DetalheNfseDialog({ open, onOpenChange, notaId, onPrint, onBolet
           </div>
         ) : nota ? (
           <div className="space-y-4">
-            {/* Status e números */}
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+             {/* Status e números */}
+            <div className="flex items-center justify-between p-4 bg-muted/30 border border-border rounded-lg">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   {getStatusBadge(nota.status)}
                   {nota.numero_nfse && (
-                    <span className="text-sm text-gray-600">NFS-e: {nota.numero_nfse}</span>
+                    <span className="text-sm text-foreground">NFS-e: {nota.numero_nfse}</span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   RPS: {nota.numero_rps} | Serie: {nota.serie_rps}
                 </p>
                 {nota.codigo_verificacao && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Cod. Verificacao: {nota.codigo_verificacao}
                   </p>
                 )}
               </div>
               <div className="text-right space-y-1">
-                <p className="text-2xl font-bold text-emerald-700">{formatCurrency(nota.valor_total)}</p>
+                <p className="text-2xl font-bold text-emerald-450">{formatCurrency(nota.valor_total)}</p>
                 {nota.data_emissao && (
-                  <p className="text-xs text-gray-500">Emitida em: {formatDateBR(nota.data_emissao)}</p>
+                  <p className="text-xs text-muted-foreground">Emitida em: {formatDateBR(nota.data_emissao)}</p>
                 )}
                 <div className="flex flex-col gap-1">
                   {(nota.status === "emitida" || nota.status === "cancelada") && onPrint && (
@@ -159,7 +161,7 @@ export function DetalheNfseDialog({ open, onOpenChange, notaId, onPrint, onBolet
                         onOpenChange(false)
                         onPrint(nota.id || notaId)
                       }}
-                      className="text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+                      className="text-emerald-400 border-emerald-900/50 hover:bg-emerald-950/20 bg-background"
                     >
                       <Printer className="h-4 w-4 mr-1" />
                       Imprimir
@@ -173,7 +175,7 @@ export function DetalheNfseDialog({ open, onOpenChange, notaId, onPrint, onBolet
                         onOpenChange(false)
                         onBoleto(nota)
                       }}
-                      className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                      className="text-blue-400 border-blue-900/50 hover:bg-blue-950/20 bg-background"
                     >
                       <DollarSign className="h-4 w-4 mr-1" />
                       Gerar Boleto
@@ -435,7 +437,8 @@ export function DetalheNfseDialog({ open, onOpenChange, notaId, onPrint, onBolet
         ) : (
           <div className="py-8 text-center text-gray-500">Nota fiscal nao encontrada</div>
         )}
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

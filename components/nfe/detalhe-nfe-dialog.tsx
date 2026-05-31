@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
@@ -132,17 +132,19 @@ export function DetalheNfeDialog({ open, onOpenChange, nfeId, onPrint }: Detalhe
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-blue-600" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-3xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+          <SheetTitle className="flex items-center gap-2 text-foreground">
+            <Package className="h-5 w-5 text-blue-500" />
             Detalhes da NF-e
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription className="text-muted-foreground text-sm">
             Informacoes completas da Nota Fiscal Eletronica de Material
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -339,13 +341,14 @@ export function DetalheNfeDialog({ open, onOpenChange, nfeId, onPrint }: Detalhe
               </>
             )}
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <FileText className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-            <p className="text-gray-500">NF-e nao encontrada</p>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+            ) : (
+              <div className="text-center py-12">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">NF-e nao encontrada</p>
+              </div>
+            )}
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

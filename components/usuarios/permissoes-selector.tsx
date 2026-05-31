@@ -113,21 +113,21 @@ export function PermissoesSelector({ permissoesSelecionadas, onChange, tipo }: P
   }
 
   return (
-    <Card>
+    <Card className="bg-card border-border">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <CardTitle>Permissões do Usuário</CardTitle>
-            <CardDescription>Selecione os módulos que o usuário terá acesso</CardDescription>
+            <CardTitle className="text-foreground">Permissões do Usuário</CardTitle>
+            <CardDescription className="text-muted-foreground">Selecione os módulos que o usuário terá acesso</CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={aplicarPadrao}>
+            <Button type="button" variant="outline" size="sm" onClick={aplicarPadrao} className="border-border text-foreground hover:bg-muted/40">
               Padrão
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={selecionarTodas}>
+            <Button type="button" variant="outline" size="sm" onClick={selecionarTodas} className="border-border text-foreground hover:bg-muted/40">
               Todas
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={limparTodas}>
+            <Button type="button" variant="outline" size="sm" onClick={limparTodas} className="border-border text-foreground hover:bg-muted/40">
               Limpar
             </Button>
           </div>
@@ -143,19 +143,20 @@ export function PermissoesSelector({ permissoesSelecionadas, onChange, tipo }: P
             return (
               <div
                 key={permissao.id}
-                className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-slate-50 transition-colors"
+                className="flex items-start space-x-3 p-3 rounded-lg border border-border bg-background hover:bg-muted/20 transition-colors"
               >
                 <Checkbox
                   id={`permissao-${permissao.id}`}
                   checked={isChecked}
                   onCheckedChange={(checked) => handleToggle(permissao.id, checked as boolean)}
+                  className="border-border data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                 />
                 <div className="flex-1">
                   <Label
                     htmlFor={`permissao-${permissao.id}`}
-                    className="flex items-center gap-2 font-medium cursor-pointer"
+                    className="flex items-center gap-2 font-medium cursor-pointer text-foreground"
                   >
-                    <Icone className="h-4 w-4 text-purple-600" />
+                    <Icone className="h-4 w-4 text-purple-400" />
                     {permissao.nome}
                   </Label>
                   <p className="text-xs text-muted-foreground mt-1">{permissao.descricao}</p>

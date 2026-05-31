@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -234,14 +234,14 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
   )
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[80vw] max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-emerald-600" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+          <SheetTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-emerald-500" />
             Emitir NFS-e
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription>
             {form.origem !== "avulsa" ? (
               <span>
                 Emissao a partir de{" "}
@@ -255,10 +255,10 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
             ) : (
               "Emissao avulsa de Nota Fiscal de Servico"
             )}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Tomador (Cliente) */}
           <div>
             <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-3">
@@ -274,13 +274,14 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                   placeholder="Buscar cliente por nome ou CNPJ/CPF..."
                   value={searchCliente}
                   onChange={(e) => setSearchCliente(e.target.value)}
+                  className="bg-background border-border text-foreground"
                 />
                 {searchCliente && clientesFiltrados.length > 0 && (
-                  <div className="max-h-40 overflow-y-auto border rounded-md">
+                  <div className="max-h-40 overflow-y-auto border border-border rounded-md bg-popover text-popover-foreground">
                     {clientesFiltrados.slice(0, 10).map((cliente) => (
                       <button
                         key={cliente.id}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm border-b last:border-b-0"
+                        className="w-full text-left px-3 py-2 hover:bg-muted text-sm border-b border-border last:border-b-0"
                         onClick={() => {
                           selecionarCliente(String(cliente.id))
                           setSearchCliente("")
@@ -288,10 +289,10 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                       >
                         <span className="font-medium">{cliente.nome}</span>
                         {cliente.cnpj && (
-                          <span className="text-gray-500 ml-2">CNPJ: {cliente.cnpj}</span>
+                          <span className="text-muted-foreground ml-2">CNPJ: {cliente.cnpj}</span>
                         )}
                         {cliente.cpf && (
-                          <span className="text-gray-500 ml-2">CPF: {cliente.cpf}</span>
+                          <span className="text-muted-foreground ml-2">CPF: {cliente.cpf}</span>
                         )}
                       </button>
                     ))}
@@ -299,7 +300,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                 )}
               </div>
 
-              <Separator />
+              <Separator className="bg-border" />
 
               <div className="grid grid-cols-4 gap-3">
                 <div className="space-y-2">
@@ -308,10 +309,10 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                     value={form.tomador_tipo}
                     onValueChange={(v) => updateForm("tomador_tipo", v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-background border-border text-foreground">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover text-popover-foreground border-border">
                       <SelectItem value="PJ">Pessoa Juridica (CNPJ)</SelectItem>
                       <SelectItem value="PF">Pessoa Fisica (CPF)</SelectItem>
                     </SelectContent>
@@ -323,6 +324,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                     value={form.tomador_cpf_cnpj}
                     onChange={(e) => updateForm("tomador_cpf_cnpj", e.target.value)}
                     placeholder={form.tomador_tipo === "PJ" ? "00.000.000/0000-00" : "000.000.000-00"}
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
@@ -331,6 +333,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                     value={form.tomador_razao_social}
                     onChange={(e) => updateForm("tomador_razao_social", e.target.value)}
                     placeholder="Nome do tomador"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
@@ -339,6 +342,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                     value={form.tomador_email}
                     onChange={(e) => updateForm("tomador_email", e.target.value)}
                     placeholder="email@exemplo.com"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
               </div>
@@ -413,6 +417,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                   onChange={(e) => updateForm("descricao_servico", e.target.value)}
                   placeholder="Descricao detalhada do servico prestado"
                   rows={3}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
@@ -464,6 +469,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                   value={form.valor_servicos}
                   onChange={(e) => updateForm("valor_servicos", Number(e.target.value))}
                   placeholder="0.00"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div className="space-y-2">
@@ -474,23 +480,24 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                   value={form.valor_deducoes}
                   onChange={(e) => updateForm("valor_deducoes", Number(e.target.value))}
                   placeholder="0.00"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               <div className="space-y-2">
                 <Label>ISS Retido pelo Tomador</Label>
-                <div className="flex items-center gap-3 h-9 px-3 border rounded-md bg-background">
+                <div className="flex items-center gap-3 h-9 px-3 border border-border rounded-md bg-background">
                   <Switch
                     checked={form.iss_retido}
                     onCheckedChange={(checked) => updateForm("iss_retido", checked)}
                   />
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-muted-foreground">
                     {form.iss_retido ? "Sim" : "Nao"}
                   </span>
                 </div>
               </div>
               {form.valor_servicos > 0 && (
-                <div className="p-2 bg-emerald-50 rounded-lg text-center">
-                  <p className="text-sm font-medium text-emerald-800">
+                <div className="p-2 bg-emerald-950/40 rounded-lg text-center border border-emerald-900/50">
+                  <p className="text-sm font-medium text-emerald-400">
                     Valor NFS-e: {formatCurrency(form.valor_servicos)}
                   </p>
                 </div>
@@ -521,14 +528,14 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
           </div>
         )}
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+        <SheetFooter className="p-6 border-t border-border bg-muted/30 gap-2 flex-row justify-end flex-shrink-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading} className="border-border hover:bg-muted bg-card text-foreground">
             Cancelar
           </Button>
           <Button
             onClick={handleEmitir}
             disabled={loading}
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="bg-emerald-650 hover:bg-emerald-700 text-white"
           >
             {loading ? (
               <>
@@ -542,8 +549,8 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
               </>
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

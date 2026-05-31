@@ -64,23 +64,23 @@ export function ExcluirUsuarioDialog({ usuario, open, onOpenChange, onUsuarioExc
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="bg-card border-border text-foreground">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-red-600">
+          <DialogTitle className="flex items-center gap-2 text-red-400">
             <AlertTriangle className="h-5 w-5" />
             Confirmar Exclusão
           </DialogTitle>
-          <DialogDescription>
-            Tem certeza que deseja excluir o usuário <strong>{usuario?.nome}</strong>?
+          <DialogDescription className="text-muted-foreground">
+            Tem certeza que deseja excluir o usuário <strong className="text-foreground">{usuario?.nome}</strong>?
             <br />
-            Esta ação não pode ser desfeita.
+            Esta ação não pode ser desfeita e removerá o acesso do usuário.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading} className="border-border text-foreground hover:bg-muted/40">
             Cancelar
           </Button>
-          <Button variant="destructive" onClick={handleExcluir} disabled={loading}>
+          <Button variant="destructive" onClick={handleExcluir} disabled={loading} className="bg-red-600 hover:bg-red-700 text-white">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Excluir
           </Button>

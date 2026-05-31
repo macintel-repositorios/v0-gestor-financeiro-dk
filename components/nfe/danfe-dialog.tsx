@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Loader2, Printer, Package } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
@@ -177,12 +178,12 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
   const logo = data?.logo
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[80vw] max-h-[80vh] overflow-y-auto p-0">
-        <DialogHeader className="p-4 pb-0 pr-14">
-          <DialogTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <Printer className="h-5 w-5 text-blue-600" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+          <SheetTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2 text-foreground">
+              <Printer className="h-5 w-5 text-blue-500" />
               Imprimir DANFE
             </span>
             <Button
@@ -194,24 +195,24 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
               <Printer className="h-4 w-4 mr-2" />
               Imprimir
             </Button>
-          </DialogTitle>
-        </DialogHeader>
+          </SheetTitle>
+        </SheetHeader>
 
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <div className="flex-1 flex items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </div>
         ) : nfe ? (
-          <div className="p-4 pt-2">
+          <div className="flex-1 overflow-y-auto p-6 bg-white dark:bg-slate-100 rounded-b-lg">
             <div ref={printRef}>
               <DanfeLayout nfe={nfe} itens={itens} emitente={emitente} logo={logo} />
             </div>
           </div>
         ) : (
-          <div className="py-8 text-center text-gray-500">NF-e nao encontrada</div>
+          <div className="py-8 text-center text-muted-foreground">NF-e nao encontrada</div>
         )}
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }
 

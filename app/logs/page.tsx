@@ -202,63 +202,63 @@ export default function LogsPage() {
     switch (tipo) {
       case "login":
         return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+          <Badge className="bg-green-950/40 text-green-400 border border-green-900/50 hover:bg-green-950/60">
             <LogIn className="w-3 h-3 mr-1" />
             Login
           </Badge>
         )
       case "logout":
         return (
-          <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-200">
+          <Badge className="bg-orange-950/40 text-orange-400 border border-orange-900/50 hover:bg-orange-950/60">
             <LogOut className="w-3 h-3 mr-1" />
             Logout
           </Badge>
         )
       case "create":
         return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+          <Badge className="bg-blue-950/40 text-blue-400 border border-blue-900/50 hover:bg-blue-950/60">
             <Plus className="w-3 h-3 mr-1" />
             Criação
           </Badge>
         )
       case "update":
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+          <Badge className="bg-yellow-950/40 text-yellow-400 border border-yellow-900/50 hover:bg-yellow-950/60">
             <Edit className="w-3 h-3 mr-1" />
             Edição
           </Badge>
         )
       case "delete":
         return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">
+          <Badge className="bg-red-950/40 text-red-400 border border-red-900/50 hover:bg-red-950/60">
             <Trash2 className="w-3 h-3 mr-1" />
             Exclusão
           </Badge>
         )
       case "view":
         return (
-          <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200">
+          <Badge className="bg-purple-950/40 text-purple-400 border border-purple-900/50 hover:bg-purple-950/60">
             <Eye className="w-3 h-3 mr-1" />
             Visualização
           </Badge>
         )
       case "error":
         return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">
+          <Badge className="bg-red-950/40 text-red-400 border border-red-900/50 hover:bg-red-950/60">
             <XCircle className="w-3 h-3 mr-1" />
             Erro
           </Badge>
         )
       case "warning":
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+          <Badge className="bg-yellow-950/40 text-yellow-400 border border-yellow-900/50 hover:bg-yellow-950/60">
             <AlertTriangle className="w-3 h-3 mr-1" />
             Aviso
           </Badge>
         )
       case "info":
         return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+          <Badge className="bg-blue-950/40 text-blue-400 border border-blue-900/50 hover:bg-blue-950/60">
             <Info className="w-3 h-3 mr-1" />
             Info
           </Badge>
@@ -310,27 +310,27 @@ export default function LogsPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-gray-50/30">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-background text-foreground min-h-screen">
         <div className="flex items-center gap-3 mb-6">
           {logoMenu && (
             <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />
           )}
           <div>
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-64 mt-2" />
+            <Skeleton className="h-8 w-48 bg-muted" />
+            <Skeleton className="h-4 w-64 mt-2 bg-muted" />
           </div>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-7 gap-3 lg:gap-4">
           {Array.from({ length: 7 }).map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="bg-card border-border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-4" />
+                <Skeleton className="h-4 w-24 bg-muted" />
+                <Skeleton className="h-4 w-4 bg-muted" />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-8 w-16" />
-                <Skeleton className="h-3 w-32 mt-2" />
+                <Skeleton className="h-8 w-16 bg-muted" />
+                <Skeleton className="h-3 w-32 mt-2 bg-muted" />
               </CardContent>
             </Card>
           ))}
@@ -340,14 +340,14 @@ export default function LogsPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 to-gray-50/30">
-      <div className="flex items-center justify-between gap-3 mb-6">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-background text-foreground min-h-screen">
+      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
         <div className="flex items-center gap-3">
           {logoMenu && (
             <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />
           )}
           <div>
-            <h2 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-600 to-slate-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
               Logs do Sistema
             </h2>
             <p className="text-sm lg:text-base text-muted-foreground">
@@ -357,11 +357,11 @@ export default function LogsPage() {
         </div>
 
         {/* Horário atual */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-white/50 px-3 py-2 rounded-lg border">
-          <Globe className="h-4 w-4" />
+        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 px-3 py-2 rounded-lg border border-border">
+          <Globe className="h-4 w-4 text-purple-400" />
           <div>
-            <div className="font-medium">Horário Atual (SP)</div>
-            <div className="font-mono">{currentTime}</div>
+            <div className="font-medium text-foreground">Horário Atual (SP)</div>
+            <div className="font-mono text-purple-300">{currentTime}</div>
           </div>
         </div>
       </div>
@@ -370,131 +370,131 @@ export default function LogsPage() {
         <Card 
           onClick={() => setTipoFilter("all")}
           className={cn(
-            "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-blue-950/20 border-blue-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-blue-950/30",
             tipoFilter === "all" ? "ring-2 ring-blue-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total de Logs</CardTitle>
-            <Activity className="h-3 w-3 lg:h-4 lg:w-4 text-blue-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-blue-400">Total de Logs</CardTitle>
+            <Activity className="h-3 w-3 lg:h-4 lg:w-4 text-blue-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-4 pt-0">
-            <div className="text-lg lg:text-2xl font-bold text-blue-800">{stats.total}</div>
-            <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5">registros</p>
+            <div className="text-lg lg:text-2xl font-bold text-blue-200">{stats.total}</div>
+            <p className="text-[10px] lg:text-xs text-blue-400/80 mt-0.5">registros</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoFilter("login")}
           className={cn(
-            "bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-green-950/20 border-green-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-green-950/30",
             tipoFilter === "login" ? "ring-2 ring-green-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Logins</CardTitle>
-            <LogIn className="h-3 w-3 lg:h-4 lg:w-4 text-green-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-green-400">Logins</CardTitle>
+            <LogIn className="h-3 w-3 lg:h-4 lg:w-4 text-green-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-4 pt-0">
-            <div className="text-lg lg:text-2xl font-bold text-green-800">{stats.logins}</div>
-            <p className="text-[10px] lg:text-xs text-green-600 mt-0.5">acessos</p>
+            <div className="text-lg lg:text-2xl font-bold text-green-200">{stats.logins}</div>
+            <p className="text-[10px] lg:text-xs text-green-400/80 mt-0.5">acessos</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoFilter("logout")}
           className={cn(
-            "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-orange-950/20 border-orange-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-orange-950/30",
             tipoFilter === "logout" ? "ring-2 ring-orange-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-orange-700">Logouts</CardTitle>
-            <LogOut className="h-3 w-3 lg:h-4 lg:w-4 text-orange-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-orange-400">Logouts</CardTitle>
+            <LogOut className="h-3 w-3 lg:h-4 lg:w-4 text-orange-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-4 pt-0">
             <div className="text-lg lg:text-2xl font-bold text-orange-800">{stats.logouts}</div>
-            <p className="text-[10px] lg:text-xs text-orange-600 mt-0.5">saídas</p>
+            <p className="text-[10px] lg:text-xs text-orange-400/80 mt-0.5">saídas</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoFilter("create")}
           className={cn(
-            "bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-purple-950/20 border-purple-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-purple-950/30",
             tipoFilter === "create" ? "ring-2 ring-purple-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Criações</CardTitle>
-            <Plus className="h-3 w-3 lg:h-4 lg:w-4 text-purple-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-purple-400">Criações</CardTitle>
+            <Plus className="h-3 w-3 lg:h-4 lg:w-4 text-purple-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-4 pt-0">
-            <div className="text-lg lg:text-2xl font-bold text-purple-800">{stats.creates}</div>
-            <p className="text-[10px] lg:text-xs text-purple-600 mt-0.5">novos registros</p>
+            <div className="text-lg lg:text-2xl font-bold text-purple-200">{stats.creates}</div>
+            <p className="text-[10px] lg:text-xs text-purple-400/80 mt-0.5">novos registros</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoFilter("update")}
           className={cn(
-            "bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-yellow-950/20 border-yellow-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-yellow-950/30",
             tipoFilter === "update" ? "ring-2 ring-yellow-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Edições</CardTitle>
-            <Edit className="h-3 w-3 lg:h-4 lg:w-4 text-yellow-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-yellow-400">Edições</CardTitle>
+            <Edit className="h-3 w-3 lg:h-4 lg:w-4 text-yellow-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-4 pt-0">
-            <div className="text-lg lg:text-2xl font-bold text-yellow-800">{stats.updates}</div>
-            <p className="text-[10px] lg:text-xs text-yellow-600 mt-0.5">alterações</p>
+            <div className="text-lg lg:text-2xl font-bold text-yellow-200">{stats.updates}</div>
+            <p className="text-[10px] lg:text-xs text-yellow-400/80 mt-0.5">alterações</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoFilter("delete")}
           className={cn(
-            "bg-gradient-to-br from-red-50 to-red-100 border-red-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-red-950/20 border-red-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-red-950/30",
             tipoFilter === "delete" ? "ring-2 ring-red-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-red-700">Exclusões</CardTitle>
-            <Trash2 className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-red-400">Exclusões</CardTitle>
+            <Trash2 className="h-3 w-3 lg:h-4 lg:w-4 text-red-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-4 pt-0">
-            <div className="text-lg lg:text-2xl font-bold text-red-800">{stats.deletes}</div>
-            <p className="text-[10px] lg:text-xs text-red-600 mt-0.5">remoções</p>
+            <div className="text-lg lg:text-2xl font-bold text-red-200">{stats.deletes}</div>
+            <p className="text-[10px] lg:text-xs text-red-400/80 mt-0.5">remoções</p>
           </CardContent>
         </Card>
 
         <Card 
           onClick={() => setTipoFilter("error")}
           className={cn(
-            "bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200 cursor-pointer select-none transition-all duration-200 hover:scale-105",
+            "bg-rose-950/20 border-rose-900/50 cursor-pointer select-none transition-all duration-200 hover:scale-105 hover:bg-rose-950/30",
             tipoFilter === "error" ? "ring-2 ring-rose-500 ring-offset-1" : "opacity-85 hover:opacity-100"
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
-            <CardTitle className="text-xs lg:text-sm font-medium text-rose-700">Erros</CardTitle>
-            <XCircle className="h-3 w-3 lg:h-4 lg:w-4 text-rose-600" />
+            <CardTitle className="text-xs lg:text-sm font-medium text-rose-400">Erros</CardTitle>
+            <XCircle className="h-3 w-3 lg:h-4 lg:w-4 text-rose-400" />
           </CardHeader>
           <CardContent className="p-3 lg:p-4 pt-0">
-            <div className="text-lg lg:text-2xl font-bold text-rose-800">{stats.errors}</div>
-            <p className="text-[10px] lg:text-xs text-rose-600 mt-0.5">problemas</p>
+            <div className="text-lg lg:text-2xl font-bold text-rose-200">{stats.errors}</div>
+            <p className="text-[10px] lg:text-xs text-rose-400/80 mt-0.5">problemas</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-white/60 backdrop-blur-sm border-white/20 shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-gray-500 to-slate-600 text-white rounded-t-lg p-4 lg:p-6">
+      <Card className="bg-card border-border shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-gray-950/60 via-slate-950/60 to-gray-950/60 text-white border-b border-border/40 rounded-t-lg p-4 lg:p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
+              <Activity className="h-5 w-5 text-purple-400" />
               <div>
-                <CardTitle>Logs de Atividade</CardTitle>
-                <CardDescription className="text-gray-100">
+                <CardTitle className="text-foreground">Logs de Atividade</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Histórico completo de ações, login/logout e tempo de sessão (Horário de Brasília)
                 </CardDescription>
               </div>
@@ -502,7 +502,7 @@ export default function LogsPage() {
             <div className="flex gap-2">
               <Button
                 onClick={carregarDados}
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                className="bg-muted/40 hover:bg-muted/60 text-foreground border-border"
                 size="sm"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
@@ -510,7 +510,7 @@ export default function LogsPage() {
               </Button>
               <Button
                 onClick={exportarLogs}
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                className="bg-muted/40 hover:bg-muted/60 text-foreground border-border"
                 size="sm"
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -525,16 +525,16 @@ export default function LogsPage() {
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar por usuário, ação ou detalhes..."
-                className="pl-8"
+                className="pl-8 bg-background border-border text-foreground focus:border-purple-500"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <Select value={tipoFilter} onValueChange={setTipoFilter}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="w-full md:w-48 bg-background border-border text-foreground">
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border text-foreground">
                 <SelectItem value="all">Todos os tipos</SelectItem>
                 <SelectItem value="login">Login</SelectItem>
                 <SelectItem value="logout">Logout</SelectItem>
@@ -548,10 +548,10 @@ export default function LogsPage() {
               </SelectContent>
             </Select>
             <Select value={moduloFilter} onValueChange={setModuloFilter}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="w-full md:w-48 bg-background border-border text-foreground">
                 <SelectValue placeholder="Filtrar por módulo" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border text-foreground">
                 <SelectItem value="all">Todos os módulos</SelectItem>
                 <SelectItem value="Autenticação">Autenticação</SelectItem>
                 <SelectItem value="Clientes">Clientes</SelectItem>
@@ -585,28 +585,28 @@ export default function LogsPage() {
               renderCell={(log, col) => {
                 switch (col) {
                   case "data_formatada":
-                    return <span className="font-mono text-sm">{log.data_formatada}</span>
+                    return <span className="font-mono text-sm text-foreground">{log.data_formatada}</span>
                   case "usuario_nome":
                     return (
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div>
-                          <div className="font-medium">{log.usuario_nome || "Sistema"}</div>
+                          <div className="font-medium text-foreground">{log.usuario_nome || "Sistema"}</div>
                           <div className="text-xs text-muted-foreground truncate">{log.usuario_email}</div>
                         </div>
                       </div>
                     )
-                  case "acao": return <span className="font-medium truncate">{log.acao}</span>
-                  case "modulo": return <Badge variant="outline">{log.modulo}</Badge>
+                  case "acao": return <span className="font-medium text-foreground truncate">{log.acao}</span>
+                  case "modulo": return <Badge variant="outline" className="border-border bg-muted/20 text-muted-foreground">{log.modulo}</Badge>
                   case "tipo": return getTipoBadge(log.tipo)
                   case "tempo_sessao_formatado":
                     return log.tempo_sessao_formatado ? (
-                      <div className="flex items-center gap-1 text-sm">
+                      <div className="flex items-center gap-1 text-sm text-foreground">
                         <Clock className="h-3 w-3 text-muted-foreground" />
                         {log.tempo_sessao_formatado}
                       </div>
                     ) : <span className="text-muted-foreground">-</span>
-                  case "ip_address": return <span className="font-mono text-sm">{log.ip_address || "-"}</span>
+                  case "ip_address": return <span className="font-mono text-sm text-foreground">{log.ip_address || "-"}</span>
                   case "detalhes": return <span className="text-sm text-muted-foreground truncate">{log.detalhes || "-"}</span>
                   default: return null
                 }
@@ -617,16 +617,16 @@ export default function LogsPage() {
           {/* MOBILE VIEW */}
           <div className="md:hidden space-y-3">
             {!(search.trim() !== "" || tipoFilter !== "all" || moduloFilter !== "all") ? (
-              <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
-                <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os logs</h3>
-                <p className="text-sm text-gray-500">Digite na busca, filtre por módulo/tipo ou selecione um card de filtro para começar.</p>
+              <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
+                <Search className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Busque ou filtre para ver os logs</h3>
+                <p className="text-sm text-muted-foreground">Digite na busca, filtre por módulo/tipo ou selecione um card de filtro para começar.</p>
               </div>
             ) : logs.length === 0 ? (
               <div className="text-center py-12">
-                <Activity className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                <h3 className="text-base font-medium text-gray-900 mb-1">Nenhum log encontrado</h3>
-                <p className="text-sm text-gray-500">Tente ajustar os filtros de busca ou tipo.</p>
+                <Activity className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Nenhum log encontrado</h3>
+                <p className="text-sm text-muted-foreground">Tente ajustar os filtros de busca ou tipo.</p>
               </div>
             ) : (
               logs.map((log) => {
@@ -634,8 +634,8 @@ export default function LogsPage() {
                 return (
                   <div
                     key={log.id}
-                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-white ${
-                      isExpanded ? "shadow-lg ring-1 ring-slate-200" : "shadow-sm hover:shadow-md"
+                    className={`rounded-xl border transition-all duration-200 overflow-hidden bg-card border-border ${
+                      isExpanded ? "shadow-lg ring-1 ring-slate-900/50" : "shadow-sm hover:shadow-md"
                     }`}
                   >
                     <button
@@ -643,55 +643,55 @@ export default function LogsPage() {
                       onClick={() => setExpandedLogId(prev => prev === log.id ? null : log.id)}
                       className="w-full text-left p-3.5 flex items-center gap-3"
                     >
-                      <div className="h-10 w-10 flex-shrink-0 bg-slate-50 rounded-full flex items-center justify-center">
-                        <User className="h-5 w-5 text-slate-500" />
+                      <div className="h-10 w-10 flex-shrink-0 bg-muted rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-semibold text-sm text-gray-900 truncate block">
+                        <span className="font-semibold text-sm text-foreground truncate block">
                           {log.usuario_nome || "Sistema"}
                         </span>
                         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                           {getTipoBadge(log.tipo)}
-                          <Badge variant="outline" className="text-xs">{log.modulo}</Badge>
+                          <Badge variant="outline" className="text-xs border-border bg-muted/20 text-muted-foreground">{log.modulo}</Badge>
                         </div>
                       </div>
-                      <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                         isExpanded ? "rotate-90" : ""
                       }`} />
                     </button>
 
                     {isExpanded && (
                       <div className="px-3.5 pb-3.5 pt-0 animate-in slide-in-from-top-2 duration-200">
-                        <div className="border-t border-gray-100 pt-3 space-y-2">
+                        <div className="border-t border-border pt-3 space-y-2">
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Ação</span>
-                              <p className="text-xs text-gray-800 font-medium">{log.acao}</p>
+                            <div className="bg-muted/40 border border-border rounded-lg p-2.5 col-span-2">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Ação</span>
+                              <p className="text-xs text-foreground font-medium">{log.acao}</p>
                             </div>
                             {log.usuario_email && (
-                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Email</span>
-                                <p className="text-xs text-gray-800 truncate">{log.usuario_email}</p>
+                              <div className="bg-muted/40 border border-border rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Email</span>
+                                <p className="text-xs text-foreground truncate">{log.usuario_email}</p>
                               </div>
                             )}
-                            <div className="bg-gray-50 rounded-lg p-2.5">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Data/Hora (SP)</span>
-                              <p className="text-xs text-gray-800 font-mono">{log.data_formatada}</p>
+                            <div className="bg-muted/40 border border-border rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Data/Hora (SP)</span>
+                              <p className="text-xs text-foreground font-mono">{log.data_formatada}</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-2.5">
-                              <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">IP</span>
-                              <p className="text-xs text-gray-800 font-mono">{log.ip_address || "-"}</p>
+                            <div className="bg-muted/40 border border-border rounded-lg p-2.5">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">IP</span>
+                              <p className="text-xs text-foreground font-mono">{log.ip_address || "-"}</p>
                             </div>
                             {log.tempo_sessao_formatado && (
-                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Tempo Sessão</span>
-                                <p className="text-xs text-gray-800">{log.tempo_sessao_formatado}</p>
+                              <div className="bg-muted/40 border border-border rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Tempo Sessão</span>
+                                <p className="text-xs text-foreground">{log.tempo_sessao_formatado}</p>
                               </div>
                             )}
                             {log.detalhes && (
-                              <div className="bg-gray-50 rounded-lg p-2.5 col-span-2">
-                                <span className="text-[10px] font-medium text-gray-500 uppercase block mb-0.5">Detalhes</span>
-                                <p className="text-xs text-gray-800 whitespace-pre-wrap">{log.detalhes}</p>
+                              <div className="bg-muted/40 border border-border rounded-lg p-2.5 col-span-2">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase block mb-0.5">Detalhes</span>
+                                <p className="text-xs text-foreground whitespace-pre-wrap">{log.detalhes}</p>
                               </div>
                             )}
                           </div>
