@@ -745,8 +745,8 @@ export default function EditarOrdemServicoPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 pb-24 md:pb-6">
-      <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className={asDrawer ? "bg-transparent text-foreground pb-24 md:pb-6" : "min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 pb-24 md:pb-6"}>
+      <div className={asDrawer ? "p-0 space-y-4" : "container mx-auto p-4 md:p-6 space-y-4 md:space-y-6"}>
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -844,7 +844,7 @@ export default function EditarOrdemServicoPage({
           {/* Tab 1: Informações */}
           <TabsContent value="info" className="space-y-4">
             {/* Informações Básicas */}
-            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <Card className="border border-border/50 shadow-xl bg-white/90 dark:bg-card/90 backdrop-blur-sm text-foreground">
               <CardHeader className="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 text-white rounded-t-lg p-3 md:p-6">
                 <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
                   <FileText className="h-4 w-4 md:h-5 md:w-5" />
@@ -857,38 +857,38 @@ export default function EditarOrdemServicoPage({
               <CardContent className="p-3 md:p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
                   <div>
-                    <Label className="text-gray-500 text-xs">Cliente</Label>
-                    <div className="font-medium text-gray-900">{clienteSelecionado?.nome || "Não informado"}</div>
+                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Cliente</Label>
+                    <div className="font-medium text-gray-900 dark:text-foreground">{clienteSelecionado?.nome || "Não informado"}</div>
                   </div>
                   <div>
-                    <Label className="text-gray-500 text-xs">Tipo de Serviço</Label>
-                    <div className="font-medium text-gray-900">{getTipoServicoLabel(ordem.tipo_servico)}</div>
+                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Tipo de Serviço</Label>
+                    <div className="font-medium text-gray-900 dark:text-foreground">{getTipoServicoLabel(ordem.tipo_servico)}</div>
                   </div>
                   <div>
-                    <Label className="text-gray-500 text-xs">Data de Criação</Label>
-                    <div className="font-medium text-gray-900">
+                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Data de Criação</Label>
+                    <div className="font-medium text-gray-900 dark:text-foreground">
                       {ordem.data_atual
                         ? new Date(ordem.data_atual.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR")
                         : "Não informada"}
                     </div>
                   </div>
                   <div>
-                    <Label className="text-gray-500 text-xs">Solicitado Por</Label>
-                    <div className="font-medium text-gray-900">{ordem.solicitado_por || "Não informado"}</div>
+                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Solicitado Por</Label>
+                    <div className="font-medium text-gray-900 dark:text-foreground">{ordem.solicitado_por || "Não informado"}</div>
                   </div>
                   <div className="md:col-span-2">
-                    <Label className="text-gray-500 flex items-center gap-2 text-xs">
+                    <Label className="text-gray-500 dark:text-gray-400 flex items-center gap-2 text-xs">
                       <MapPin className="h-3 w-3 md:h-4 md:w-4" />
                       Endereço do Cliente
                     </Label>
-                    <div className="font-medium text-gray-900 bg-blue-50 p-2 md:p-3 rounded-lg mt-1 text-xs">
+                    <div className="font-medium text-gray-900 dark:text-blue-100 bg-blue-50 dark:bg-blue-950/30 p-2 md:p-3 rounded-lg mt-1 text-xs">
                       {getEnderecoCompleto(clienteSelecionado)}
                     </div>
                   </div>
                   {ordem.descricao_defeito && (
                     <div className="md:col-span-2">
-                      <Label className="text-gray-500 text-xs">Descrição do Problema</Label>
-                      <div className="font-medium text-gray-900 bg-gray-50 p-2 md:p-3 rounded-lg mt-1 whitespace-pre-wrap text-xs">
+                      <Label className="text-gray-500 dark:text-gray-400 text-xs">Descrição do Problema</Label>
+                      <div className="font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-slate-900/50 p-2 md:p-3 rounded-lg mt-1 whitespace-pre-wrap text-xs">
                         {ordem.descricao_defeito}
                       </div>
                     </div>
@@ -898,7 +898,7 @@ export default function EditarOrdemServicoPage({
             </Card>
 
             {/* Dados de Execução */}
-            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <Card className="border border-border/50 shadow-xl bg-white/90 dark:bg-card/90 backdrop-blur-sm text-foreground">
               <CardHeader className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white rounded-t-lg p-3 md:p-6">
                 <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
                   <User className="h-4 w-4 md:h-5 md:w-5" />
@@ -962,13 +962,13 @@ export default function EditarOrdemServicoPage({
                   <Separator />
 
                   {/* Campo de Situação */}
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 md:p-4 rounded-lg border-2 border-blue-200">
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-3 md:p-4 rounded-lg border border-blue-200 dark:border-blue-900/30">
                     <Label htmlFor="situacao" className="text-xs md:text-base font-semibold flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
                       Situação da Ordem *
                     </Label>
                     <Select value={situacao} onValueChange={setSituacao} disabled={isOrdemAgendada && !isDiaExecucao()}>
-                      <SelectTrigger className="mt-2 bg-white h-9 md:h-10 text-xs md:text-sm">
+                      <SelectTrigger className="mt-2 bg-background h-9 md:h-10 text-xs md:text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1130,7 +1130,7 @@ export default function EditarOrdemServicoPage({
 
           {/* Tab 2: Equipamentos */}
           <TabsContent value="equipamentos">
-            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <Card className="border border-border/50 shadow-xl bg-white/90 dark:bg-card/90 backdrop-blur-sm text-foreground">
               <CardHeader className="bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 text-white rounded-t-lg p-3 md:p-6">
                 <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
                   <Package className="h-4 w-4 md:h-5 md:w-5" />
@@ -1142,8 +1142,8 @@ export default function EditarOrdemServicoPage({
               </CardHeader>
               <CardContent className="p-3 md:p-6">
                 <div className="space-y-3 md:space-y-4">
-                  <div className="border rounded-lg p-3 md:p-4 bg-gradient-to-r from-gray-50 to-blue-50">
-                    <h4 className="font-medium mb-3 text-gray-900 text-xs md:text-base">Adicionar Equipamento</h4>
+                  <div className="border border-border rounded-lg p-3 md:p-4 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-slate-900/50 dark:to-blue-950/20">
+                    <h4 className="font-medium mb-3 text-gray-900 dark:text-foreground text-xs md:text-base">Adicionar Equipamento</h4>
                     <div className="flex flex-col md:flex-row gap-2 md:gap-3">
                       <div className="flex-1">
                         <EquipamentoCombobox value={novoEquipamentoId} onValueChange={setNovoEquipamentoId} />
@@ -1162,10 +1162,10 @@ export default function EditarOrdemServicoPage({
                     {itensEquipamentos.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between p-2 md:p-3 border-2 border-slate-200 rounded-lg bg-gradient-to-r from-white to-blue-50"
+                        className="flex items-center justify-between p-2 md:p-3 border border-slate-200 dark:border-border rounded-lg bg-gradient-to-r from-white to-blue-50 dark:from-card dark:to-blue-950/20"
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="font-medium text-gray-900 text-xs md:text-sm truncate">
+                          <span className="font-medium text-gray-900 dark:text-foreground text-xs md:text-sm truncate">
                             {item.equipamento_nome_atual || item.equipamento_nome}
                           </span>
                         </div>
@@ -1180,10 +1180,10 @@ export default function EditarOrdemServicoPage({
                       </div>
                     ))}
                     {itensEquipamentos.length === 0 && (
-                      <div className="text-center py-6 md:py-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                      <div className="text-center py-6 md:py-8 border border-dashed border-gray-300 dark:border-border rounded-lg bg-gray-50 dark:bg-slate-900/50">
                         <Package className="mx-auto h-8 w-8 md:h-12 md:w-12 text-gray-400 mb-3 md:mb-4" />
-                        <div className="text-gray-600 text-xs md:text-base">Nenhum equipamento na ordem</div>
-                        <div className="text-[10px] md:text-sm text-gray-500">
+                        <div className="text-gray-600 dark:text-foreground text-xs md:text-base">Nenhum equipamento na ordem</div>
+                        <div className="text-[10px] md:text-sm text-gray-500 dark:text-gray-400">
                           Use o formulário acima para adicionar equipamentos
                         </div>
                       </div>
@@ -1196,7 +1196,7 @@ export default function EditarOrdemServicoPage({
 
           {/* Tab 3: Relatórios */}
           <TabsContent value="relatorios">
-            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <Card className="border border-border/50 shadow-xl bg-white/90 dark:bg-card/90 backdrop-blur-sm text-foreground">
               <CardHeader className="bg-gradient-to-r from-teal-500 via-cyan-600 to-blue-600 text-white rounded-t-lg p-3 md:p-6">
                 <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
                   <ClipboardList className="h-4 w-4 md:h-5 md:w-5" />
@@ -1417,7 +1417,7 @@ export default function EditarOrdemServicoPage({
         </Tabs>
 
         {/* Botões de Ação - Versão Mobile Otimizada */}
-        <div className="fixed md:relative bottom-0 left-0 right-0 bg-white md:bg-transparent border-t md:border-0 shadow-2xl md:shadow-xl p-3 md:p-4 z-50">
+        <div className="fixed md:relative bottom-0 left-0 right-0 bg-white dark:bg-card md:bg-transparent border-t border-border md:border-0 shadow-2xl md:shadow-xl p-3 md:p-4 z-50">
           <div className="container mx-auto max-w-7xl">
             <div className="flex flex-row gap-2">
               <Button

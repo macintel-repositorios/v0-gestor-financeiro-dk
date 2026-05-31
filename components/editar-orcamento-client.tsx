@@ -839,7 +839,7 @@ export function EditarOrcamentoClient({
         {/* Formulário Principal */}
         <div className="lg:col-span-2 space-y-6">
           {/* Dados do Cliente */}
-          <Card className="border-0 shadow-lg bg-white">
+          <Card className="border border-border shadow-lg bg-white dark:bg-card">
             <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6">
               <CardTitle className="text-white flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -862,16 +862,16 @@ export function EditarOrcamentoClient({
                 </div>
 
                 {cliente && (
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900/30">
                     <div className="flex items-center gap-2 mb-2">
                       {cliente.codigo && (
                         <Badge variant="outline" className="font-mono">
                           {cliente.codigo}
                         </Badge>
                       )}
-                      <span className="font-medium text-blue-900">{cliente.nome}</span>
+                      <span className="font-medium text-blue-900 dark:text-blue-100">{cliente.nome}</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
                       <div>
                         {cliente.cnpj && (
                           <div>
@@ -919,12 +919,12 @@ export function EditarOrcamentoClient({
                     </div>
 
                     {(cliente.nome_adm || cliente.contato_adm || cliente.telefone_adm || cliente.email_adm) && (
-                      <div className="mt-4 pt-3 border-t border-blue-200">
+                      <div className="mt-4 pt-3 border-t border-blue-200 dark:border-blue-900/30">
                         <div className="flex items-center gap-2 mb-2">
                           <Building2 className="h-4 w-4 text-blue-600" />
-                          <span className="font-medium text-blue-800">Administradora</span>
+                          <span className="font-medium text-blue-800 dark:text-blue-200">Administradora</span>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
                           <div>
                             {cliente.nome_adm && (
                               <div>
@@ -989,7 +989,7 @@ export function EditarOrcamentoClient({
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     Parâmetros do Orçamento
                   </h4>
@@ -1122,7 +1122,7 @@ export function EditarOrcamentoClient({
           </Card>
 
           {/* Itens do Orçamento */}
-          <Card className="border-0 shadow-lg bg-white">
+          <Card className="border border-border shadow-lg bg-white dark:bg-card">
             <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
               <CardTitle className="text-white flex items-center gap-2">
                 <Package className="h-5 w-5" />
@@ -1146,7 +1146,7 @@ export function EditarOrcamentoClient({
                       type="button"
                       variant="outline"
                       onClick={() => setShowNewProductDialog(true)}
-                      className="bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 hover:border-blue-300"
+                      className="bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/30 hover:border-blue-300"
                       title="Adicionar novo produto"
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -1161,7 +1161,7 @@ export function EditarOrcamentoClient({
                   <div className="border rounded-lg overflow-hidden">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-gray-50">
+                        <TableRow className="bg-gray-50 dark:bg-slate-900/50">
                           <TableHead className="w-8 px-2"></TableHead>
                           <TableHead className="font-semibold">Produto</TableHead>
                           <TableHead className="font-semibold w-32">Quantidade</TableHead>
@@ -1181,7 +1181,7 @@ export function EditarOrcamentoClient({
                             className={cn(
                               "transition-colors",
                               dragOverIndex === index && draggedIndex !== index
-                                ? "bg-blue-50 border-t-2 border-blue-400"
+                                ? "bg-blue-50 dark:bg-blue-950/20 border-t-2 border-blue-400"
                                 : "",
                               draggedIndex === index ? "opacity-40" : ""
                             )}
@@ -1205,7 +1205,7 @@ export function EditarOrcamentoClient({
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => editarProduto(item.produto)}
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1 h-6 w-6"
+                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-1 h-6 w-6"
                                     title="Editar produto"
                                   >
                                     <Edit2 className="h-3 w-3" />
@@ -1214,17 +1214,17 @@ export function EditarOrcamentoClient({
                                 <div className="flex items-center gap-2 mt-1">
                                   <Badge
                                     variant="outline"
-                                    className="text-xs font-mono bg-blue-50 text-blue-700 border-blue-200"
+                                    className="text-xs font-mono bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/30"
                                   >
                                     {item.produto.codigo}
                                   </Badge>
                                   {item.marca_nome && (
-                                    <Badge className="text-xs bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
+                                    <Badge className="text-xs bg-green-100 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/30 hover:bg-green-100">
                                       {item.marca_nome}
                                     </Badge>
                                   )}
                                   {item.produto_ncm && (
-                                    <Badge className="text-xs bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-100 font-mono">
+                                    <Badge className="text-xs bg-purple-100 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-900/30 hover:bg-purple-100 font-mono">
                                       {item.produto_ncm}
                                     </Badge>
                                   )}
@@ -1261,7 +1261,7 @@ export function EditarOrcamentoClient({
                                 size="sm"
                                 variant="outline"
                                 onClick={() => removerItem(index)}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-900/30"
                                 title="Remover item"
                               >
                                 <Minus className="h-3 w-3" />
@@ -1275,10 +1275,10 @@ export function EditarOrcamentoClient({
                 )}
 
                 {itens.length === 0 && (
-                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                  <div className="text-center py-8 border border-dashed border-gray-300 dark:border-border rounded-lg bg-gray-50 dark:bg-slate-900/20">
                     <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-600">Nenhum item adicionado</p>
-                    <p className="text-sm text-gray-500">Use o campo acima para adicionar produtos</p>
+                    <p className="text-gray-600 dark:text-gray-300">Nenhum item adicionado</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Use o campo acima para adicionar produtos</p>
                   </div>
                 )}
               </div>
@@ -1286,7 +1286,7 @@ export function EditarOrcamentoClient({
           </Card>
 
           {/* Observações */}
-          <Card className="border-0 shadow-lg bg-white">
+          <Card className="border border-border shadow-lg bg-white dark:bg-card">
             <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
               <CardTitle>Observações</CardTitle>
               <CardDescription>Informações adicionais sobre o orçamento</CardDescription>
@@ -1306,7 +1306,7 @@ export function EditarOrcamentoClient({
 
         {/* Resumo */}
         <div className="space-y-6">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50 sticky top-6">
+          <Card className="border border-border shadow-lg bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/10 dark:to-blue-950/10 sticky top-6">
             <CardHeader className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
               <CardTitle className="text-white flex items-center gap-2">
                 <Calculator className="h-5 w-5" />
@@ -1316,7 +1316,7 @@ export function EditarOrcamentoClient({
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="border-b pb-4">
-                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-blue-600" />
                     Parcelamento
                   </h4>
@@ -1333,7 +1333,7 @@ export function EditarOrcamentoClient({
                         onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 0)}
                         className="text-sm"
                       />
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {parcelamentoMdo === 0
                           ? "Sem cobrança"
                           : parcelamentoMdo === 1
@@ -1358,7 +1358,7 @@ export function EditarOrcamentoClient({
                         className="text-sm"
                         disabled={materialAVista}
                       />
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {materialAVista
                           ? "À vista"
                           : parcelamentoMaterial === 0
@@ -1386,33 +1386,33 @@ export function EditarOrcamentoClient({
                 </div>
 
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Valor Material:</span>
+                  <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                    <span>Valor Material:</span>
                     <span className="font-medium">{formatCurrency(calcularValorMaterial())}</span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Mão de Obra:</span>
+                  <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                    <span>Mão de Obra:</span>
                     <span className="font-medium">{formatCurrency(calcularValorMaoObra())}</span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Custo Deslocamento:</span>
+                  <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                    <span>Custo Deslocamento:</span>
                     <span className="font-medium">{formatCurrency(calcularCustoDeslocamento())}</span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Valor dos Juros:</span>
+                  <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                    <span>Valor dos Juros:</span>
                     <span className="font-medium">{formatCurrency(calcularValorJuros())}</span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Taxa Boleto MDO:</span>
+                  <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                    <span>Taxa Boleto MDO:</span>
                     <span className="font-medium">{formatCurrency(calcularTaxaBoletoMdo())}</span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Taxa Boleto Material:</span>
+                  <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                    <span>Taxa Boleto Material:</span>
                     <span className="font-medium">{formatCurrency(calcularTaxaBoletoMaterial())}</span>
                   </div>
 
@@ -1423,13 +1423,13 @@ export function EditarOrcamentoClient({
                     </div>
                   )}
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Imposto Serviço:</span>
+                  <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                    <span>Imposto Serviço:</span>
                     <span className="font-medium">{formatCurrency(calcularImpostoServicoValor())}</span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Imposto Material:</span>
+                  <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                    <span>Imposto Material:</span>
                     <span className="font-medium">{formatCurrency(calcularImpostoMaterialValor())}</span>
                   </div>
 
@@ -1446,13 +1446,13 @@ export function EditarOrcamentoClient({
 
                   {/* Seção de Parcelamento */}
                   <div className="border-t pt-4">
-                    <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-blue-600" />
                       Forma de Pagamento
                     </h4>
                     <div className="space-y-2">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">Mão de Obra:</span>
+                      <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+                        <span>Mão de Obra:</span>
                         <span className="font-medium text-blue-600">
                           {parcelamentoMdo === 0
                             ? "Sem cobrança"
@@ -1461,8 +1461,8 @@ export function EditarOrcamentoClient({
                               : `${parcelamentoMdo}x de ${formatCurrency(calcularSubtotalMdo() / parcelamentoMdo)}`}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">Material:</span>
+                      <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+                        <span>Material:</span>
                         <span className="font-medium text-blue-600">
                           {materialAVista
                             ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
@@ -1492,7 +1492,7 @@ export function EditarOrcamentoClient({
                   </div>
                 </div>
 
-                <div className="pt-4 space-y-2 text-sm text-gray-600">
+                <div className="pt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
                   <div className="flex justify-between">
                     <span>Itens:</span>
                     <span>{itens.length}</span>
