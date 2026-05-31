@@ -25,9 +25,16 @@ import {
   Wrench,
   Package,
   ChevronRight,
+  MoreHorizontal
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
@@ -878,65 +885,109 @@ export default function OrcamentosPage({
                         const subtotalMaterial = calcularSubtotalMaterialOrcamento(orcamento)
                         const precisaNfe = parcelamentoMaterial !== 0 && subtotalMaterial > 0
                         const mostraNfBtns = orcamento.situacao === "aprovado" || orcamento.situacao === "nota fiscal emitida"
+                        
+                        const handleVisualizarClick = () => {
+                          setSelectedOrcamentoNumeroVisualizar(orcamento.numero)
+                          setIsVisualizarOrcamentoOpen(true)
+                        }
+                        
+                        const handleEditarClick = () => {
+                          setSelectedOrcamentoNumeroEditar(orcamento.numero)
+                          setIsEditarOrcamentoOpen(true)
+                        }
+
                         return (
-                          <div className="flex flex-wrap gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedOrcamentoNumeroVisualizar(orcamento.numero)
-                                setIsVisualizarOrcamentoOpen(true)
-                              }}
-                              className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
-                              title="Visualizar"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedOrcamentoNumeroEditar(orcamento.numero)
-                                setIsEditarOrcamentoOpen(true)
-                              }}
-                              className="text-green-600 dark:text-green-400 hover:bg-green-500/10 border-green-200 dark:border-green-900/50 bg-transparent h-8 w-8 p-0"
-                              title="Editar"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            {mostraNfBtns && (
+                          <div className="flex items-center gap-1">
+                            {/* Desktop View: Show buttons directly on large screens */}
+                            <div className="hidden xl:flex gap-1">
                               <Button
                                 size="sm"
                                 variant="outline"
-                                disabled={!precisaNfse || nfseJaEmitida}
-                                onClick={() => !(!precisaNfse || nfseJaEmitida) && handleEmitirNfse(orcamento)}
-                                className={`h-8 w-8 p-0 ${
-                                  !precisaNfse || nfseJaEmitida
-                                    ? "text-muted-foreground border-border bg-muted/20 opacity-50 cursor-not-allowed"
-                                    : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent"
-                                }`}
-                                title={!precisaNfse ? "Sem cobrança" : nfseJaEmitida ? "Já emitida" : "NFS-e"}
+                                onClick={handleVisualizarClick}
+                                className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
+                                title="Visualizar"
                               >
-                                <FileCheck className="h-4 w-4" />
+                                <Eye className="h-4 w-4" />
                               </Button>
-                            )}
-                            {mostraNfBtns && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                disabled={!precisaNfe || nfeJaEmitida}
-                                onClick={() => !(!precisaNfe || nfeJaEmitida) && handleEmitirNfe(orcamento)}
-                                className={`h-8 w-8 p-0 ${
-                                  !precisaNfe || nfeJaEmitida
-                                    ? "text-muted-foreground border-border bg-muted/20 opacity-50 cursor-not-allowed"
-                                    : "text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent"
-                                }`}
-                                title={!precisaNfe ? "Sem material" : nfeJaEmitida ? "Já emitida" : "NF-e"}
+                                onClick={handleEditarClick}
+                                className="text-green-600 dark:text-green-400 hover:bg-green-500/10 border-green-200 dark:border-green-900/50 bg-transparent h-8 w-8 p-0"
+                                title="Editar"
                               >
-                                <Package className="h-4 w-4" />
+                                <Edit className="h-4 w-4" />
                               </Button>
-                            )}
-                            <OrcamentoDeleteDialog orcamento={orcamento} onSuccess={fetchOrcamentos} />
+                              {mostraNfBtns && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={!precisaNfse || nfseJaEmitida}
+                                  onClick={() => !(!precisaNfse || nfseJaEmitida) && handleEmitirNfse(orcamento)}
+                                  className={`h-8 w-8 p-0 ${
+                                    !precisaNfse || nfseJaEmitida
+                                      ? "text-muted-foreground border-border bg-muted/20 opacity-50 cursor-not-allowed"
+                                      : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent"
+                                  }`}
+                                  title={!precisaNfse ? "Sem cobrança" : nfseJaEmitida ? "Já emitida" : "NFS-e"}
+                                >
+                                  <FileCheck className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {mostraNfBtns && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={!precisaNfe || nfeJaEmitida}
+                                  onClick={() => !(!precisaNfe || nfeJaEmitida) && handleEmitirNfe(orcamento)}
+                                  className={`h-8 w-8 p-0 ${
+                                    !precisaNfe || nfeJaEmitida
+                                      ? "text-muted-foreground border-border bg-muted/20 opacity-50 cursor-not-allowed"
+                                      : "text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent"
+                                  }`}
+                                  title={!precisaNfe ? "Sem material" : nfeJaEmitida ? "Já emitida" : "NF-e"}
+                                >
+                                  <Package className="h-4 w-4" />
+                                </Button>
+                              )}
+                              <OrcamentoDeleteDialog orcamento={orcamento} onSuccess={fetchOrcamentos} />
+                            </div>
+                            
+                            {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                            <div className="xl:hidden">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={handleVisualizarClick}>
+                                    <Eye className="h-4 w-4 mr-2" />Visualizar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={handleEditarClick}>
+                                    <Edit className="h-4 w-4 mr-2" />Editar
+                                  </DropdownMenuItem>
+                                  {mostraNfBtns && precisaNfse && !nfseJaEmitida && (
+                                    <DropdownMenuItem onClick={() => handleEmitirNfse(orcamento)}>
+                                      <FileCheck className="h-4 w-4 mr-2" />Emitir NFS-e
+                                    </DropdownMenuItem>
+                                  )}
+                                  {mostraNfBtns && precisaNfe && !nfeJaEmitida && (
+                                    <DropdownMenuItem onClick={() => handleEmitirNfe(orcamento)}>
+                                      <Package className="h-4 w-4 mr-2" />Emitir NF-e
+                                    </DropdownMenuItem>
+                                  )}
+                                  <OrcamentoDeleteDialog
+                                    orcamento={orcamento}
+                                    onSuccess={fetchOrcamentos}
+                                    trigger={
+                                      <DropdownMenuItem className="text-red-600 focus:text-red-600" onSelect={(e) => e.preventDefault()}>
+                                        <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                      </DropdownMenuItem>
+                                    }
+                                  />
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
                         )
                       }

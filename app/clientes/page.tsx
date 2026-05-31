@@ -4,8 +4,14 @@ import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Users, Building2, Phone, Mail, Edit, Trash2, Filter, Plus, MapPin, FileText, ChevronLeft, ChevronRight, UserX, X } from "lucide-react"
+import { Search, Users, Building2, Phone, Mail, Edit, Trash2, Filter, Plus, MapPin, FileText, ChevronLeft, ChevronRight, UserX, X, MoreHorizontal } from "lucide-react"
 import { ResizableTable, type ColumnDef } from "@/components/ui/resizable-table"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { formatCNPJ, formatCPF, formatPhone } from "@/lib/utils"
 import type { Cliente } from "@/types/database"
 import { ClienteFormDialog } from "@/components/cliente-form-dialog"
@@ -776,7 +782,7 @@ export default function ClientesPage() {
                     { key: "email",        label: "Contato",           width: 230, sortable: false },
                     { key: "distancia_km", label: "Distância",         width: 100, sortable: true },
                     { key: "tem_contrato", label: "Contrato",          width: 110, sortable: true },
-                    { key: "acoes",        label: "Ações",             width: 100, sortable: false, noResize: true },
+                    { key: "acoes",        label: "Ações",             width: 120, sortable: false, noResize: true },
                   ] as ColumnDef<Cliente>[]}
                   data={paginatedClientes}
                   rowKey={(row) => row.id}
@@ -831,19 +837,41 @@ export default function ClientesPage() {
                         )
                       case "acoes":
                         return (
-                          <div className="flex gap-1 flex-wrap">
-                            <Button variant="outline" size="sm" onClick={() => handleEditCliente(cliente)}
-                              className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm"
-                              onClick={() => {
-                                setClienteToDelete(cliente)
-                                setIsDeleteClienteOpen(true)
-                              }}
-                              className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                          <div className="flex items-center gap-1">
+                            {/* Desktop View: Show buttons directly on large screens */}
+                            <div className="hidden xl:flex gap-1">
+                              <Button variant="outline" size="sm" onClick={() => handleEditCliente(cliente)}
+                                className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="outline" size="sm"
+                                onClick={() => {
+                                  setClienteToDelete(cliente)
+                                  setIsDeleteClienteOpen(true)
+                                }}
+                                className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                            <div className="xl:hidden">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleEditCliente(cliente)}>
+                                    <Edit className="h-4 w-4 mr-2" />Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => {
+                                    setClienteToDelete(cliente)
+                                    setIsDeleteClienteOpen(true)
+                                  }}>
+                                    <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
                         )
                       default: return null

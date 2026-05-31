@@ -25,10 +25,17 @@ import {
   CalendarRange,
   ChevronLeft,
   ChevronRight,
+  MoreHorizontal
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import type { OrdemServico } from "@/types/ordem-servico"
 import { LotePreventivasDialog } from "@/components/ordem-servico/lote-preventivas-dialog"
@@ -637,39 +644,70 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
                       <span className="text-foreground">{os.data_atual ? new Date(os.data_atual.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"}</span>
                     )
                   case "situacao":    return getStatusBadge(os.situacao)
-                  case "acoes":
+                  case "acoes": {
+                    const handleVisualizarClick = () => {
+                      setSelectedOSIdVisualizar(os.id.toString())
+                      setIsVisualizarOSOpen(true)
+                    }
+                    const handleEditarClick = () => {
+                      setSelectedOSIdEditar(os.id.toString())
+                      setIsEditarOSOpen(true)
+                    }
                     return (
                       <div className="flex items-center gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedOSIdVisualizar(os.id.toString())
-                            setIsVisualizarOSOpen(true)
-                          }}
-                          className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0"
-                          title="Visualizar"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedOSIdEditar(os.id.toString())
-                            setIsEditarOSOpen(true)
-                          }}
-                          className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0"
-                          title="Editar"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <OrdemServicoDeleteDialog
-                          ordemServico={os}
-                          onSuccess={carregarDados}
-                        />
+                        {/* Desktop View: Show buttons directly on large screens */}
+                        <div className="hidden xl:flex gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleVisualizarClick}
+                            className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0"
+                            title="Visualizar"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleEditarClick}
+                            className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0"
+                            title="Editar"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <OrdemServicoDeleteDialog
+                            ordemServico={os}
+                            onSuccess={carregarDados}
+                          />
+                        </div>
+                        {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                        <div className="xl:hidden">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={handleVisualizarClick}>
+                                <Eye className="h-4 w-4 mr-2" />Visualizar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={handleEditarClick}>
+                                <Edit className="h-4 w-4 mr-2" />Editar
+                              </DropdownMenuItem>
+                              <OrdemServicoDeleteDialog
+                                ordemServico={os}
+                                onSuccess={carregarDados}
+                                trigger={
+                                  <DropdownMenuItem className="text-red-600 focus:text-red-600" onSelect={(e) => e.preventDefault()}>
+                                    <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                  </DropdownMenuItem>
+                                }
+                              />
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     )
+                  }
                   default: return null
                 }
               }}

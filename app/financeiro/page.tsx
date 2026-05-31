@@ -34,6 +34,7 @@ import {
   X,
   TrendingUp,
   ExternalLink,
+  MoreHorizontal,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -54,6 +55,12 @@ import { EditarBoletoDialog } from "@/components/financeiro/editar-boleto-dialog
 import { VisualizarBoletosDialog } from "@/components/financeiro/visualizar-boletos-dialog"
 import { FluxoCaixaTab } from "@/components/financeiro/fluxo-caixa-tab"
 import Link from "next/link"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Boleto {
   id: number
@@ -895,44 +902,93 @@ export default function FinanceiroPage() {
                             case "status": return getStatusBadge(boleto.status, boleto.data_vencimento)
                             case "numero_parcela": return <span className="text-foreground font-medium">{boleto.numero_parcela}/{boleto.total_parcelas}</span>
                             case "acoes":
+                              const handleVisualizarClick = () => handleVisualizarBoleto(boleto)
+                              const handleMarcarPagoClick = () => handleMarcarPago(boleto)
+                              const handleEditarBoletoClick = () => handleEditarBoleto(boleto)
+                              const handleExcluirBoletoClick = () => handleExcluirBoleto(boleto)
+                              const handleEnviarAsaasClick = () => handleEnviarAsaas(boleto)
+                              const handleImprimirBoletoClick = () => handleImprimirBoleto(boleto)
+
                               return (
-                                <div className="flex gap-1 flex-wrap">
-                                  <Button size="sm" variant="outline" onClick={() => handleVisualizarBoleto(boleto)}
-                                    className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                  {!(boleto.status === "pago" && boleto.data_pagamento) && (
-                                    <>
-                                      {!boleto.asaas_id && (
-                                        <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
-                                          disabled={enviandoParaAsaas === boleto.id}
-                                          className="border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 h-8 w-8 p-0" title="Enviar Asaas">
-                                          {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                <div className="flex items-center gap-1">
+                                  {/* Desktop View: Show buttons directly on large screens */}
+                                  <div className="hidden xl:flex gap-1">
+                                    <Button size="sm" variant="outline" onClick={handleVisualizarClick}
+                                      className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                    {!(boleto.status === "pago" && boleto.data_pagamento) && (
+                                      <>
+                                        {!boleto.asaas_id && (
+                                          <Button variant="outline" size="sm" onClick={handleEnviarAsaasClick}
+                                            disabled={enviandoParaAsaas === boleto.id}
+                                            className="border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 h-8 w-8 p-0" title="Enviar Asaas">
+                                            {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                          </Button>
+                                        )}
+                                        {boleto.asaas_bankslip_url && (
+                                          <Button variant="outline" size="sm" onClick={handleImprimirBoletoClick}
+                                            className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir">
+                                            <Printer className="h-4 w-4" />
+                                          </Button>
+                                        )}
+                                        {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
+                                          <Button size="sm" variant="outline" onClick={handleMarcarPagoClick}
+                                            className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
+                                            <CheckCircle className="h-4 w-4" />
+                                          </Button>
+                                        )}
+                                        <Button size="sm" variant="outline" onClick={handleEditarBoletoClick}
+                                          className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
+                                          <Edit className="h-4 w-4" />
                                         </Button>
-                                      )}
-                                      {boleto.asaas_bankslip_url && (
-                                        <Button variant="outline" size="sm" onClick={() => handleImprimirBoleto(boleto)}
-                                          className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir">
-                                          <Printer className="h-4 w-4" />
-                                        </Button>
-                                      )}
-                                      {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
-                                        <Button size="sm" variant="outline" onClick={() => handleMarcarPago(boleto)}
-                                          className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Marcar como Pago">
-                                          <CheckCircle className="h-4 w-4" />
-                                        </Button>
-                                      )}
-                                      <Button size="sm" variant="outline" onClick={() => handleEditarBoleto(boleto)}
-                                        className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                    </>
-                                  )}
-                                  <Button size="sm" variant="outline" onClick={() => handleExcluirBoleto(boleto)}
-                                    disabled={deletingId === boleto.id}
-                                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
-                                    {deletingId === boleto.id ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" /> : <Trash2 className="h-4 w-4" />}
-                                  </Button>
+                                      </>
+                                    )}
+                                    <Button size="sm" variant="outline" onClick={handleExcluirBoletoClick}
+                                      disabled={deletingId === boleto.id}
+                                      className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
+                                      {deletingId === boleto.id ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" /> : <Trash2 className="h-4 w-4" />}
+                                    </Button>
+                                  </div>
+
+                                  {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                                  <div className="xl:hidden">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={handleVisualizarClick}>
+                                          <Eye className="h-4 w-4 mr-2" />Visualizar
+                                        </DropdownMenuItem>
+                                        {!(boleto.status === "pago" && boleto.data_pagamento) && (
+                                          <>
+                                            {!boleto.asaas_id && (
+                                              <DropdownMenuItem onClick={handleEnviarAsaasClick} disabled={enviandoParaAsaas === boleto.id}>
+                                                <Send className="h-4 w-4 mr-2" />Enviar Asaas
+                                              </DropdownMenuItem>
+                                            )}
+                                            {boleto.asaas_bankslip_url && (
+                                              <DropdownMenuItem onClick={handleImprimirBoletoClick}>
+                                                <Printer className="h-4 w-4 mr-2" />Imprimir
+                                              </DropdownMenuItem>
+                                            )}
+                                            {(boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && (
+                                              <DropdownMenuItem onClick={handleMarcarPagoClick}>
+                                                <CheckCircle className="h-4 w-4 mr-2" />Marcar Pago
+                                              </DropdownMenuItem>
+                                            )}
+                                            <DropdownMenuItem onClick={handleEditarBoletoClick}>
+                                              <Edit className="h-4 w-4 mr-2" />Editar
+                                            </DropdownMenuItem>
+                                          </>
+                                        )}
+                                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleExcluirBoletoClick} disabled={deletingId === boleto.id}>
+                                          <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
                                 </div>
                               )
                             default: return null
@@ -1239,33 +1295,70 @@ export default function FinanceiroPage() {
                               )
                             case "acoes":
                               return (
-                                <div className="flex gap-2">
-                                  <Button size="sm" variant="outline" className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-border bg-transparent h-8 w-8 p-0">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                  <Button size="sm" variant="outline" className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-border bg-transparent h-8 w-8 p-0">
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10 border-border bg-transparent h-8 w-8 p-0">
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent className="border-border bg-card text-foreground">
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-muted-foreground">Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel className="border-border bg-transparent hover:bg-muted text-foreground">Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700 text-white border-0">Excluir Recibo</AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
+                                <div className="flex items-center gap-1">
+                                  {/* Desktop View */}
+                                  <div className="hidden xl:flex gap-2">
+                                    <Button size="sm" variant="outline" className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-border bg-transparent h-8 w-8 p-0">
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-border bg-transparent h-8 w-8 p-0">
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10 border-border bg-transparent h-8 w-8 p-0">
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent className="border-border bg-card text-foreground">
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                          <AlertDialogDescription className="text-muted-foreground">Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel className="border-border bg-transparent hover:bg-muted text-foreground">Cancelar</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700 text-white border-0">Excluir Recibo</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </div>
+
+                                  {/* Mobile/Tablet View */}
+                                  <div className="xl:hidden">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem>
+                                          <Eye className="h-4 w-4 mr-2" />Visualizar
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                          <Edit className="h-4 w-4 mr-2" />Editar
+                                        </DropdownMenuItem>
+                                        <AlertDialog>
+                                          <AlertDialogTrigger asChild>
+                                            <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={(e) => e.preventDefault()}>
+                                              <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                            </DropdownMenuItem>
+                                          </AlertDialogTrigger>
+                                          <AlertDialogContent className="border-border bg-card text-foreground">
+                                            <AlertDialogHeader>
+                                              <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                                              <AlertDialogDescription className="text-muted-foreground">Tem certeza que deseja excluir o recibo "{recibo.numero}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                              <AlertDialogCancel className="border-border bg-transparent hover:bg-muted text-foreground">Cancelar</AlertDialogCancel>
+                                              <AlertDialogAction onClick={() => handleDeleteRecibo(recibo)} className="bg-red-600 hover:bg-red-700 text-white border-0">Excluir Recibo</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                          </AlertDialogContent>
+                                        </AlertDialog>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
                                 </div>
                               )
-                            default: return null
+                              default: return null
                           }
                         }}
                       />

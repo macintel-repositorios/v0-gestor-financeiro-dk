@@ -7,8 +7,14 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ResizableTable, type ColumnDef } from "@/components/ui/resizable-table"
-import { UserCog, Search, Shield, User, Users, CheckCircle, XCircle, Crown, RefreshCw, ChevronRight } from "lucide-react"
+import { UserCog, Search, Shield, User, Users, CheckCircle, XCircle, Crown, RefreshCw, ChevronRight, MoreHorizontal } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import { NovoUsuarioDialog } from "@/components/usuarios/novo-usuario-dialog"
 import { EditarUsuarioDialog } from "@/components/usuarios/editar-usuario-dialog"
@@ -399,7 +405,7 @@ export default function UsuariosPage() {
                 { key: "permissoes",    label: "Permissões",    width: 200, sortable: false },
                 { key: "ativo",         label: "Status",        width: 100, sortable: true },
                 { key: "ultimo_acesso", label: "Último Acesso", width: 160, sortable: true },
-                { key: "acoes",         label: "Ações",         width: 120, sortable: false, noResize: true },
+                { key: "acoes",         label: "Ações",         width: 160, sortable: false, noResize: true },
               ]}
               data={usuariosFiltrados}
               rowKey={(row) => row.id}
@@ -430,9 +436,28 @@ export default function UsuariosPage() {
                   case "ultimo_acesso": return <span className="text-sm text-muted-foreground">{formatarData(usuario.ultimo_acesso)}</span>
                   case "acoes":
                     return (
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="hover:bg-blue-950/40 text-foreground border-border bg-transparent" onClick={() => handleEditar(usuario)}>Editar</Button>
-                        <Button variant="outline" size="sm" className="hover:bg-red-950/40 text-red-400 border-border bg-transparent" onClick={() => handleExcluir(usuario)}>Excluir</Button>
+                      <div className="flex items-center gap-1">
+                        {/* Desktop View: Show buttons directly on large screens */}
+                        <div className="hidden xl:flex gap-2">
+                          <Button variant="outline" size="sm" className="hover:bg-blue-950/40 text-foreground border-border bg-transparent" onClick={() => handleEditar(usuario)}>Editar</Button>
+                          <Button variant="outline" size="sm" className="hover:bg-red-950/40 text-red-400 border-border bg-transparent" onClick={() => handleExcluir(usuario)}>Excluir</Button>
+                        </div>
+                        {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                        <div className="xl:hidden">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditar(usuario)}>
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => handleExcluir(usuario)}>
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     )
                   default: return null

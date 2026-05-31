@@ -22,8 +22,16 @@ import {
   ChevronRight,
   FileText,
   Check,
-  ChevronsUpDown
+  ChevronsUpDown,
+  MoreHorizontal,
+  Trash2
 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { ProdutoDeleteDialog } from "@/components/produto-delete-dialog"
 import { CategoriaDeleteDialog } from "@/components/categoria-delete-dialog"
 import { MarcaDeleteDialog } from "@/components/marca-delete-dialog"
@@ -325,7 +333,7 @@ export default function ProdutosPage({
         { key: "valor_unitario", label: "Valor", width: 100, sortable: true },
         { key: "estoque", label: "Estoque", width: 90, sortable: true },
         { key: "ativo", label: "Status", width: 80, sortable: true },
-        { key: "acoes", label: "Ações", width: 80, sortable: false, noResize: true },
+        { key: "acoes", label: "Ações", width: 120, sortable: false, noResize: true },
       ]}
       data={produtosList}
       rowKey={(row) => row.id}
@@ -397,32 +405,59 @@ export default function ProdutosPage({
               </Badge>
             )
           case "acoes":
+            const handleEditClick = () => {
+              if (isServico(produto.codigo)) {
+                setEditandoServico({
+                  id: produto.id,
+                  codigo: produto.codigo,
+                  descricao: produto.descricao,
+                  valor_mao_obra: produto.valor_mao_obra,
+                  observacoes: produto.observacoes,
+                  ativo: produto.ativo,
+                })
+                setServicoDialogOpen(true)
+              } else {
+                setSelectedProdutoEdit(produto)
+                setIsEditarProdutoOpen(true)
+              }
+            }
             return (
-              <div className="flex items-center justify-end gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (isServico(produto.codigo)) {
-                      setEditandoServico({
-                        id: produto.id,
-                        codigo: produto.codigo,
-                        descricao: produto.descricao,
-                        valor_mao_obra: produto.valor_mao_obra,
-                        observacoes: produto.observacoes,
-                        ativo: produto.ativo,
-                      })
-                      setServicoDialogOpen(true)
-                    } else {
-                      setSelectedProdutoEdit(produto)
-                      setIsEditarProdutoOpen(true)
-                    }
-                  }}
-                  className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
-                >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-                <ProdutoDeleteDialog produto={produto} onSuccess={reloadAll} />
+              <div className="flex items-center gap-1">
+                {/* Desktop View: Show buttons directly on large screens */}
+                <div className="hidden xl:flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditClick}
+                    className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
+                    title="Editar"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <ProdutoDeleteDialog produto={produto} onSuccess={reloadAll} />
+                </div>
+                {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                <div className="xl:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleEditClick}>
+                        <Edit className="h-4 w-4 mr-2" />Editar
+                      </DropdownMenuItem>
+                      <ProdutoDeleteDialog
+                        produto={produto}
+                        onSuccess={reloadAll}
+                        trigger={
+                          <DropdownMenuItem className="text-red-600 focus:text-red-600" onSelect={(e) => e.preventDefault()}>
+                            <Trash2 className="h-4 w-4 mr-2" />Excluir
+                          </DropdownMenuItem>
+                        }
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             )
           default:
@@ -441,7 +476,7 @@ export default function ProdutosPage({
         { key: "categoria_nome", label: "Categoria", width: 130, sortable: true },
         { key: "valor_mao_obra", label: "Valor Mão de Obra", width: 140, sortable: true },
         { key: "ativo", label: "Status", width: 80, sortable: true },
-        { key: "acoes", label: "Ações", width: 80, sortable: false, noResize: true },
+        { key: "acoes", label: "Ações", width: 120, sortable: false, noResize: true },
       ]}
       data={servicosList}
       rowKey={(row) => row.id}
@@ -482,27 +517,54 @@ export default function ProdutosPage({
               </Badge>
             )
           case "acoes":
+            const handleEditClick = () => {
+              setEditandoServico({
+                id: servico.id,
+                codigo: servico.codigo,
+                descricao: servico.descricao,
+                valor_mao_obra: servico.valor_mao_obra,
+                observacoes: servico.observacoes,
+                ativo: servico.ativo,
+              })
+              setServicoDialogOpen(true)
+            }
             return (
-              <div className="flex items-center justify-end gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setEditandoServico({
-                      id: servico.id,
-                      codigo: servico.codigo,
-                      descricao: servico.descricao,
-                      valor_mao_obra: servico.valor_mao_obra,
-                      observacoes: servico.observacoes,
-                      ativo: servico.ativo,
-                    })
-                    setServicoDialogOpen(true)
-                  }}
-                  className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
-                >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-                <ProdutoDeleteDialog produto={servico} onSuccess={reloadAll} />
+              <div className="flex items-center gap-1">
+                {/* Desktop View: Show buttons directly on large screens */}
+                <div className="hidden xl:flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditClick}
+                    className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
+                    title="Editar"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <ProdutoDeleteDialog produto={servico} onSuccess={reloadAll} />
+                </div>
+                {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                <div className="xl:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleEditClick}>
+                        <Edit className="h-4 w-4 mr-2" />Editar
+                      </DropdownMenuItem>
+                      <ProdutoDeleteDialog
+                        produto={servico}
+                        onSuccess={reloadAll}
+                        trigger={
+                          <DropdownMenuItem className="text-red-600 focus:text-red-600" onSelect={(e) => e.preventDefault()}>
+                            <Trash2 className="h-4 w-4 mr-2" />Excluir
+                          </DropdownMenuItem>
+                        }
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             )
           default:
@@ -519,7 +581,7 @@ export default function ProdutosPage({
         { key: "codigo", label: "Código", width: 100, sortable: true },
         { key: "nome", label: "Nome", width: 270, sortable: true },
         { key: "ativo", label: "Status", width: 100, sortable: true },
-        { key: "acoes", label: "Ações", width: 80, sortable: false, noResize: true },
+        { key: "acoes", label: "Ações", width: 120, sortable: false, noResize: true },
       ]}
       data={categoriasList}
       rowKey={(row) => row.id}
@@ -551,20 +613,47 @@ export default function ProdutosPage({
               </Badge>
             )
           case "acoes":
+            const handleEditClick = () => {
+              setSelectedCategoriaEdit(categoria)
+              setIsEditarCategoriaOpen(true)
+            }
             return (
-              <div className="flex items-center justify-end gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedCategoriaEdit(categoria)
-                    setIsEditarCategoriaOpen(true)
-                  }}
-                  className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
-                >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-                <CategoriaDeleteDialog categoria={categoria} onSuccess={fetchCategorias} />
+              <div className="flex items-center gap-1">
+                {/* Desktop View: Show buttons directly on large screens */}
+                <div className="hidden xl:flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditClick}
+                    className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
+                    title="Editar"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <CategoriaDeleteDialog categoria={categoria} onSuccess={fetchCategorias} />
+                </div>
+                {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                <div className="xl:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleEditClick}>
+                        <Edit className="h-4 w-4 mr-2" />Editar
+                      </DropdownMenuItem>
+                      <CategoriaDeleteDialog
+                        categoria={categoria}
+                        onSuccess={fetchCategorias}
+                        trigger={
+                          <DropdownMenuItem className="text-red-600 focus:text-red-600" onSelect={(e) => e.preventDefault()}>
+                            <Trash2 className="h-4 w-4 mr-2" />Excluir
+                          </DropdownMenuItem>
+                        }
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             )
           default:
@@ -582,7 +671,7 @@ export default function ProdutosPage({
         { key: "sigla", label: "Sigla", width: 100, sortable: true },
         { key: "contador", label: "Contador", width: 90, sortable: true },
         { key: "ativo", label: "Status", width: 90, sortable: true },
-        { key: "acoes", label: "Ações", width: 80, sortable: false, noResize: true },
+        { key: "acoes", label: "Ações", width: 120, sortable: false, noResize: true },
       ]}
       data={marcasList}
       rowKey={(row) => row.id}
@@ -620,20 +709,47 @@ export default function ProdutosPage({
               </Badge>
             )
           case "acoes":
+            const handleEditClick = () => {
+              setSelectedMarcaEdit(marca)
+              setIsEditarMarcaOpen(true)
+            }
             return (
-              <div className="flex items-center justify-end gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedMarcaEdit(marca)
-                    setIsEditarMarcaOpen(true)
-                  }}
-                  className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
-                >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-                <MarcaDeleteDialog marca={marca} onSuccess={fetchMarcas} />
+              <div className="flex items-center gap-1">
+                {/* Desktop View: Show buttons directly on large screens */}
+                <div className="hidden xl:flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditClick}
+                    className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
+                    title="Editar"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <MarcaDeleteDialog marca={marca} onSuccess={fetchMarcas} />
+                </div>
+                {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
+                <div className="xl:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleEditClick}>
+                        <Edit className="h-4 w-4 mr-2" />Editar
+                      </DropdownMenuItem>
+                      <MarcaDeleteDialog
+                        marca={marca}
+                        onSuccess={fetchMarcas}
+                        trigger={
+                          <DropdownMenuItem className="text-red-600 focus:text-red-600" onSelect={(e) => e.preventDefault()}>
+                            <Trash2 className="h-4 w-4 mr-2" />Excluir
+                          </DropdownMenuItem>
+                        }
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             )
           default:

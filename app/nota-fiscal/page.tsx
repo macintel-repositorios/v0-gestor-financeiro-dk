@@ -40,6 +40,7 @@ import {
   Calendar,
   ChevronRight,
   X,
+  MoreHorizontal
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
@@ -54,6 +55,12 @@ import { EmitirNfeDialog } from "@/components/nfe/emitir-nfe-dialog"
 import { DetalheNfeDialog } from "@/components/nfe/detalhe-nfe-dialog"
 import { DanfeDialog } from "@/components/nfe/danfe-dialog"
 import Link from "next/link"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 // Tipo unificado para ambas as notas
 interface NotaUnificada {
@@ -1175,45 +1182,119 @@ export default function NotaFiscalPage() {
                           case "valor_total": return <span className="text-right font-black text-foreground text-sm">{shouldShow ? formatCurrency(nota.valor_total) : "R$ •••"}</span>
                           case "status": return getStatusBadge(nota.status)
                           case "data": return <span className="text-xs text-muted-foreground font-semibold">{formatDateBR(nota.data_emissao || nota.created_at)}</span>
-                          case "acoes":
-                            return (
-                              <div className="flex items-center justify-end gap-1">
-                                {nota.tipo === "nfse" && (nota.status === "processando" || nota.status === "erro") && !nota.numero_nfse && (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-950/20"
+                          case "acoes": {
+                            const notaNum = nota.tipo === "nfse" ? String(nota.numero_nfse || "") : String(nota.numero_nfe || "")
+                            const boletoInfo = boletoStatusMap[notaNum]
+                            
+                            const renderConsultarBtn = () => {
+                              if (nota.tipo === "nfse" && (nota.status === "processando" || nota.status === "erro") && !nota.numero_nfse) {
+                                return (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20"
                                     onClick={() => handleConsultarNfse(nota.id)} disabled={consultandoId === nota.id} title="Consultar">
                                     {consultandoId === nota.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                                   </Button>
-                                )}
-                                {nota.tipo === "nfe" && (nota.status === "processando" || nota.status === "rejeitada") && (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-950/20"
+                                )
+                              }
+                              if (nota.tipo === "nfe" && (nota.status === "processando" || nota.status === "rejeitada")) {
+                                return (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20"
                                     onClick={() => handleConsultarNfe(nota.id)} disabled={consultandoId === nota.id} title="Consultar SEFAZ">
                                     {consultandoId === nota.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                                   </Button>
-                                )}
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => handleVerDetalhes(nota)} title="Ver detalhes">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:bg-emerald-950/20" onClick={() => handleImprimir(nota)} title={nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}>
+                                )
+                              }
+                              return null
+                            }
+
+                            const renderImprimirBtn = () => {
+                              if (((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
+                                return (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:bg-emerald-955/20" onClick={() => handleImprimir(nota)} title={nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}>
                                     <Printer className="h-4 w-4" />
                                   </Button>
-                                )}
-                                {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (() => {
-                                  const notaNum = nota.tipo === "nfse" ? String(nota.numero_nfse || "") : String(nota.numero_nfe || "")
-                                  const boletoInfo = boletoStatusMap[notaNum]
-                                  if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
-                                    return <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-400 hover:bg-teal-950/20" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
-                                  }
-                                  if (boletoInfo?.temBoleto) return null
-                                  return <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-950/20" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
-                                })()}
-                                {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:bg-red-950/20" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }} title={`Cancelar ${nota.tipo === "nfse" ? "NFS-e" : "NF-e"}`}>
+                                )
+                              }
+                              return null
+                            }
+
+                            const renderBoletoBtn = () => {
+                              if (!((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
+                                return null
+                              }
+                              if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
+                                return <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-400 hover:bg-teal-955/20" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
+                              }
+                              if (boletoInfo?.temBoleto) return null
+                              return <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
+                            }
+
+                            const renderCancelarBtn = () => {
+                              if (((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
+                                return (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:bg-red-955/20" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }} title={`Cancelar ${nota.tipo === "nfse" ? "NFS-e" : "NF-e"}`}>
                                     <XCircle className="h-4 w-4" />
                                   </Button>
-                                )}
+                                )
+                              }
+                              return null
+                            }
+
+                            return (
+                              <div className="flex items-center justify-end gap-1">
+                                {/* Desktop View */}
+                                <div className="hidden xl:flex gap-0.5">
+                                  {renderConsultarBtn()}
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => handleVerDetalhes(nota)} title="Ver detalhes">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  {renderImprimirBtn()}
+                                  {renderBoletoBtn()}
+                                  {renderCancelarBtn()}
+                                </div>
+
+                                {/* Mobile/Tablet View */}
+                                <div className="xl:hidden">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      {nota.tipo === "nfse" && (nota.status === "processando" || nota.status === "erro") && !nota.numero_nfse && (
+                                        <DropdownMenuItem onClick={() => handleConsultarNfse(nota.id)}>
+                                          <RefreshCw className="h-4 w-4 mr-2" />Consultar
+                                        </DropdownMenuItem>
+                                      )}
+                                      {nota.tipo === "nfe" && (nota.status === "processando" || nota.status === "rejeitada") && (
+                                        <DropdownMenuItem onClick={() => handleConsultarNfe(nota.id)}>
+                                          <RefreshCw className="h-4 w-4 mr-2" />Consultar SEFAZ
+                                        </DropdownMenuItem>
+                                      )}
+                                      <DropdownMenuItem onClick={() => handleVerDetalhes(nota)}>
+                                        <Eye className="h-4 w-4 mr-2" />Ver detalhes
+                                      </DropdownMenuItem>
+                                      {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                        <DropdownMenuItem onClick={() => handleImprimir(nota)}>
+                                          <Printer className="h-4 w-4 mr-2" />{nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}
+                                        </DropdownMenuItem>
+                                      )}
+                                      {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (() => {
+                                        if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
+                                          return <DropdownMenuItem onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-4 w-4 mr-2" />Imprimir Boleto</DropdownMenuItem>
+                                        }
+                                        if (boletoInfo?.temBoleto) return null
+                                        return <DropdownMenuItem onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }}><DollarSign className="h-4 w-4 mr-2" />Gerar Boleto</DropdownMenuItem>
+                                      })()}
+                                      {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }}>
+                                          <XCircle className="h-4 w-4 mr-2" />Cancelar Nota
+                                        </DropdownMenuItem>
+                                      )}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
                               </div>
                             )
+                          }
                           default: return null
                         }
                       }}

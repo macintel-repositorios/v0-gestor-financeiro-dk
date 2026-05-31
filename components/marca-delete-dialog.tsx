@@ -25,9 +25,10 @@ interface Marca {
 interface MarcaDeleteDialogProps {
   marca: Marca
   onSuccess: () => void
+  trigger?: React.ReactNode
 }
 
-export function MarcaDeleteDialog({ marca, onSuccess }: MarcaDeleteDialogProps) {
+export function MarcaDeleteDialog({ marca, onSuccess, trigger }: MarcaDeleteDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
@@ -70,9 +71,11 @@ export function MarcaDeleteDialog({ marca, onSuccess }: MarcaDeleteDialogProps) 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        {trigger || (
+          <Button variant="outline" size="sm" className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md h-full flex flex-col p-6 border-l border-border shadow-2xl bg-card text-foreground">
         <SheetHeader className="mb-6">
