@@ -97,6 +97,13 @@
     @apply bg-background text-foreground;
   }
 
+  @media screen {
+    html, body {
+      overflow: hidden;
+      height: 100%;
+    }
+  }
+
   input,
   select,
   textarea,
