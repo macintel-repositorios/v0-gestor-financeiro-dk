@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Printer, X } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -601,54 +601,17 @@ export function PropostaPrint({ proposta, isOpen, onClose }: PropostaPrintProps)
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent
-          className="p-0 gap-0 overflow-hidden print:hidden"
-          style={{
-            width: `${modalSize.width}px`,
-            height: `${modalSize.height}px`,
-            maxWidth: "none",
-            maxHeight: "none",
-          }}
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent
+          className="p-0 gap-0 overflow-hidden print:hidden w-full sm:max-w-4xl h-full flex flex-col border-l border-border shadow-2xl bg-card text-foreground"
         >
-          {/* Resize Handles */}
-          <div
-            className="absolute top-0 left-0 right-0 h-1 cursor-n-resize hover:bg-blue-500 z-50"
-            onMouseDown={(e) => handleMouseDown(e, "n")}
-          />
-          <div
-            className="absolute bottom-0 left-0 right-0 h-1 cursor-s-resize hover:bg-blue-500 z-50"
-            onMouseDown={(e) => handleMouseDown(e, "s")}
-          />
-          <div
-            className="absolute top-0 bottom-0 left-0 w-1 cursor-w-resize hover:bg-blue-500 z-50"
-            onMouseDown={(e) => handleMouseDown(e, "w")}
-          />
-          <div
-            className="absolute top-0 bottom-0 right-0 w-1 cursor-e-resize hover:bg-blue-500 z-50"
-            onMouseDown={(e) => handleMouseDown(e, "e")}
-          />
-          <div
-            className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize hover:bg-blue-500 z-50"
-            onMouseDown={(e) => handleMouseDown(e, "nw")}
-          />
-          <div
-            className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize hover:bg-blue-500 z-50"
-            onMouseDown={(e) => handleMouseDown(e, "ne")}
-          />
-          <div
-            className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize hover:bg-blue-500 z-50"
-            onMouseDown={(e) => handleMouseDown(e, "sw")}
-          />
-          <div
-            className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize hover:bg-blue-500 z-50"
-            onMouseDown={(e) => handleMouseDown(e, "se")}
-          />
-
           {/* Header fixo */}
-          <DialogHeader className="px-6 py-4 border-b shrink-0">
-            <DialogTitle>Visualizar Proposta para Impressão</DialogTitle>
-          </DialogHeader>
+          <SheetHeader className="px-6 py-4 border-b shrink-0 bg-muted/30">
+            <SheetTitle className="text-foreground flex items-center gap-2">
+              <Printer className="h-5 w-5 text-purple-600" />
+              Visualizar Proposta para Impressão
+            </SheetTitle>
+          </SheetHeader>
 
           {/* Conteúdo scrollável */}
           <div className="flex-1 overflow-y-auto px-6 py-4">
@@ -932,8 +895,8 @@ export function PropostaPrint({ proposta, isOpen, onClose }: PropostaPrintProps)
               Fechar
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       {/* Estilos de impressão */}
       <style jsx>{`
