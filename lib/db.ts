@@ -50,7 +50,9 @@ const verificarConexao = async (tentativas = 3) => {
   }
 }
 
-verificarConexao()
+if (process.env.NEXT_PHASE !== "phase-production-build") {
+  verificarConexao()
+}
 
 export { pool }
 

@@ -53,7 +53,19 @@ interface Contrato {
   itens_proposta: any[]
 }
 
-export default function ContratoPage() {
+export default function ContratoPage({
+  numero: propNumero,
+  onClose,
+  onEditClick,
+  onSuccess,
+  asDrawer = false,
+}: {
+  numero?: string
+  onClose?: () => void
+  onEditClick?: (numero: string) => void
+  onSuccess?: () => void
+  asDrawer?: boolean
+} = {}) {
   const params = useParams()
   const router = useRouter()
   const [contrato, setContrato] = useState<Contrato | null>(null)
@@ -61,7 +73,7 @@ export default function ContratoPage() {
   const [showEditor, setShowEditor] = useState(false)
   const [conteudoFormatado, setConteudoFormatado] = useState("")
 
-  const numero = params?.numero as string
+  const numero = propNumero || (params?.numero as string)
 
   useEffect(() => {
     if (numero) {
@@ -203,7 +215,12 @@ export default function ContratoPage() {
           title: "Sucesso",
           description: "Contrato excluído com sucesso",
         })
-        router.push("/contratos")
+        if (onSuccess) onSuccess()
+        if (!asDrawer) {
+          router.push("/contratos")
+        } else if (onClose) {
+          onClose()
+        }
       } else {
         toast({
           title: "Erro",
@@ -260,7 +277,11 @@ export default function ContratoPage() {
   }
 
   if (!contrato) {
-    return (
+    return asDrawer ? (
+      <div className="text-center py-6">
+        <h3 className="font-semibold text-red-600">Contrato não encontrado</h3>
+      </div>
+    ) : (
       <div className="container mx-auto p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Contrato não encontrado</h1>
@@ -274,26 +295,38 @@ export default function ContratoPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className={asDrawer ? "bg-transparent text-foreground p-0 space-y-4 pb-24 md:pb-6" : "container mx-auto p-6 space-y-6 pb-24 md:pb-6 bg-gradient-to-br from-slate-50 to-slate-100"}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={() => router.push("/contratos")}>
+          <Button variant="outline" onClick={() => {
+            if (asDrawer && onClose) {
+              onClose()
+            } else {
+              router.push("/contratos")
+            }
+          }}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
+            {asDrawer ? "Fechar" : "Voltar"}
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Contrato {contrato.numero}</h1>
-            <p className="text-muted-foreground">Cliente: {contrato.cliente_nome}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Contrato {contrato.numero}</h1>
+            <p className="text-muted-foreground text-sm">Cliente: {contrato.cliente_nome}</p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge className={getStatusColor(contrato.status)}>{contrato.status?.toUpperCase() || "INDEFINIDO"}</Badge>
           <Button variant="outline" onClick={() => setShowEditor(true)}>
             <Printer className="mr-2 h-4 w-4" />
             Editor de Impressão
           </Button>
-          <Button variant="outline" onClick={() => router.push(`/contratos/${numero}/editar`)}>
+          <Button variant="outline" onClick={() => {
+            if (asDrawer && onEditClick) {
+              onEditClick(numero)
+            } else {
+              router.push(`/contratos/${numero}/editar`)
+            }
+          }}>
             <Edit className="mr-2 h-4 w-4" />
             Editar
           </Button>
@@ -479,7 +512,7 @@ export default function ContratoPage() {
             <CardContent>
               {conteudoFormatado ? (
                 <div
-                  className="prose prose-sm max-w-none text-justify leading-relaxed bg-white p-6 rounded-lg border shadow-sm"
+                  className="prose prose-sm max-w-none text-justify leading-relaxed bg-card text-foreground dark:prose-invert p-6 rounded-lg border border-border shadow-sm"
                   style={{
                     fontSize: "14px",
                     lineHeight: "1.6",

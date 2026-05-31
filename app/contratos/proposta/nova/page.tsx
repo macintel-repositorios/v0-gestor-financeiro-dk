@@ -63,7 +63,15 @@ const PRAZO_CONTRATO_OPTIONS = [
   { value: "indeterminado", label: "Indeterminado" },
 ]
 
-export default function NovaPropostaPage() {
+export default function NovaPropostaPage({
+  onClose,
+  onSuccess,
+  asDrawer = false,
+}: {
+  onClose?: () => void
+  onSuccess?: () => void
+  asDrawer?: boolean
+} = {}) {
   const router = useRouter()
   const { toast } = useToast()
 
@@ -408,7 +416,12 @@ export default function NovaPropostaPage() {
           title: "Sucesso!",
           description: `Proposta ${numeroResult.data.numero} criada com sucesso`,
         })
-        router.push(`/contratos/proposta/${numeroResult.data.numero}`)
+        if (onSuccess) onSuccess()
+        if (asDrawer && onClose) {
+          onClose()
+        } else {
+          router.push(`/contratos/proposta/${numeroResult.data.numero}`)
+        }
       } else {
         toast({
           title: "Erro",
@@ -429,13 +442,17 @@ export default function NovaPropostaPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    return asDrawer ? (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+      </div>
+    ) : (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950">
         <div className="container mx-auto p-6">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Carregando equipamentos...</p>
+              <p className="text-gray-600 dark:text-gray-400">Carregando equipamentos...</p>
             </div>
           </div>
         </div>
@@ -444,33 +461,37 @@ export default function NovaPropostaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto p-6 space-y-6">
+    <div className={asDrawer ? "bg-transparent text-foreground p-0 space-y-4 pb-24 md:pb-6" : "min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 pb-24 md:pb-6"}>
+      <div className={asDrawer ? "p-0 space-y-4" : "container mx-auto p-6 space-y-6"}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent dark:from-green-400 dark:to-blue-400">
               Nova Proposta de Contrato
             </h1>
-            <p className="text-gray-600 mt-1">Crie uma nova proposta de contrato de conservação</p>
+            <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">Crie uma nova proposta de contrato de conservação</p>
             {numeroProposta && (
               <div className="flex items-center gap-2 mt-2">
-                <FileText className="h-5 w-5 text-blue-600" />
-                <span className="text-lg font-semibold text-blue-600 font-mono">Número: {numeroProposta}</span>
+                <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <span className="text-lg font-semibold text-blue-600 dark:text-blue-400 font-mono">Número: {numeroProposta}</span>
               </div>
             )}
           </div>
           <div className="flex gap-2">
-            <Link href="/contratos">
-              <Button variant="outline" className="bg-transparent">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Cancelar
-              </Button>
-            </Link>
+            <Button variant="outline" className="bg-transparent" onClick={() => {
+              if (asDrawer && onClose) {
+                onClose()
+              } else {
+                router.push("/contratos")
+              }
+            }}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Cancelar
+            </Button>
             <Button
               onClick={salvarProposta}
               disabled={saving || !cliente || equipamentosSelecionados.length === 0}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg"
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800"
             >
               <Save className="h-4 w-4 mr-2" />
               {saving ? "Salvando..." : "Salvar Proposta"}
@@ -482,13 +503,13 @@ export default function NovaPropostaPage() {
           {/* Formulário Principal */}
           <div className="lg:col-span-2 space-y-6">
             {/* Dados do Cliente */}
-            <Card className="border-0 shadow-lg bg-white">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg  p-4 lg:p-6">
+            <Card className="border border-border bg-card text-card-foreground shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-blue-900/50 dark:to-purple-900/50 dark:border-b dark:border-border">
                 <CardTitle className="text-white flex items-center gap-2">
                   <User className="h-5 w-5" />
                   Dados do Cliente
                 </CardTitle>
-                <CardDescription className="text-blue-100">
+                <CardDescription className="text-blue-100 dark:text-blue-200">
                   Selecione o cliente e configure os parâmetros
                 </CardDescription>
               </CardHeader>
@@ -510,7 +531,7 @@ export default function NovaPropostaPage() {
                           type="button"
                           variant="outline"
                           onClick={() => setShowNewClientDialog(true)}
-                          className="bg-green-50 hover:bg-green-100 text-green-600 border-green-200 hover:border-green-300"
+                          className="bg-green-50 dark:bg-green-950/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/30"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Novo Cliente
@@ -520,90 +541,90 @@ export default function NovaPropostaPage() {
                   </div>
 
                   {cliente && (
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900/30">
                       <div className="flex items-center gap-2 mb-2">
                         {cliente.codigo && (
                           <Badge variant="outline" className="font-mono">
                             {cliente.codigo}
                           </Badge>
                         )}
-                        <span className="font-medium text-blue-900">{cliente.nome}</span>
+                        <span className="font-medium text-blue-900 dark:text-blue-200">{cliente.nome}</span>
                         {cliente.tem_contrato && (
                           <Badge variant="outline" className="text-green-600 border-green-200">
                             Contrato
                           </Badge>
                         )}
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                         <div>
                           {cliente.cnpj && (
                             <div>
-                              <strong>CNPJ:</strong> {cliente.cnpj}
+                              <strong className="text-foreground">CNPJ:</strong> {cliente.cnpj}
                             </div>
                           )}
                           {cliente.cpf && (
                             <div>
-                              <strong>CPF:</strong> {cliente.cpf}
+                              <strong className="text-foreground">CPF:</strong> {cliente.cpf}
                             </div>
                           )}
                           {cliente.endereco && (
                             <div>
-                              <strong>Endereço:</strong> {cliente.endereco}
+                              <strong className="text-foreground">Endereço:</strong> {cliente.endereco}
                             </div>
                           )}
                           {cliente.email && (
                             <div>
-                              <strong>Email:</strong> {cliente.email}
+                              <strong className="text-foreground">Email:</strong> {cliente.email}
                             </div>
                           )}
                           {cliente.telefone && (
                             <div>
-                              <strong>Telefone:</strong> {cliente.telefone}
+                              <strong className="text-foreground">Telefone:</strong> {cliente.telefone}
                             </div>
                           )}
                         </div>
                         <div>
                           {cliente.cidade && (
                             <div>
-                              <strong>Cidade:</strong> {cliente.cidade}/{cliente.estado}
+                              <strong className="text-foreground">Cidade:</strong> {cliente.cidade}/{cliente.estado}
                             </div>
                           )}
                           {cliente.distancia_km !== undefined && (
                             <div>
-                              <strong>Distância:</strong> {cliente.distancia_km} km
+                              <strong className="text-foreground">Distância:</strong> {cliente.distancia_km} km
                             </div>
                           )}
                         </div>
                       </div>
 
                       {(cliente.nome_adm || cliente.contato_adm || cliente.telefone_adm || cliente.email_adm) && (
-                        <div className="mt-4 pt-3 border-t border-blue-200">
+                        <div className="mt-4 pt-3 border-t border-blue-200 dark:border-blue-900/30">
                           <div className="flex items-center gap-2 mb-2">
-                            <Building2 className="h-4 w-4 text-blue-600" />
-                            <span className="font-medium text-blue-800">Administradora</span>
+                            <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <span className="font-medium text-blue-850 dark:text-blue-300">Administradora</span>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                             <div>
                               {cliente.nome_adm && (
                                 <div>
-                                  <strong>Nome:</strong> {cliente.nome_adm}
+                                  <strong className="text-foreground">Nome:</strong> {cliente.nome_adm}
                                 </div>
                               )}
                               {cliente.contato_adm && (
                                 <div>
-                                  <strong>Contato:</strong> {cliente.contato_adm}
+                                  <strong className="text-foreground">Contato:</strong> {cliente.contato_adm}
                                 </div>
                               )}
                             </div>
                             <div>
                               {cliente.telefone_adm && (
                                 <div>
-                                  <strong>Telefone:</strong> {cliente.telefone_adm}
+                                  <strong className="text-foreground">Telefone:</strong> {cliente.telefone_adm}
                                 </div>
                               )}
                               {cliente.email_adm && (
                                 <div>
-                                  <strong>Email:</strong> {cliente.email_adm}
+                                  <strong className="text-foreground">Email:</strong> {cliente.email_adm}
                                 </div>
                               )}
                             </div>
@@ -654,9 +675,8 @@ export default function NovaPropostaPage() {
                         min="0"
                         value={distanciaKm || 0}
                         onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
-                        className="bg-blue-50"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Distância: {distanciaKm || 0} km</p>
+                      <p className="text-xs text-muted-foreground mt-1">Distância: {distanciaKm || 0} km</p>
                     </div>
                     <div>
                       <Label htmlFor="quantidade_visitas">Quantidade de Visitas</Label>
@@ -683,24 +703,24 @@ export default function NovaPropostaPage() {
             </Card>
 
             {/* Equipamentos por Categoria */}
-            <Card className="border-0 shadow-lg bg-white">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg  p-4 lg:p-6">
+            <Card className="border border-border bg-card text-card-foreground shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-green-900/50 dark:to-blue-900/50 dark:border-b dark:border-border">
                 <CardTitle className="text-white flex items-center gap-2">
                   <Package className="h-5 w-5" />
                   Equipamentos por Categoria
                 </CardTitle>
-                <CardDescription className="text-green-100">
+                <CardDescription className="text-green-100 dark:text-green-200">
                   Selecione os equipamentos necessários para o contrato
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
                   {Object.entries(CATEGORIAS).map(([categoria, config]) => {
-                    const equipamentosCategoria = equipamentos.filter((eq) => eq.categoria === categoria)
+                    const equipamentosCategoria = equipments.filter((eq) => eq.categoria === categoria)
 
                     return (
                       <div key={categoria} className="space-y-3">
-                        <h3 className="text-lg font-semibold text-gray-800">{config.nome}</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{config.nome}</h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {equipamentosCategoria.map((equipamento) => {
@@ -709,7 +729,7 @@ export default function NovaPropostaPage() {
                             )
 
                             return (
-                              <div key={equipamento.id} className="border rounded-lg p-3">
+                              <div key={equipamento.id} className="border border-border rounded-lg p-3 bg-card/50">
                                 <div className="flex items-center space-x-2 mb-2">
                                   <Checkbox
                                     checked={!!selecionado}
@@ -717,7 +737,7 @@ export default function NovaPropostaPage() {
                                   />
                                   <div className="flex-1">
                                     <div className="font-medium text-sm">{equipamento.nome}</div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-xs text-muted-foreground">
                                       {formatCurrency(equipamento.valor_hora)}/hora
                                     </div>
                                   </div>
@@ -743,20 +763,20 @@ export default function NovaPropostaPage() {
                                         <span>{formatCurrency(selecionado.valor_unitario || 0)}</span>
                                       </div>
                                       {(selecionado.valor_desconto_individual || 0) > 0 && (
-                                        <div className="flex justify-between text-red-600">
+                                        <div className="flex justify-between text-red-600 dark:text-red-400">
                                           <span>Desconto individual:</span>
                                           <span>-{formatCurrency(selecionado.valor_desconto_individual || 0)}</span>
                                         </div>
                                       )}
                                       {(selecionado.valor_desconto_categoria || 0) > 0 && (
-                                        <div className="flex justify-between text-blue-600">
+                                        <div className="flex justify-between text-blue-600 dark:text-blue-400">
                                           <span>Desconto categoria:</span>
                                           <span>-{formatCurrency(selecionado.valor_desconto_categoria || 0)}</span>
                                         </div>
                                       )}
                                       <div className="flex justify-between font-semibold border-t pt-1">
                                         <span>Total:</span>
-                                        <span className="text-green-600">
+                                        <span className="text-green-600 dark:text-green-400">
                                           {formatCurrency(selecionado.valor_total || 0)}
                                         </span>
                                       </div>
@@ -775,13 +795,13 @@ export default function NovaPropostaPage() {
             </Card>
 
             {/* Condições do Contrato */}
-            <Card className="border-0 shadow-lg bg-white">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg  p-4 lg:p-6">
+            <Card className="border border-border bg-card text-card-foreground shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-purple-900/50 dark:to-pink-900/50 dark:border-b dark:border-border">
                 <CardTitle className="text-white flex items-center gap-2">
                   <Settings className="h-5 w-5" />
                   Condições do Contrato
                 </CardTitle>
-                <CardDescription className="text-purple-100">Configure as condições comerciais</CardDescription>
+                <CardDescription className="text-purple-100 dark:text-purple-200">Configure as condições comerciais</CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -836,7 +856,7 @@ export default function NovaPropostaPage() {
                     placeholder="Liste os equipamentos fornecidos em consignação (ex: 2x Interfone, 1x Controle Remoto Universal)..."
                     rows={3}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     ℹ️ Opcional. Será exibido na visualização e impressão logo após os equipamentos inclusos
                   </p>
                 </div>
@@ -857,8 +877,8 @@ export default function NovaPropostaPage() {
 
           {/* Resumo da Proposta */}
           <div className="space-y-6">
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-blue-50 sticky top-6">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg  p-4 lg:p-6">
+            <Card className="border border-border bg-card text-card-foreground shadow-sm bg-gradient-to-br from-green-50/50 to-blue-50/50 dark:from-green-950/10 dark:to-blue-950/10 sticky top-6">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-green-900/50 dark:to-blue-900/50 dark:border-b dark:border-border">
                 <CardTitle className="text-white flex items-center gap-2">
                   <Calculator className="h-5 w-5" />
                   Resumo da Proposta
@@ -867,12 +887,12 @@ export default function NovaPropostaPage() {
               <CardContent className="p-6">
                 <div className="space-y-4">
                   {numeroProposta && (
-                    <div className="p-3 bg-blue-100 rounded-lg border border-blue-300 mb-4">
+                    <div className="p-3 bg-blue-100 dark:bg-blue-950/20 rounded-lg border border-blue-300 dark:border-blue-900/30 mb-4">
                       <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-blue-700" />
+                        <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
                         <div>
-                          <div className="text-xs text-blue-600 font-medium">Número da Proposta</div>
-                          <div className="text-lg font-bold text-blue-800 font-mono">{numeroProposta}</div>
+                          <div className="text-xs text-blue-600 dark:text-blue-300 font-medium">Número da Proposta</div>
+                          <div className="text-lg font-bold text-blue-800 dark:text-blue-205 font-mono">{numeroProposta}</div>
                         </div>
                       </div>
                     </div>
@@ -880,33 +900,33 @@ export default function NovaPropostaPage() {
 
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Valor Bruto dos Equipamentos:</span>
+                      <span className="text-muted-foreground">Valor Bruto dos Equipamentos:</span>
                       <span className="font-medium">{formatCurrency(calcularValorBrutoEquipamentos())}</span>
                     </div>
 
                     {calcularDescontoTotal() > 0 && (
-                      <div className="flex justify-between items-center text-red-600">
+                      <div className="flex justify-between items-center text-red-600 dark:text-red-400">
                         <span>Desconto Total:</span>
                         <span className="font-medium">-{formatCurrency(calcularDescontoTotal())}</span>
                       </div>
                     )}
 
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Valor dos Equipamentos (líquido):</span>
+                      <span className="text-muted-foreground">Valor dos Equipamentos (líquido):</span>
                       <span className="font-medium">{formatCurrency(calcularValorEquipamentos())}</span>
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Valor do Deslocamento:</span>
+                      <span className="text-muted-foreground">Valor do Deslocamento:</span>
                       <span className="font-medium">{formatCurrency(calcularDeslocamento())}</span>
                     </div>
-                    <div className="text-xs text-gray-500 text-center">
+                    <div className="text-xs text-muted-foreground text-center">
                       ({distanciaKm}km × 2 × {formatCurrency(valorPorKm)} × {quantidadeVisitas})
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Desconto Visitas Técnicas:</span>
-                      <span className={`font-medium ${calcularValorVisitas() < 0 ? "text-red-600" : "text-green-600"}`}>
+                      <span className="text-muted-foreground">Desconto Visitas Técnicas:</span>
+                      <span className={`font-medium ${calcularValorVisitas() < 0 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
                         {formatCurrency(calcularValorVisitas())}
                       </span>
                     </div>
@@ -914,12 +934,12 @@ export default function NovaPropostaPage() {
                     <div className="border-t pt-4">
                       <div className="flex justify-between items-center text-lg font-bold">
                         <span>Valor Total da Proposta:</span>
-                        <span className="text-green-600">{formatCurrency(calcularTotal())}</span>
+                        <span className="text-green-600 dark:text-green-400">{formatCurrency(calcularTotal())}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 space-y-2 text-sm text-gray-600">
+                  <div className="pt-4 space-y-2 text-sm text-muted-foreground">
                     <div className="flex justify-between">
                       <span>Equipamentos:</span>
                       <span>{equipamentosSelecionados.length}</span>
@@ -947,7 +967,7 @@ export default function NovaPropostaPage() {
                   <Button
                     onClick={salvarProposta}
                     disabled={saving || !cliente || equipamentosSelecionados.length === 0}
-                    className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg"
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {saving ? "Salvando..." : "Salvar Proposta"}

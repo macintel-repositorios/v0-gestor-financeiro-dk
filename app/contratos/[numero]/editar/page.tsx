@@ -64,7 +64,17 @@ const PRAZO_CONTRATO_OPTIONS = [
   { value: "indeterminado", label: "Indeterminado (1 mês)" },
 ]
 
-export default function EditarContratoPage() {
+export default function EditarContratoPage({
+  numero: propNumero,
+  onClose,
+  onSuccess,
+  asDrawer = false,
+}: {
+  numero?: string
+  onClose?: () => void
+  onSuccess?: () => void
+  asDrawer?: boolean
+} = {}) {
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
@@ -72,7 +82,7 @@ export default function EditarContratoPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  const numero = params.numero as string
+  const numero = propNumero || (params.numero as string)
 
   const fetchContrato = async () => {
     try {
@@ -150,7 +160,12 @@ export default function EditarContratoPage() {
           title: "Sucesso",
           description: "Contrato atualizado com sucesso",
         })
-        router.push(`/contratos/${numero}`)
+        if (onSuccess) onSuccess()
+        if (!asDrawer) {
+          router.push(`/contratos/${numero}`)
+        } else if (onClose) {
+          onClose()
+        }
       } else {
         toast({
           title: "Erro",
@@ -283,7 +298,11 @@ export default function EditarContratoPage() {
   }, [numero])
 
   if (loading) {
-    return (
+    return asDrawer ? (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+      </div>
+    ) : (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-lg">Carregando contrato...</div>
@@ -293,7 +312,11 @@ export default function EditarContratoPage() {
   }
 
   if (!contrato) {
-    return (
+    return asDrawer ? (
+      <div className="text-center py-6">
+        <h3 className="font-semibold text-red-600">Contrato não encontrado</h3>
+      </div>
+    ) : (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-lg text-red-600">Contrato não encontrado</div>
@@ -303,19 +326,25 @@ export default function EditarContratoPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className={asDrawer ? "bg-transparent text-foreground p-0 space-y-4 pb-24 md:pb-6" : "container mx-auto p-6 space-y-6 pb-24 md:pb-6 bg-gradient-to-br from-slate-50 to-slate-100"}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.back()}>
+          <Button variant="outline" onClick={() => {
+            if (asDrawer && onClose) {
+              onClose()
+            } else {
+              router.back()
+            }
+          }}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+            {asDrawer ? "Fechar" : "Voltar"}
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Editar Contrato</h1>
-            <p className="text-muted-foreground">Contrato #{contrato.numero}</p>
+            <p className="text-muted-foreground text-sm">Contrato #{contrato.numero}</p>
           </div>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white">
           <Save className="h-4 w-4 mr-2" />
           {saving ? "Salvando..." : "Salvar"}
         </Button>
@@ -323,8 +352,8 @@ export default function EditarContratoPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
-          <CardHeader className="bg-blue-50">
-            <CardTitle className="flex items-center gap-2 text-blue-700">
+          <CardHeader className="bg-blue-50/50 dark:bg-blue-950/20 border-b border-border">
+            <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
               <User className="h-5 w-5" />
               Dados do Cliente
             </CardTitle>
@@ -491,7 +520,7 @@ export default function EditarContratoPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
+            <div className="flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg border-2 border-blue-200 dark:border-blue-900/50">
               <div className="flex-1">
                 <Label htmlFor="cliente_tem_contrato" className="text-sm font-semibold cursor-pointer">
                   Cliente tem contrato ativo
@@ -507,7 +536,7 @@ export default function EditarContratoPage() {
             </div>
 
             {contrato.cliente_tem_contrato && (
-              <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+              <div className="bg-green-50/50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200 dark:border-green-900/50">
                 <Label htmlFor="cliente_dia_contrato">Dia do Contrato</Label>
                 <Input
                   id="cliente_dia_contrato"
@@ -529,8 +558,8 @@ export default function EditarContratoPage() {
 
         {contrato.itens_proposta && contrato.itens_proposta.length > 0 && (
           <Card>
-            <CardHeader className="bg-green-50">
-              <CardTitle className="flex items-center gap-2 text-green-700">
+            <CardHeader className="bg-green-50/50 dark:bg-green-950/20 border-b border-border">
+              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
                 <Package className="h-5 w-5" />
                 Equipamentos Inclusos
               </CardTitle>
@@ -559,8 +588,8 @@ export default function EditarContratoPage() {
         )}
 
         <Card>
-          <CardHeader className="bg-orange-50">
-            <CardTitle className="flex items-center gap-2 text-orange-700">
+          <CardHeader className="bg-orange-50/50 dark:bg-orange-950/20 border-b border-border">
+            <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-400">
               <FileText className="h-5 w-5" />
               Dados do Contrato
             </CardTitle>
@@ -607,7 +636,7 @@ export default function EditarContratoPage() {
                   type="date"
                   value={contrato.data_fim}
                   disabled
-                  className="bg-gray-50 text-gray-600"
+                  className="bg-muted text-muted-foreground"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   {contrato.prazo_meses === "indeterminado"
@@ -645,7 +674,7 @@ export default function EditarContratoPage() {
                   max="31"
                   value={contrato.dia_vencimento}
                   disabled
-                  className="bg-gray-50 text-gray-600"
+                  className="bg-muted text-muted-foreground"
                 />
                 <p className="text-xs text-muted-foreground mt-1">Sincronizado com o dia do contrato do cliente</p>
               </div>

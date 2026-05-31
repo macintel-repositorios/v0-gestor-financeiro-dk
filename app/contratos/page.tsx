@@ -42,6 +42,12 @@ import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
+import { NovoContratoDialog } from "@/components/contratos/novo-contrato-dialog"
+import { EditarContratoDialog } from "@/components/contratos/editar-contrato-dialog"
+import { VisualizarContratoDialog } from "@/components/contratos/visualizar-contrato-dialog"
+import { NovaPropostaDialog } from "@/components/contratos/nova-proposta-dialog"
+import { EditarPropostaDialog } from "@/components/contratos/editar-proposta-dialog"
+import { VisualizarPropostaDialog } from "@/components/contratos/visualizar-proposta-dialog"
 
 interface PropostaContrato {
   id: string
@@ -169,6 +175,18 @@ export default function ContratosPage() {
   const [searchContratos, setSearchContratos] = useState("")
   const [expandedPropostaId, setExpandedPropostaId] = useState<string | null>(null)
   const [expandedContratoId, setExpandedContratoId] = useState<string | null>(null)
+
+  // Drawer states
+  const [selectedContratoNumero, setSelectedContratoNumero] = useState<string | null>(null)
+  const [selectedPropostaNumero, setSelectedPropostaNumero] = useState<string | null>(null)
+
+  const [isNovoContratoOpen, setIsNovoContratoOpen] = useState(false)
+  const [isEditarContratoOpen, setIsEditarContratoOpen] = useState(false)
+  const [isVisualizarContratoOpen, setIsVisualizarContratoOpen] = useState(false)
+
+  const [isNovaPropostaOpen, setIsNovaPropostaOpen] = useState(false)
+  const [isEditarPropostaOpen, setIsEditarPropostaOpen] = useState(false)
+  const [isVisualizarPropostaOpen, setIsVisualizarPropostaOpen] = useState(false)
   const [propostaStatusFilter, setPropostaStatusFilter] = useState("all")
   const [contratoStatusFilter, setContratoStatusFilter] = useState("all")
   // NFS-e state
@@ -541,13 +559,11 @@ export default function ContratosPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="container mx-auto p-4 lg:p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Carregando contratos...</p>
-            </div>
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-sm">Carregando contratos...</p>
           </div>
         </div>
       </div>
@@ -555,123 +571,122 @@ export default function ContratosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            {logoMenu && (
-              <img
-                src={logoMenu}
-                alt="Logo"
-                className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
-              />
-            )}
-            <div>
-              <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Contratos & Propostas
-              </h1>
-              <p className="text-gray-600 mt-1 text-sm lg:text-base">Gerencie contratos e propostas de manutenção</p>
-            </div>
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full text-foreground">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          {logoMenu && (
+            <img
+              src={logoMenu}
+              alt="Logo"
+              className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
+            />
+          )}
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+              Contratos & Propostas
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5 font-medium">Gerencie contratos e propostas de manutenção</p>
           </div>
-          <Button
-            onClick={toggleOcultarValores}
-            variant="outline"
-            className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 bg-white h-8 lg:h-10 text-xs lg:text-sm hidden md:inline-flex self-start sm:self-center"
-          >
-            {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
-            {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
-          </Button>
         </div>
+        <Button
+          onClick={toggleOcultarValores}
+          variant="outline"
+          className="border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 bg-background h-8 lg:h-10 text-xs lg:text-sm hidden md:inline-flex self-start sm:self-center"
+        >
+          {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+          {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
+        </Button>
+      </div>
 
-        {/* Stats Cards - Propostas */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              propostaStatusFilter === "all" ? "ring-2 ring-blue-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setPropostaStatusFilter("all")}
-          >
-            <CardContent className="p-3 lg:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-700 text-xs lg:text-sm font-medium">Total Propostas</p>
-                  <p className="text-lg lg:text-2xl font-bold text-blue-800">{propostaStats.total}</p>
-                </div>
-                <FileText className="h-6 w-6 lg:h-8 lg:w-8 text-blue-600" />
+      {/* Stats Cards - Propostas */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            propostaStatusFilter === "all" ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setPropostaStatusFilter("all")}
+        >
+          <CardContent className="p-3 lg:p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-600 dark:text-blue-400 text-xs lg:text-sm font-medium">Total Propostas</p>
+                <p className="text-lg lg:text-2xl font-bold text-foreground">{propostaStats.total}</p>
               </div>
-            </CardContent>
-          </Card>
+              <FileText className="h-6 w-6 lg:h-8 lg:w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-yellow-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              propostaStatusFilter === "rascunho" ? "ring-2 ring-yellow-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setPropostaStatusFilter("rascunho")}
-          >
-            <CardContent className="p-3 lg:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-yellow-700 text-xs lg:text-sm font-medium">Rascunhos</p>
-                  <p className="text-lg lg:text-2xl font-bold text-yellow-800">{propostaStats.rascunhos}</p>
-                </div>
-                <Edit className="h-6 w-6 lg:h-8 lg:w-8 text-yellow-600" />
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            propostaStatusFilter === "rascunho" ? "ring-2 ring-yellow-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setPropostaStatusFilter("rascunho")}
+        >
+          <CardContent className="p-3 lg:p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-600 dark:text-yellow-400 text-xs lg:text-sm font-medium">Rascunhos</p>
+                <p className="text-lg lg:text-2xl font-bold text-foreground">{propostaStats.rascunhos}</p>
               </div>
-            </CardContent>
-          </Card>
+              <Edit className="h-6 w-6 lg:h-8 lg:w-8 text-yellow-500" />
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              propostaStatusFilter === "enviada" ? "ring-2 ring-purple-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setPropostaStatusFilter("enviada")}
-          >
-            <CardContent className="p-3 lg:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-700 text-xs lg:text-sm font-medium">Enviadas</p>
-                  <p className="text-lg lg:text-2xl font-bold text-purple-800">{propostaStats.enviadas}</p>
-                </div>
-                <Calendar className="h-6 w-6 lg:h-8 lg:w-8 text-purple-600" />
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            propostaStatusFilter === "enviada" ? "ring-2 ring-purple-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setPropostaStatusFilter("enviada")}
+        >
+          <CardContent className="p-3 lg:p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-600 dark:text-purple-400 text-xs lg:text-sm font-medium">Enviadas</p>
+                <p className="text-lg lg:text-2xl font-bold text-foreground">{propostaStats.enviadas}</p>
               </div>
-            </CardContent>
-          </Card>
+              <Calendar className="h-6 w-6 lg:h-8 lg:w-8 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card
-            className={`border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
-              contratoStatusFilter === "ativo" ? "ring-2 ring-green-400 ring-offset-2" : ""
-            }`}
-            onClick={() => setContratoStatusFilter("ativo")}
-          >
-            <CardContent className="p-3 lg:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-700 text-xs lg:text-sm font-medium">Contratos Ativos</p>
-                  <p className="text-lg lg:text-2xl font-bold text-green-800">{contratoStats.ativos}</p>
-                </div>
-                <CheckCircle className="h-6 w-6 lg:h-8 lg:w-8 text-green-600" />
+        <Card
+          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            contratoStatusFilter === "ativo" ? "ring-2 ring-green-500 ring-offset-2 ring-offset-background" : ""
+          }`}
+          onClick={() => setContratoStatusFilter("ativo")}
+        >
+          <CardContent className="p-3 lg:p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-600 dark:text-green-400 text-xs lg:text-sm font-medium">Contratos Ativos</p>
+                <p className="text-lg lg:text-2xl font-bold text-foreground">{contratoStats.ativos}</p>
               </div>
-            </CardContent>
-          </Card>
+              <CheckCircle className="h-6 w-6 lg:h-8 lg:w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100 hover:shadow-xl transition-all duration-300 col-span-2 lg:col-span-1">
-            <CardContent className="p-3 lg:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-emerald-700 text-xs lg:text-sm font-medium">Valor Contratos</p>
-                  <p className="text-sm lg:text-xl font-bold text-emerald-800">
-                    {shouldHideValues ? "R$ •••" : formatCurrency(contratoStats.valor_total)}
-                  </p>
-                </div>
-                <DollarSign className="h-6 w-6 lg:h-8 lg:w-8 text-emerald-600" />
+        <Card className="border border-border shadow-xs bg-card col-span-2 lg:col-span-1">
+          <CardContent className="p-3 lg:p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-emerald-600 dark:text-emerald-400 text-xs lg:text-sm font-medium">Valor Contratos</p>
+                <p className="text-sm lg:text-xl font-bold text-foreground">
+                  {shouldHideValues ? "R$ •••" : formatCurrency(contratoStats.valor_total)}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>     </div>
+              <DollarSign className="h-6 w-6 lg:h-8 lg:w-8 text-emerald-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
         {/* Tabs */}
         <Tabs defaultValue="propostas" className="space-y-4 lg:space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-[400px] p-1 bg-white">
+          <TabsList className="grid w-full grid-cols-2 lg:w-[400px] p-1 bg-muted dark:bg-slate-900/60 border border-border">
             <TabsTrigger
               value="propostas"
               className="text-xs lg:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white"
@@ -688,9 +703,9 @@ export default function ContratosPage() {
 
           <TabsContent value="propostas" className="space-y-4 lg:space-y-6">
             {/* Search and Filters Propostas */}
-            <Card className="border-0 shadow-lg bg-gradient-to-r from-white to-gray-50">
+            <Card className="border border-border shadow-md bg-card text-card-foreground">
               <CardHeader className="p-3 md:p-6 pb-2 md:pb-3">
-                <CardTitle className="text-base md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <CardTitle className="text-base md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">
                   Buscar e Filtrar Propostas
                 </CardTitle>
                 <CardDescription className="text-xs md:text-sm">Pesquise por número ou nome do cliente</CardDescription>
@@ -704,7 +719,7 @@ export default function ContratosPage() {
                       placeholder="Digite para buscar..."
                       value={searchPropostas}
                       onChange={(e) => setSearchPropostas(e.target.value)}
-                      className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="pl-10 border-border bg-background text-foreground focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
@@ -712,7 +727,7 @@ export default function ContratosPage() {
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-gray-400" />
                     <Select value={propostaStatusFilter} onValueChange={setPropostaStatusFilter}>
-                      <SelectTrigger className="w-full sm:w-48 border-gray-200 focus:border-blue-500">
+                      <SelectTrigger className="w-full sm:w-48 border-border bg-background text-foreground focus:border-blue-500">
                         <SelectValue placeholder="Filtrar por status" />
                       </SelectTrigger>
                       <SelectContent>
@@ -748,8 +763,8 @@ export default function ContratosPage() {
 
             {/* Desktop Table View */}
             <div className="hidden md:block">
-              <Card className="border-0 shadow-lg bg-white">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6">
+              <Card className="border border-border shadow-md bg-card text-card-foreground">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-blue-900/50 dark:to-purple-900/50 dark:border-b dark:border-border">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
                       <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
@@ -760,8 +775,14 @@ export default function ContratosPage() {
                         {filteredPropostas.length} proposta{filteredPropostas.length !== 1 ? "s" : ""} encontrada{filteredPropostas.length !== 1 ? "s" : ""}
                       </CardDescription>
                     </div>
-                    <Link href="/contratos/proposta/nova">
-                      <Button className="bg-white text-blue-600 hover:bg-blue-50 text-sm lg:text-base">
+                    <Link 
+                      href="/contratos/proposta/nova"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setIsNovaPropostaOpen(true)
+                      }}
+                    >
+                      <Button className="bg-white text-blue-600 hover:bg-blue-50 text-sm lg:text-base dark:bg-slate-900 dark:text-blue-400 dark:hover:bg-slate-800 dark:border-slate-800">
                         <Plus className="h-4 w-4 mr-2" />
                         Nova Proposta
                       </Button>
@@ -783,7 +804,13 @@ export default function ContratosPage() {
                           : "Tente ajustar os filtros"}
                       </p>
                       {propostaStatusFilter === "all" && (
-                        <Link href="/contratos/proposta/nova">
+                        <Link 
+                          href="/contratos/proposta/nova"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setIsNovaPropostaOpen(true)
+                          }}
+                        >
                           <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
                             <Plus className="h-4 w-4 mr-2" />
                             Nova Proposta
@@ -831,12 +858,28 @@ export default function ContratosPage() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem asChild>
-                                    <Link href={`/contratos/proposta/${proposta.numero}`} className="flex items-center">
+                                    <Link 
+                                      href={`/contratos/proposta/${proposta.numero}`} 
+                                      className="flex items-center"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        setSelectedPropostaNumero(proposta.numero)
+                                        setIsVisualizarPropostaOpen(true)
+                                      }}
+                                    >
                                       <Eye className="h-4 w-4 mr-2" />Visualizar
                                     </Link>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem asChild>
-                                    <Link href={`/contratos/proposta/${proposta.numero}/editar`} className="flex items-center">
+                                    <Link 
+                                      href={`/contratos/proposta/${proposta.numero}/editar`} 
+                                      className="flex items-center"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        setSelectedPropostaNumero(proposta.numero)
+                                        setIsEditarPropostaOpen(true)
+                                      }}
+                                    >
                                       <Edit className="h-4 w-4 mr-2" />Editar
                                     </Link>
                                   </DropdownMenuItem>
@@ -861,7 +904,13 @@ export default function ContratosPage() {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   {filteredPropostas.length} proposta{filteredPropostas.length !== 1 ? "s" : ""}
                 </p>
-                <Link href="/contratos/proposta/nova">
+                <Link 
+                  href="/contratos/proposta/nova"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setIsNovaPropostaOpen(true)
+                  }}
+                >
                   <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs h-8">
                     <Plus className="h-3.5 w-3.5 mr-1" /> Nova Proposta
                   </Button>
@@ -869,7 +918,7 @@ export default function ContratosPage() {
               </div>
 
               {!hasActiveFilterProposta ? (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
                   <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
                   <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver as propostas</h3>
                   <p className="text-sm text-gray-500">Digite na busca ou selecione um filtro para começar.</p>
@@ -888,9 +937,9 @@ export default function ContratosPage() {
                       key={proposta.id}
                       className={`rounded-xl border transition-all duration-200 overflow-hidden ${
                         proposta.status === "aprovada"
-                          ? "border-green-200 bg-gradient-to-r from-green-50/80 to-white"
-                          : "border-gray-200 bg-white"
-                      } ${isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"}`}
+                          ? "border-green-200/30 bg-gradient-to-r from-green-950/20 to-card"
+                          : "border-border bg-card text-card-foreground"
+                      } ${isExpanded ? "shadow-lg ring-1 ring-blue-200/30" : "shadow-sm hover:shadow-md"}`}
                     >
                       <button
                         type="button"
@@ -949,12 +998,28 @@ export default function ContratosPage() {
                               </div>
                             </div>
                             <div className="flex gap-2 pt-2">
-                              <Link href={`/contratos/proposta/${proposta.numero}`} className="flex-1">
+                              <Link 
+                                href={`/contratos/proposta/${proposta.numero}`} 
+                                className="flex-1"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  setSelectedPropostaNumero(proposta.numero)
+                                  setIsVisualizarPropostaOpen(true)
+                                }}
+                              >
                                 <Button size="sm" variant="outline" className="w-full text-xs">
                                   <Eye className="h-3 w-3 mr-1" /> Visualizar
                                 </Button>
                               </Link>
-                              <Link href={`/contratos/proposta/${proposta.numero}/editar`} className="flex-1">
+                              <Link 
+                                href={`/contratos/proposta/${proposta.numero}/editar`} 
+                                className="flex-1"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  setSelectedPropostaNumero(proposta.numero)
+                                  setIsEditarPropostaOpen(true)
+                                }}
+                              >
                                 <Button size="sm" variant="outline" className="w-full text-xs">
                                   <Edit className="h-3 w-3 mr-1" /> Editar
                                 </Button>
@@ -1040,8 +1105,8 @@ export default function ContratosPage() {
 
             {/* Desktop Table View */}
             <div className="hidden md:block">
-              <Card className="border-0 shadow-lg bg-white">
-                <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
+              <Card className="border border-border shadow-md bg-card text-card-foreground">
+                <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-green-900/50 dark:to-blue-900/50 dark:border-b dark:border-border">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
                       <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
@@ -1126,10 +1191,30 @@ export default function ContratosPage() {
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
                                     <DropdownMenuItem asChild>
-                                      <Link href={`/contratos/${contrato.numero}`} className="flex items-center"><Eye className="h-4 w-4 mr-2" />Visualizar</Link>
+                                      <Link 
+                                        href={`/contratos/${contrato.numero}`} 
+                                        className="flex items-center"
+                                        onClick={(e) => {
+                                          e.preventDefault()
+                                          setSelectedContratoNumero(contrato.numero)
+                                          setIsVisualizarContratoOpen(true)
+                                        }}
+                                      >
+                                        <Eye className="h-4 w-4 mr-2" />Visualizar
+                                      </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
-                                      <Link href={`/contratos/${contrato.numero}/editar`} className="flex items-center"><Edit className="h-4 w-4 mr-2" />Editar</Link>
+                                      <Link 
+                                        href={`/contratos/${contrato.numero}/editar`} 
+                                        className="flex items-center"
+                                        onClick={(e) => {
+                                          e.preventDefault()
+                                          setSelectedContratoNumero(contrato.numero)
+                                          setIsEditarContratoOpen(true)
+                                        }}
+                                      >
+                                        <Edit className="h-4 w-4 mr-2" />Editar
+                                      </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => excluirContrato(contrato.numero)}>
                                       <Trash2 className="h-4 w-4 mr-2" />Excluir
@@ -1156,7 +1241,7 @@ export default function ContratosPage() {
               </div>
 
               {!hasActiveFilterContrato ? (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-150 p-6 shadow-sm">
+                <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
                   <Search className="mx-auto h-12 w-12 text-gray-300 mb-3" />
                   <h3 className="text-base font-medium text-gray-700 mb-1">Busque ou filtre para ver os contratos</h3>
                   <p className="text-sm text-gray-500">Digite na busca ou selecione um filtro para começar.</p>
@@ -1176,9 +1261,9 @@ export default function ContratosPage() {
                       key={contrato.id}
                       className={`rounded-xl border transition-all duration-200 overflow-hidden ${
                         contrato.status === "ativo"
-                          ? "border-green-200 bg-gradient-to-r from-green-50/80 to-white"
-                          : "border-gray-200 bg-white"
-                      } ${isExpanded ? "shadow-lg ring-1 ring-blue-200" : "shadow-sm hover:shadow-md"}`}
+                          ? "border-green-200/30 bg-gradient-to-r from-green-950/20 to-card"
+                          : "border-border bg-card text-card-foreground"
+                      } ${isExpanded ? "shadow-lg ring-1 ring-blue-200/30" : "shadow-sm hover:shadow-md"}`}
                     >
                       <button
                         type="button"
@@ -1270,16 +1355,32 @@ export default function ContratosPage() {
                                   <FileCheck className="h-3.5 w-3.5 mr-1" /> NFS-e
                                 </Button>
                               )}
-                              <Link href={`/contratos/${contrato.numero}`} className="flex-1">
-                                <Button size="sm" variant="outline" className="w-full text-xs">
-                                  <Eye className="h-3 w-3 mr-1" /> Visualizar
-                                </Button>
-                              </Link>
-                              <Link href={`/contratos/${contrato.numero}/editar`} className="flex-1">
-                                <Button size="sm" variant="outline" className="w-full text-xs">
-                                  <Edit className="h-3 w-3 mr-1" /> Editar
-                                </Button>
-                              </Link>
+                              <Link 
+                                 href={`/contratos/${contrato.numero}`} 
+                                 className="flex-1"
+                                 onClick={(e) => {
+                                   e.preventDefault()
+                                   setSelectedContratoNumero(contrato.numero)
+                                   setIsVisualizarContratoOpen(true)
+                                 }}
+                               >
+                                 <Button size="sm" variant="outline" className="w-full text-xs">
+                                   <Eye className="h-3 w-3 mr-1" /> Visualizar
+                                 </Button>
+                               </Link>
+                               <Link 
+                                 href={`/contratos/${contrato.numero}/editar`} 
+                                 className="flex-1"
+                                 onClick={(e) => {
+                                   e.preventDefault()
+                                   setSelectedContratoNumero(contrato.numero)
+                                   setIsEditarContratoOpen(true)
+                                 }}
+                               >
+                                 <Button size="sm" variant="outline" className="w-full text-xs">
+                                   <Edit className="h-3 w-3 mr-1" /> Editar
+                                 </Button>
+                               </Link>
                               <Button
                                 size="sm"
                                 variant="destructive"
@@ -1358,7 +1459,7 @@ export default function ContratosPage() {
               </Label>
               <div className="grid grid-cols-2 gap-2">
                 <Select value={mesPreventivaRef} onValueChange={setMesPreventivaRef}>
-                  <SelectTrigger className="bg-white">
+                  <SelectTrigger className="bg-background text-foreground border-border">
                     <SelectValue placeholder="Mes" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1370,7 +1471,7 @@ export default function ContratosPage() {
                   </SelectContent>
                 </Select>
                 <Select value={anoPreventivaRef} onValueChange={setAnoPreventivaRef}>
-                  <SelectTrigger className="bg-white">
+                  <SelectTrigger className="bg-background text-foreground border-border">
                     <SelectValue placeholder="Ano" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1475,6 +1576,70 @@ export default function ContratosPage() {
           }}
         />
       )}
+
+      {/* Drawers para Contratos e Propostas */}
+      <NovoContratoDialog
+        open={isNovoContratoOpen}
+        onOpenChange={setIsNovoContratoOpen}
+        onSuccess={() => {
+          loadContratos()
+          loadPropostas()
+        }}
+      />
+
+      <EditarContratoDialog
+        numero={selectedContratoNumero}
+        open={isEditarContratoOpen}
+        onOpenChange={setIsEditarContratoOpen}
+        onSuccess={() => {
+          loadContratos()
+          loadPropostas()
+        }}
+      />
+
+      <VisualizarContratoDialog
+        numero={selectedContratoNumero}
+        open={isVisualizarContratoOpen}
+        onOpenChange={setIsVisualizarContratoOpen}
+        onEditClick={(numero) => {
+          setIsVisualizarContratoOpen(false)
+          setSelectedContratoNumero(numero)
+          setIsEditarContratoOpen(true)
+        }}
+        onSuccess={() => {
+          loadContratos()
+          loadPropostas()
+        }}
+      />
+
+      <NovaPropostaDialog
+        open={isNovaPropostaOpen}
+        onOpenChange={setIsNovaPropostaOpen}
+        onSuccess={() => {
+          loadPropostas()
+        }}
+      />
+
+      <EditarPropostaDialog
+        numero={selectedPropostaNumero}
+        open={isEditarPropostaOpen}
+        onOpenChange={setIsEditarPropostaOpen}
+        onSuccess={() => {
+          loadPropostas()
+          loadContratos()
+        }}
+      />
+
+      <VisualizarPropostaDialog
+        numero={selectedPropostaNumero}
+        open={isVisualizarPropostaOpen}
+        onOpenChange={setIsVisualizarPropostaOpen}
+        onEditClick={(numero) => {
+          setIsVisualizarPropostaOpen(false)
+          setSelectedPropostaNumero(numero)
+          setIsEditarPropostaOpen(true)
+        }}
+      />
     </div>
   )
 }

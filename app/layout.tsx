@@ -61,7 +61,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${plusJakarta.variable} font-sans`}>
         <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
             <LayoutContent>{children}</LayoutContent>
             <Toaster position="top-right" />
           </ThemeProvider>

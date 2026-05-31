@@ -34,7 +34,15 @@ const PRAZO_CONTRATO_OPTIONS = [
   { value: "indeterminado", label: "Indeterminado" },
 ]
 
-export default function NovoContratoPage() {
+export default function NovoContratoPage({
+  onClose,
+  onSuccess,
+  asDrawer = false,
+}: {
+  onClose?: () => void
+  onSuccess?: () => void
+  asDrawer?: boolean
+} = {}) {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -185,7 +193,12 @@ export default function NovoContratoPage() {
           title: "Sucesso",
           description: "Contrato criado com sucesso",
         })
-        router.push(`/contratos/${formData.numero}`)
+        if (onSuccess) onSuccess()
+        if (!asDrawer) {
+          router.push(`/contratos/${formData.numero}`)
+        } else if (onClose) {
+          onClose()
+        }
       } else {
         toast({
           title: "Erro",
@@ -206,11 +219,17 @@ export default function NovoContratoPage() {
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div className={asDrawer ? "bg-transparent text-foreground p-0 space-y-4 pb-24 md:pb-6" : "container mx-auto py-6 pb-24 md:pb-6"}>
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
+        <Button variant="outline" size="sm" onClick={() => {
+          if (asDrawer && onClose) {
+            onClose()
+          } else {
+            router.back()
+          }
+        }}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
+          {asDrawer ? "Fechar" : "Voltar"}
         </Button>
         <h1 className="text-2xl font-bold">Novo Contrato</h1>
       </div>
@@ -451,7 +470,13 @@ export default function NovoContratoPage() {
 
         {/* Botões */}
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
+          <Button type="button" variant="outline" onClick={() => {
+            if (asDrawer && onClose) {
+              onClose()
+            } else {
+              router.back()
+            }
+          }}>
             Cancelar
           </Button>
           <Button type="submit" disabled={loading}>

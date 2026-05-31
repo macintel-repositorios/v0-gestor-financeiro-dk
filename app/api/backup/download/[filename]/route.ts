@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from "next/server"
 import { readFile, stat } from "fs/promises"
 import { join } from "path"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
   try {
     const { filename } = await params

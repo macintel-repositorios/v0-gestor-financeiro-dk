@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { readdir, stat } from "fs/promises"
 import { join } from "path"
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   try {
     const backupDir = join(process.cwd(), "backups")

@@ -4,6 +4,8 @@ import { writeFile, mkdir } from "fs/promises"
 import { join } from "path"
 import { format } from "date-fns"
 
+export const dynamic = "force-dynamic"
+
 export async function POST(request: NextRequest) {
   try {
     const { tables, includeData } = await request.json()
