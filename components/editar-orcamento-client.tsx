@@ -54,9 +54,18 @@ interface OrcamentoItem {
 interface EditarOrcamentoClientProps {
   orcamento: any
   itensIniciais: any[]
+  onClose?: () => void
+  onSuccess?: () => void
+  asDrawer?: boolean
 }
 
-export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcamentoClientProps) {
+export function EditarOrcamentoClient({
+  orcamento,
+  itensIniciais,
+  onClose,
+  onSuccess,
+  asDrawer = false,
+}: EditarOrcamentoClientProps) {
   const [cliente, setCliente] = useState<Cliente | null>(null)
   const [itens, setItens] = useState<OrcamentoItem[]>([])
   const [tipoServico, setTipoServico] = useState(orcamento.tipo_servico || "")
@@ -599,7 +608,10 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
         description: `Novo orçamento #${novoNumero} criado.`,
       })
 
-      router.push("/orcamentos") // Redirect to the list of quotes
+      if (onSuccess) onSuccess()
+      if (!asDrawer) {
+        router.push("/orcamentos") // Redirect to the list of quotes
+      }
       router.refresh()
     } catch (error) {
       console.error("Erro ao duplicar:", error)
@@ -734,6 +746,7 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
           title: "Sucesso!",
           description: `Orçamento ${orcamento.numero} atualizado com sucesso`,
         })
+        if (onSuccess) onSuccess()
         router.refresh()
       } else {
         toast({
@@ -779,11 +792,17 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={() => router.push(`/orcamentos/${orcamento.numero}`)}
+              onClick={() => {
+                if (asDrawer && onClose) {
+                  onClose()
+                } else {
+                  router.push(`/orcamentos/${orcamento.numero}`)
+                }
+              }}
               className="bg-white/10 hover:bg-white/20 text-white border-white/30"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
+              {asDrawer ? "Fechar" : "Voltar"}
             </Button>
             <Button
               variant="outline"

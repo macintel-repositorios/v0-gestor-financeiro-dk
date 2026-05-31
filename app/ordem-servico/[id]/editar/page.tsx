@@ -112,10 +112,20 @@ const TEXTO_SERVICO_PREVENTIVA = `1. Limpeza e Lubrificação dos portões de pe
 3. Teste dos sensores de anti-esmagamento.
 4. Verificação dos cabos de aço ou cremalheiras.`
 
-export default function EditarOrdemServicoPage() {
+export default function EditarOrdemServicoPage({
+  id,
+  onClose,
+  onSuccess,
+  asDrawer = false,
+}: {
+  id?: string
+  onClose?: () => void
+  onSuccess?: () => void
+  asDrawer?: boolean
+} = {}) {
   const router = useRouter()
   const params = useParams()
-  const ordemId = params.id as string
+  const ordemId = id || (params?.id as string)
   const { user } = useAuth()
 
   const [loading, setLoading] = useState(true)
@@ -508,7 +518,12 @@ export default function EditarOrdemServicoPage() {
           : `Ordem de serviço atualizada! Status: ${getSituacaoLabel(situacao)}`,
       })
 
-      router.push("/ordem-servico")
+      if (onSuccess) onSuccess()
+      if (!asDrawer) {
+        router.push("/ordem-servico")
+      } else if (onClose) {
+        onClose()
+      }
     } catch (error) {
       console.error("[Frontend] Erro ao salvar:", error)
       toast({
@@ -658,7 +673,11 @@ export default function EditarOrdemServicoPage() {
   }
 
   if (loading) {
-    return (
+    return asDrawer ? (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+      </div>
+    ) : (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div className="container mx-auto p-6">
           <div className="flex items-center justify-center h-64">
@@ -673,7 +692,11 @@ export default function EditarOrdemServicoPage() {
   }
 
   if (!ordem) {
-    return (
+    return asDrawer ? (
+      <div className="text-center py-6">
+        <h3 className="font-semibold text-red-600">Ordem de serviço não encontrada</h3>
+      </div>
+    ) : (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div className="container mx-auto p-6">
           <div className="text-center">
@@ -757,12 +780,18 @@ export default function EditarOrdemServicoPage() {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => router.back()}
+              onClick={() => {
+                if (asDrawer && onClose) {
+                  onClose()
+                } else {
+                  router.back()
+                }
+              }}
               className="bg-white/80 backdrop-blur-sm flex-1 md:flex-none"
               size="sm"
             >
               <ArrowLeft className="h-4 w-4 md:mr-2" />
-              <span className="md:inline">Voltar</span>
+              <span className="md:inline">{asDrawer ? "Fechar" : "Voltar"}</span>
             </Button>
           </div>
         </div>

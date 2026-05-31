@@ -2,16 +2,13 @@
 
 import { useState } from "react"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, AlertTriangle, Loader2 } from "lucide-react"
@@ -71,68 +68,70 @@ export function CategoriaDeleteDialog({ categoria, onSuccess }: CategoriaDeleteD
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive bg-transparent">
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="sm" className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
           <Trash2 className="h-4 w-4" />
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+      </SheetTrigger>
+      <SheetContent className="w-full sm:max-w-md h-full flex flex-col p-6 border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="mb-6">
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="h-5 w-5" />
+            <SheetTitle className="text-red-600">Confirmar Exclusão</SheetTitle>
           </div>
-          <AlertDialogDescription>
+          <SheetDescription>
             Esta ação não pode ser desfeita. A categoria será permanentemente removida do sistema.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="flex-1 space-y-4">
           <div className="bg-muted p-4 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Código:</span>
-              <span className="font-mono">{categoria.codigo}</span>
+              <span className="text-sm font-medium text-muted-foreground">Código:</span>
+              <span className="font-mono text-foreground">{categoria.codigo}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Nome:</span>
-              <span className="font-medium">{categoria.nome}</span>
+              <span className="text-sm font-medium text-muted-foreground">Nome:</span>
+              <span className="font-medium text-foreground">{categoria.nome}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Produtos vinculados:</span>
-              <Badge variant="outline">{categoria.total_produtos}</Badge>
+              <span className="text-sm font-medium text-muted-foreground">Produtos vinculados:</span>
+              <Badge variant="outline" className="border-border text-foreground">{categoria.total_produtos}</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Status:</span>
+              <span className="text-sm font-medium text-muted-foreground">Status:</span>
               <Badge variant={categoria.ativo ? "default" : "secondary"}>{categoria.ativo ? "Ativo" : "Inativo"}</Badge>
             </div>
           </div>
 
           {categoria.total_produtos > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
+            <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                <span className="text-sm text-yellow-800 font-medium">Atenção!</span>
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+                <span className="text-sm text-red-500 font-medium">Atenção!</span>
               </div>
-              <p className="text-sm text-yellow-700 mt-1">
+              <p className="text-xs text-red-500 mt-1">
                 Esta categoria possui {categoria.total_produtos} produto(s) vinculado(s). A exclusão não será permitida.
               </p>
             </div>
           )}
         </div>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
+        <div className="flex gap-3 mt-6 border-t border-border pt-4">
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={loading} className="flex-1 bg-transparent border-border hover:bg-muted">
+            Cancelar
+          </Button>
+          <Button
             onClick={handleDelete}
             disabled={loading || categoria.total_produtos > 0}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="flex-1 bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Excluir Categoria
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            Excluir
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

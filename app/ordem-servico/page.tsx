@@ -33,6 +33,9 @@ import { useToast } from "@/hooks/use-toast"
 import type { OrdemServico } from "@/types/ordem-servico"
 import { LotePreventivasDialog } from "@/components/ordem-servico/lote-preventivas-dialog"
 import { NovaOSDialog } from "@/components/ordem-servico/nova-os-dialog"
+import { VisualizarOSDialog } from "@/components/ordem-servico/visualizar-os-dialog"
+import { EditarOSDialog } from "@/components/ordem-servico/editar-os-dialog"
+import { OrdemServicoDeleteDialog } from "@/components/ordem-servico/ordem-servico-delete-dialog"
 
 export default function OrdemServicoPage({ searchParams }: { searchParams: Promise<{ nova?: string }> }) {
   const [loading, setLoading] = useState(true)
@@ -43,6 +46,10 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
   const [expandedOrdemId, setExpandedOrdemId] = useState<number | null>(null)
   const [pageIndex, setPageIndex] = useState(0)
   const [isNovaOSOpen, setIsNovaOSOpen] = useState(false)
+  const [selectedOSIdVisualizar, setSelectedOSIdVisualizar] = useState<string | null>(null)
+  const [isVisualizarOSOpen, setIsVisualizarOSOpen] = useState(false)
+  const [selectedOSIdEditar, setSelectedOSIdEditar] = useState<string | null>(null)
+  const [isEditarOSOpen, setIsEditarOSOpen] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -633,19 +640,34 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
                   case "acoes":
                     return (
                       <div className="flex items-center gap-1">
-                        <Link href={`/ordem-servico/${os.id}`}>
-                          <Button variant="outline" size="sm" className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Link href={`/ordem-servico/${os.id}/editar`}>
-                          <Button variant="outline" size="sm" className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button variant="outline" size="sm" className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir" onClick={() => handleDelete(os.id)}>
-                          <Trash2 className="h-4 w-4" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOSIdVisualizar(os.id.toString())
+                            setIsVisualizarOSOpen(true)
+                          }}
+                          className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0"
+                          title="Visualizar"
+                        >
+                          <Eye className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOSIdEditar(os.id.toString())
+                            setIsEditarOSOpen(true)
+                          }}
+                          className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-900/50 bg-transparent h-8 w-8 p-0"
+                          title="Editar"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <OrdemServicoDeleteDialog
+                          ordemServico={os}
+                          onSuccess={carregarDados}
+                        />
                       </div>
                     )
                   default: return null
@@ -776,34 +798,43 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
                             )}
                           </div>
                           <div className="flex gap-2 pt-1">
-                            <Link href={`/ordem-servico/${os.id}`} className="flex-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full h-9 text-xs font-medium text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 bg-transparent hover:bg-blue-500/10"
-                              >
-                                <Eye className="h-3.5 w-3.5 mr-1.5" />
-                                Visualizar
-                              </Button>
-                            </Link>
-                            <Link href={`/ordem-servico/${os.id}/editar`} className="flex-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full h-9 text-xs font-medium text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/50 bg-transparent hover:bg-green-500/10"
-                              >
-                                <Edit className="h-3.5 w-3.5 mr-1.5" />
-                                Editar
-                              </Button>
-                            </Link>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-9 text-xs font-medium text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50 bg-transparent hover:bg-red-500/10 px-3"
-                              onClick={() => handleDelete(os.id)}
+                              onClick={() => {
+                                setSelectedOSIdVisualizar(os.id.toString())
+                                setIsVisualizarOSOpen(true)
+                              }}
+                              className="flex-1 h-9 text-xs font-medium text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 bg-transparent hover:bg-blue-500/10"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Eye className="h-3.5 w-3.5 mr-1.5" />
+                              Visualizar
                             </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedOSIdEditar(os.id.toString())
+                                setIsEditarOSOpen(true)
+                              }}
+                              className="flex-1 h-9 text-xs font-medium text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/50 bg-transparent hover:bg-green-500/10"
+                            >
+                              <Edit className="h-3.5 w-3.5 mr-1.5" />
+                              Editar
+                            </Button>
+                            <OrdemServicoDeleteDialog
+                              ordemServico={os}
+                              onSuccess={carregarDados}
+                              trigger={
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-9 text-xs font-medium text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50 bg-transparent hover:bg-red-500/10 px-3"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              }
+                            />
                           </div>
                         </div>
                       </div>
@@ -818,6 +849,30 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
 
       <LotePreventivasDialog open={loteDialogOpen} onOpenChange={setLoteDialogOpen} onSuccess={carregarDados} />
       <NovaOSDialog open={isNovaOSOpen} onOpenChange={setIsNovaOSOpen} onSuccess={carregarDados} />
+
+      <VisualizarOSDialog
+        id={selectedOSIdVisualizar}
+        open={isVisualizarOSOpen}
+        onOpenChange={(open) => {
+          setIsVisualizarOSOpen(open)
+          if (!open) setSelectedOSIdVisualizar(null)
+        }}
+        onEditClick={(id) => {
+          setSelectedOSIdEditar(id)
+          setIsEditarOSOpen(true)
+        }}
+        onSuccess={carregarDados}
+      />
+
+      <EditarOSDialog
+        id={selectedOSIdEditar}
+        open={isEditarOSOpen}
+        onOpenChange={(open) => {
+          setIsEditarOSOpen(open)
+          if (!open) setSelectedOSIdEditar(null)
+        }}
+        onSuccess={carregarDados}
+      />
     </div>
   )
 }

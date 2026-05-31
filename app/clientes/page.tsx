@@ -23,6 +23,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { useRouter } from "next/navigation"
 
 export default function ClientesPage() {
@@ -35,6 +42,10 @@ export default function ClientesPage() {
   const [expandedClientId, setExpandedClientId] = useState<string | null>(null)
   const [pageIndex, setPageIndex] = useState(0)
   const [isClienteFormOpen, setIsClienteFormOpen] = useState(false)
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
+  const [isEditClienteOpen, setIsEditClienteOpen] = useState(false)
+  const [isDeleteClienteOpen, setIsDeleteClienteOpen] = useState(false)
+  const [clienteToDelete, setClienteToDelete] = useState<Cliente | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -215,7 +226,8 @@ export default function ClientesPage() {
   }
 
   const handleEditCliente = (cliente: Cliente) => {
-    router.push(`/clientes/${cliente.id}/editar`)
+    setSelectedCliente(cliente)
+    setIsEditClienteOpen(true)
   }
 
   const handleDeleteCliente = async (cliente: Cliente) => {
@@ -700,32 +712,18 @@ export default function ClientesPage() {
                             <Edit className="h-3.5 w-3.5 mr-1.5" />
                             Editar
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-9 text-xs font-medium text-red-600 border-red-200 hover:bg-red-50 bg-transparent px-3"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tem certeza que deseja excluir o cliente &quot;{cliente.nome}&quot;? Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteCliente(cliente)} className="bg-red-600 hover:bg-red-700">
-                                  Excluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-9 text-xs font-medium text-red-600 border-red-200 hover:bg-red-50 bg-transparent px-3"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setClienteToDelete(cliente)
+                              setIsDeleteClienteOpen(true)
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -838,28 +836,14 @@ export default function ClientesPage() {
                               className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm"
-                                  className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Tem certeza que deseja excluir o cliente &quot;{cliente.nome}&quot;? Esta ação não pode ser desfeita.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteCliente(cliente)} className="bg-red-600 hover:bg-red-700">
-                                    Excluir Cliente
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            <Button variant="outline" size="sm"
+                              onClick={() => {
+                                setClienteToDelete(cliente)
+                                setIsDeleteClienteOpen(true)
+                              }}
+                              className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0" title="Excluir">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         )
                       default: return null
@@ -906,6 +890,61 @@ export default function ClientesPage() {
           asDrawer={true}
           onSuccess={loadClientes}
         />
+        <ClienteFormDialog
+          open={isEditClienteOpen}
+          onOpenChange={(open) => {
+            setIsEditClienteOpen(open)
+            if (!open) setSelectedCliente(null)
+          }}
+          asDrawer={true}
+          cliente={selectedCliente}
+          onSuccess={() => {
+            loadClientes()
+            setIsEditClienteOpen(false)
+            setSelectedCliente(null)
+          }}
+        />
+        <Sheet open={isDeleteClienteOpen} onOpenChange={setIsDeleteClienteOpen}>
+          <SheetContent className="w-full sm:max-w-md h-full flex flex-col p-6 border-l border-border shadow-2xl bg-card text-foreground">
+            <SheetHeader className="mb-6">
+              <SheetTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Excluir Cliente
+              </SheetTitle>
+              <SheetDescription>
+                Confirme a exclusão definitiva do cliente do sistema.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex-1 space-y-4">
+              <p className="text-sm">
+                Tem certeza que deseja excluir o cliente <strong className="text-foreground">{clienteToDelete?.nome}</strong>?
+              </p>
+              <p className="text-xs text-muted-foreground bg-destructive/10 text-destructive p-3 rounded-lg border border-destructive/20">
+                Aviso: Esta ação não pode ser desfeita e removerá permanentemente o registro deste cliente.
+              </p>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteClienteOpen(false)}
+                className="flex-1 bg-transparent border-border hover:bg-muted"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (clienteToDelete) {
+                    await handleDeleteCliente(clienteToDelete)
+                    setIsDeleteClienteOpen(false)
+                  }
+                }}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                Excluir
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     )
   }

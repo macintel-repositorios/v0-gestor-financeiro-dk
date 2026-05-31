@@ -3,7 +3,13 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -131,105 +137,101 @@ export function EditarServicoDialog({ open, onOpenChange, servico, onSuccess }: 
   if (!servico) return null
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Wrench className="h-5 w-5 text-orange-600" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="mb-4">
+          <SheetTitle className="flex items-center gap-2">
+            <Wrench className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             Editar Serviço
-          </DialogTitle>
-          <DialogDescription>Edite as informações do serviço</DialogDescription>
-        </DialogHeader>
+          </SheetTitle>
+          <SheetDescription>Edite as informações do serviço</SheetDescription>
+        </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Código (somente leitura) */}
-          <div>
-            <Label className="text-sm font-medium text-gray-700">Código do Serviço</Label>
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 mt-2">
-              <Lock className="h-4 w-4 text-gray-500" />
-              <span className="font-mono font-bold text-gray-900">{servico.codigo}</span>
-              <span className="text-xs text-gray-500 ml-2">(não pode ser alterado)</span>
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2 flex-1 flex flex-col justify-between">
+          <div className="space-y-4">
+            {/* Código (somente leitura) */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Código do Serviço</Label>
+              <div className="flex items-center gap-2 p-3 bg-muted/40 rounded-lg border border-border">
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                <span className="font-mono font-bold text-foreground text-sm">{servico.codigo}</span>
+                <span className="text-[10px] text-muted-foreground ml-2">(não pode ser alterado)</span>
+              </div>
             </div>
-          </div>
 
-          {/* Descrição do Serviço */}
-          <div>
-            <Label htmlFor="descricao">Descrição do Serviço *</Label>
-            <Input
-              id="descricao"
-              value={formData.descricao}
-              onChange={(e) => setFormData((prev) => ({ ...prev, descricao: e.target.value }))}
-              placeholder="Ex: Instalação de ar condicionado, Manutenção preventiva..."
-              required
-              className="mt-2"
-            />
-          </div>
-
-          {/* Tipo (fixo) */}
-          <div>
-            <Label className="text-sm font-medium text-gray-700">Tipo</Label>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-2">
-              <p className="text-gray-600 font-medium">Serviços</p>
+            {/* Descrição do Serviço */}
+            <div className="space-y-1.5">
+              <Label htmlFor="descricao" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Descrição do Serviço *</Label>
+              <Input
+                id="descricao"
+                value={formData.descricao}
+                onChange={(e) => setFormData((prev) => ({ ...prev, ...{ descricao: e.target.value } }))}
+                placeholder="Ex: Instalação de ar condicionado, Manutenção preventiva..."
+                required
+                className="h-9 border-border bg-background text-xs"
+              />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Tipo fixo para todos os serviços</p>
-          </div>
 
-          {/* Valor da Mão de Obra */}
-          <div>
-            <Label htmlFor="valor_mao_obra">Valor da Mão de Obra (R$) *</Label>
-            <Input
-              id="valor_mao_obra"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.valor_mao_obra}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, valor_mao_obra: Number.parseFloat(e.target.value) || 0 }))
-              }
-              placeholder="180.00"
-              required
-              className="mt-2"
-            />
-            <p className="text-xs text-gray-500 mt-1">Valor padrão: R$ 180,00</p>
-          </div>
+            {/* Tipo (fixo) */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipo</Label>
+              <div className="bg-muted/40 border border-border rounded-lg p-3">
+                <p className="text-foreground text-xs font-semibold">Serviços</p>
+              </div>
+            </div>
 
-          {/* Observações */}
-          <div>
-            <Label htmlFor="observacoes">Observações</Label>
-            <Textarea
-              id="observacoes"
-              value={formData.observacoes}
-              onChange={(e) => setFormData((prev) => ({ ...prev, observacoes: e.target.value }))}
-              placeholder="Detalhes sobre o serviço, tempo estimado, requisitos especiais..."
-              rows={3}
-              className="mt-2 resize-none"
-            />
-            <p className="text-xs text-gray-500 mt-1">Informações adicionais sobre o serviço (opcional)</p>
-          </div>
+            {/* Valor da Mão de Obra */}
+            <div className="space-y-1.5">
+              <Label htmlFor="valor_mao_obra" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Valor da Mão de Obra (R$) *</Label>
+              <Input
+                id="valor_mao_obra"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.valor_mao_obra}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, ...{ valor_mao_obra: Number.parseFloat(e.target.value) || 0 } }))
+                }
+                placeholder="180.00"
+                required
+                className="h-9 border-border bg-background text-xs"
+              />
+            </div>
 
-          {/* Serviço Ativo */}
-          <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-            <Switch
-              id="ativo"
-              checked={formData.ativo}
-              onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, ativo: checked }))}
-            />
-            <div>
-              <Label htmlFor="ativo" className="font-medium">
+            {/* Observações */}
+            <div className="space-y-1.5">
+              <Label htmlFor="observacoes" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Observações</Label>
+              <Textarea
+                id="observacoes"
+                value={formData.observacoes}
+                onChange={(e) => setFormData((prev) => ({ ...prev, ...{ observacoes: e.target.value } }))}
+                placeholder="Detalhes sobre o serviço..."
+                rows={3}
+                className="resize-none border-border bg-background text-xs"
+              />
+            </div>
+
+            {/* Serviço Ativo */}
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="ativo"
+                checked={formData.ativo}
+                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, ...{ ativo: checked } }))}
+              />
+              <Label htmlFor="ativo" className="text-xs font-semibold cursor-pointer">
                 Serviço ativo
               </Label>
-              <p className="text-xs text-gray-500">Serviços ativos aparecem nas listagens e podem ser selecionados</p>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+          <div className="flex justify-end space-x-4 pt-4 mt-auto border-t border-border">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading} className="flex-1 h-10">
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white h-10"
             >
               {loading ? (
                 <>
@@ -239,13 +241,13 @@ export function EditarServicoDialog({ open, onOpenChange, servico, onSuccess }: 
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Atualizar Serviço
+                  Salvar
                 </>
               )}
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

@@ -33,6 +33,9 @@ import { useToast } from "@/hooks/use-toast"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
 import { EmitirNfeDialog } from "@/components/nfe/emitir-nfe-dialog"
 import { NovoOrcamentoDialog } from "@/components/orcamentos/novo-orcamento-dialog"
+import { VisualizarOrcamentoDialog } from "@/components/orcamentos/visualizar-orcamento-dialog"
+import { EditarOrcamentoDialog } from "@/components/orcamentos/editar-orcamento-dialog"
+import { OrcamentoDeleteDialog } from "@/components/orcamentos/orcamento-delete-dialog"
 
 interface Orcamento {
   id: string
@@ -85,6 +88,10 @@ export default function OrcamentosPage({
   const [situacaoFilter, setSituacaoFilter] = useState("todos")
   const [expandedOrcamentoId, setExpandedOrcamentoId] = useState<string | null>(null)
   const [isNovoOrcamentoOpen, setIsNovoOrcamentoOpen] = useState(false)
+  const [selectedOrcamentoNumeroVisualizar, setSelectedOrcamentoNumeroVisualizar] = useState<string | null>(null)
+  const [isVisualizarOrcamentoOpen, setIsVisualizarOrcamentoOpen] = useState(false)
+  const [selectedOrcamentoNumeroEditar, setSelectedOrcamentoNumeroEditar] = useState<string | null>(null)
+  const [isEditarOrcamentoOpen, setIsEditarOrcamentoOpen] = useState(false)
 
   // Parse URL Search Params
   useEffect(() => {
@@ -873,16 +880,30 @@ export default function OrcamentosPage({
                         const mostraNfBtns = orcamento.situacao === "aprovado" || orcamento.situacao === "nota fiscal emitida"
                         return (
                           <div className="flex flex-wrap gap-1">
-                            <Link href={`/orcamentos/${orcamento.numero}`}>
-                              <Button size="sm" variant="outline" className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                            <Link href={`/orcamentos/${orcamento.numero}/editar`}>
-                              <Button size="sm" variant="outline" className="text-green-600 dark:text-green-400 hover:bg-green-500/10 border-green-200 dark:border-green-900/50 bg-transparent h-8 w-8 p-0" title="Editar">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </Link>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedOrcamentoNumeroVisualizar(orcamento.numero)
+                                setIsVisualizarOrcamentoOpen(true)
+                              }}
+                              className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
+                              title="Visualizar"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedOrcamentoNumeroEditar(orcamento.numero)
+                                setIsEditarOrcamentoOpen(true)
+                              }}
+                              className="text-green-600 dark:text-green-400 hover:bg-green-500/10 border-green-200 dark:border-green-900/50 bg-transparent h-8 w-8 p-0"
+                              title="Editar"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
                             {mostraNfBtns && (
                               <Button
                                 size="sm"
@@ -915,15 +936,7 @@ export default function OrcamentosPage({
                                 <Package className="h-4 w-4" />
                               </Button>
                             )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDelete(orcamento.numero)}
-                              className="text-red-600 dark:text-red-400 hover:bg-red-500/10 border-red-200 dark:border-red-900/50 bg-transparent h-8 w-8 p-0"
-                              title="Excluir"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <OrcamentoDeleteDialog orcamento={orcamento} onSuccess={fetchOrcamentos} />
                           </div>
                         )
                       }
@@ -1024,26 +1037,30 @@ export default function OrcamentosPage({
 
                               return (
                                 <div className="flex flex-wrap gap-2 pt-1">
-                                  <Link href={`/orcamentos/${orcamento.numero}`} className="flex-1">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="w-full h-9 text-xs font-medium text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50 bg-transparent hover:bg-indigo-500/10"
-                                    >
-                                      <Eye className="h-3.5 w-3.5 mr-1.5" />
-                                      Visualizar
-                                    </Button>
-                                  </Link>
-                                  <Link href={`/orcamentos/${orcamento.numero}/editar`} className="flex-1">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="w-full h-9 text-xs font-medium text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/50 bg-transparent hover:bg-green-500/10"
-                                    >
-                                      <Edit className="h-3.5 w-3.5 mr-1.5" />
-                                      Editar
-                                    </Button>
-                                  </Link>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedOrcamentoNumeroVisualizar(orcamento.numero)
+                                      setIsVisualizarOrcamentoOpen(true)
+                                    }}
+                                    className="flex-1 h-9 text-xs font-medium text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50 bg-transparent hover:bg-indigo-500/10"
+                                  >
+                                    <Eye className="h-3.5 w-3.5 mr-1.5" />
+                                    Visualizar
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedOrcamentoNumeroEditar(orcamento.numero)
+                                      setIsEditarOrcamentoOpen(true)
+                                    }}
+                                    className="flex-1 h-9 text-xs font-medium text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/50 bg-transparent hover:bg-green-500/10"
+                                  >
+                                    <Edit className="h-3.5 w-3.5 mr-1.5" />
+                                    Editar
+                                  </Button>
                                   {mostraNfBtns && (
                                     <Button
                                       variant="outline"
@@ -1076,14 +1093,19 @@ export default function OrcamentosPage({
                                       <Package className="h-4 w-4" />
                                     </Button>
                                   )}
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-9 text-xs bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-500 font-medium px-3"
-                                    onClick={() => handleDelete(orcamento.numero)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
+                                  <OrcamentoDeleteDialog
+                                    orcamento={orcamento}
+                                    onSuccess={fetchOrcamentos}
+                                    trigger={
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 text-xs bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-500 font-medium px-3"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    }
+                                  />
                                 </div>
                               )
                             })()}
@@ -1165,6 +1187,30 @@ export default function OrcamentosPage({
       <NovoOrcamentoDialog
         open={isNovoOrcamentoOpen}
         onOpenChange={setIsNovoOrcamentoOpen}
+        onSuccess={fetchOrcamentos}
+      />
+
+      <VisualizarOrcamentoDialog
+        numero={selectedOrcamentoNumeroVisualizar}
+        open={isVisualizarOrcamentoOpen}
+        onOpenChange={(open) => {
+          setIsVisualizarOrcamentoOpen(open)
+          if (!open) setSelectedOrcamentoNumeroVisualizar(null)
+        }}
+        onEditClick={(numero) => {
+          setSelectedOrcamentoNumeroEditar(numero)
+          setIsEditarOrcamentoOpen(true)
+        }}
+        onSuccess={fetchOrcamentos}
+      />
+
+      <EditarOrcamentoDialog
+        numero={selectedOrcamentoNumeroEditar}
+        open={isEditarOrcamentoOpen}
+        onOpenChange={(open) => {
+          setIsEditarOrcamentoOpen(open)
+          if (!open) setSelectedOrcamentoNumeroEditar(null)
+        }}
         onSuccess={fetchOrcamentos}
       />
     </div>

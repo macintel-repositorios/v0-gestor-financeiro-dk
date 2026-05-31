@@ -38,6 +38,9 @@ import { NovoProdutoDialog } from "@/components/produtos/novo-produto-dialog"
 import { NovoServicoDialog } from "@/components/produtos/novo-servico-dialog"
 import { NovaCategoriaDialog } from "@/components/produtos/nova-categoria-dialog"
 import { NovaMarcaDialog } from "@/components/produtos/nova-marca-dialog"
+import { EditarProdutoDialog } from "@/components/produtos/editar-produto-dialog"
+import { CategoriaEditDialog } from "@/components/categoria-edit-dialog"
+import { MarcaEditDialog } from "@/components/marca-edit-dialog"
 
 interface Produto {
   id: string
@@ -118,6 +121,12 @@ export default function ProdutosPage({
   const [isNovoServicoOpen, setIsNovoServicoOpen] = useState(false)
   const [isNovaCategoriaOpen, setIsNovaCategoriaOpen] = useState(false)
   const [isNovaMarcaOpen, setIsNovaMarcaOpen] = useState(false)
+  const [selectedProdutoEdit, setSelectedProdutoEdit] = useState<any | null>(null)
+  const [isEditarProdutoOpen, setIsEditarProdutoOpen] = useState(false)
+  const [selectedCategoriaEdit, setSelectedCategoriaEdit] = useState<any | null>(null)
+  const [isEditarCategoriaOpen, setIsEditarCategoriaOpen] = useState(false)
+  const [selectedMarcaEdit, setSelectedMarcaEdit] = useState<any | null>(null)
+  const [isEditarMarcaOpen, setIsEditarMarcaOpen] = useState(false)
 
   // Parse URL Search Params
   useEffect(() => {
@@ -405,7 +414,8 @@ export default function ProdutosPage({
                       })
                       setServicoDialogOpen(true)
                     } else {
-                      router.push(`/produtos/${produto.id}/editar`)
+                      setSelectedProdutoEdit(produto)
+                      setIsEditarProdutoOpen(true)
                     }
                   }}
                   className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
@@ -546,7 +556,10 @@ export default function ProdutosPage({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push(`/produtos/categorias/${categoria.id}/editar`)}
+                  onClick={() => {
+                    setSelectedCategoriaEdit(categoria)
+                    setIsEditarCategoriaOpen(true)
+                  }}
                   className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
                 >
                   <Edit className="h-3.5 w-3.5" />
@@ -612,7 +625,10 @@ export default function ProdutosPage({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push(`/produtos/marcas/${marca.id}/editar`)}
+                  onClick={() => {
+                    setSelectedMarcaEdit(marca)
+                    setIsEditarMarcaOpen(true)
+                  }}
                   className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
                 >
                   <Edit className="h-3.5 w-3.5" />
@@ -970,6 +986,33 @@ export default function ProdutosPage({
         open={isNovaMarcaOpen}
         onOpenChange={setIsNovaMarcaOpen}
         onSuccess={reloadAll}
+      />
+      <EditarProdutoDialog
+        open={isEditarProdutoOpen}
+        onOpenChange={(open) => {
+          setIsEditarProdutoOpen(open)
+          if (!open) setSelectedProdutoEdit(null)
+        }}
+        onSuccess={reloadAll}
+        produto={selectedProdutoEdit}
+      />
+      <CategoriaEditDialog
+        open={isEditarCategoriaOpen}
+        onOpenChange={(open) => {
+          setIsEditarCategoriaOpen(open)
+          if (!open) setSelectedCategoriaEdit(null)
+        }}
+        onSuccess={reloadAll}
+        categoria={selectedCategoriaEdit}
+      />
+      <MarcaEditDialog
+        open={isEditarMarcaOpen}
+        onOpenChange={(open) => {
+          setIsEditarMarcaOpen(open)
+          if (!open) setSelectedMarcaEdit(null)
+        }}
+        onSuccess={reloadAll}
+        marca={selectedMarcaEdit}
       />
     </div>
   )

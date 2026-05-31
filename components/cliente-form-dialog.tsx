@@ -35,9 +35,10 @@ interface ClienteFormDialogProps {
   onOpenChange?: (open: boolean) => void
   onSuccess?: (cliente: any) => void
   asDrawer?: boolean
+  cliente?: any
 }
  
-export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asDrawer = false }: ClienteFormDialogProps) {
+export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asDrawer = false, cliente }: ClienteFormDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { buscarCep, loading: loadingCep } = useCep()
@@ -70,6 +71,34 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
   const isControlled = open !== undefined && onOpenChange !== undefined
   const isOpen = isControlled ? open : internalOpen
   const setIsOpen = isControlled ? onOpenChange : setInternalOpen
+
+  useEffect(() => {
+    if (isOpen && cliente) {
+      setFormData({
+        nome: cliente.nome || "",
+        codigo: cliente.codigo || "",
+        cnpj: cliente.cnpj || "",
+        cpf: cliente.cpf || "",
+        email: cliente.email || "",
+        telefone: cliente.telefone || "",
+        endereco: cliente.endereco || "",
+        bairro: cliente.bairro || "",
+        cep: cliente.cep || "",
+        cidade: cliente.cidade || "",
+        estado: cliente.estado || "",
+        distancia_km: cliente.distancia_km || 0,
+        sindico: cliente.sindico || "",
+        nome_adm: cliente.nome_adm || "",
+        contato_adm: cliente.contato_adm || "",
+        telefone_adm: cliente.telefone_adm || "",
+        email_adm: cliente.email_adm || "",
+        contribuinte_icms: cliente.contribuinte_icms ?? 0,
+        inscricao_estadual: cliente.inscricao_estadual || "",
+      })
+    } else if (isOpen && !cliente) {
+      resetForm()
+    }
+  }, [isOpen, cliente])
 
   useEffect(() => {
     const generateCodigoFromDocument = () => {
@@ -202,8 +231,8 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
         ...formData,
       }
 
-      const response = await fetch("/api/clientes", {
-        method: "POST",
+      const response = await fetch(cliente ? `/api/clientes/${cliente.id}` : "/api/clientes", {
+        method: cliente ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -215,7 +244,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
       if (result.success) {
         toast({
           title: "Sucesso!",
-          description: "Cliente cadastrado com sucesso",
+          description: cliente ? "Cliente atualizado com sucesso" : "Cliente cadastrado com sucesso",
         })
 
         resetForm()
@@ -227,7 +256,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
       } else {
         toast({
           title: "Erro",
-          description: result.message || "Erro ao cadastrar cliente",
+          description: result.message || (cliente ? "Erro ao atualizar cliente" : "Erro ao cadastrar cliente"),
           variant: "destructive",
         })
       }
@@ -538,9 +567,11 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
           <SheetHeader className="mb-4">
             <SheetTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Novo Cliente
+              {cliente ? "Editar Cliente" : "Novo Cliente"}
             </SheetTitle>
-            <SheetDescription>Cadastre um novo cliente no sistema</SheetDescription>
+            <SheetDescription>
+              {cliente ? "Atualize as informações do cliente" : "Cadastre um novo cliente no sistema"}
+            </SheetDescription>
           </SheetHeader>
           {renderForm()}
         </SheetContent>
@@ -564,9 +595,11 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Novo Cliente
+            {cliente ? "Editar Cliente" : "Novo Cliente"}
           </DialogTitle>
-          <DialogDescription>Cadastre um novo cliente no sistema</DialogDescription>
+          <DialogDescription>
+            {cliente ? "Atualize as informações do cliente" : "Cadastre um novo cliente no sistema"}
+          </DialogDescription>
         </DialogHeader>
         {renderForm()}
       </DialogContent>
