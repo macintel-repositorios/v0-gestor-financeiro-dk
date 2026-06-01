@@ -118,6 +118,8 @@ export default function FinanceiroPage() {
   const [searchRecibos, setSearchRecibos] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [periodoFilter, setPeriodoFilter] = useState("todos")
+  const [customFilterMes, setCustomFilterMes] = useState("")
+  const [customFilterAno, setCustomFilterAno] = useState("")
   const [logoMenu, setLogoMenu] = useState<string>("")
   const [showNovoBoleto, setShowNovoBoleto] = useState(false)
   const [showEditarBoleto, setShowEditarBoleto] = useState(false)
@@ -465,6 +467,12 @@ export default function FinanceiroPage() {
         const fimSemestre = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)
         return dataVencimento >= inicioSemestre && dataVencimento <= fimSemestre
       }
+      case "custom-mes": {
+        if (!customFilterMes || !customFilterAno) return true
+        const monthNum = parseInt(customFilterMes, 10)
+        const yearNum = parseInt(customFilterAno, 10)
+        return dataVencimento.getFullYear() === yearNum && (dataVencimento.getMonth() + 1) === monthNum
+      }
       default:
         return true
     }
@@ -799,7 +807,14 @@ export default function FinanceiroPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <Select value={periodoFilter} onValueChange={setPeriodoFilter}>
+                    <Select value={periodoFilter} onValueChange={(val) => {
+                      setPeriodoFilter(val)
+                      if (val === "custom-mes") {
+                        const now = new Date()
+                        if (!customFilterMes) setCustomFilterMes(String(now.getMonth() + 1).padStart(2, "0"))
+                        if (!customFilterAno) setCustomFilterAno(String(now.getFullYear()))
+                      }
+                    }}>
                       <SelectTrigger className="w-48 border-border bg-background text-foreground">
                         <SelectValue placeholder="Filtrar por período" />
                       </SelectTrigger>
@@ -810,9 +825,43 @@ export default function FinanceiroPage() {
                         <SelectItem value="mes-posterior">Mês posterior</SelectItem>
                         <SelectItem value="trimestre">Trimestre</SelectItem>
                         <SelectItem value="semestre">Semestre</SelectItem>
+                        <SelectItem value="custom-mes">Mês Personalizado...</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+                  {periodoFilter === "custom-mes" && (
+                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-200">
+                      <Select value={customFilterMes} onValueChange={setCustomFilterMes}>
+                        <SelectTrigger className="w-32 border-border bg-background text-foreground">
+                          <SelectValue placeholder="Mês" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="01">Janeiro</SelectItem>
+                          <SelectItem value="02">Fevereiro</SelectItem>
+                          <SelectItem value="03">Março</SelectItem>
+                          <SelectItem value="04">Abril</SelectItem>
+                          <SelectItem value="05">Maio</SelectItem>
+                          <SelectItem value="06">Junho</SelectItem>
+                          <SelectItem value="07">Julho</SelectItem>
+                          <SelectItem value="08">Agosto</SelectItem>
+                          <SelectItem value="09">Setembro</SelectItem>
+                          <SelectItem value="10">Outubro</SelectItem>
+                          <SelectItem value="11">Novembro</SelectItem>
+                          <SelectItem value="12">Dezembro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select value={customFilterAno} onValueChange={setCustomFilterAno}>
+                        <SelectTrigger className="w-24 border-border bg-background text-foreground">
+                          <SelectValue placeholder="Ano" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() - 2 + i)).map((ano) => (
+                            <SelectItem key={ano} value={ano}>{ano}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
