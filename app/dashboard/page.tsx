@@ -78,7 +78,7 @@ interface RecentItem {
 // Componente de Loading Skeleton adaptado ao novo padrão minimalista
 function DashboardSkeleton() {
   return (
-    <div className="flex-1 space-y-6 p-6 md:p-10 min-h-screen bg-transparent text-foreground">
+    <div className="flex-1 space-y-6 p-6 md:p-10 w-full bg-transparent text-foreground">
       {/* Header Skeleton */}
       <div className="flex items-center gap-3 mb-6">
         <Skeleton className="h-8 w-8 rounded-lg" />
@@ -435,7 +435,7 @@ export default function DashboardPage() {
 
   if (!stats) {
     return (
-      <div className="flex-1 p-6 md:p-10 min-h-screen bg-transparent">
+      <div className="flex-1 p-6 md:p-10 w-full bg-transparent">
         <div className="text-center py-20 bg-card border border-border/80 rounded-xl max-w-md mx-auto shadow-xs p-6">
           <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/20 flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="h-6 w-6 text-rose-600 dark:text-rose-400" />
@@ -452,7 +452,7 @@ export default function DashboardPage() {
     : 0
 
   return (
-    <div className="flex-1 space-y-6 p-6 md:p-10 min-h-screen bg-transparent text-foreground w-full">
+    <div className="flex-1 space-y-6 p-6 md:p-10 w-full bg-transparent text-foreground">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-border/60 pb-5">

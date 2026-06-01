@@ -60,7 +60,7 @@ export default function ConfiguracoesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="w-full text-foreground">
       <div className="container mx-auto p-6 space-y-6 pb-32 md:pb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

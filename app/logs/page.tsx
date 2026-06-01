@@ -310,7 +310,7 @@ export default function LogsPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-background text-foreground min-h-screen">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 text-foreground">
         <div className="flex items-center gap-3 mb-6">
           {logoMenu && (
             <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />
@@ -340,7 +340,7 @@ export default function LogsPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-background text-foreground min-h-screen">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 text-foreground">
       <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
         <div className="flex items-center gap-3">
           {logoMenu && (

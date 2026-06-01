@@ -24,12 +24,18 @@ export function LayoutContent({ children }: LayoutContentProps) {
   }, [])
 
   useEffect(() => {
-    // Reset scroll position of the main layout container and window on route change
+    // Reset scroll position of the main layout container, wrapper, and window on route change
     const mainElement = document.querySelector("main")
     if (mainElement) {
-      mainElement.scrollTo({ top: 0 })
+      mainElement.scrollTop = 0
+    }
+    const layoutWrapper = document.getElementById("layout-wrapper")
+    if (layoutWrapper) {
+      layoutWrapper.scrollTop = 0
     }
     window.scrollTo({ top: 0 })
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
   }, [pathname])
 
   useEffect(() => {
@@ -132,7 +138,7 @@ export function LayoutContent({ children }: LayoutContentProps) {
         <div className="absolute bottom-[-10%] left-[-5%] w-[700px] h-[700px] rounded-full bg-accent/8 blur-[160px] pointer-events-none -z-10" style={{ animation: 'pulse 12s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
         
         <AppSidebar />
-        <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+        <div id="layout-wrapper" className="flex-1 flex flex-col overflow-hidden relative z-10">
           <Header />
           <main className="flex-1 overflow-auto p-4 lg:p-6">
             <div className="mx-auto max-w-7xl">{children}</div>

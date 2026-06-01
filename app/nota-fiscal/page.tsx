@@ -792,7 +792,7 @@ export default function NotaFiscalPage() {
   const hasActiveFilterNotas = searchTerm.trim() !== "" || statusFilter !== "todos" || origemFilter !== "todos" || tipoFilter !== "todos" || periodoFilter !== "todos"
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-background text-foreground min-h-screen animate-in fade-in duration-300">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 text-foreground animate-in fade-in duration-300">
       <div className="container mx-auto space-y-6 pb-32 md:pb-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
