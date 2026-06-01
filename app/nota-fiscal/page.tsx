@@ -146,7 +146,8 @@ export default function NotaFiscalPage() {
   const [notaParaBoleto, setNotaParaBoleto] = useState<any>(null)
   const [visualizarBoletosOpen, setVisualizarBoletosOpen] = useState(false)
   const [visualizarBoletosNumero, setVisualizarBoletosNumero] = useState("")
-  const [boletoStatusMap, setBoletoStatusMap] = useState<Record<string, { temBoleto: boolean; aguardandoPagamento: boolean }>>({})
+  const [boletoStatusMap, setBoletoStatusMap] = useState<Record<string, { temBoleto: boolean; enviadoAsaas: boolean; aguardandoPagamento: boolean }>>({})
+  const [enviandoAsaasNota, setEnviandoAsaasNota] = useState<string | null>(null)
 
   const { toast } = useToast()
 
@@ -327,6 +328,70 @@ export default function NotaFiscalPage() {
       }
     } catch (error) {
       console.error("Erro ao buscar status dos boletos:", error)
+    }
+  }
+
+  const handleEnviarAsaasPorNota = async (numeroNota: string) => {
+    if (!confirm(`Enviar boleto(s) da nota ${numeroNota} para o Asaas?`)) {
+      return
+    }
+
+    try {
+      setEnviandoAsaasNota(numeroNota)
+      const resBoletos = await fetch(`/api/boletos?numeroBase=${encodeURIComponent(numeroNota)}`)
+      const resultBoletos = await resBoletos.json()
+
+      if (!resultBoletos.success || !resultBoletos.data) {
+        toast({
+          title: "Erro ao buscar boletos",
+          description: "Não foi possível carregar os boletos locais.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const boletosLocais = resultBoletos.data.filter((b: any) => !b.asaas_id)
+      if (boletosLocais.length === 0) {
+        toast({
+          title: "Aviso",
+          description: "Todos os boletos dessa nota já foram enviados ao Asaas.",
+        })
+        return
+      }
+
+      let successCount = 0
+      for (const b of boletosLocais) {
+        const res = await fetch(`/api/boletos/${b.id}/enviar-asaas`, {
+          method: "POST",
+        })
+        const result = await res.json()
+        if (result.success) {
+          successCount++
+        }
+      }
+
+      if (successCount > 0) {
+        toast({
+          title: "Boletos enviados",
+          description: `${successCount} boleto(s) enviado(s) ao Asaas com sucesso!`,
+        })
+        fetchTodasNotas()
+      } else {
+        toast({
+          title: "Erro ao enviar",
+          description: "Nenhum boleto pôde ser enviado ao Asaas.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Erro ao enviar boletos para Asaas:", error)
+      toast({
+        title: "Erro",
+        description: "Erro ao processar envio ao Asaas",
+        variant: "destructive",
+      })
+    } finally {
+      setEnviandoAsaasNota(null)
     }
   }
 
@@ -1220,11 +1285,13 @@ export default function NotaFiscalPage() {
                               if (!((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
                                 return null
                               }
-                              if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
-                                return <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-400 hover:bg-teal-955/20" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
+                              if (!boletoInfo?.temBoleto) {
+                                return <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
                               }
-                              if (boletoInfo?.temBoleto) return null
-                              return <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
+                              if (!boletoInfo.enviadoAsaas) {
+                                return <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-400 hover:bg-teal-955/20" onClick={() => handleEnviarAsaasPorNota(notaNum)} disabled={enviandoAsaasNota === notaNum} title="Enviar para Asaas">{enviandoAsaasNota === notaNum ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
+                              }
+                              return <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:bg-indigo-955/20" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
                             }
 
                             const renderCancelarBtn = () => {
@@ -1277,11 +1344,13 @@ export default function NotaFiscalPage() {
                                         </DropdownMenuItem>
                                       )}
                                       {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (() => {
-                                        if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
-                                          return <DropdownMenuItem onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-4 w-4 mr-2" />Imprimir Boleto</DropdownMenuItem>
+                                        if (!boletoInfo?.temBoleto) {
+                                          return <DropdownMenuItem onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }}><DollarSign className="h-4 w-4 mr-2" />Gerar Boleto</DropdownMenuItem>
                                         }
-                                        if (boletoInfo?.temBoleto) return null
-                                        return <DropdownMenuItem onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }}><DollarSign className="h-4 w-4 mr-2" />Gerar Boleto</DropdownMenuItem>
+                                        if (!boletoInfo.enviadoAsaas) {
+                                          return <DropdownMenuItem onClick={() => handleEnviarAsaasPorNota(notaNum)} disabled={enviandoAsaasNota === notaNum}><Send className="h-4 w-4 mr-2" />Enviar Asaas</DropdownMenuItem>
+                                        }
+                                        return <DropdownMenuItem onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-4 w-4 mr-2" />Imprimir Boleto</DropdownMenuItem>
                                       })()}
                                       {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
                                         <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }}>
@@ -1423,14 +1492,16 @@ export default function NotaFiscalPage() {
                                     </Button>
                                   )}
                                   {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (() => {
-                                    const notaNum = nota.tipo === "nfse" ? String(nota.numero_nfse || "") : String(nota.numero_nfe || "")
-                                    const boletoInfo = boletoStatusMap[notaNum]
-                                    if (boletoInfo?.temBoleto && boletoInfo.aguardandoPagamento) {
-                                      return <Button variant="outline" size="sm" className="flex-1 text-xs text-teal-400 hover:bg-teal-950/20 border-teal-900/50" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
-                                    }
-                                    if (boletoInfo?.temBoleto) return null
-                                    return <Button variant="outline" size="sm" className="flex-1 text-xs text-blue-400 hover:bg-blue-950/20 border-blue-900/50" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }}><DollarSign className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
-                                  })()}
+                                     const notaNum = nota.tipo === "nfse" ? String(nota.numero_nfse || "") : String(nota.numero_nfe || "")
+                                     const boletoInfo = boletoStatusMap[notaNum]
+                                     if (!boletoInfo?.temBoleto) {
+                                       return <Button variant="outline" size="sm" className="flex-1 text-xs text-blue-400 hover:bg-blue-955/20 border-blue-900/50" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }}><DollarSign className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
+                                     }
+                                     if (!boletoInfo.enviadoAsaas) {
+                                       return <Button variant="outline" size="sm" className="flex-1 text-xs text-teal-400 hover:bg-teal-955/20 border-teal-900/50" onClick={() => handleEnviarAsaasPorNota(notaNum)} disabled={enviandoAsaasNota === notaNum}>{enviandoAsaasNota === notaNum ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Send className="h-3.5 w-3.5 mr-1" />} Enviar Asaas</Button>
+                                     }
+                                     return <Button variant="outline" size="sm" className="flex-1 text-xs text-indigo-400 hover:bg-indigo-950/20 border-indigo-900/50" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
+                                   })()}
                                   {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
                                     <Button variant="outline" size="sm" className="flex-1 text-xs text-red-400 hover:bg-red-950/20 border-red-900/50" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }}>
                                       <XCircle className="h-3.5 w-3.5 mr-1" /> Cancelar
@@ -1497,6 +1568,10 @@ export default function NotaFiscalPage() {
           setNotaParaBoleto(nota)
           setBoletoOpen(true)
         }}
+        onVisualizarBoletos={(numeroBase) => {
+          setVisualizarBoletosNumero(numeroBase)
+          setVisualizarBoletosOpen(true)
+        }}
       />
 
       <ImprimirNfseDialog
@@ -1513,6 +1588,14 @@ export default function NotaFiscalPage() {
         onPrint={(id) => {
           setDanfeNfeId(id)
           setDanfeOpen(true)
+        }}
+        onBoleto={(nota) => {
+          setNotaParaBoleto(nota)
+          setBoletoOpen(true)
+        }}
+        onVisualizarBoletos={(numeroBase) => {
+          setVisualizarBoletosNumero(numeroBase)
+          setVisualizarBoletosOpen(true)
         }}
       />
 

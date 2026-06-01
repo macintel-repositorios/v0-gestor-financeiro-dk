@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Loader2, FileText, CheckCircle2, XCircle, AlertCircle, RefreshCw, Printer, Package, Clock, Copy } from "lucide-react"
+import { Loader2, FileText, CheckCircle2, XCircle, AlertCircle, RefreshCw, Printer, Package, Clock, Copy, DollarSign, Send } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
@@ -21,6 +21,8 @@ interface DetalheNfeDialogProps {
   onOpenChange: (open: boolean) => void
   nfeId: number | null
   onPrint?: (nfeId: number) => void
+  onBoleto?: (nota: any) => void
+  onVisualizarBoletos?: (numeroBase: string) => void
 }
 
 function formatDateBR(dateStr: string | null): string {
@@ -38,12 +40,15 @@ function formatDateBR(dateStr: string | null): string {
   }
 }
 
-export function DetalheNfeDialog({ open, onOpenChange, nfeId, onPrint }: DetalheNfeDialogProps) {
+export function DetalheNfeDialog({ open, onOpenChange, nfeId, onPrint, onBoleto, onVisualizarBoletos }: DetalheNfeDialogProps) {
   const [loading, setLoading] = useState(false)
   const [consultando, setConsultando] = useState(false)
   const [nfe, setNfe] = useState<any>(null)
   const [itens, setItens] = useState<any[]>([])
   const [transmissoes, setTransmissoes] = useState<any[]>([])
+  const [boletos, setBoletos] = useState<any[]>([])
+  const [loadingBoletos, setLoadingBoletos] = useState(false)
+  const [enviandoAsaas, setEnviandoAsaas] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -51,6 +56,29 @@ export function DetalheNfeDialog({ open, onOpenChange, nfeId, onPrint }: Detalhe
       fetchNfe()
     }
   }, [open, nfeId])
+
+  useEffect(() => {
+    if (nfe?.numero_nfe) {
+      fetchBoletos(nfe.numero_nfe)
+    } else {
+      setBoletos([])
+    }
+  }, [nfe])
+
+  const fetchBoletos = async (num: string) => {
+    try {
+      setLoadingBoletos(true)
+      const res = await fetch(`/api/boletos?numeroBase=${encodeURIComponent(num)}`)
+      const data = await res.json()
+      if (data.success) {
+        setBoletos(data.data || [])
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoadingBoletos(false)
+    }
+  }
 
   const fetchNfe = async () => {
     if (!nfeId) return
@@ -173,6 +201,83 @@ export function DetalheNfeDialog({ open, onOpenChange, nfeId, onPrint }: Detalhe
                   <Button variant="outline" size="sm" onClick={() => onPrint(nfe.id)} className="text-emerald-600 border-emerald-300">
                     <Printer className="h-4 w-4 mr-1" />
                     DANFE
+                  </Button>
+                )}
+                {nfe.status === "autorizada" && onBoleto && boletos.length === 0 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      onOpenChange(false)
+                      onBoleto({
+                        id: nfe.id,
+                        tipo: "nfe",
+                        numero_nfe: nfe.numero_nfe,
+                        cliente_id: nfe.cliente_id,
+                        cliente_nome: nfe.cliente_nome || nfe.dest_razao_social || nfe.cliente_nome,
+                        valor_total: nfe.valor_total || nfe.valor_produtos,
+                        data_emissao: nfe.data_emissao || nfe.created_at,
+                      })
+                    }}
+                    className="text-blue-400 border-blue-900/50 hover:bg-blue-950/20 bg-background"
+                  >
+                    <DollarSign className="h-4 w-4 mr-1" />
+                    Gerar Boleto
+                  </Button>
+                )}
+                {nfe.status === "autorizada" && boletos.length > 0 && boletos.some((b: any) => !b.asaas_id) && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={enviandoAsaas}
+                    onClick={async () => {
+                      setEnviandoAsaas(true)
+                      try {
+                        const boletosLocais = boletos.filter((b: any) => !b.asaas_id)
+                        let successCount = 0
+                        for (const b of boletosLocais) {
+                          const res = await fetch(`/api/boletos/${b.id}/enviar-asaas`, { method: "POST" })
+                          const result = await res.json()
+                          if (result.success) successCount++
+                        }
+                        if (successCount > 0) {
+                          toast({
+                            title: "Envio ao Asaas",
+                            description: `${successCount} boleto(s) enviado(s) ao Asaas com sucesso!`,
+                          })
+                          if (nfe?.numero_nfe) fetchBoletos(nfe.numero_nfe)
+                        } else {
+                          toast({
+                            title: "Erro ao enviar",
+                            description: "Não foi possível enviar os boletos ao Asaas",
+                            variant: "destructive",
+                          })
+                        }
+                      } catch (err) {
+                        console.error(err)
+                        toast({ title: "Erro", description: "Erro ao enviar boletos", variant: "destructive" })
+                      } finally {
+                        setEnviandoAsaas(false)
+                      }
+                    }}
+                    className="text-teal-400 border-teal-900/50 hover:bg-teal-950/20 bg-background"
+                  >
+                    {enviandoAsaas ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
+                    Enviar Asaas
+                  </Button>
+                )}
+                {nfe.status === "autorizada" && boletos.length > 0 && boletos.every((b: any) => b.asaas_id) && onVisualizarBoletos && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      onOpenChange(false)
+                      onVisualizarBoletos(nfe.numero_nfe)
+                    }}
+                    className="text-indigo-400 border-indigo-900/50 hover:bg-indigo-955/20 bg-background"
+                  >
+                    <Printer className="h-4 w-4 mr-1" />
+                    Imprimir Boleto
                   </Button>
                 )}
               </div>

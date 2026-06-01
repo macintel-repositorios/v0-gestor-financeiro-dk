@@ -9,6 +9,7 @@ export async function GET() {
       SELECT 
         b.numero_nota,
         COUNT(*) as total_boletos,
+        SUM(CASE WHEN b.asaas_id IS NOT NULL AND b.asaas_id != '' THEN 1 ELSE 0 END) as enviados_asaas,
         SUM(CASE WHEN b.status = 'aguardando_pagamento' THEN 1 ELSE 0 END) as aguardando_pagamento
       FROM boletos b
       WHERE b.numero_nota IS NOT NULL AND b.numero_nota != ''
@@ -18,7 +19,7 @@ export async function GET() {
     const boletos = rows as any[]
 
     // Construir mapa: agrupar por numero base (sem -XX de parcelas)
-    const statusMap: Record<string, { temBoleto: boolean; aguardandoPagamento: boolean }> = {}
+    const statusMap: Record<string, { temBoleto: boolean; enviadoAsaas: boolean; aguardandoPagamento: boolean }> = {}
 
     for (const row of boletos) {
       const numNota = String(row.numero_nota)
@@ -26,10 +27,13 @@ export async function GET() {
       const numBase = numNota.replace(/-\d+$/, "")
 
       if (!statusMap[numBase]) {
-        statusMap[numBase] = { temBoleto: false, aguardandoPagamento: false }
+        statusMap[numBase] = { temBoleto: false, enviadoAsaas: false, aguardandoPagamento: false }
       }
 
       statusMap[numBase].temBoleto = true
+      if (Number(row.enviados_asaas) > 0) {
+        statusMap[numBase].enviadoAsaas = true
+      }
       if (Number(row.aguardando_pagamento) > 0) {
         statusMap[numBase].aguardandoPagamento = true
       }

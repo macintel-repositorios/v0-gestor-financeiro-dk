@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 import {
   Eye,
   Calendar,
@@ -20,6 +21,8 @@ import {
   Download,
   CreditCard,
   ExternalLink,
+  Send,
+  Loader2,
 } from "lucide-react"
 
 interface Boleto {
@@ -56,9 +59,48 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
   const [boletos, setBoletos] = useState<Boleto[]>([])
   const [loading, setLoading] = useState(false)
   const [printingAll, setPrintingAll] = useState(false)
+  const [enviandoAsaasId, setEnviandoAsaasId] = useState<number | null>(null)
+  const { toast } = useToast()
 
   const extrairNumeroBase = (numero: string): string => {
     return numero.replace(/-\d+$/, "")
+  }
+
+  const handleEnviarAsaas = async (boleto: Boleto) => {
+    if (!confirm(`Enviar boleto ${boleto.numero} para o Asaas?\n\nIsso irá gerar o código de barras e linha digitável.`)) {
+      return
+    }
+
+    try {
+      setEnviandoAsaasId(boleto.id)
+      const response = await fetch(`/api/boletos/${boleto.id}/enviar-asaas`, {
+        method: "POST",
+      })
+      const result = await response.json()
+
+      if (result.success) {
+        toast({
+          title: "Boleto enviado",
+          description: `Boleto ${boleto.numero} enviado ao Asaas com sucesso!`,
+        })
+        loadBoletos()
+      } else {
+        toast({
+          title: "Erro ao enviar",
+          description: result.message || "Erro ao enviar boleto ao Asaas",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Erro ao enviar boleto ao Asaas:", error)
+      toast({
+        title: "Erro",
+        description: "Erro ao enviar boleto ao Asaas",
+        variant: "destructive",
+      })
+    } finally {
+      setEnviandoAsaasId(null)
+    }
   }
 
   useEffect(() => {
@@ -459,7 +501,24 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
                                       Ver Fatura
                                     </Button>
                                   )}
-                                  {!boleto.asaas_id && <span className="text-[10px] text-muted-foreground">Boleto local - enviar ao Asaas</span>}
+                                  {!boleto.asaas_id && (
+                                    <div className="space-y-1">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={enviandoAsaasId === boleto.id}
+                                        onClick={() => handleEnviarAsaas(boleto)}
+                                        className="text-xs text-teal-600 dark:text-teal-400 hover:text-teal-700 hover:bg-teal-50 dark:hover:bg-teal-950/30 border-teal-200 dark:border-teal-900/50 bg-card w-full justify-start h-8"
+                                      >
+                                        {enviandoAsaasId === boleto.id ? (
+                                          <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                        ) : (
+                                          <Send className="h-3.5 w-3.5 mr-1.5" />
+                                        )}
+                                        Enviar para Asaas
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               </TableCell>
                             </TableRow>
