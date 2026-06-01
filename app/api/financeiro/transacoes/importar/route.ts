@@ -126,18 +126,51 @@ export async function POST(request: Request) {
       const lines = fileContent.split(/\r?\n/).map((l: string) => l.trim()).filter(Boolean)
       const delimiter = fileContent.includes(";") ? ";" : ","
       
+      let headerIndices = {
+        date: 0,
+        desc: 1,
+        amount: 2,
+        entrada: -1,
+        saida: -1
+      }
+      
+      let hasHeader = false
+      if (lines.length > 0) {
+        const firstLineCols = lines[0].split(delimiter).map((c: string) => c.replace(/^["']|["']$/g, "").trim().toLowerCase())
+        if (firstLineCols.some(col => col.includes("data") || col.includes("date") || col.includes("lançamento") || col.includes("lancamento"))) {
+          hasHeader = true
+          
+          const dateIdx = firstLineCols.findIndex(col => col.includes("data") || col.includes("date"))
+          const descIdx = firstLineCols.findIndex(col => col.includes("descri") || col.includes("memo") || col.includes("histórico") || col.includes("historico"))
+          const entradaIdx = firstLineCols.findIndex(col => col.includes("entrada") || col.includes("crédito") || col.includes("credito") || col.includes("recebido"))
+          const saidaIdx = firstLineCols.findIndex(col => col.includes("saída") || col.includes("saida") || col.includes("débito") || col.includes("debito") || col.includes("pago"))
+          const amountIdx = firstLineCols.findIndex(col => col.includes("valor") || col.includes("value") || col.includes("quantia") || col.includes("monto") || col.includes("lançamento") || col.includes("lancamento"))
+          
+          if (dateIdx !== -1) headerIndices.date = dateIdx
+          if (descIdx !== -1) headerIndices.desc = descIdx
+          
+          if (entradaIdx !== -1 && saidaIdx !== -1) {
+            headerIndices.entrada = entradaIdx
+            headerIndices.saida = saidaIdx
+          } else if (amountIdx !== -1) {
+            headerIndices.amount = amountIdx
+          }
+        }
+      }
+      
       for (let i = 0; i < lines.length; i++) {
-        // Skip potential headers
-        if (i === 0 && (lines[i].toLowerCase().includes("data") || lines[i].toLowerCase().includes("date") || lines[i].toLowerCase().includes("lançamento"))) {
+        // Skip header row
+        if (i === 0 && hasHeader) {
           continue
         }
         
         const cols = lines[i].split(delimiter).map((c: string) => c.replace(/^["']|["']$/g, "").trim())
-        if (cols.length >= 3) {
-          let dateVal = cols[0]
-          let descVal = cols[1]
-          let amtVal = cols[2]
+        if (cols.length > Math.max(headerIndices.date, headerIndices.desc)) {
+          let dateVal = cols[headerIndices.date]
+          let descVal = cols[headerIndices.desc]
           
+          if (!dateVal || dateVal === "-") continue
+
           let day = "01"
           let month = "01"
           let year = "2026"
@@ -174,20 +207,46 @@ export async function POST(request: Request) {
           
           const formattedDate = `${year}-${month}-${day}`
           
-          // Parse value
-          let parsedVal = parseFloat(amtVal.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", "."))
-          if (isNaN(parsedVal)) {
-            parsedVal = parseFloat(cols[cols.length - 1].replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", "."))
-            descVal = cols.slice(1, cols.length - 1).join(" ")
+          let parsedVal = 0
+          let isSaida = false
+          let isValid = false
+          
+          if (headerIndices.entrada !== -1 && headerIndices.saida !== -1) {
+            const entradaValStr = cols[headerIndices.entrada] || ""
+            const saidaValStr = cols[headerIndices.saida] || ""
+            
+            const parsedEntrada = parseFloat(entradaValStr.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", "."))
+            const parsedSaida = parseFloat(saidaValStr.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", "."))
+            
+            if (!isNaN(parsedEntrada) && entradaValStr !== "-") {
+              parsedVal = parsedEntrada
+              isSaida = false
+              isValid = true
+            } else if (!isNaN(parsedSaida) && saidaValStr !== "-") {
+              parsedVal = parsedSaida
+              isSaida = true
+              isValid = true
+            }
+          } else {
+            let amtVal = cols[headerIndices.amount] || ""
+            parsedVal = parseFloat(amtVal.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", "."))
+            if (isNaN(parsedVal)) {
+              parsedVal = parseFloat(cols[cols.length - 1].replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", "."))
+              descVal = cols.slice(1, cols.length - 1).join(" ")
+            }
+            if (!isNaN(parsedVal)) {
+              isSaida = parsedVal < 0
+              parsedVal = Math.abs(parsedVal)
+              isValid = true
+            }
           }
 
-          if (formattedDate && descVal && !isNaN(parsedVal)) {
-            const isSaida = parsedVal < 0
+          if (formattedDate && descVal && isValid) {
             transactions.push({
               data: formattedDate,
               descricao: descVal,
               tipo: isSaida ? "saida" : "entrada",
-              valor: Math.abs(parsedVal),
+              valor: parsedVal,
               categoria: classifyCategory(descVal, isSaida ? "saida" : "entrada")
             })
           }
