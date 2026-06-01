@@ -371,7 +371,7 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-4">
           {logoMenu && (
             <img
@@ -384,28 +384,18 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
               Ordem de Serviço
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5 font-medium font-medium">Gerencie ordens de serviço e acompanhe execução</p>
+            <p className="text-sm text-muted-foreground mt-0.5 font-medium">Gerencie ordens de serviço e acompanhe execução</p>
+            <div className="mt-4">
+              <Button
+                onClick={() => setIsNovaOSOpen(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-10 px-4 text-sm font-semibold transition-all rounded-xl"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Ordem de Serviço
+              </Button>
+            </div>
           </div>
         </div>
-        <div className="hidden md:block">
-          <Button
-            onClick={() => setIsNovaOSOpen(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Ordem de Serviço
-          </Button>
-        </div>
-      </div>
-
-      <div className="md:hidden">
-        <Button
-          onClick={() => setIsNovaOSOpen(true)}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-5 shadow-xs rounded-xl"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Nova Ordem de Serviço
-        </Button>
       </div>
 
       {/* Stats Cards */}

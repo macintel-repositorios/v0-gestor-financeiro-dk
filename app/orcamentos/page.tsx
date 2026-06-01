@@ -611,7 +611,7 @@ export default function OrcamentosPage({
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full text-foreground bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+      <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-4">
           {logoMenu && (
             <img
@@ -627,24 +627,24 @@ export default function OrcamentosPage({
             <p className="text-sm text-muted-foreground mt-0.5 font-medium">
               Gerencie e acompanhe todos os orçamentos e faturamentos do sistema
             </p>
+            <div className="mt-4 flex items-center gap-2">
+              <Button
+                onClick={toggleOcultarValores}
+                variant="outline"
+                className="border-border text-foreground hover:bg-muted/40 h-10 px-4 text-xs font-semibold"
+              >
+                {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+                {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
+              </Button>
+              <Button
+                onClick={() => setIsNovoOrcamentoOpen(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-10 px-4 text-xs lg:text-sm font-semibold transition-all rounded-xl"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Orçamento
+              </Button>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={toggleOcultarValores}
-            variant="outline"
-            className="border-border text-foreground hover:bg-muted/40 h-9 text-xs font-semibold hidden md:inline-flex"
-          >
-            {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
-            {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
-          </Button>
-          <Button
-            onClick={() => setIsNovoOrcamentoOpen(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-xs lg:text-sm font-medium transition-all"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Orçamento
-          </Button>
         </div>
       </div>
 

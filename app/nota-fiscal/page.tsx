@@ -795,7 +795,7 @@ export default function NotaFiscalPage() {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 text-foreground animate-in fade-in duration-300">
       <div className="container mx-auto space-y-6 pb-32 md:pb-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-col gap-4 mb-4">
           <div className="flex items-center gap-3">
             {logoMenu && (
               <img
@@ -811,41 +811,40 @@ export default function NotaFiscalPage() {
               <p className="text-xs md:text-sm text-muted-foreground">
                 Gerenciamento de NFS-e (Serviço) e NF-e (Material)
               </p>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={toggleShowValues}
+                  className="flex items-center justify-center gap-2 h-10 rounded-xl border border-border bg-card hover:bg-muted text-foreground px-4 text-xs font-semibold"
+                >
+                  {!shouldShow ? (
+                    <>
+                      <Eye className="h-4 w-4" />
+                      <span>Mostrar Valores</span>
+                    </>
+                  ) : (
+                    <>
+                      <EyeOff className="h-4 w-4" />
+                      <span>Ocultar Valores</span>
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => setEmitirNfseOpen(true)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-10 rounded-xl px-4"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span>Emitir NFS-e</span>
+                </Button>
+                <Button
+                  onClick={() => setEmitirNfeOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-10 rounded-xl px-4"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span>Emitir NF-e</span>
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleShowValues}
-              className="hidden md:flex items-center justify-center gap-2 h-9 rounded-lg border border-border bg-card hover:bg-muted text-foreground"
-            >
-              {!shouldShow ? (
-                <>
-                  <Eye className="h-4 w-4" />
-                  <span className="text-xs font-semibold">Mostrar Valores</span>
-                </>
-              ) : (
-                <>
-                  <EyeOff className="h-4 w-4" />
-                  <span className="text-xs font-semibold">Ocultar Valores</span>
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={() => setEmitirNfseOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 rounded-lg px-4"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              <span>Emitir NFS-e</span>
-            </Button>
-            <Button
-              onClick={() => setEmitirNfeOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9 rounded-lg px-4"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              <span>Emitir NF-e</span>
-            </Button>
           </div>
         </div>
 

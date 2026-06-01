@@ -573,7 +573,7 @@ export default function ContratosPage() {
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full text-foreground">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-4">
           {logoMenu && (
             <img
@@ -587,16 +587,18 @@ export default function ContratosPage() {
               Contratos & Propostas
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5 font-medium">Gerencie contratos e propostas de manutenção</p>
+            <div className="mt-4">
+              <Button
+                onClick={toggleOcultarValores}
+                variant="outline"
+                className="border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 bg-background h-10 px-4 text-xs lg:text-sm font-semibold rounded-xl"
+              >
+                {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+                {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
+              </Button>
+            </div>
           </div>
         </div>
-        <Button
-          onClick={toggleOcultarValores}
-          variant="outline"
-          className="border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 bg-background h-8 lg:h-10 text-xs lg:text-sm hidden md:inline-flex self-start sm:self-center"
-        >
-          {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
-          {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
-        </Button>
       </div>
 
       {/* Stats Cards - Propostas */}

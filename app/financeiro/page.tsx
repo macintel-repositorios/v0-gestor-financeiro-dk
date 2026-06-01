@@ -627,7 +627,7 @@ export default function FinanceiroPage() {
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-4">
           {logoMenu && (
             <img
@@ -641,27 +641,27 @@ export default function FinanceiroPage() {
               Gestão Financeira
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">Controle de boletos e recibos</p>
+            <div className="mt-4">
+              <Button
+                onClick={toggleValoresOcultos}
+                variant="outline"
+                className="flex items-center gap-2 border border-border hover:bg-muted transition-all duration-200 bg-card text-foreground h-10 px-4 text-sm rounded-xl"
+              >
+                {valoresOcultos ? (
+                  <>
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-semibold">Mostrar Valores</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-semibold">Ocultar Valores</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
-
-        {/* Botão de Toggle de Valores */}
-        <Button
-          onClick={toggleValoresOcultos}
-          variant="outline"
-          className="hidden md:flex items-center gap-2 border border-border hover:bg-muted transition-all duration-200 bg-card text-foreground h-9 px-3 text-sm"
-        >
-          {valoresOcultos ? (
-            <>
-              <EyeOff className="h-4 w-4 text-muted-foreground" />
-              <span className="hidden sm:inline font-medium">Mostrar Valores</span>
-            </>
-          ) : (
-            <>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-              <span className="hidden sm:inline font-medium">Ocultar Valores</span>
-            </>
-          )}
-        </Button>
       </div>
 
       {/* Stats Cards - Agora clicáveis */}

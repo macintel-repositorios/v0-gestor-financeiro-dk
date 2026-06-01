@@ -455,7 +455,7 @@ export default function DashboardPage() {
     <div className="flex-1 space-y-6 p-6 md:p-10 w-full bg-transparent text-foreground">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
+      <div className="flex flex-col gap-4 border-b border-border/60 pb-5">
         <div className="flex items-center gap-3">
           {logoMenu && (
             <img
@@ -471,27 +471,27 @@ export default function DashboardPage() {
             <p className="text-xs md:text-sm text-muted-foreground">
               Visão consolidada da performance financeira e clientes do sistema
             </p>
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={toggleShowValues}
+                className="flex items-center justify-center gap-2 h-10 rounded-xl border border-border bg-card hover:bg-slate-100/50 shadow-xs px-4 text-xs font-semibold"
+              >
+                {!shouldShow ? (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    <span>Mostrar Valores</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="h-4 w-4" />
+                    <span>Ocultar Valores</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleShowValues}
-          className="hidden md:flex items-center justify-center gap-2 h-9 rounded-lg border border-border bg-card hover:bg-slate-100/50 shadow-xs"
-        >
-          {!shouldShow ? (
-            <>
-              <Eye className="h-4 w-4" />
-              <span className="text-xs font-medium">Mostrar Valores</span>
-            </>
-          ) : (
-            <>
-              <EyeOff className="h-4 w-4" />
-              <span className="text-xs font-medium">Ocultar Valores</span>
-            </>
-          )}
-        </Button>
       </div>
 
       {/* KPI Cards Grid */}

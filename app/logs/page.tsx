@@ -341,7 +341,7 @@ export default function LogsPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 text-foreground">
-      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+      <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-3">
           {logoMenu && (
             <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />
@@ -353,15 +353,15 @@ export default function LogsPage() {
             <p className="text-sm lg:text-base text-muted-foreground">
               Monitore atividades, login/logout e operações dos usuários
             </p>
-          </div>
-        </div>
-
-        {/* Horário atual */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 px-3 py-2 rounded-lg border border-border">
-          <Globe className="h-4 w-4 text-purple-400" />
-          <div>
-            <div className="font-medium text-foreground">Horário Atual (SP)</div>
-            <div className="font-mono text-purple-300">{currentTime}</div>
+            <div className="mt-4 flex">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 px-3 py-2 rounded-xl border border-border">
+                <Globe className="h-4 w-4 text-purple-400" />
+                <div>
+                  <div className="font-medium text-foreground">Horário Atual (SP)</div>
+                  <div className="font-mono text-purple-300">{currentTime}</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

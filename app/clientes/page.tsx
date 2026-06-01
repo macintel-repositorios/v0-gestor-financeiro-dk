@@ -327,7 +327,7 @@ export default function ClientesPage() {
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-4">
           {logoMenu && (
             <img
@@ -341,12 +341,14 @@ export default function ClientesPage() {
               Clientes
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5 font-medium">Gerencie seus clientes e informações de contato</p>
+            <div className="mt-4">
+              <Button onClick={handleNovoCliente} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-10 px-4 text-sm font-semibold transition-all rounded-xl">
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Cliente
+              </Button>
+            </div>
           </div>
         </div>
-        <Button onClick={handleNovoCliente} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all">
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Cliente
-        </Button>
       </div>
 
       {/* Stats Cards — clicáveis como filtros */}

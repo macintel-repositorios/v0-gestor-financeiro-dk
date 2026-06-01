@@ -201,7 +201,7 @@ export default function DocumentosPage() {
         {/* Header com gradiente */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 dark:from-blue-950/40 dark:via-purple-950/40 dark:to-blue-900/40 p-6 md:p-8 text-white shadow-xl border border-border/30">
           <div className="absolute inset-0 bg-black/10"></div>
-          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="relative flex flex-col gap-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight drop-shadow-lg">Documentos</h1>
               <p className="mt-2 text-blue-100 dark:text-gray-300 text-sm md:text-lg">Gerencie seus documentos e contratos de forma inteligente</p>
@@ -211,16 +211,18 @@ export default function DocumentosPage() {
                   <span>{totalDocumentos} documentos</span>
                 </div>
               </div>
+              <div className="mt-6">
+                <Link href="/documentos/novo" className="inline-block">
+                  <Button
+                    size="lg"
+                    className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm shadow-lg hover:scale-105 transition-all duration-200 dark:bg-slate-900/40 dark:hover:bg-slate-900/60"
+                  >
+                    <Plus className="mr-2 h-5 w-5" />
+                    Novo Documento
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <Link href="/documentos/novo" className="w-full md:w-auto flex-shrink-0">
-              <Button
-                size="lg"
-                className="w-full md:w-auto bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm shadow-lg hover:scale-105 transition-all duration-200 dark:bg-slate-900/40 dark:hover:bg-slate-900/60"
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                Novo Documento
-              </Button>
-            </Link>
           </div>
         </div>
 

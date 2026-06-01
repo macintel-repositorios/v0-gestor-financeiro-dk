@@ -62,7 +62,7 @@ export default function ConfiguracoesPage() {
   return (
     <div className="w-full text-foreground">
       <div className="container mx-auto p-6 space-y-6 pb-32 md:pb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
             {logoMenu && (
               <img
@@ -76,16 +76,18 @@ export default function ConfiguracoesPage() {
                 Configurações
               </h1>
               <p className="text-muted-foreground mt-1">Configure as opções do sistema</p>
+              <div className="mt-4">
+                <Button
+                  onClick={handleExportarConfiguracoes}
+                  variant="outline"
+                  className="border-border text-foreground hover:bg-muted bg-transparent flex rounded-xl"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar Configurações
+                </Button>
+              </div>
             </div>
           </div>
-          <Button
-            onClick={handleExportarConfiguracoes}
-            variant="outline"
-            className="border-border text-foreground hover:bg-muted bg-transparent hidden md:flex"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportar Configurações
-          </Button>
         </div>
 
         <Card className="border border-border shadow-2xl bg-card text-foreground">
