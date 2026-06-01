@@ -243,3 +243,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const contaId = searchParams.get("contaId")
+    const anoMes = searchParams.get("anoMes") // e.g. "2026-02"
+
+    if (!contaId || !anoMes) {
+      return NextResponse.json({ success: false, error: "Parâmetros inválidos" }, { status: 400 })
+    }
+
+    // 1. Delete transactions from transacoes_financeiras for this account and month
+    await pool.execute(
+      "DELETE FROM transacoes_financeiras WHERE conta_id = ? AND DATE_FORMAT(data, '%Y-%m') = ?",
+      [contaId, anoMes]
+    )
+
+    // 2. Remove the period record from extratos_importados
+    await pool.execute(
+      "DELETE FROM extratos_importados WHERE conta_id = ? AND ano_mes = ?",
+      [contaId, anoMes]
+    )
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error("Erro ao desfazer importação:", error)
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  }
+}

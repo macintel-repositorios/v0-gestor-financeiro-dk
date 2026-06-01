@@ -562,6 +562,42 @@ export function FluxoCaixaTab() {
     }
   }
 
+  const handleUndoImport = async (contaId: number, period: string, contaNome: string) => {
+    const formattedPeriod = period.split("-").reverse().join("/") // e.g. "02/2026"
+    if (!confirm(`⚠️ Atenção: Deseja apagar todas as transações importadas em ${formattedPeriod} para a conta ${contaNome}? Isso permitirá reimportar o extrato correto.`)) {
+      return
+    }
+
+    try {
+      setImporting(true)
+      const res = await fetch(`/api/financeiro/transacoes/importar?contaId=${contaId}&anoMes=${period}`, {
+        method: "DELETE"
+      })
+      const result = await res.json()
+      if (result.success) {
+        toast({
+          title: "Importação Removida",
+          description: `Os lançamentos de ${formattedPeriod} para a conta ${contaNome} foram excluídos.`,
+        })
+        await loadData()
+      } else {
+        toast({
+          title: "Erro",
+          description: result.error || "Erro ao desfazer importação",
+          variant: "destructive"
+        })
+      }
+    } catch {
+      toast({
+        title: "Erro",
+        description: "Erro de conexão ao desfazer importação",
+        variant: "destructive"
+      })
+    } finally {
+      setImporting(false)
+    }
+  }
+
   const getAccountIcon = (tipo: string) => {
     switch (tipo) {
       case "conta_corrente":
@@ -1737,9 +1773,20 @@ export function FluxoCaixaTab() {
 
                       <span className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         {isImported ? (
-                          <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded">
-                            <Check className="h-3 w-3" /> Importado
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded">
+                              <Check className="h-3 w-3" /> Importado
+                            </span>
+                            <Button
+                              onClick={() => handleUndoImport(acc.id, targetPeriod, acc.nome)}
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-[10px] text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-0 p-1 flex items-center justify-center"
+                              title="Desfazer Importação"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         ) : (
                           <span className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                             <span className="flex items-center justify-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 px-2 py-1 rounded">
