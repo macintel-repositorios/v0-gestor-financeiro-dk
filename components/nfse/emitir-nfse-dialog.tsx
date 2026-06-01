@@ -261,9 +261,9 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Tomador (Cliente) */}
           <div>
-            <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-3">
+            <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
               <User className="h-4 w-4 text-blue-600" />
-              Tomador do Servico
+              Tomador do Serviço
             </h3>
 
             {/* Seleção de cliente existente */}
@@ -404,18 +404,18 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
 
           {/* Serviço */}
           <div>
-            <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-3">
+            <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
               <FileText className="h-4 w-4 text-emerald-600" />
-              Dados do Servico
+              Dados do Serviço
             </h3>
 
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label>Descricao do Servico *</Label>
+                <Label>Descrição do Serviço *</Label>
                 <Textarea
                   value={form.descricao_servico}
                   onChange={(e) => updateForm("descricao_servico", e.target.value)}
-                  placeholder="Descricao detalhada do servico prestado"
+                  placeholder="Descrição detalhada do serviço prestado"
                   rows={3}
                   className="bg-background border-border text-foreground"
                 />
@@ -427,42 +427,42 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
 
           {/* Valores */}
           <div>
-            <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-3">
+            <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
               <DollarSign className="h-4 w-4 text-amber-600" />
               Valores
             </h3>
 
             {/* Informativo: separacao MDO vs Material quando vem de orcamento */}
             {dadosOrigem?.origem === "orcamento" && (dadosOrigem.valor_material || dadosOrigem.valor_total_orcamento) && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-3">
-                <p className="text-xs font-medium text-blue-800 mb-2">Valores do Orcamento:</p>
+              <div className="p-4 bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 rounded-xl mb-3">
+                <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Valores do Orçamento:</p>
                 <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center p-1.5 bg-blue-100 rounded">
-                    <p className="text-blue-600">Subtotal MDO (Servicos)</p>
-                    <p className="font-bold text-blue-800">{formatCurrency(dadosOrigem.valor || 0)}</p>
+                  <div className="text-center p-2 bg-blue-500/10 dark:bg-blue-500/20 rounded-lg">
+                    <p className="text-blue-600 dark:text-blue-400 font-medium">Subtotal MDO (Serviços)</p>
+                    <p className="font-bold text-blue-800 dark:text-blue-300 mt-0.5">{formatCurrency(dadosOrigem.valor || 0)}</p>
                   </div>
                   {dadosOrigem.valor_material !== undefined && (
-                    <div className="text-center p-1.5 bg-green-100 rounded">
-                      <p className="text-green-600">Subtotal Material</p>
-                      <p className="font-bold text-green-800">{formatCurrency(dadosOrigem.valor_material)}</p>
+                    <div className="text-center p-2 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-lg">
+                      <p className="text-emerald-600 dark:text-emerald-400 font-medium">Subtotal Material</p>
+                      <p className="font-bold text-emerald-800 dark:text-emerald-300 mt-0.5">{formatCurrency(dadosOrigem.valor_material)}</p>
                     </div>
                   )}
                   {dadosOrigem.valor_total_orcamento !== undefined && (
-                    <div className="text-center p-1.5 bg-gray-100 rounded">
-                      <p className="text-gray-600">Total Orcamento</p>
-                      <p className="font-bold text-gray-800">{formatCurrency(dadosOrigem.valor_total_orcamento)}</p>
+                    <div className="text-center p-2 bg-muted rounded-lg">
+                      <p className="text-muted-foreground font-medium">Total Orçamento</p>
+                      <p className="font-bold text-foreground mt-0.5">{formatCurrency(dadosOrigem.valor_total_orcamento)}</p>
                     </div>
                   )}
                 </div>
-                <p className="text-[10px] text-blue-600 mt-2">
-                  A NFS-e da prefeitura e emitida apenas sobre o valor de servicos (MDO). A nota de material e separada.
+                <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-2 font-medium">
+                  A NFS-e da prefeitura é emitida apenas sobre o valor de serviços (MDO). A nota de material é separada.
                 </p>
               </div>
             )}
 
             <div className="grid grid-cols-4 gap-3 items-end">
               <div className="space-y-2">
-                <Label>Valor dos Servicos - MDO (R$) *</Label>
+                <Label>Valor dos Serviços - MDO (R$) *</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -473,7 +473,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                 />
               </div>
               <div className="space-y-2">
-                <Label>Valor Deducoes (R$)</Label>
+                <Label>Valor Deduções (R$)</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -491,7 +491,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                     onCheckedChange={(checked) => updateForm("iss_retido", checked)}
                   />
                   <span className="text-sm text-muted-foreground">
-                    {form.iss_retido ? "Sim" : "Nao"}
+                    {form.iss_retido ? "Sim" : "Não"}
                   </span>
                 </div>
               </div>
@@ -510,17 +510,17 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
 
         {/* Erro visivel */}
         {submitError && (
-          <div className="p-3 bg-red-50 border border-red-300 rounded-lg flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-medium text-red-800 text-sm">Erro na emissao</p>
-              <p className="text-xs text-red-600 mt-1">{submitError}</p>
+              <p className="font-semibold text-destructive text-sm">Erro na emissão</p>
+              <p className="text-xs text-destructive mt-1 font-medium">{submitError}</p>
             </div>
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-red-500 hover:text-red-700"
+              className="h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={() => setSubmitError(null)}
             >
               Fechar
