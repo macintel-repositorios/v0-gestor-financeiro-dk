@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         cc.status as contrato_status
       FROM clientes c
       LEFT JOIN contratos_conservacao cc ON c.id = cc.cliente_id AND cc.status = 'ativo'
-      WHERE c.tem_contrato = true
+      WHERE c.tem_contrato = true OR cc.id IS NOT NULL
       ORDER BY c.nome ASC
     `
 

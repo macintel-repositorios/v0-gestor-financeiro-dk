@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -132,26 +132,26 @@ export function LotePreventivasDialog({ open, onOpenChange, onSuccess }: LotePre
   }
 
   const renderConfiguracao = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+    <div className="space-y-6 text-foreground">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="mes">Mês de Referência</Label>
-          <Input id="mes" type="month" value={mesReferencia} onChange={(e) => setMesReferencia(e.target.value)} />
+          <Label htmlFor="mes" className="text-sm font-semibold">Mês de Referência</Label>
+          <Input id="mes" type="month" value={mesReferencia} onChange={(e) => setMesReferencia(e.target.value)} className="bg-background border-border text-foreground" />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="data">Data de Agendamento (Opcional)</Label>
-          <Input id="data" type="date" value={dataAgendamento} onChange={(e) => setDataAgendamento(e.target.value)} />
+          <Label htmlFor="data" className="text-sm font-semibold">Data de Agendamento (Opcional)</Label>
+          <Input id="data" type="date" value={dataAgendamento} onChange={(e) => setDataAgendamento(e.target.value)} className="bg-background border-border text-foreground" />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label>Período (Opcional)</Label>
+        <Label className="text-sm font-semibold">Período (Opcional)</Label>
         <Select value={periodoAgendamento || undefined} onValueChange={(v: any) => setPeriodoAgendamento(v)}>
-          <SelectTrigger>
+          <SelectTrigger className="bg-background border-border text-foreground">
             <SelectValue placeholder="Selecione o período" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-popover border-border text-foreground">
             <SelectItem value="manha">Manhã</SelectItem>
             <SelectItem value="tarde">Tarde</SelectItem>
             <SelectItem value="integral">Integral</SelectItem>
@@ -162,7 +162,7 @@ export function LotePreventivasDialog({ open, onOpenChange, onSuccess }: LotePre
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label className="text-base font-semibold">Clientes com Contrato Ativo</Label>
-          <Button variant="outline" size="sm" onClick={toggleTodos}>
+          <Button variant="outline" size="sm" onClick={toggleTodos} className="border-border hover:bg-muted text-foreground">
             {clientesSelecionados.length === clientes.filter((c) => !c.ja_tem_os_no_mes).length
               ? "Desmarcar Todos"
               : "Selecionar Todos"}
@@ -174,15 +174,15 @@ export function LotePreventivasDialog({ open, onOpenChange, onSuccess }: LotePre
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="max-h-[400px] space-y-2 overflow-y-auto rounded-md border p-4">
+          <div className="max-h-[400px] space-y-2 overflow-y-auto rounded-md border border-border bg-muted/10 p-4">
             {clientes.length === 0 ? (
               <p className="text-center text-sm text-muted-foreground">Nenhum cliente com contrato encontrado</p>
             ) : (
               clientes.map((cliente) => (
                 <div
                   key={cliente.id}
-                  className={`flex items-start space-x-3 rounded-lg border p-3 ${
-                    cliente.ja_tem_os_no_mes ? "bg-muted opacity-60" : "hover:bg-accent"
+                  className={`flex items-start space-x-3 rounded-lg border border-border p-3 transition-colors ${
+                    cliente.ja_tem_os_no_mes ? "bg-muted/50 opacity-60" : "bg-card hover:bg-muted/40"
                   }`}
                 >
                   <Checkbox
@@ -192,16 +192,16 @@ export function LotePreventivasDialog({ open, onOpenChange, onSuccess }: LotePre
                   />
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
-                      <p className="font-medium">{cliente.nome}</p>
+                      <p className="font-semibold text-foreground text-sm">{cliente.nome}</p>
                       {cliente.ja_tem_os_no_mes && (
-                        <span className="flex items-center gap-1 text-xs text-orange-600">
+                        <span className="flex items-center gap-1 text-xs text-orange-500 font-medium bg-orange-500/10 px-2 py-0.5 rounded-full">
                           <AlertCircle className="h-3 w-3" />
                           Já tem OS no mês ({cliente.os_existente?.numero})
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">{cliente.endereco}</p>
-                    <div className="flex gap-2 text-xs text-muted-foreground">
+                    <div className="flex gap-2 text-[10px] text-muted-foreground">
                       <span>Código: {cliente.codigo}</span>
                       {cliente.dia_contrato && <span>• Dia do Contrato: {cliente.dia_contrato}</span>}
                       {cliente.contrato_numero && <span>• Contrato: {cliente.contrato_numero}</span>}
@@ -213,19 +213,19 @@ export function LotePreventivasDialog({ open, onOpenChange, onSuccess }: LotePre
           </div>
         )}
 
-        <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
-          <p className="font-medium">Selecionados: {clientesSelecionados.length} clientes</p>
-          <p className="mt-1 text-xs">
+        <div className="rounded-lg bg-blue-500/10 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-900/50 p-4 text-sm">
+          <p className="font-semibold">Selecionados: {clientesSelecionados.length} clientes</p>
+          <p className="mt-1 text-xs opacity-90">
             Serão criadas {clientesSelecionados.length} ordens de serviço preventivas para o mês {mesReferencia}
           </p>
         </div>
       </div>
 
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
+      <div className="flex justify-end gap-3 pt-2">
+        <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border text-foreground">
           Cancelar
         </Button>
-        <Button onClick={criarOrdens} disabled={loading || clientesSelecionados.length === 0}>
+        <Button onClick={criarOrdens} disabled={loading || clientesSelecionados.length === 0} className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium">
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calendar className="mr-2 h-4 w-4" />}
           Criar {clientesSelecionados.length} Ordens
         </Button>
@@ -234,27 +234,27 @@ export function LotePreventivasDialog({ open, onOpenChange, onSuccess }: LotePre
   )
 
   const renderResultado = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 text-foreground">
       <div className="space-y-4">
-        <div className="rounded-lg bg-green-50 p-4">
+        <div className="rounded-lg bg-emerald-500/10 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50 p-4">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <h3 className="font-semibold text-green-900">Ordens Criadas com Sucesso</h3>
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <h3 className="font-semibold">Ordens Criadas com Sucesso</h3>
           </div>
-          <p className="mt-2 text-sm text-green-700">{resultado?.sucesso.length} ordens de serviço foram criadas</p>
+          <p className="mt-2 text-sm opacity-90">{resultado?.sucesso.length} ordens de serviço foram criadas</p>
         </div>
 
         {resultado?.sucesso.length > 0 && (
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Ordens Criadas:</Label>
-            <div className="max-h-[300px] space-y-2 overflow-y-auto rounded-md border p-4">
+            <Label className="text-sm font-semibold">Ordens Criadas:</Label>
+            <div className="max-h-[300px] space-y-2 overflow-y-auto rounded-md border border-border p-4 bg-muted/10">
               {resultado.sucesso.map((item: any) => (
-                <div key={item.ordem_id} className="flex items-center justify-between rounded-lg bg-green-50 p-3">
+                <div key={item.ordem_id} className="flex items-center justify-between rounded-lg bg-emerald-500/5 border border-emerald-500/10 dark:border-emerald-500/20 p-3">
                   <div>
-                    <p className="font-medium">{item.cliente_nome}</p>
-                    <p className="text-sm text-muted-foreground">OS #{item.numero_os}</p>
+                    <p className="font-semibold text-sm">{item.cliente_nome}</p>
+                    <p className="text-xs text-muted-foreground">OS #{item.numero_os}</p>
                   </div>
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
               ))}
             </div>
@@ -263,12 +263,12 @@ export function LotePreventivasDialog({ open, onOpenChange, onSuccess }: LotePre
 
         {resultado?.erros.length > 0 && (
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-red-600">Erros:</Label>
-            <div className="max-h-[200px] space-y-2 overflow-y-auto rounded-md border border-red-200 p-4">
+            <Label className="text-sm font-semibold text-red-600 dark:text-red-400">Erros:</Label>
+            <div className="max-h-[200px] space-y-2 overflow-y-auto rounded-md border border-red-500/20 p-4 bg-muted/10">
               {resultado.erros.map((item: any, index: number) => (
-                <div key={index} className="rounded-lg bg-red-50 p-3">
-                  <p className="text-sm font-medium text-red-900">Cliente ID: {item.cliente_id}</p>
-                  <p className="text-xs text-red-700">{item.erro}</p>
+                <div key={index} className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-red-800 dark:text-red-300">
+                  <p className="text-sm font-medium">Cliente ID: {item.cliente_id}</p>
+                  <p className="text-xs opacity-90">{item.erro}</p>
                 </div>
               ))}
             </div>
@@ -276,28 +276,32 @@ export function LotePreventivasDialog({ open, onOpenChange, onSuccess }: LotePre
         )}
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={() => onOpenChange(false)}>Fechar</Button>
+      <div className="flex justify-end pt-2">
+        <Button onClick={() => onOpenChange(false)} className="bg-primary text-primary-foreground">Fechar</Button>
       </div>
     </div>
   )
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden p-0">
-        <DialogHeader className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Calendar className="h-6 w-6" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+        <SheetHeader className="mb-4">
+          <SheetTitle className="flex items-center gap-2 text-xl font-bold">
+            <Calendar className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             {etapa === "configuracao" && "Criar Ordens Preventivas em Lote"}
             {etapa === "resultado" && "Resultado da Criação"}
-          </DialogTitle>
-        </DialogHeader>
+          </SheetTitle>
+          <SheetDescription>
+            {etapa === "configuracao" && "Selecione o mês de referência e os clientes com contrato ativo para gerar as ordens de serviço preventivas."}
+            {etapa === "resultado" && "Confira o resultado do processamento das ordens em lote."}
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="overflow-y-auto p-6">
+        <div className="space-y-6 pt-2">
           {etapa === "configuracao" && renderConfiguracao()}
           {etapa === "resultado" && renderResultado()}
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }
