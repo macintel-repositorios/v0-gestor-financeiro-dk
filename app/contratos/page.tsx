@@ -120,7 +120,12 @@ interface ContratoStats {
 
 const formatDate = (dateString: string) => {
   if (!dateString) return "-"
-  const date = new Date(dateString + "T00:00:00")
+  const cleanDate = dateString.includes("T") ? dateString.split("T")[0] : dateString
+  const date = new Date(cleanDate + "T00:00:00")
+  if (isNaN(date.getTime())) {
+    const fallback = new Date(dateString)
+    return isNaN(fallback.getTime()) ? "-" : fallback.toLocaleDateString("pt-BR")
+  }
   return date.toLocaleDateString("pt-BR")
 }
 
@@ -257,14 +262,8 @@ export default function ContratosPage() {
     const month = parseInt(mesRef, 10)
     const year = parseInt(anoRef, 10)
     
-    let targetMonth = month
-    let targetYear = year
-    if (targetMonth === 12) {
-      targetMonth = 1
-      targetYear += 1
-    } else {
-      targetMonth += 1
-    }
+    const targetMonth = month
+    const targetYear = year
     
     const ultimoDia = new Date(targetYear, targetMonth, 0).getDate()
     const diaValido = Math.min(diaVencimento, ultimoDia)
@@ -522,8 +521,8 @@ export default function ContratosPage() {
   }
 
 
-  const recalculateBatchSelections = (mes: string, ano: string) => {
-    const mesRef = `${mes}/${ano}`
+  const recalculateBatchSelections = (mesAtual: string, anoAtual: string, mesPrev: string, anoPrev: string) => {
+    const mesRef = `${mesPrev}/${anoPrev}`
     const contratosAtivos = contratos.filter((c) => c.status === "ativo")
     
     // NFS-e selecionados
@@ -560,6 +559,8 @@ export default function ContratosPage() {
 
   const handleIniciarBatch = () => {
     const now = new Date()
+    const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
+    const currentYr = String(now.getFullYear())
     
     const mesAnterior = now.getMonth() === 0 ? 12 : now.getMonth()
     const anoAnterior = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()
@@ -567,8 +568,8 @@ export default function ContratosPage() {
     const mesAnteriorStr = String(mesAnterior).padStart(2, "0")
     const anoAnteriorStr = String(anoAnterior)
 
-    setBatchMesRef(mesAnteriorStr)
-    setBatchAnoRef(anoAnteriorStr)
+    setBatchMesRef(currentMonth)
+    setBatchAnoRef(currentYr)
     setBatchMesPreventiva(mesAnteriorStr)
     setBatchAnoPreventiva(anoAnteriorStr)
     setBatchTab("nfse")
@@ -579,7 +580,7 @@ export default function ContratosPage() {
 
     // Run selections recalculation
     setTimeout(() => {
-      recalculateBatchSelections(mesAnteriorStr, anoAnteriorStr)
+      recalculateBatchSelections(currentMonth, currentYr, mesAnteriorStr, anoAnteriorStr)
     }, 100)
   }
 
@@ -674,7 +675,7 @@ export default function ContratosPage() {
       })
       setBatchProgress(initialProgress)
 
-      const mesRef = `${batchMesRef}/${batchAnoRef}`
+      const mesRef = `${batchMesPreventiva}/${batchAnoPreventiva}`
 
       for (const num of batchBoletosSelecionados) {
         const contrato = contratos.find((c) => c.numero === num)
@@ -750,7 +751,7 @@ export default function ContratosPage() {
       })
       setBatchProgress(initialProgress)
 
-      const mesRef = `${batchMesRef}/${batchAnoRef}`
+      const mesRef = `${batchMesPreventiva}/${batchAnoPreventiva}`
 
       for (const num of batchAsaasSelecionados) {
         const contrato = contratos.find((c) => c.numero === num)
@@ -1832,7 +1833,7 @@ export default function ContratosPage() {
         </Tabs>
       
 
-      {/* Drawer de Mes de Referencia */}
+      {/* Drawer de Mês Atual */}
       <Sheet open={mesRefDialogOpen} onOpenChange={(open) => {
         setMesRefDialogOpen(open)
         if (!open) {
@@ -1843,16 +1844,16 @@ export default function ContratosPage() {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-emerald-600" />
-              Mês de Referência
+              Mês Atual
             </SheetTitle>
             <SheetDescription>
-              Selecione o mês e ano de referência para a NFS-e do contrato{" "}
+              Selecione o mês e ano atual (emissão da nota) para o contrato{" "}
               <span className="font-semibold">{mesRefContrato?.numero}</span>
             </SheetDescription>
           </SheetHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="mes-ref">Mês</Label>
+              <Label htmlFor="mes-ref">Mês Atual</Label>
               <Select value={mesRefSelecionado} onValueChange={setMesRefSelecionado}>
                 <SelectTrigger id="mes-ref" className="bg-background text-foreground border-border">
                   <SelectValue placeholder="Selecione o mês" />
@@ -1867,7 +1868,7 @@ export default function ContratosPage() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="ano-ref">Ano</Label>
+              <Label htmlFor="ano-ref">Ano Atual</Label>
               <Select value={anoRefSelecionado} onValueChange={setAnoRefSelecionado}>
                 <SelectTrigger id="ano-ref" className="bg-background text-foreground border-border">
                   <SelectValue placeholder="Selecione o ano" />
@@ -1922,8 +1923,8 @@ export default function ContratosPage() {
             
             {mesRefContrato && (() => {
               const equipamentos = parseEquipamentos(mesRefContrato)
-              const mesRef = mesRefSelecionado && anoRefSelecionado ? `${mesRefSelecionado}/${anoRefSelecionado}` : ""
-              const chaveVerificacao = mesRef ? `${mesRefContrato.numero}|${mesRef}` : ""
+              const mesPrevRefVal = mesPreventivaRef && anoPreventivaRef ? `${mesPreventivaRef}/${anoPreventivaRef}` : ""
+              const chaveVerificacao = mesPrevRefVal ? `${mesRefContrato.numero}|${mesPrevRefVal}` : ""
               const jaEmitidaMes = chaveVerificacao && notasEmitidasContrato[chaveVerificacao]?.temNfse
               return (
                 <div className="space-y-3">
@@ -1931,10 +1932,10 @@ export default function ContratosPage() {
                     <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4">
                       <p className="text-xs font-semibold text-yellow-600 dark:text-yellow-400 flex items-center gap-1">
                         <FileCheck className="h-3.5 w-3.5" />
-                        NFS-e já emitida para {MESES.find(m => m.value === mesRefSelecionado)?.label}/{anoRefSelecionado}
+                        NFS-e já emitida para a Preventiva de {MESES.find(m => m.value === mesPreventivaRef)?.label}/{anoPreventivaRef}
                       </p>
                       <p className="text-xs text-yellow-600/80 dark:text-yellow-400/80 mt-1">
-                        Selecione outro mês ou continue para emitir novamente.
+                        Selecione outro período de preventiva ou continue para emitir novamente.
                       </p>
                     </div>
                   )}
@@ -2043,10 +2044,10 @@ export default function ContratosPage() {
                 {/* Seleção do Período */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="batch-mes-ref" className="text-xs font-semibold">Mês de Referência</Label>
+                    <Label htmlFor="batch-mes-ref" className="text-xs font-semibold">Mês Atual (Emissão)</Label>
                     <Select value={batchMesRef} onValueChange={(v) => {
                       setBatchMesRef(v)
-                      recalculateBatchSelections(v, batchAnoRef)
+                      recalculateBatchSelections(v, batchAnoRef, batchMesPreventiva, batchAnoPreventiva)
                     }}>
                       <SelectTrigger id="batch-mes-ref" className="bg-background text-foreground border-border">
                         <SelectValue placeholder="Mês" />
@@ -2061,10 +2062,10 @@ export default function ContratosPage() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="batch-ano-ref" className="text-xs font-semibold">Ano de Referência</Label>
+                    <Label htmlFor="batch-ano-ref" className="text-xs font-semibold">Ano Atual (Emissão)</Label>
                     <Select value={batchAnoRef} onValueChange={(v) => {
                       setBatchAnoRef(v)
-                      recalculateBatchSelections(batchMesRef, v)
+                      recalculateBatchSelections(batchMesRef, v, batchMesPreventiva, batchAnoPreventiva)
                     }}>
                       <SelectTrigger id="batch-ano-ref" className="bg-background text-foreground border-border">
                         <SelectValue placeholder="Ano" />
@@ -2087,7 +2088,10 @@ export default function ContratosPage() {
                       Mês da Preventiva (para descrição da nota)
                     </Label>
                     <div className="grid grid-cols-2 gap-2">
-                      <Select value={batchMesPreventiva} onValueChange={setBatchMesPreventiva}>
+                      <Select value={batchMesPreventiva} onValueChange={(v) => {
+                        setBatchMesPreventiva(v)
+                        recalculateBatchSelections(batchMesRef, batchAnoRef, v, batchAnoPreventiva)
+                      }}>
                         <SelectTrigger className="bg-background text-foreground border-border h-8">
                           <SelectValue placeholder="Mês" />
                         </SelectTrigger>
@@ -2099,7 +2103,10 @@ export default function ContratosPage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <Select value={batchAnoPreventiva} onValueChange={setBatchAnoPreventiva}>
+                      <Select value={batchAnoPreventiva} onValueChange={(v) => {
+                        setBatchAnoPreventiva(v)
+                        recalculateBatchSelections(batchMesRef, batchAnoRef, batchMesPreventiva, v)
+                      }}>
                         <SelectTrigger className="bg-background text-foreground border-border h-8">
                           <SelectValue placeholder="Ano" />
                         </SelectTrigger>
@@ -2128,7 +2135,7 @@ export default function ContratosPage() {
 
                 <div className="flex-1 overflow-y-auto p-6 bg-card">
                   {(() => {
-                    const mesRef = `${batchMesRef}/${batchAnoRef}`
+                    const mesRef = `${batchMesPreventiva}/${batchAnoPreventiva}`
                     const contratosAtivos = contratos.filter((c) => c.status === "ativo")
 
                     if (batchTab === "nfse") {
@@ -2277,7 +2284,7 @@ export default function ContratosPage() {
                                 const isChecked = batchBoletosSelecionados.includes(c.numero)
                                 const chave = `${c.numero}|${mesRef}`
                                 const nota = notasEmitidasContrato[chave]
-                                const originalDueDate = `${batchAnoRef}-${String(parseInt(batchMesRef, 10) === 12 ? 1 : parseInt(batchMesRef, 10) + 1).padStart(2, "0")}-${String(c.dia_vencimento || 10).padStart(2, "0")}`
+                                const originalDueDate = `${batchAnoRef}-${batchMesRef}-${String(c.dia_vencimento || 10).padStart(2, "0")}`
                                 const calculatedDueDate = calculateDueDate(c.dia_vencimento || 10, batchMesRef, batchAnoRef, feriados)
                                 const wasDelayed = originalDueDate !== calculatedDueDate
                                 
@@ -2444,7 +2451,7 @@ export default function ContratosPage() {
                                         <Badge className="bg-blue-500/10 text-blue-600 border-0 font-mono text-[9px]">Boleto Local: {boleto?.numero}</Badge>
                                       </div>
                                       <p className="text-muted-foreground font-mono text-[10px] mt-1">
-                                        Valor: {formatCurrency(c.valor_mensal)} | Venc.: {boleto?.data_vencimento ? new Date(boleto.data_vencimento + "T00:00:00").toLocaleDateString("pt-BR") : ""}
+                                        Valor: {formatCurrency(c.valor_mensal)} | Venc.: {boleto?.data_vencimento ? formatDate(boleto.data_vencimento) : ""}
                                       </p>
                                     </div>
                                   </label>
