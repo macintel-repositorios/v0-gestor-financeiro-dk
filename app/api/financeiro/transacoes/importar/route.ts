@@ -255,9 +255,10 @@ export async function DELETE(request: Request) {
     }
 
     // 1. Delete transactions from transacoes_financeiras for this account and month
+    const startDate = `${anoMes}-01`
     await pool.execute(
-      "DELETE FROM transacoes_financeiras WHERE conta_id = ? AND DATE_FORMAT(data, '%Y-%m') = ?",
-      [contaId, anoMes]
+      "DELETE FROM transacoes_financeiras WHERE conta_id = ? AND data >= ? AND data <= LAST_DAY(?)",
+      [contaId, startDate, startDate]
     )
 
     // 2. Remove the period record from extratos_importados
