@@ -99,9 +99,19 @@
 
   @media screen {
     html, body {
-      overflow: hidden;
-      height: 100%;
+      min-height: 100%;
     }
+  }
+
+  .min-h-screen {
+    min-height: auto !important;
+    height: auto !important;
+  }
+  
+  /* Melhorar legibilidade de texto em mobile */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   input,
