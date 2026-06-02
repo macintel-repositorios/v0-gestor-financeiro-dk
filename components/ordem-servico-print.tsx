@@ -1,10 +1,10 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Printer, X, Eye } from "lucide-react"
+import { Printer, Eye } from "lucide-react"
 
 interface OrdemServicoPrintProps {
   ordemServico: any
@@ -57,18 +57,6 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
   const [logoImpressao, setLogoImpressao] = useState<LogoConfig | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Estados para redimensionamento
-  const [size, setSize] = useState({ width: 1400, height: 800 })
-  const [isResizing, setIsResizing] = useState(false)
-  const [resizeDirection, setResizeDirection] = useState<string>("")
-  const modalRef = useRef<HTMLDivElement>(null)
-  const startPos = useRef({ x: 0, y: 0, width: 0, height: 0 })
-
-  const minWidth = 800
-  const minHeight = 600
-  const maxWidth = typeof window !== "undefined" ? window.innerWidth - 100 : 1800
-  const maxHeight = typeof window !== "undefined" ? window.innerHeight - 100 : 1000
-
   useEffect(() => {
     fetchConfiguracoes()
   }, [])
@@ -95,65 +83,6 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
       setLoading(false)
     }
   }
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent, direction: string) => {
-      e.preventDefault()
-      setIsResizing(true)
-      setResizeDirection(direction)
-      startPos.current = {
-        x: e.clientX,
-        y: e.clientY,
-        width: size.width,
-        height: size.height,
-      }
-    },
-    [size],
-  )
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isResizing) return
-
-      const deltaX = e.clientX - startPos.current.x
-      const deltaY = e.clientY - startPos.current.y
-
-      let newWidth = size.width
-      let newHeight = size.height
-
-      if (resizeDirection.includes("e")) {
-        newWidth = Math.min(Math.max(startPos.current.width + deltaX, minWidth), maxWidth)
-      }
-      if (resizeDirection.includes("w")) {
-        newWidth = Math.min(Math.max(startPos.current.width - deltaX, minWidth), maxWidth)
-      }
-      if (resizeDirection.includes("s")) {
-        newHeight = Math.min(Math.max(startPos.current.height + deltaY, minHeight), maxHeight)
-      }
-      if (resizeDirection.includes("n")) {
-        newHeight = Math.min(Math.max(startPos.current.height - deltaY, minHeight), maxHeight)
-      }
-
-      setSize({ width: newWidth, height: newHeight })
-    },
-    [isResizing, resizeDirection, size, minWidth, minHeight, maxWidth, maxHeight],
-  )
-
-  const handleMouseUp = useCallback(() => {
-    setIsResizing(false)
-    setResizeDirection("")
-  }, [])
-
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener("mousemove", handleMouseMove)
-      document.addEventListener("mouseup", handleMouseUp)
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove)
-        document.removeEventListener("mouseup", handleMouseUp)
-      }
-    }
-  }, [isResizing, handleMouseMove, handleMouseUp])
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "Não informada"
@@ -719,73 +648,47 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-8 shadow-xl">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <Sheet open={true} onOpenChange={(open) => { if (!open) onClose() }}>
+        <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
             <span className="ml-3">Carregando...</span>
           </div>
-        </div>
-      </div>
+        </SheetContent>
+      </Sheet>
     )
   }
 
   const assinaturaResponsavel = getAssinaturaResponsavel()
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div
-        ref={modalRef}
-        className="bg-white rounded-lg shadow-2xl flex flex-col relative"
-        style={{
-          width: `${size.width}px`,
-          height: `${size.height}px`,
-          maxWidth: "95vw",
-          maxHeight: "95vh",
-        }}
-      >
-        {/* Resize Handles */}
-        <div
-          className="absolute top-0 left-8 right-8 h-2 cursor-ns-resize hover:bg-blue-500/20 transition-colors z-10"
-          onMouseDown={(e) => handleMouseDown(e, "n")}
-        />
-        <div
-          className="absolute bottom-0 left-8 right-8 h-2 cursor-ns-resize hover:bg-blue-500/20 transition-colors z-10"
-          onMouseDown={(e) => handleMouseDown(e, "s")}
-        />
-        <div
-          className="absolute right-0 top-8 bottom-8 w-2 cursor-ew-resize hover:bg-blue-500/20 transition-colors z-10"
-          onMouseDown={(e) => handleMouseDown(e, "e")}
-        />
-        <div
-          className="absolute left-0 top-8 bottom-8 w-2 cursor-ew-resize hover:bg-blue-500/20 transition-colors z-10"
-          onMouseDown={(e) => handleMouseDown(e, "w")}
-        />
-        <div
-          className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize hover:bg-blue-500/30 transition-colors z-10 rounded-tr-lg"
-          onMouseDown={(e) => handleMouseDown(e, "ne")}
-        />
-        <div
-          className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize hover:bg-blue-500/30 transition-colors z-10 rounded-tl-lg"
-          onMouseDown={(e) => handleMouseDown(e, "nw")}
-        />
-        <div
-          className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize hover:bg-blue-500/30 transition-colors z-10 rounded-br-lg"
-          onMouseDown={(e) => handleMouseDown(e, "se")}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize hover:bg-blue-500/30 transition-colors z-10 rounded-bl-lg"
-          onMouseDown={(e) => handleMouseDown(e, "sw")}
-        />
-
-        {/* Header Fixo */}
-        <div className="flex-shrink-0 px-6 py-4 border-b bg-white rounded-t-lg">
-          <h2 className="text-xl font-semibold">Visualizar Ordem de Serviço - {ordemServico.numero}</h2>
-        </div>
+    <Sheet open={true} onOpenChange={(open) => { if (!open) onClose() }}>
+      <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
+        <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+          <SheetTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2 text-foreground font-bold">
+              <Printer className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              Imprimir Ordem de Serviço
+            </span>
+            <div className="flex gap-2 mr-10">
+              <Button onClick={handlePreview} variant="outline" className="h-8 text-xs bg-transparent border-border hover:bg-muted text-foreground">
+                <Eye className="mr-1.5 h-3.5 w-3.5" />
+                Visualizar PDF
+              </Button>
+              <Button onClick={handlePrintNewWindow} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white h-8 text-xs font-semibold">
+                <Printer className="mr-1.5 h-3.5 w-3.5" />
+                Imprimir
+              </Button>
+            </div>
+          </SheetTitle>
+          <SheetDescription className="text-muted-foreground text-sm">
+            Visualização de impressão da Ordem de Serviço Nº {ordemServico.numero}
+          </SheetDescription>
+        </SheetHeader>
 
         {/* Conteúdo com Scroll */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="bg-white">
+        <div className="flex-1 overflow-y-auto p-6 bg-white dark:bg-slate-100 rounded-b-lg text-black">
+          <div>
             <div className="mb-4">
               {(logoImpressao?.dados || logoImpressao?.caminho || timbradoConfig?.logo_url) && (
                 <div className="text-center mb-4 pb-3 border-b-2 border-gray-800">
@@ -941,7 +844,7 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
               <div className="mt-4">
                 <div className="text-center">
                   <h4 className="font-bold mb-2 text-base">Responsável do Cliente</h4>
-                  <div className="border-2 border-black h-28 flex items-center justify-center mb-2 max-w-md mx-auto">
+                  <div className="border-2 border-black h-28 flex items-center justify-center mb-2 max-w-md mx-auto bg-white">
                     {assinaturaResponsavel && (
                       <img
                         src={getAssinaturaCaminho(assinaturaResponsavel) || "/placeholder.svg"}
@@ -970,25 +873,7 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
             </div>
           </div>
         </div>
-
-        {/* Footer Fixo */}
-        <div className="flex-shrink-0 px-6 py-4 border-t bg-gray-50 rounded-b-lg">
-          <div className="flex items-center justify-end space-x-2">
-            <Button onClick={handlePreview} variant="outline" className="bg-green-50 hover:bg-green-100">
-              <Eye className="mr-2 h-4 w-4" />
-              Visualizar
-            </Button>
-            <Button onClick={handlePrintNewWindow} className="bg-blue-600 hover:bg-blue-700">
-              <Printer className="mr-2 h-4 w-4" />
-              Imprimir
-            </Button>
-            <Button onClick={onClose} variant="outline">
-              <X className="mr-2 h-4 w-4" />
-              Fechar
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   )
 }
