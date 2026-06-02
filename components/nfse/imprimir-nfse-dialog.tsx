@@ -193,7 +193,7 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
               size="sm"
               onClick={handlePrint}
               disabled={loading || !dados}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white mr-10"
             >
               <Printer className="h-4 w-4 mr-2" />
               Imprimir

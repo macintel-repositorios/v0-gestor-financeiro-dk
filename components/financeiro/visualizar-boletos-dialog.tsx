@@ -62,8 +62,9 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
   const [enviandoAsaasId, setEnviandoAsaasId] = useState<number | null>(null)
   const { toast } = useToast()
 
-  const extrairNumeroBase = (numero: string): string => {
-    return numero.replace(/-\d+$/, "")
+  const extrairNumeroBase = (numero: string | number): string => {
+    const numStr = String(numero || "")
+    return numStr.replace(/-\d+$/, "")
   }
 
   const handleEnviarAsaas = async (boleto: Boleto) => {

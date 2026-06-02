@@ -190,7 +190,7 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
               size="sm"
               onClick={handlePrint}
               disabled={loading || !data}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white mr-10"
             >
               <Printer className="h-4 w-4 mr-2" />
               Imprimir
