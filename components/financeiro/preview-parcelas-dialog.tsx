@@ -29,6 +29,7 @@ interface PreviewParcelasDialogProps {
   formaPagamento: string
   multaPercentual: number
   jurosMesPercentual: number
+  desconto?: number
   onEmitir: () => void
   onVoltar: () => void
   loading: boolean
@@ -44,6 +45,7 @@ export function PreviewParcelasDialog({
   formaPagamento,
   multaPercentual,
   jurosMesPercentual,
+  desconto,
   onEmitir,
   onVoltar,
   loading,
@@ -134,6 +136,12 @@ export function PreviewParcelasDialog({
                     <span>Juros ao Mês:</span>
                     <span className="font-medium">{jurosMesPercentual.toFixed(2)}%</span>
                   </div>
+                  {desconto !== undefined && desconto > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span>Desconto:</span>
+                      <span className="font-medium text-red-600">-{desconto.toFixed(2)}%</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

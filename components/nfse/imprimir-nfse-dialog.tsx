@@ -9,7 +9,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Loader2, Printer } from "lucide-react"
+import { Loader2, Printer, ExternalLink } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 
 interface ImprimirNfseDialogProps {
@@ -72,7 +72,11 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
   const [loading, setLoading] = useState(false)
   const [dados, setDados] = useState<any>(null)
   const [brasaoBase64, setBrasaoBase64] = useState<string | null>(null)
-  const printRef = useRef<HTMLDivElement>(null)
+  
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [generatingPdf, setGeneratingPdf] = useState(false)
+  
+  const hiddenDivRef = useRef<HTMLDivElement>(null)
 
   // Convert brasao image to base64 so it works consistently in both modal and print window
   useEffect(() => {
@@ -112,107 +116,121 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
     }
   }
 
-  const handlePrint = () => {
-    const content = printRef.current
-    if (!content) return
-
-    const printWindow = window.open("", "_blank")
-    if (!printWindow) return
-
-    // Get the full URL for images so they work in the new window
-    const baseUrl = window.location.origin
-
-    // Clone content and fix relative image paths (skip data: URIs which are already base64)
-    let htmlContent = content.innerHTML
-    htmlContent = htmlContent.replace(
-      /src="\/images\//g,
-      `src="${baseUrl}/images/`
-    )
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>NFS-e ${dados?.nota?.numero_nfse || ""}</title>
-        <style>
-          ${getPrintStyles()}
-          img { max-width: 100%; }
-          @media print {
-            body { padding: 0; margin: 0; }
-            @page { margin: 10mm; size: A4; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-          }
-        </style>
-      </head>
-      <body>${htmlContent}</body>
-      </html>
-    `)
-    printWindow.document.close()
-    // Wait for images to fully load before printing
-    const images = printWindow.document.querySelectorAll("img")
-    let loadedCount = 0
-    const totalImages = images.length
-
-    const tryPrint = () => {
-      loadedCount++
-      if (loadedCount >= totalImages) {
-        setTimeout(() => printWindow.print(), 300)
+  // Clear PDF on close or change
+  useEffect(() => {
+    if (!open) {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+        setPdfUrl(null)
       }
+      setDados(null)
     }
+  }, [open, pdfUrl])
 
-    if (totalImages === 0) {
-      setTimeout(() => printWindow.print(), 300)
-    } else {
-      images.forEach((img) => {
-        if (img.complete) {
-          tryPrint()
-        } else {
-          img.onload = tryPrint
-          img.onerror = tryPrint
+  useEffect(() => {
+    if (dados && !generatingPdf && !pdfUrl) {
+      setGeneratingPdf(true)
+      // Aguardar renderização no DOM off-screen
+      setTimeout(async () => {
+        try {
+          const element = hiddenDivRef.current
+          if (!element) return
+
+          const html2canvas = (await import("html2canvas")).default
+          const { jsPDF } = await import("jspdf")
+
+          const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+          })
+
+          const imgData = canvas.toDataURL("image/png")
+          const pdf = new jsPDF("p", "mm", "a4")
+          const imgWidth = 210
+          const pageHeight = 295
+          const imgHeight = (canvas.height * imgWidth) / canvas.width
+          let heightLeft = imgHeight
+          let position = 0
+
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
+
+          while (heightLeft >= 0) {
+            position = heightLeft - imgHeight
+            pdf.addPage()
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+            heightLeft -= pageHeight
+          }
+
+          const pdfBlob = pdf.output("blob")
+          const url = URL.createObjectURL(pdfBlob)
+          setPdfUrl(url)
+        } catch (error) {
+          console.error("Erro ao gerar PDF:", error)
+        } finally {
+          setGeneratingPdf(false)
         }
-      })
-      // Fallback: print after 3s even if images fail
-      setTimeout(() => printWindow.print(), 3000)
+      }, 600)
     }
-  }
-
-  const nota = dados?.nota
-  const prestador = dados?.prestador
-  const logo = dados?.logo
+  }, [dados, generatingPdf, pdfUrl])
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground">
+      <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
         <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
           <SheetTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2 text-foreground">
               <Printer className="h-5 w-5 text-emerald-500" />
               Imprimir NFS-e
             </span>
-            <Button
-              size="sm"
-              onClick={handlePrint}
-              disabled={loading || !dados}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white mr-10"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
-            </Button>
+            <div className="flex gap-2 mr-6">
+              {pdfUrl && (
+                <Button
+                  size="sm"
+                  onClick={() => window.open(pdfUrl, "_blank")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Abrir em Nova Aba
+                </Button>
+              )}
+            </div>
           </SheetTitle>
         </SheetHeader>
 
-        {loading ? (
+        {loading || generatingPdf ? (
           <div className="flex-1 flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-          </div>
-        ) : nota ? (
-          <div className="flex-1 overflow-y-auto p-6 bg-white dark:bg-slate-100 rounded-b-lg">
-            <div ref={printRef}>
-              <NfsePrefeituraSP nota={nota} prestador={prestador} logo={logo} brasaoBase64={brasaoBase64} />
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-emerald-500 mx-auto mb-4" />
+              <p className="text-muted-foreground text-sm">Gerando visualização em PDF...</p>
             </div>
           </div>
+        ) : pdfUrl ? (
+          <div className="flex-1 bg-white">
+            <iframe
+              src={pdfUrl}
+              className="w-full h-full border-0"
+              title="NFS-e PDF Preview"
+            />
+          </div>
         ) : (
-          <div className="py-8 text-center text-muted-foreground">Nota fiscal nao encontrada</div>
+          <div className="py-8 text-center text-muted-foreground">Nota fiscal não encontrada</div>
+        )}
+
+        {/* Container invisivel para geracao do PDF */}
+        {dados && !pdfUrl && (
+          <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "800px" }}>
+            <div ref={hiddenDivRef} className="p-6 bg-white">
+              <NfsePrefeituraSP
+                nota={dados.nota}
+                prestador={dados.prestador}
+                logo={dados.logo}
+                brasaoBase64={brasaoBase64}
+              />
+            </div>
+          </div>
         )}
       </SheetContent>
     </Sheet>
@@ -222,7 +240,7 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
 // ============================================================
 // Componente que renderiza o layout oficial da Prefeitura de SP
 // ============================================================
-function NfsePrefeituraSP({ nota, prestador, logo, brasaoBase64 }: { nota: any; prestador: any; logo: string | null; brasaoBase64: string | null }) {
+export function NfsePrefeituraSP({ nota, prestador, logo, brasaoBase64 }: { nota: any; prestador: any; logo: string | null; brasaoBase64: string | null }) {
   const isCancelada = nota.status === "cancelada"
 
   const enderecoTomador = [
@@ -641,7 +659,7 @@ const cellStyle: React.CSSProperties = {
 // ============================================================
 // CSS para impressao
 // ============================================================
-function getPrintStyles(): string {
+export function getPrintStyles(): string {
   return `
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
     body {

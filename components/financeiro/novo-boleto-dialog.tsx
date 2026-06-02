@@ -52,8 +52,8 @@ export function NovoBoletoDialog({ open, onOpenChange, notaFiscal, onSuccess }: 
   const [loading, setLoading] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [parcelas, setParcelas] = useState<ParcelaPreview[]>([])
-  const verificarNumeroTimeoutRef = useRef<NodeJS.Timeout>()
-  const verificarVencimentoTimeoutRef = useRef<NodeJS.Timeout>()
+  const verificarNumeroTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+  const verificarVencimentoTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const [vencimentoAlerta, setVencimentoAlerta] = useState<{
     mensagem: string
     dataSugerida: string
