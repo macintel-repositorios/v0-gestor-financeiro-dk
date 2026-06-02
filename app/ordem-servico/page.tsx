@@ -422,13 +422,6 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
       {/* Header */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-4">
-          {logoMenu && (
-            <img
-              src={logoMenu || "/placeholder.svg"}
-              alt="Logo"
-              className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
-            />
-          )}
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
               Ordem de Serviço
@@ -448,128 +441,128 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7">
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "todas" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border/80 shadow-xs hover:border-indigo-500/50 hover:bg-muted/10 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "todas" ? "ring-2 ring-indigo-500 ring-offset-1 ring-offset-background border-indigo-500/40" : ""
           }`}
           onClick={() => handleCardClick("todas")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total</CardTitle>
-            <Wrench className="h-4 w-4 text-muted-foreground/70" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+            <CardTitle className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Total</CardTitle>
+            <Wrench className="h-3.5 w-3.5 text-indigo-500" />
           </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.total}</div>
-            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">ordens cadastradas</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg lg:text-xl font-bold text-foreground">{stats.total}</div>
+            <p className="text-[9px] text-muted-foreground">cadastradas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "aberta" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border/80 shadow-xs hover:border-yellow-500/50 hover:bg-muted/10 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "aberta" ? "ring-2 ring-yellow-500 ring-offset-1 ring-offset-background border-yellow-500/40" : ""
           }`}
           onClick={() => handleCardClick("aberta")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Abertas</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground/70" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+            <CardTitle className="text-xs font-semibold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">Abertas</CardTitle>
+            <Clock className="h-3.5 w-3.5 text-yellow-500" />
           </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.abertas}</div>
-            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">aguardando</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg lg:text-xl font-bold text-foreground">{stats.abertas}</div>
+            <p className="text-[9px] text-muted-foreground">aguardando</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "agendada" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border/80 shadow-xs hover:border-cyan-500/50 hover:bg-muted/10 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "agendada" ? "ring-2 ring-cyan-500 ring-offset-1 ring-offset-background border-cyan-500/40" : ""
           }`}
           onClick={() => handleCardClick("agendada")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Agendadas</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground/70" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+            <CardTitle className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">Agendadas</CardTitle>
+            <Calendar className="h-3.5 w-3.5 text-cyan-500" />
           </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.agendadas}</div>
-            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">visitas agendadas</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg lg:text-xl font-bold text-foreground">{stats.agendadas}</div>
+            <p className="text-[9px] text-muted-foreground">visitas agendadas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "em_andamento" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border/80 shadow-xs hover:border-blue-500/50 hover:bg-muted/10 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "em_andamento" ? "ring-2 ring-blue-500 ring-offset-1 ring-offset-background border-blue-500/40" : ""
           }`}
           onClick={() => handleCardClick("em_andamento")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Andamento</CardTitle>
-            <PlayCircle className="h-4 w-4 text-muted-foreground/70" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+            <CardTitle className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Andamento</CardTitle>
+            <PlayCircle className="h-3.5 w-3.5 text-blue-500" />
           </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.em_andamento}</div>
-            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">executando</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg lg:text-xl font-bold text-foreground">{stats.em_andamento}</div>
+            <p className="text-[9px] text-muted-foreground">executando</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "concluida" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border/80 shadow-xs hover:border-green-500/50 hover:bg-muted/10 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "concluida" ? "ring-2 ring-green-500 ring-offset-1 ring-offset-background border-green-500/40" : ""
           }`}
           onClick={() => handleCardClick("concluida")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Concluídas</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground/70" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+            <CardTitle className="text-xs font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider">Concluídas</CardTitle>
+            <CheckCircle className="h-3.5 w-3.5 text-green-500" />
           </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.concluidas}</div>
-            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">finalizadas</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg lg:text-xl font-bold text-foreground">{stats.concluidas}</div>
+            <p className="text-[9px] text-muted-foreground">finalizadas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            tipoServicoFilter === "preventiva" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border/80 shadow-xs hover:border-purple-500/50 hover:bg-muted/10 transition-all duration-200 bg-card cursor-pointer select-none ${
+            tipoServicoFilter === "preventiva" ? "ring-2 ring-purple-500 ring-offset-1 ring-offset-background border-purple-500/40" : ""
           }`}
           onClick={() => handleTipoServicoCardClick("preventiva")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Preventivas</CardTitle>
-            <Wrench className="h-4 w-4 text-muted-foreground/70" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+            <CardTitle className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Preventivas</CardTitle>
+            <Wrench className="h-3.5 w-3.5 text-purple-500" />
           </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.preventivas}</div>
-            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">manutenções preventivas</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg lg:text-xl font-bold text-foreground">{stats.preventivas}</div>
+            <p className="text-[9px] text-muted-foreground">preventivas</p>
           </CardContent>
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            tipoServicoFilter === "manutencao" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border/80 shadow-xs hover:border-indigo-500/50 hover:bg-muted/10 transition-all duration-200 bg-card cursor-pointer select-none ${
+            tipoServicoFilter === "manutencao" ? "ring-2 ring-indigo-500 ring-offset-1 ring-offset-background border-indigo-500/40" : ""
           }`}
           onClick={() => handleTipoServicoCardClick("manutencao")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Manutenções</CardTitle>
-            <Wrench className="h-4 w-4 text-muted-foreground/70" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+            <CardTitle className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Manutenções</CardTitle>
+            <Wrench className="h-3.5 w-3.5 text-indigo-500" />
           </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl lg:text-2xl font-bold text-foreground">{stats.manutencoes}</div>
-            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">manutenções corretivas</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg lg:text-xl font-bold text-foreground">{stats.manutencoes}</div>
+            <p className="text-[9px] text-muted-foreground">corretivas</p>
           </CardContent>
         </Card>
       </div>
 
       {/* OS Management Card */}
-      <Card className="border border-border shadow-sm overflow-hidden bg-card">
-        <CardHeader className="bg-muted/40 border-b border-border p-4 flex flex-row items-center justify-between space-y-0">
+      <Card className="border border-border/80 shadow-md overflow-hidden bg-card hover:border-indigo-500/20 transition-all duration-300">
+        <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg p-4 flex flex-row items-center justify-between space-y-0 dark:from-blue-900/50 dark:to-indigo-900/50 dark:border-b dark:border-border">
           <div className="flex items-center gap-2">
-            <Wrench className="h-5 w-5 text-muted-foreground" />
+            <Wrench className="h-5 w-5 text-white" />
             <div>
-              <CardTitle className="text-sm font-semibold text-foreground">Gestão de Ordens de Serviço</CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5 hidden md:block">
+              <CardTitle className="text-white text-base lg:text-lg font-bold">Gestão de Ordens de Serviço</CardTitle>
+              <CardDescription className="text-blue-100 text-xs mt-0.5 hidden md:block">
                 Gerencie e acompanhe todas as ordens de serviço
               </CardDescription>
             </div>
@@ -579,7 +572,7 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
               onClick={() => setLoteDialogOpen(true)}
               variant="outline"
               size="sm"
-              className="border-border bg-card hover:bg-muted text-foreground h-8 px-3 text-xs"
+              className="border-white/20 bg-background/90 text-foreground hover:bg-background h-8 px-3 text-xs rounded-xl"
             >
               <CalendarRange className="h-4 w-4 md:mr-2" />
               <span className="hidden md:inline">Preventivas em Lote</span>
@@ -588,7 +581,7 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
               onClick={() => setIsNovaOSOpen(true)}
               variant="outline"
               size="sm"
-              className="border-border bg-card hover:bg-muted text-foreground h-8 px-3 text-xs"
+              className="border-white/20 bg-background/90 text-foreground hover:bg-background h-8 px-3 text-xs rounded-xl"
             >
               <Plus className="h-4 w-4 md:mr-2" />
               <span className="hidden md:inline">Nova OS</span>

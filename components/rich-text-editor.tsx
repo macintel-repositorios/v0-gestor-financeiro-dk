@@ -240,28 +240,28 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
   }, [])
 
   return (
-    <div className="border rounded-lg">
+    <div className="border border-border rounded-lg bg-background text-foreground overflow-hidden">
       {/* Toolbar */}
-      <div className="border-b p-2 flex flex-wrap gap-1 bg-gray-50">
+      <div className="border-b border-border p-2 flex flex-wrap gap-1 bg-muted/40">
         {/* Undo/Redo */}
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("undo")} title="Desfazer">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("undo")} title="Desfazer" className="hover:bg-muted text-foreground">
           <Undo className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("redo")} title="Refazer">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("redo")} title="Refazer" className="hover:bg-muted text-foreground">
           <Redo className="h-4 w-4" />
         </Button>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-6 bg-border" />
 
         {/* Font Family */}
         <select
-          className="px-2 py-1 text-sm border rounded"
+          className="px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none"
           onChange={(e) => execCommand("fontName", e.target.value)}
           title="Fonte"
         >
-          <option value="">Fonte</option>
+          <option value="" className="bg-background text-foreground">Fonte</option>
           {fontFamilies.map((font) => (
-            <option key={font.value} value={font.value}>
+            <option key={font.value} value={font.value} className="bg-background text-foreground">
               {font.label}
             </option>
           ))}
@@ -269,56 +269,56 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
 
         {/* Font Size */}
         <select
-          className="px-2 py-1 text-sm border rounded"
+          className="px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none"
           onChange={(e) => execCommand("fontSize", e.target.value)}
           title="Tamanho"
         >
-          <option value="">Tamanho</option>
+          <option value="" className="bg-background text-foreground">Tamanho</option>
           {fontSizes.map((size) => (
-            <option key={size.value} value={size.value}>
+            <option key={size.value} value={size.value} className="bg-background text-foreground">
               {size.label}
             </option>
           ))}
         </select>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-6 bg-border" />
 
         {/* Text Formatting */}
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("bold")} title="Negrito">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("bold")} title="Negrito" className="hover:bg-muted text-foreground">
           <Bold className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("italic")} title="Itálico">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("italic")} title="Itálico" className="hover:bg-muted text-foreground">
           <Italic className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("underline")} title="Sublinhado">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("underline")} title="Sublinhado" className="hover:bg-muted text-foreground">
           <Underline className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("strikeThrough")} title="Riscado">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("strikeThrough")} title="Riscado" className="hover:bg-muted text-foreground">
           <Strikethrough className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("subscript")} title="Subscrito">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("subscript")} title="Subscrito" className="hover:bg-muted text-foreground">
           <Subscript className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("superscript")} title="Sobrescrito">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("superscript")} title="Sobrescrito" className="hover:bg-muted text-foreground">
           <Superscript className="h-4 w-4" />
         </Button>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-6 bg-border" />
 
         {/* Text Color */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button type="button" variant="ghost" size="sm" title="Cor do texto">
+            <Button type="button" variant="ghost" size="sm" title="Cor do texto" className="hover:bg-muted text-foreground">
               <Type className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64">
+          <PopoverContent className="w-64 bg-popover border-border">
             <div className="grid grid-cols-6 gap-1">
               {colors.map((color) => (
                 <button
                   key={color}
                   type="button"
-                  className="w-8 h-8 rounded border border-gray-300 hover:scale-110 transition-transform"
+                  className="w-8 h-8 rounded border border-border hover:scale-110 transition-transform"
                   style={{ backgroundColor: color }}
                   onClick={() => execCommand("foreColor", color)}
                   title={color}
@@ -331,17 +331,17 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         {/* Background Color */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button type="button" variant="ghost" size="sm" title="Cor de fundo">
+            <Button type="button" variant="ghost" size="sm" title="Cor de fundo" className="hover:bg-muted text-foreground">
               <Palette className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64">
+          <PopoverContent className="w-64 bg-popover border-border">
             <div className="grid grid-cols-6 gap-1">
               {colors.map((color) => (
                 <button
                   key={color}
                   type="button"
-                  className="w-8 h-8 rounded border border-gray-300 hover:scale-110 transition-transform"
+                  className="w-8 h-8 rounded border border-border hover:scale-110 transition-transform"
                   style={{ backgroundColor: color }}
                   onClick={() => execCommand("backColor", color)}
                   title={color}
@@ -357,11 +357,12 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("removeFormat")}
           title="Remover formatação"
+          className="hover:bg-muted text-foreground"
         >
           <RemoveFormatting className="h-4 w-4" />
         </Button>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-6 bg-border" />
 
         {/* Alignment */}
         <Button
@@ -370,6 +371,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("justifyLeft")}
           title="Alinhar à esquerda"
+          className="hover:bg-muted text-foreground"
         >
           <AlignLeft className="h-4 w-4" />
         </Button>
@@ -379,6 +381,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("justifyCenter")}
           title="Centralizar"
+          className="hover:bg-muted text-foreground"
         >
           <AlignCenter className="h-4 w-4" />
         </Button>
@@ -388,14 +391,15 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("justifyRight")}
           title="Alinhar à direita"
+          className="hover:bg-muted text-foreground"
         >
           <AlignRight className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("justifyFull")} title="Justificar">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("justifyFull")} title="Justificar" className="hover:bg-muted text-foreground">
           <AlignJustify className="h-4 w-4" />
         </Button>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-6 bg-border" />
 
         {/* Lists and Paragraphs */}
         <Button
@@ -404,6 +408,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("insertUnorderedList")}
           title="Lista com marcadores"
+          className="hover:bg-muted text-foreground"
         >
           <List className="h-4 w-4" />
         </Button>
@@ -413,17 +418,18 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("insertOrderedList")}
           title="Lista numerada"
+          className="hover:bg-muted text-foreground"
         >
           <ListOrdered className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("indent")} title="Aumentar recuo">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("indent")} title="Aumentar recuo" className="hover:bg-muted text-foreground">
           <Indent className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("outdent")} title="Diminuir recuo">
+        <Button type="button" variant="ghost" size="sm" onClick={() => execCommand("outdent")} title="Diminuir recuo" className="hover:bg-muted text-foreground">
           <Outdent className="h-4 w-4" />
         </Button>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-6 bg-border" />
 
         {/* Paragraph Formatting */}
         <Button
@@ -432,6 +438,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("insertParagraph")}
           title="Novo parágrafo"
+          className="hover:bg-muted text-foreground"
         >
           <PlusCircle className="h-4 w-4" />
         </Button>
@@ -441,6 +448,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("formatBlock", "blockquote")}
           title="Citação"
+          className="hover:bg-muted text-foreground"
         >
           <Quote className="h-4 w-4" />
         </Button>
@@ -450,20 +458,21 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           size="sm"
           onClick={() => execCommand("formatBlock", "pre")}
           title="Código"
+          className="hover:bg-muted text-foreground"
         >
           <Code className="h-4 w-4" />
         </Button>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-6 bg-border" />
 
         {/* Link */}
         <Dialog open={linkDialog} onOpenChange={setLinkDialog}>
           <DialogTrigger asChild>
-            <Button type="button" variant="ghost" size="sm" title="Inserir link">
+            <Button type="button" variant="ghost" size="sm" title="Inserir link" className="hover:bg-muted text-foreground">
               <LinkIcon className="h-4 w-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-popover border-border text-foreground">
             <DialogHeader>
               <DialogTitle>Inserir Link</DialogTitle>
             </DialogHeader>
@@ -475,6 +484,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
                   value={linkText}
                   onChange={(e) => setLinkText(e.target.value)}
                   placeholder="Digite o texto que aparecerá"
+                  className="bg-background text-foreground border-border"
                 />
               </div>
               <div>
@@ -484,9 +494,10 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="https://exemplo.com"
+                  className="bg-background text-foreground border-border"
                 />
               </div>
-              <Button onClick={insertLink} disabled={!linkUrl || !linkText}>
+              <Button onClick={insertLink} disabled={!linkUrl || !linkText} className="bg-primary text-primary-foreground">
                 Inserir Link
               </Button>
             </div>
@@ -496,16 +507,16 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         {/* Image */}
         <Dialog open={imageDialog} onOpenChange={setImageDialog}>
           <DialogTrigger asChild>
-            <Button type="button" variant="ghost" size="sm" title="Inserir imagem">
+            <Button type="button" variant="ghost" size="sm" title="Inserir imagem" className="hover:bg-muted text-foreground">
               <ImageIcon className="h-4 w-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md bg-popover border-border text-foreground">
             <DialogHeader>
               <DialogTitle>Inserir Imagem</DialogTitle>
             </DialogHeader>
             <Tabs defaultValue="url" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-2 bg-muted">
                 <TabsTrigger value="url">Por URL</TabsTrigger>
                 <TabsTrigger value="upload">Upload</TabsTrigger>
               </TabsList>
@@ -517,13 +528,14 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://exemplo.com/imagem.jpg"
+                    className="bg-background text-foreground border-border"
                   />
                 </div>
               </TabsContent>
               <TabsContent value="upload" className="space-y-4">
                 <div>
                   <Label htmlFor="imageFile">Selecionar arquivo</Label>
-                  <Input id="imageFile" type="file" accept="image/*" onChange={handleFileChange} />
+                  <Input id="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="bg-background text-foreground border-border" />
                 </div>
               </TabsContent>
             </Tabs>
@@ -535,6 +547,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
                   value={imageAlt}
                   onChange={(e) => setImageAlt(e.target.value)}
                   placeholder="Descrição da imagem"
+                  className="bg-background text-foreground border-border"
                 />
               </div>
               <div>
@@ -545,7 +558,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
                 <Label>Altura: {imageHeight[0]}px</Label>
                 <Slider value={imageHeight} onValueChange={setImageHeight} max={600} min={50} step={10} />
               </div>
-              <Button onClick={insertImage} disabled={!imageUrl && !imageFile}>
+              <Button onClick={insertImage} disabled={!imageUrl && !imageFile} className="bg-primary text-primary-foreground">
                 Inserir Imagem
               </Button>
             </div>
@@ -556,11 +569,11 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         {selectedImage && (
           <Popover open={imageSettingsOpen} onOpenChange={setImageSettingsOpen}>
             <PopoverTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" title="Configurar imagem selecionada">
+              <Button type="button" variant="ghost" size="sm" title="Configurar imagem selecionada" className="hover:bg-muted text-foreground">
                 <Settings className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80">
+            <PopoverContent className="w-80 bg-popover border-border text-foreground">
               <div className="space-y-4">
                 <h4 className="font-medium">Configurar Imagem</h4>
                 <div>
@@ -578,9 +591,10 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
                     value={imageAlt}
                     onChange={(e) => setImageAlt(e.target.value)}
                     placeholder="Descrição da imagem"
+                    className="bg-background text-foreground border-border"
                   />
                 </div>
-                <Button onClick={updateSelectedImage}>Aplicar Alterações</Button>
+                <Button onClick={updateSelectedImage} className="bg-primary text-primary-foreground">Aplicar Alterações</Button>
               </div>
             </PopoverContent>
           </Popover>
@@ -588,11 +602,11 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       </div>
 
       {/* Editor */}
-      <div className="relative">
+      <div className="relative bg-background">
         <div
           ref={editorRef}
           contentEditable
-          className="min-h-[300px] p-4 focus:outline-none prose max-w-none"
+          className="min-h-[300px] p-4 focus:outline-none prose prose-invert max-w-none text-foreground bg-background"
           onInput={handleInput}
           onFocus={handleFocus}
           onBlur={handleBlur}
@@ -600,7 +614,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           suppressContentEditableWarning
         />
         {showPlaceholder && placeholder && (
-          <div className="absolute top-4 left-4 text-gray-400 pointer-events-none select-none">{placeholder}</div>
+          <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none select-none">{placeholder}</div>
         )}
       </div>
     </div>

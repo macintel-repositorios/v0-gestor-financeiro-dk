@@ -325,17 +325,14 @@ export default function ClientesPage() {
   const hasActiveFilter = searchTerm.trim() !== "" || distanceFilter !== "all" || cardFilter !== "all"
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full text-foreground relative overflow-hidden">
+      {/* Decorative blurred background blobs */}
+      <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse duration-10000" />
+      <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-indigo-500/5 blur-[150px] pointer-events-none -z-10 animate-pulse duration-12000" />
+
       {/* Header */}
-      <div className="flex flex-col gap-4 mb-6">
+      <div className="flex flex-col gap-4 mb-6 border-b border-border/60 pb-5">
         <div className="flex items-center gap-4">
-          {logoMenu && (
-            <img
-              src={logoMenu || "/placeholder.svg"}
-              alt="Logo"
-              className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
-            />
-          )}
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
               Clientes
@@ -354,14 +351,15 @@ export default function ClientesPage() {
       {/* Stats Cards — clicáveis como filtros */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            cardFilter === "all" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`group relative border border-border shadow-xs hover:border-indigo-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-indigo-500/30 ${
+            cardFilter === "all" ? "ring-2 ring-indigo-500 border-indigo-500/40" : ""
           }`}
           onClick={() => handleCardFilterToggle("all")}
         >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-indigo-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total de Clientes</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Total de Clientes</CardTitle>
+            <Users className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{clientes.length}</div>
@@ -372,14 +370,15 @@ export default function ClientesPage() {
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            cardFilter === "empresas" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`group relative border border-border shadow-xs hover:border-blue-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-blue-500/30 ${
+            cardFilter === "empresas" ? "ring-2 ring-blue-500 border-blue-500/40" : ""
           }`}
           onClick={() => handleCardFilterToggle("empresas")}
         >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-blue-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Empresas</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Empresas</CardTitle>
+            <Building2 className="h-4 w-4 text-blue-500 group-hover:scale-110 transition-transform" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">
@@ -390,14 +389,15 @@ export default function ClientesPage() {
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            cardFilter === "com_contrato" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`group relative border border-border shadow-xs hover:border-emerald-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-emerald-500/30 ${
+            cardFilter === "com_contrato" ? "ring-2 ring-emerald-500 border-emerald-500/40" : ""
           }`}
           onClick={() => handleCardFilterToggle("com_contrato")}
         >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-emerald-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Com Contrato</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Com Contrato</CardTitle>
+            <FileText className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">
@@ -408,14 +408,15 @@ export default function ClientesPage() {
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            cardFilter === "sem_contrato" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`group relative border border-border shadow-xs hover:border-orange-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-orange-500/30 ${
+            cardFilter === "sem_contrato" ? "ring-2 ring-orange-500 border-orange-500/40" : ""
           }`}
           onClick={() => handleCardFilterToggle("sem_contrato")}
         >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-orange-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Sem Contrato</CardTitle>
-            <UserX className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider">Sem Contrato</CardTitle>
+            <UserX className="h-4 w-4 text-orange-500 group-hover:scale-110 transition-transform" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">
@@ -745,11 +746,11 @@ export default function ClientesPage() {
         {/* ════════════════════════════════════════════════════════════════════
             DESKTOP VIEW — ResizableTable (hidden on mobile)
            ════════════════════════════════════════════════════════════════════ */}
-        <Card className="border border-border shadow-sm overflow-hidden hidden md:block">
-          <CardHeader className="bg-muted/40 border-b border-border p-4 flex flex-row items-center justify-between space-y-0">
+        <Card className="border border-border/80 shadow-md overflow-hidden hidden md:block hover:border-indigo-500/20 transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-blue-900/50 dark:to-indigo-900/50 dark:border-b dark:border-border">
             <div>
-              <CardTitle className="text-sm font-semibold text-foreground">Lista de Clientes</CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+              <CardTitle className="text-white text-base lg:text-lg font-bold">Lista de Clientes</CardTitle>
+              <CardDescription className="text-blue-100 text-xs mt-0.5">
                 {filteredClientes.length} cliente{filteredClientes.length !== 1 ? "s" : ""} encontrado{filteredClientes.length !== 1 ? "s" : ""} • Ordenados por contrato e nome
               </CardDescription>
             </div>

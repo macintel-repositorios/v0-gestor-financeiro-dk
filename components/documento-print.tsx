@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Printer, X } from "lucide-react"
+import { Printer, X, FileText, Loader2, ExternalLink } from "lucide-react"
 
 interface Documento {
   id: number
@@ -62,6 +62,7 @@ interface Logo {
 interface DocumentoPrintProps {
   documento: Documento | null
   isOpen: boolean
+  mode?: "visualizar" | "imprimir"
   onClose: () => void
 }
 
@@ -90,11 +91,24 @@ const formatDateExtended = (dateString: string): string => {
   return `${day} de ${month} de ${year}`
 }
 
-export function DocumentoPrint({ documento, isOpen, onClose }: DocumentoPrintProps) {
+export function DocumentoPrint({ documento, isOpen, mode = "visualizar", onClose }: DocumentoPrintProps) {
   const [configuracaoTimbrado, setConfiguracaoTimbrado] = useState<ConfiguracaoTimbrado | null>(null)
   const [logos, setLogos] = useState<Logo[]>([])
   const [loading, setLoading] = useState(true)
   const [clienteCompleto, setClienteCompleto] = useState<any>(null)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [generatingPdf, setGeneratingPdf] = useState(false)
+  const hiddenDivRef = useRef<HTMLDivElement>(null)
+
+  // Limpar PDF ao fechar
+  useEffect(() => {
+    if (!isOpen) {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+        setPdfUrl(null)
+      }
+    }
+  }, [isOpen, pdfUrl])
 
   // Estados para redimensionamento
   const [size, setSize] = useState({ width: 1400, height: 800 })
@@ -116,6 +130,55 @@ export function DocumentoPrint({ documento, isOpen, onClose }: DocumentoPrintPro
       }
     }
   }, [isOpen, documento?.cliente_id])
+
+  // PDF Generator Effect
+  useEffect(() => {
+    if (isOpen && mode === "imprimir" && documento && configuracaoTimbrado && logos.length > 0 && !loading && !generatingPdf && !pdfUrl) {
+      setGeneratingPdf(true)
+      setTimeout(async () => {
+        try {
+          const element = hiddenDivRef.current
+          if (!element) return
+
+          const html2canvas = (await import("html2canvas")).default
+          const { jsPDF } = await import("jspdf")
+
+          const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+          })
+
+          const imgData = canvas.toDataURL("image/png")
+          const pdf = new jsPDF("p", "mm", "a4")
+          const imgWidth = 210
+          const pageHeight = 297
+          const imgHeight = (canvas.height * imgWidth) / canvas.width
+          let heightLeft = imgHeight
+          let position = 0
+
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
+
+          while (heightLeft > 10) {
+            position = heightLeft - imgHeight
+            pdf.addPage()
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+            heightLeft -= pageHeight
+          }
+
+          const pdfBlob = pdf.output("blob")
+          const url = URL.createObjectURL(pdfBlob)
+          setPdfUrl(url)
+        } catch (error) {
+          console.error("Erro ao gerar PDF do documento:", error)
+        } finally {
+          setGeneratingPdf(false)
+        }
+      }, 600)
+    }
+  }, [isOpen, mode, documento, configuracaoTimbrado, logos, loading, generatingPdf, pdfUrl])
 
   const loadConfiguracaoTimbrado = async () => {
     try {
@@ -623,149 +686,278 @@ export function DocumentoPrint({ documento, isOpen, onClose }: DocumentoPrintPro
   const sindico = clienteCompleto?.sindico || documento.cliente_sindico || ""
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent
-        className="w-full sm:max-w-[80vw] h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300"
-      >
-        <SheetHeader className="flex-shrink-0 px-6 py-4 border-b border-border bg-muted/20">
-          <SheetTitle className="text-foreground">Visualizar Documento para Impressão</SheetTitle>
-        </SheetHeader>
+    <>
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent
+          className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300"
+        >
+          <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-slate-900 to-zinc-950 text-white flex-shrink-0">
+            <SheetTitle className="text-white flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-500" />
+                {mode === "imprimir" ? "Imprimir Documento" : "Visualizar Documento"}
+              </span>
+              {mode === "imprimir" && pdfUrl && (
+                <div className="flex gap-2 mr-6">
+                  <Button
+                    size="sm"
+                    onClick={() => window.open(pdfUrl, "_blank")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Abrir em Nova Aba
+                  </Button>
+                </div>
+              )}
+            </SheetTitle>
+          </SheetHeader>
 
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Carregando configurações...</p>
+          {loading || (mode === "imprimir" && generatingPdf) ? (
+            <div className="flex items-center justify-center flex-1">
+              <div className="text-center">
+                <Loader2 className="animate-spin rounded-full h-8 w-8 text-blue-600 mx-auto mb-4"></Loader2>
+                <p className="text-muted-foreground">
+                  {mode === "imprimir" ? "Gerando visualização em PDF..." : "Carregando configurações..."}
+                </p>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="flex-1 flex flex-col min-h-0">
-            {/* Preview do Documento */}
-            <div className="flex-1 bg-white text-black border-t border-border overflow-hidden flex flex-col">
-              <div className="flex-1 overflow-y-auto p-8">
-                {/* Cabeçalho Preview - SEM código e versão */}
-                <div className="text-center mb-8 border-b pb-6">
-                  {logoImpressao && logoImpressao.dados && (
-                    <div className="mb-6">
-                      <img
-                        src={logoImpressao.dados || "/placeholder.svg"}
-                        alt="Logo da empresa"
-                        className="mx-auto max-h-20 object-contain"
-                      />
+          ) : mode === "imprimir" && pdfUrl ? (
+            <div className="flex-1 bg-white">
+              <iframe src={pdfUrl} className="w-full h-full border-0" title="PDF Preview" />
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col min-h-0">
+              {/* Preview do Documento */}
+              <div className="flex-1 bg-white text-black border-t border-border overflow-hidden flex flex-col">
+                <div className="flex-1 overflow-y-auto p-8">
+                  {/* Cabeçalho Preview - SEM código e versão */}
+                  <div className="text-center mb-8 border-b pb-6">
+                    {logoImpressao && logoImpressao.dados && (
+                      <div className="mb-6">
+                        <img
+                          src={logoImpressao.dados || "/placeholder.svg"}
+                          alt="Logo da empresa"
+                          className="mx-auto max-h-20 object-contain"
+                        />
+                      </div>
+                    )}
+
+                    {configuracaoTimbrado?.cabecalho && (
+                      <div className="mb-6 text-sm text-gray-600 leading-relaxed">{configuracaoTimbrado.cabecalho}</div>
+                    )}
+
+                    <h1 className="text-2xl font-bold mb-4 text-gray-900">{documento.titulo}</h1>
+                  </div>
+
+                  {/* Informações do Cliente Preview */}
+                  {documento.cliente_nome && (
+                    <div className="bg-gray-50 p-4 rounded-lg mb-6 border">
+                      <h3 className="font-bold mb-2 text-gray-800">Ao</h3>
+                      <div className="space-y-1 text-sm leading-tight">
+                        <div>
+                          <strong>Nome:</strong> {documento.cliente_nome}
+                        </div>
+                        {documento.cliente_endereco && (
+                          <div>
+                            <strong>Endereço:</strong> {documento.cliente_endereco}
+                          </div>
+                        )}
+                        {documento.cliente_telefone && (
+                          <div>
+                            <strong>Telefone:</strong> {documento.cliente_telefone}
+                          </div>
+                        )}
+                        {documento.cliente_email && (
+                          <div>
+                            <strong>E-mail:</strong> {documento.cliente_email}
+                          </div>
+                        )}
+                        {sindico && (
+                          <div className="pt-2">
+                            <strong>A/C Sr(a):</strong> {sindico}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
-                  {configuracaoTimbrado?.cabecalho && (
-                    <div className="mb-6 text-sm text-gray-600 leading-relaxed">{configuracaoTimbrado.cabecalho}</div>
-                  )}
+                  {/* Conteúdo Completo do Documento */}
+                  <div className="mb-8">
+                    <div
+                      className="prose max-w-none text-sm leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: documento.conteudo }}
+                    />
+                  </div>
 
-                  <h1 className="text-2xl font-bold mb-4 text-gray-900">{documento.titulo}</h1>
-                </div>
-
-                {/* Informações do Cliente Preview */}
-                {documento.cliente_nome && (
-                  <div className="bg-gray-50 p-4 rounded-lg mb-6 border">
-                    <h3 className="font-bold mb-2 text-gray-800">Ao</h3>
-                    <div className="space-y-1 text-sm leading-tight">
-                      <div>
-                        <strong>Nome:</strong> {documento.cliente_nome}
+                  {/* Seção de Rodapé com Data e Informações da Empresa - Preview */}
+                  <div className="flex justify-between items-start py-4 border-t border-gray-300 mb-6">
+                    <div className="w-1/2">{/* Lado esquerdo vazio */}</div>
+                    <div className="w-1/2 text-center">
+                      <div className="text-sm text-gray-600 mb-3">
+                        <strong>São Paulo, {formatDateExtended(documento.created_at)}</strong>
                       </div>
-                      {documento.cliente_endereco && (
-                        <div>
-                          <strong>Endereço:</strong> {documento.cliente_endereco}
-                        </div>
-                      )}
-                      {documento.cliente_telefone && (
-                        <div>
-                          <strong>Telefone:</strong> {documento.cliente_telefone}
-                        </div>
-                      )}
-                      {documento.cliente_email && (
-                        <div>
-                          <strong>E-mail:</strong> {documento.cliente_email}
-                        </div>
-                      )}
-                      {sindico && (
-                        <div className="pt-2">
-                          <strong>A/C Sr(a):</strong> {sindico}
+                      {configuracaoTimbrado && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          {configuracaoTimbrado.empresa_nome && <div>{configuracaoTimbrado.empresa_nome}</div>}
+                          {configuracaoTimbrado.empresa_cnpj && <div>{configuracaoTimbrado.empresa_cnpj}</div>}
+                          {configuracaoTimbrado.empresa_representante_legal && (
+                            <div>{configuracaoTimbrado.empresa_representante_legal}</div>
+                          )}
+                          {configuracaoTimbrado.empresa_email && <div>{configuracaoTimbrado.empresa_email}</div>}
                         </div>
                       )}
                     </div>
                   </div>
-                )}
 
-                {/* Conteúdo Completo do Documento */}
-                <div className="mb-8">
-                  <div
-                    className="prose max-w-none text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: documento.conteudo }}
-                  />
+                  {/* Observações */}
+                  {documento.observacoes && (
+                    <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <h4 className="font-bold mb-2 text-yellow-800">Observações:</h4>
+                      <p className="text-sm text-yellow-700">{documento.observacoes}</p>
+                    </div>
+                  )}
+
+                  {/* Rodapé Preview */}
+                  {configuracaoTimbrado && (configuracaoTimbrado.rodape || configuracaoTimbrado.rodape_texto) && (
+                    <div className="border-t-2 border-gray-800 pt-4 text-center">
+                      <div className="text-xs font-bold space-y-1">
+                        {configuracaoTimbrado.rodape && (
+                          <div dangerouslySetInnerHTML={{ __html: configuracaoTimbrado.rodape }} />
+                        )}
+                        {configuracaoTimbrado.rodape_texto && <div>{configuracaoTimbrado.rodape_texto}</div>}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Botões de Ação */}
+              <div className="flex-shrink-0 flex justify-between items-center border-t border-border bg-muted/20 px-6 py-4">
+                <div className="text-xs text-muted-foreground space-y-0.5 font-medium">
+                  <div>
+                    <strong>Configuração:</strong> {configuracaoTimbrado?.tamanho_papel || "A4"} -{" "}
+                    {configuracaoTimbrado?.orientacao || "Retrato"}
+                  </div>
+                  <div>
+                    <strong>Margens:</strong> {configuracaoTimbrado?.margem_superior || 20}mm
+                  </div>
                 </div>
 
-                {/* Seção de Rodapé com Data e Informações da Empresa - Preview */}
-                <div className="flex justify-between items-start py-4 border-t border-gray-300 mb-6">
-                  <div className="w-1/2">{/* Lado esquerdo vazio */}</div>
-                  <div className="w-1/2 text-center">
-                    <div className="text-sm text-gray-600 mb-3">
-                      <strong>São Paulo, {formatDateExtended(documento.created_at)}</strong>
+                <div className="flex gap-3">
+                  <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Printer className="h-4 w-4 mr-2" />
+                    Imprimir
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Hidden Div for PDF generation */}
+      {documento && mode === "imprimir" && !pdfUrl && (
+        <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "800px" }}>
+          <div ref={hiddenDivRef} className="p-6 bg-white text-black flex flex-col" style={{ width: "210mm", minHeight: "297mm" }}>
+            {/* Cabeçalho fixo no topo */}
+            <div className="mb-3 pb-3 border-b-2 border-black flex-shrink-0 text-center">
+              {logoImpressao && (
+                <div className="text-center mb-2">
+                  <img
+                    src={logoImpressao.dados || "/placeholder.svg"}
+                    alt="Logo da empresa"
+                    className="mx-auto max-h-14 object-contain"
+                  />
+                </div>
+              )}
+
+              {configuracaoTimbrado?.cabecalho && (
+                <div className="text-center mb-2 font-medium text-[9px]">{configuracaoTimbrado.cabecalho}</div>
+              )}
+
+              <div className="text-center mb-2">
+                <h1 className="text-sm font-bold mb-1">{documento.titulo}</h1>
+              </div>
+            </div>
+
+            {/* Conteúdo principal */}
+            <div className="flex-1 p-4 text-[10px] leading-snug">
+              {/* Dados do Cliente */}
+              {documento.cliente_nome && (
+                <div className="mb-3 p-3 bg-gray-50 border rounded text-left">
+                  <h3 className="font-bold mb-1 text-[10px] text-gray-800">Ao</h3>
+                  <div className="space-y-0.5 text-[9px] leading-tight">
+                    <div>
+                      <strong>Nome:</strong> {documento.cliente_nome}
                     </div>
-                    {configuracaoTimbrado && (
-                      <div className="text-xs text-gray-500 space-y-1">
-                        {configuracaoTimbrado.empresa_nome && <div>{configuracaoTimbrado.empresa_nome}</div>}
-                        {configuracaoTimbrado.empresa_cnpj && <div>{configuracaoTimbrado.empresa_cnpj}</div>}
-                        {configuracaoTimbrado.empresa_representante_legal && (
-                          <div>{configuracaoTimbrado.empresa_representante_legal}</div>
-                        )}
-                        {configuracaoTimbrado.empresa_email && <div>{configuracaoTimbrado.empresa_email}</div>}
+                    {documento.cliente_endereco && (
+                      <div>
+                        <strong>Endereço:</strong> {documento.cliente_endereco}
+                      </div>
+                    )}
+                    {documento.cliente_telefone && (
+                      <div>
+                        <strong>Telefone:</strong> {documento.cliente_telefone}
+                      </div>
+                    )}
+                    {documento.cliente_email && (
+                      <div>
+                        <strong>E-mail:</strong> {documento.cliente_email}
+                      </div>
+                    )}
+                    {sindico && (
+                      <div className="pt-1">
+                        <strong>A/C Sr(a):</strong> {sindico}
                       </div>
                     )}
                   </div>
                 </div>
+              )}
 
-                {/* Observações */}
-                {documento.observacoes && (
-                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <h4 className="font-bold mb-2 text-yellow-800">Observações:</h4>
-                    <p className="text-sm text-yellow-700">{documento.observacoes}</p>
+              {/* Conteúdo do Documento */}
+              <div className="mb-6 prose max-w-none text-[10px] leading-normal" dangerouslySetInnerHTML={{ __html: documento.conteudo }} />
+
+              {/* Seção de Rodapé com Data e Informações da Empresa */}
+              <div className="flex justify-between items-start py-3 border-t border-gray-300 mt-4">
+                <div className="w-1/2">{/* Lado esquerdo vazio */}</div>
+                <div className="w-1/2 text-center">
+                  <div className="text-[10px] text-gray-600 mb-2">
+                    <strong>São Paulo, {formatDateExtended(documento.created_at)}</strong>
                   </div>
-                )}
-
-                {/* Rodapé Preview */}
-                {configuracaoTimbrado && (configuracaoTimbrado.rodape || configuracaoTimbrado.rodape_texto) && (
-                  <div className="border-t-2 border-gray-800 pt-4 text-center">
-                    <div className="text-xs font-bold space-y-1">
-                      {configuracaoTimbrado.rodape && (
-                        <div dangerouslySetInnerHTML={{ __html: configuracaoTimbrado.rodape }} />
+                  {configuracaoTimbrado && (
+                    <div className="text-[8px] text-gray-500 space-y-0.5">
+                      {configuracaoTimbrado.empresa_nome && <div>{configuracaoTimbrado.empresa_nome}</div>}
+                      {configuracaoTimbrado.empresa_cnpj && <div>{configuracaoTimbrado.empresa_cnpj}</div>}
+                      {configuracaoTimbrado.empresa_representante_legal && (
+                        <div>{configuracaoTimbrado.empresa_representante_legal}</div>
                       )}
-                      {configuracaoTimbrado.rodape_texto && <div>{configuracaoTimbrado.rodape_texto}</div>}
+                      {configuracaoTimbrado.empresa_email && <div>{configuracaoTimbrado.empresa_email}</div>}
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Botões de Ação */}
-            <div className="flex-shrink-0 flex justify-between items-center border-t border-border bg-muted/20 px-6 py-4">
-              <div className="text-xs text-muted-foreground space-y-0.5 font-medium">
-                <div>
-                  <strong>Configuração:</strong> {configuracaoTimbrado?.tamanho_papel || "A4"} -{" "}
-                  {configuracaoTimbrado?.orientacao || "Retrato"}
-                </div>
-                <div>
-                  <strong>Margens:</strong> {configuracaoTimbrado?.margem_superior || 20}mm
+                  )}
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Printer className="h-4 w-4 mr-2" />
-                  Imprimir
-                </Button>
-              </div>
+              {/* Observações */}
+              {documento.observacoes && (
+                <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-[9px] text-left">
+                  <h4 className="font-bold text-yellow-800 mb-1">Observações:</h4>
+                  <p className="text-yellow-700">{documento.observacoes}</p>
+                </div>
+              )}
             </div>
+
+            {/* Rodapé fixo no final */}
+            {configuracaoTimbrado && (configuracaoTimbrado.rodape || configuracaoTimbrado.rodape_texto) && (
+              <div className="mt-auto pt-2 border-t-2 border-black flex-shrink-0 text-center">
+                <div className="text-center text-[8px] leading-tight space-y-0.5 font-bold">
+                  {configuracaoTimbrado.rodape && <div>{configuracaoTimbrado.rodape}</div>}
+                  {configuracaoTimbrado.rodape_texto && <div>{configuracaoTimbrado.rodape_texto}</div>}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </SheetContent>
-    </Sheet>
+        </div>
+      )}
+    </>
   )
 }

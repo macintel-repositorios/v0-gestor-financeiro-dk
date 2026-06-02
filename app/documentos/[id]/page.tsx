@@ -126,7 +126,7 @@ export default function VisualizarDocumentoPage() {
     const statusConfig = {
       rascunho: { label: "Rascunho", variant: "secondary" as const },
       finalizado: { label: "Finalizado", variant: "default" as const },
-      assinado: { label: "Assinado", variant: "success" as const },
+      assinado: { label: "Assinado", variant: "default" as const },
       arquivado: { label: "Arquivado", variant: "outline" as const },
     }
 
@@ -324,7 +324,7 @@ export default function VisualizarDocumentoPage() {
       </div>
 
       {/* Dialog de Impressão */}
-      <DocumentoPrint documento={documento} isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} />
+      <DocumentoPrint documento={documento} isOpen={showPrintDialog} mode="imprimir" onClose={() => setShowPrintDialog(false)} />
     </div>
   )
 }

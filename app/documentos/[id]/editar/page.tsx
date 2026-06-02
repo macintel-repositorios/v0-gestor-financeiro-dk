@@ -13,8 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { RichTextEditor } from "@/components/rich-text-editor"
 import { ClienteCombobox } from "@/components/cliente-combobox"
-import { ArrowLeft, Save, Eye } from "lucide-react"
 import Link from "next/link"
+import { DocumentoPrint } from "@/components/documento-print"
+import { ArrowLeft, Save, Eye } from "lucide-react"
+
 
 interface Cliente {
   id: number
@@ -49,8 +51,9 @@ export default function EditarDocumentoPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [documento, setDocumento] = useState<Documento | null>(null)
+  const [documento, setDocumento] = useState<any | null>(null)
   const [cliente, setCliente] = useState<Cliente | null>(null)
+  const [showPrintDialog, setShowPrintDialog] = useState(false)
 
   const [formData, setFormData] = useState({
     titulo: "",
@@ -200,28 +203,29 @@ export default function EditarDocumentoPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4 w-full border-b border-border pb-4">
+        <div className="flex-shrink-0">
           <Link href={`/documentos/${params.id}`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Editar Documento</h1>
-            <p className="text-muted-foreground">
-              Versão {documento.versao} - {documento.titulo}
-            </p>
-          </div>
+        </div>
+        
+        <div className="text-center flex-1">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Editar Documento</h1>
+          <p className="text-muted-foreground text-sm">
+            Versão {documento.versao} - {documento.titulo}
+          </p>
         </div>
 
-        <Link href={`/documentos/${params.id}`}>
-          <Button variant="outline">
+        <div className="flex-shrink-0">
+          <Button variant="outline" size="sm" onClick={() => setShowPrintDialog(true)}>
             <Eye className="mr-2 h-4 w-4" />
             Visualizar
           </Button>
-        </Link>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -326,12 +330,12 @@ export default function EditarDocumentoPage() {
                   </div>
 
                   {cliente && (
-                    <div className="p-3 bg-gray-50 rounded-lg space-y-2">
+                    <div className="p-3 bg-muted/40 border border-border rounded-lg space-y-2 text-foreground">
                       <div className="font-medium">{cliente.nome}</div>
-                      {cliente.codigo && <div className="text-sm text-gray-600">Código: {cliente.codigo}</div>}
-                      {cliente.cnpj && <div className="text-sm text-gray-600">CNPJ: {cliente.cnpj}</div>}
-                      {cliente.cpf && <div className="text-sm text-gray-600">CPF: {cliente.cpf}</div>}
-                      {cliente.endereco && <div className="text-sm text-gray-600">{cliente.endereco}</div>}
+                      {cliente.codigo && <div className="text-sm text-muted-foreground">Código: {cliente.codigo}</div>}
+                      {cliente.cnpj && <div className="text-sm text-muted-foreground">CNPJ: {cliente.cnpj}</div>}
+                      {cliente.cpf && <div className="text-sm text-muted-foreground">CPF: {cliente.cpf}</div>}
+                      {cliente.endereco && <div className="text-sm text-muted-foreground">{cliente.endereco}</div>}
                     </div>
                   )}
                 </div>
@@ -361,6 +365,25 @@ export default function EditarDocumentoPage() {
           </div>
         </div>
       </form>
+
+      {documento && (
+        <DocumentoPrint
+          documento={{
+            ...documento,
+            conteudo: formData.conteudo,
+            titulo: formData.titulo,
+            tipo_documento: formData.tipo_documento,
+            status: formData.status,
+            tags: formData.tags,
+            observacoes: formData.observacoes,
+            cliente_nome: cliente?.nome || documento.cliente_nome || "",
+            cliente_endereco: cliente?.endereco || documento.cliente_endereco || "",
+          }}
+          isOpen={showPrintDialog}
+          mode="visualizar"
+          onClose={() => setShowPrintDialog(false)}
+        />
+      )}
     </div>
   )
 }

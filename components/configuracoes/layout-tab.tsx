@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ImageIcon, MapPin, Printer, Eye } from "lucide-react"
+import { ImageIcon, MapPin, Printer, Eye, Loader2, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 import { useCep } from "@/hooks/use-cep"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { useRef } from "react"
 
 interface LayoutConfig {
   id?: number
@@ -125,6 +127,23 @@ export function LayoutTab() {
   const [buscandoCoordenadas, setBuscandoCoordenadas] = useState(false)
   const { buscarCep, buscarCoordenadas, loading: loadingCep } = useCep()
 
+  // Preview States
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewMode, setPreviewMode] = useState<"visualizar" | "imprimir">("visualizar")
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [generatingPdf, setGeneratingPdf] = useState(false)
+  const hiddenPreviewRef = useRef<HTMLDivElement>(null)
+
+  // Clear PDF on close
+  useEffect(() => {
+    if (!showPreview) {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+        setPdfUrl(null)
+      }
+    }
+  }, [showPreview, pdfUrl])
+
   useEffect(() => {
     carregarConfig()
     carregarLogoImpressao()
@@ -138,6 +157,56 @@ export function LayoutTab() {
       })
     }
   }, [config.empresa_latitude, config.empresa_longitude])
+
+  // PDF Generator for Papel Timbrado
+  useEffect(() => {
+    if (showPreview && previewMode === "imprimir" && config && !generatingPdf && !pdfUrl) {
+      setGeneratingPdf(true)
+      setTimeout(async () => {
+        try {
+          const element = hiddenPreviewRef.current
+          if (!element) return
+
+          const html2canvas = (await import("html2canvas")).default
+          const { jsPDF } = await import("jspdf")
+
+          const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+          })
+
+          const imgData = canvas.toDataURL("image/png")
+          const pdf = new jsPDF("p", "mm", "a4")
+          const imgWidth = 210
+          const pageHeight = 297
+          const imgHeight = (canvas.height * imgWidth) / canvas.width
+          let heightLeft = imgHeight
+          let position = 0
+
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
+
+          while (heightLeft > 10) {
+            position = heightLeft - imgHeight
+            pdf.addPage()
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+            heightLeft -= pageHeight
+          }
+
+          const pdfBlob = pdf.output("blob")
+          const url = URL.createObjectURL(pdfBlob)
+          setPdfUrl(url)
+        } catch (error) {
+          console.error("Erro ao gerar PDF do papel timbrado:", error)
+          toast.error("Erro ao gerar PDF do papel timbrado")
+        } finally {
+          setGeneratingPdf(false)
+        }
+      }, 600)
+    }
+  }, [showPreview, previewMode, config, generatingPdf, pdfUrl])
 
   const carregarConfig = async () => {
     try {
@@ -442,34 +511,13 @@ export function LayoutTab() {
   }
 
   const handleVisualizarPapelTimbrado = () => {
-    const htmlContent = gerarHTMLPapelTimbrado()
-    const previewWindow = window.open("", "_blank")
-
-    if (previewWindow) {
-      previewWindow.document.write(htmlContent)
-      previewWindow.document.close()
-    } else {
-      toast.error("Não foi possível abrir a janela de visualização. Verifique se há bloqueadores de pop-up.")
-    }
+    setPreviewMode("visualizar")
+    setShowPreview(true)
   }
 
   const handleImprimirPapelTimbrado = () => {
-    const htmlContent = gerarHTMLPapelTimbrado()
-    const printWindow = window.open("", "_blank")
-
-    if (printWindow) {
-      printWindow.document.write(htmlContent)
-      printWindow.document.close()
-
-      printWindow.onload = () => {
-        setTimeout(() => {
-          printWindow.print()
-          printWindow.close()
-        }, 500)
-      }
-    } else {
-      toast.error("Não foi possível abrir a janela de impressão. Verifique se há bloqueadores de pop-up.")
-    }
+    setPreviewMode("imprimir")
+    setShowPreview(true)
   }
 
   if (loading) {
@@ -967,6 +1015,137 @@ export function LayoutTab() {
           </Button>
         </div>
       </div>
+
+      {/* Papel Timbrado Preview Drawer */}
+      <Sheet open={showPreview} onOpenChange={setShowPreview}>
+        <SheetContent
+          className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300"
+        >
+          <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-slate-900 to-zinc-950 text-white flex-shrink-0">
+            <SheetTitle className="text-white flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Printer className="h-5 w-5 text-purple-500" />
+                {previewMode === "imprimir" ? "Imprimir Papel Timbrado" : "Visualizar Papel Timbrado"}
+              </span>
+              {previewMode === "imprimir" && pdfUrl && (
+                <div className="flex gap-2 mr-6">
+                  <Button
+                    size="sm"
+                    onClick={() => window.open(pdfUrl, "_blank")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Abrir em Nova Aba
+                  </Button>
+                </div>
+              )}
+            </SheetTitle>
+          </SheetHeader>
+
+          {previewMode === "imprimir" && (generatingPdf || !pdfUrl) ? (
+            <div className="flex items-center justify-center flex-1">
+              <div className="text-center">
+                <Loader2 className="animate-spin rounded-full h-8 w-8 text-blue-600 mx-auto mb-4"></Loader2>
+                <p className="text-muted-foreground">Gerando visualização em PDF...</p>
+              </div>
+            </div>
+          ) : previewMode === "imprimir" && pdfUrl ? (
+            <div className="flex-1 bg-white">
+              <iframe src={pdfUrl} className="w-full h-full border-0" title="PDF Preview" />
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col min-h-0 bg-white overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-8 flex justify-center bg-gray-100">
+                <div
+                  className="bg-white shadow-2xl text-black flex flex-col"
+                  style={{
+                    width: "210mm",
+                    minHeight: "297mm",
+                    paddingTop: `${config.margem_superior}mm`,
+                    paddingBottom: `${config.margem_inferior}mm`,
+                    paddingLeft: `${config.margem_esquerda}mm`,
+                    paddingRight: `${config.margem_direita}mm`,
+                  }}
+                >
+                  <div className="text-center border-b-2 border-black pb-4 mb-4 flex-shrink-0">
+                    {logoImpressao?.dados && (
+                      <div className="mb-3">
+                        <img
+                          src={logoImpressao.dados}
+                          alt="Logo da empresa"
+                          className="mx-auto max-h-16 object-contain"
+                        />
+                      </div>
+                    )}
+                    {config.cabecalho && (
+                      <div className="text-xs text-gray-700 leading-relaxed font-medium">
+                        {config.cabecalho}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    {/* Área de conteúdo em branco */}
+                  </div>
+
+                  {config.rodape && (
+                    <div className="border-t-2 border-black pt-4 mt-4 flex-shrink-0 text-center">
+                      <div className="text-[10px] font-bold text-gray-800 leading-normal">
+                        {config.rodape}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Hidden Papel Timbrado rendering div */}
+      {showPreview && previewMode === "imprimir" && !pdfUrl && (
+        <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "800px" }}>
+          <div
+            ref={hiddenPreviewRef}
+            className="bg-white text-black flex flex-col"
+            style={{
+              width: "210mm",
+              minHeight: "297mm",
+              paddingTop: `${config.margem_superior}mm`,
+              paddingBottom: `${config.margem_inferior}mm`,
+              paddingLeft: `${config.margem_esquerda}mm`,
+              paddingRight: `${config.margem_direita}mm`,
+            }}
+          >
+            <div className="text-center border-b-2 border-black pb-4 mb-4 flex-shrink-0">
+              {logoImpressao?.dados && (
+                <div className="mb-3">
+                  <img
+                    src={logoImpressao.dados}
+                    alt="Logo da empresa"
+                    className="mx-auto max-h-16 object-contain"
+                  />
+                </div>
+              )}
+              {config.cabecalho && (
+                <div className="text-xs text-gray-700 leading-relaxed font-medium">
+                  {config.cabecalho}
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1"></div>
+
+            {config.rodape && (
+              <div className="border-t-2 border-black pt-4 mt-4 flex-shrink-0 text-center">
+                <div className="text-[10px] font-bold text-gray-800 leading-normal">
+                  {config.rodape}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

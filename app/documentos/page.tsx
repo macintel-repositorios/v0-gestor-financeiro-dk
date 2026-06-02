@@ -64,6 +64,8 @@ export default function DocumentosPage() {
   const [totalDocumentos, setTotalDocumentos] = useState(0)
   const [documentoParaImprimir, setDocumentoParaImprimir] = useState<Documento | null>(null)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [documentoParaVisualizar, setDocumentoParaVisualizar] = useState<Documento | null>(null)
+  const [showVisualizarDialog, setShowVisualizarDialog] = useState(false)
 
   const itemsPerPage = 10
 
@@ -142,6 +144,11 @@ export default function DocumentosPage() {
   const handlePrint = (documento: Documento) => {
     setDocumentoParaImprimir(documento)
     setShowPrintDialog(true)
+  }
+
+  const handleVisualizar = (documento: Documento) => {
+    setDocumentoParaVisualizar(documento)
+    setShowVisualizarDialog(true)
   }
 
   const getStatusBadge = (status: string) => {
@@ -361,15 +368,14 @@ export default function DocumentosPage() {
                         >
                           <Printer className="h-4 w-4" />
                         </Button>
-                        <Link href={`/documentos/${documento.id}`}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400 text-muted-foreground rounded-lg"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleVisualizar(documento)}
+                          className="hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400 text-muted-foreground rounded-lg"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Link href={`/documentos/${documento.id}/editar`}>
                           <Button
                             variant="ghost"
@@ -424,11 +430,9 @@ export default function DocumentosPage() {
                                 <Printer className="mr-2 h-4 w-4 text-blue-500" />
                                 <span>Imprimir</span>
                               </DropdownMenuItem>
-                              <DropdownMenuItem asChild className="cursor-pointer">
-                                <Link href={`/documentos/${documento.id}`}>
-                                  <Eye className="mr-2 h-4 w-4 text-emerald-500" />
-                                  <span>Visualizar</span>
-                                </Link>
+                              <DropdownMenuItem onClick={() => handleVisualizar(documento)} className="cursor-pointer">
+                                <Eye className="mr-2 h-4 w-4 text-emerald-500" />
+                                <span>Visualizar</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild className="cursor-pointer">
                                 <Link href={`/documentos/${documento.id}/editar`}>
@@ -505,9 +509,21 @@ export default function DocumentosPage() {
         <DocumentoPrint
           documento={documentoParaImprimir}
           isOpen={showPrintDialog}
+          mode="imprimir"
           onClose={() => {
             setShowPrintDialog(false)
             setDocumentoParaImprimir(null)
+          }}
+        />
+
+        {/* Dialog de Visualização */}
+        <DocumentoPrint
+          documento={documentoParaVisualizar}
+          isOpen={showVisualizarDialog}
+          mode="visualizar"
+          onClose={() => {
+            setShowVisualizarDialog(false)
+            setDocumentoParaVisualizar(null)
           }}
         />
       </div>

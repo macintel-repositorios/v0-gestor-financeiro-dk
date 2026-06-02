@@ -154,16 +154,13 @@ export default function CalendarioPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full text-foreground relative overflow-hidden">
+      {/* Decorative blurred background blobs */}
+      <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse duration-10000" />
+      <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-indigo-500/5 blur-[150px] pointer-events-none -z-10 animate-pulse duration-12000" />
+
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        {logos.menu && (
-          <img
-            src={logos.menu || "/placeholder.svg"}
-            alt="Logo"
-            className="h-10 w-10 object-contain rounded-lg border border-border bg-card p-1"
-          />
-        )}
+      <div className="flex items-center gap-4 mb-6 border-b border-border/60 pb-5">
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
             Calendário de Agendamentos
@@ -175,14 +172,15 @@ export default function CalendarioPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            periodFilter === "all" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`group relative border border-border shadow-xs hover:border-indigo-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-indigo-500/30 ${
+            periodFilter === "all" ? "ring-2 ring-indigo-500 border-indigo-500/40" : ""
           }`}
           onClick={() => setPeriodFilter("all")}
         >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-indigo-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total Agendadas</CardTitle>
-            <CalendarIcon className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Total Agendadas</CardTitle>
+            <CalendarIcon className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{ordensAgendadas.length}</div>
@@ -191,14 +189,15 @@ export default function CalendarioPage() {
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            periodFilter === "manha" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`group relative border border-border shadow-xs hover:border-blue-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-blue-500/30 ${
+            periodFilter === "manha" ? "ring-2 ring-blue-500 border-blue-500/40" : ""
           }`}
           onClick={() => handlePeriodFilterClick("manha")}
         >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-blue-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Manhã</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Manhã</CardTitle>
+            <Clock className="h-4 w-4 text-blue-500 group-hover:scale-110 transition-transform" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{totalManha}</div>
@@ -207,14 +206,15 @@ export default function CalendarioPage() {
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            periodFilter === "tarde" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`group relative border border-border shadow-xs hover:border-orange-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-orange-500/30 ${
+            periodFilter === "tarde" ? "ring-2 ring-orange-500 border-orange-500/40" : ""
           }`}
           onClick={() => handlePeriodFilterClick("tarde")}
         >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-orange-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Tarde</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider">Tarde</CardTitle>
+            <Clock className="h-4 w-4 text-orange-500 group-hover:scale-110 transition-transform" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{totalTarde}</div>
@@ -223,14 +223,15 @@ export default function CalendarioPage() {
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            periodFilter === "integral" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`group relative border border-border shadow-xs hover:border-emerald-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-emerald-500/30 ${
+            periodFilter === "integral" ? "ring-2 ring-emerald-500 border-emerald-500/40" : ""
           }`}
           onClick={() => handlePeriodFilterClick("integral")}
         >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-emerald-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Integral</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Integral</CardTitle>
+            <Clock className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{totalIntegral}</div>
@@ -242,13 +243,13 @@ export default function CalendarioPage() {
       {/* Calendar and Orders */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Calendar */}
-        <Card className="border border-border shadow-sm bg-card overflow-hidden">
-          <CardHeader className="bg-muted/40 border-b border-border p-4">
+        <Card className="border border-border/80 shadow-md bg-card overflow-hidden hover:border-indigo-500/20 transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg p-4 dark:from-blue-900/50 dark:to-indigo-900/50 dark:border-b dark:border-border">
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+              <CalendarIcon className="h-5 w-5 text-white" />
               <div>
-                <CardTitle className="text-sm font-semibold text-foreground">Calendário</CardTitle>
-                <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                <CardTitle className="text-white text-sm font-bold">Calendário</CardTitle>
+                <CardDescription className="text-blue-100 text-xs mt-0.5">
                   Selecione uma data para ver as ordens
                 </CardDescription>
               </div>
@@ -294,16 +295,16 @@ export default function CalendarioPage() {
         </Card>
 
         {/* Orders of Selected Day */}
-        <Card className="border border-border shadow-sm bg-card overflow-hidden">
-          <CardHeader className="bg-muted/40 border-b border-border p-4">
+        <Card className="border border-border/80 shadow-md bg-card overflow-hidden hover:border-indigo-500/20 transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-t-lg p-4 dark:from-purple-900/50 dark:to-indigo-900/50 dark:border-b dark:border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-muted-foreground" />
+                <Clock className="h-5 w-5 text-white" />
                 <div>
-                  <CardTitle className="text-sm font-semibold text-foreground">
+                  <CardTitle className="text-white text-sm font-bold">
                     Ordens do Dia - {selectedDate?.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                   </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                  <CardDescription className="text-purple-100 text-xs mt-0.5">
                     {ordensDoDay.length} ordem(ns) agendada(s)
                     {periodFilter !== "all" && ` - ${getPeriodoLabel(periodFilter)}`}
                   </CardDescription>
