@@ -405,10 +405,12 @@ export default function VisualizarOrdemServicoPage() {
           <p className="text-muted-foreground">Visualizar detalhes da ordem de serviço</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handlePrint} className="print:hidden bg-transparent">
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimir
-          </Button>
+          {ordemServico.situacao === "concluida" && (
+            <Button variant="outline" onClick={handlePrint} className="print:hidden bg-transparent">
+              <Printer className="h-4 w-4 mr-2" />
+              Imprimir
+            </Button>
+          )}
           <Link href={`/ordem-servico/${ordemServico.id}/editar`}>
             <Button className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700">
               <Edit className="h-4 w-4 mr-2" />

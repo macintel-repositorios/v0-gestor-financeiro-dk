@@ -25,7 +25,9 @@ import {
   CalendarRange,
   ChevronLeft,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Printer,
+  Loader2
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
@@ -43,6 +45,7 @@ import { NovaOSDialog } from "@/components/ordem-servico/nova-os-dialog"
 import { VisualizarOSDialog } from "@/components/ordem-servico/visualizar-os-dialog"
 import { EditarOSDialog } from "@/components/ordem-servico/editar-os-dialog"
 import { OrdemServicoDeleteDialog } from "@/components/ordem-servico/ordem-servico-delete-dialog"
+import { OrdemServicoPrint } from "@/components/ordem-servico-print"
 
 export default function OrdemServicoPage({ searchParams }: { searchParams: Promise<{ nova?: string }> }) {
   const [loading, setLoading] = useState(true)
@@ -57,8 +60,54 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
   const [isVisualizarOSOpen, setIsVisualizarOSOpen] = useState(false)
   const [selectedOSIdEditar, setSelectedOSIdEditar] = useState<string | null>(null)
   const [isEditarOSOpen, setIsEditarOSOpen] = useState(false)
+  const [printOSData, setPrintOSData] = useState<{ os: any; itens: any[]; fotos: any[]; assinaturas: any[] } | null>(null)
+  const [loadingPrintOSId, setLoadingPrintOSId] = useState<number | null>(null)
   const { toast } = useToast()
   const router = useRouter()
+
+  const handlePrintClick = async (osId: number) => {
+    try {
+      setLoadingPrintOSId(osId)
+      const [itensRes, fotosRes, assinaturasRes, osRes] = await Promise.all([
+        fetch(`/api/ordens-servico/${osId}/itens`).then((r) => r.json()),
+        fetch(`/api/ordens-servico/${osId}/fotos`).then((r) => r.json()),
+        fetch(`/api/ordens-servico/${osId}/assinaturas`).then((r) => r.json()),
+        fetch(`/api/ordens-servico/${osId}`).then((r) => r.json())
+      ])
+      
+      if (osRes.success) {
+        let osFull = osRes.data
+        if (osFull.cliente_id) {
+          const clienteRes = await fetch(`/api/clientes/${osFull.cliente_id}`).then((r) => r.json())
+          if (clienteRes.success) {
+            osFull.cliente = clienteRes.data
+          }
+        }
+        
+        setPrintOSData({
+          os: osFull,
+          itens: itensRes.success ? itensRes.data : [],
+          fotos: fotosRes.success ? fotosRes.data : [],
+          assinaturas: assinaturasRes.success ? assinaturasRes.data : [],
+        })
+      } else {
+        toast({
+          title: "Erro ao gerar PDF",
+          description: "Não foi possível recuperar os dados da ordem de serviço.",
+          variant: "destructive",
+        })
+      }
+    } catch (err) {
+      console.error("Erro ao carregar dados para impressão:", err)
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao carregar os dados para impressão.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingPrintOSId(null)
+    }
+  }
 
   useEffect(() => {
     searchParams.then((params) => {
@@ -656,6 +705,22 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
+                          {os.situacao === "concluida" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handlePrintClick(os.id)}
+                              disabled={loadingPrintOSId === os.id}
+                              className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border-indigo-200 dark:border-indigo-900/50 bg-transparent h-8 w-8 p-0"
+                              title="Imprimir"
+                            >
+                              {loadingPrintOSId === os.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Printer className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
@@ -680,6 +745,16 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
                               <DropdownMenuItem onClick={handleVisualizarClick}>
                                 <Eye className="h-4 w-4 mr-2" />Visualizar
                               </DropdownMenuItem>
+                              {os.situacao === "concluida" && (
+                                <DropdownMenuItem onClick={() => handlePrintClick(os.id)} disabled={loadingPrintOSId === os.id}>
+                                  {loadingPrintOSId === os.id ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <Printer className="h-4 w-4 mr-2" />
+                                  )}
+                                  Imprimir
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem onClick={handleEditarClick}>
                                 <Edit className="h-4 w-4 mr-2" />Editar
                               </DropdownMenuItem>
@@ -838,6 +913,22 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
                               <Eye className="h-3.5 w-3.5 mr-1.5" />
                               Visualizar
                             </Button>
+                            {os.situacao === "concluida" && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePrintClick(os.id)}
+                                disabled={loadingPrintOSId === os.id}
+                                className="flex-1 h-9 text-xs font-medium text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50 bg-transparent hover:bg-indigo-500/10"
+                              >
+                                {loadingPrintOSId === os.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                ) : (
+                                  <Printer className="h-3.5 w-3.5 mr-1.5" />
+                                )}
+                                Imprimir
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"
@@ -901,6 +992,16 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
         }}
         onSuccess={carregarDados}
       />
+
+      {printOSData && (
+        <OrdemServicoPrint
+          ordemServico={printOSData.os}
+          itens={printOSData.itens}
+          fotos={printOSData.fotos}
+          assinaturas={printOSData.assinaturas}
+          onClose={() => setPrintOSData(null)}
+        />
+      )}
     </div>
   )
 }

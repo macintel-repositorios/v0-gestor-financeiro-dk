@@ -322,9 +322,11 @@ export function VisualizarOSDialog({
                 >
                   <Edit className="h-3.5 w-3.5 mr-1" /> Editar
                 </Button>
-                <Button size="sm" variant="outline" className="h-8 text-xs bg-transparent" onClick={() => setShowPrintModal(true)}>
-                  <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir
-                </Button>
+                {ordemServico.situacao === "concluida" && (
+                  <Button size="sm" variant="outline" className="h-8 text-xs bg-transparent" onClick={() => setShowPrintModal(true)}>
+                    <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir
+                  </Button>
+                )}
               </div>
             </div>
 
