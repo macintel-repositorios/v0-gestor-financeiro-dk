@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -25,9 +25,10 @@ import { toast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
 
 interface LaudoTecnicoPrintEditorProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   orcamento: any
   itens: any[]
-  onClose: () => void
 }
 
 interface TimbradoConfig {
@@ -65,7 +66,7 @@ interface EquipamentoDanificado {
   codigo?: string
 }
 
-export function LaudoTecnicoPrintEditor({ orcamento, itens, onClose }: LaudoTecnicoPrintEditorProps) {
+export function LaudoTecnicoPrintEditor({ open, onOpenChange, orcamento, itens }: LaudoTecnicoPrintEditorProps) {
   const [timbradoConfig, setTimbradoConfig] = useState<TimbradoConfig | null>(null)
   const [logoImpressao, setLogoImpressao] = useState<LogoConfig | null>(null)
   const [loading, setLoading] = useState(true)
@@ -645,79 +646,41 @@ export function LaudoTecnicoPrintEditor({ orcamento, itens, onClose }: LaudoTecn
 
   if (loading) {
     return (
-      <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-md">
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full sm:max-w-5xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Carregando...</SheetTitle>
+            <SheetDescription>Aguarde enquanto carregamos as configurações</SheetDescription>
+          </SheetHeader>
           <div className="flex items-center justify-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3">Carregando...</span>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+            <span className="ml-3 text-muted-foreground">Carregando...</span>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     )
   }
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent
-        className="overflow-hidden p-0 flex flex-col"
-        style={{
-          width: `${modalSize.width}vw`,
-          height: `${modalSize.height}vh`,
-          maxWidth: "98vw",
-          maxHeight: "98vh",
-        }}
-      >
-        {/* Resize Handles */}
-        <div
-          className="absolute top-0 left-0 right-0 h-1 cursor-n-resize hover:bg-blue-500/50 z-50"
-          onMouseDown={(e) => handleResizeStart(e, "n")}
-        />
-        <div
-          className="absolute bottom-0 left-0 right-0 h-1 cursor-s-resize hover:bg-blue-500/50 z-50"
-          onMouseDown={(e) => handleResizeStart(e, "s")}
-        />
-        <div
-          className="absolute top-0 bottom-0 left-0 w-1 cursor-w-resize hover:bg-blue-500/50 z-50"
-          onMouseDown={(e) => handleResizeStart(e, "w")}
-        />
-        <div
-          className="absolute top-0 bottom-0 right-0 w-1 cursor-e-resize hover:bg-blue-500/50 z-50"
-          onMouseDown={(e) => handleResizeStart(e, "e")}
-        />
-        <div
-          className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize z-50"
-          onMouseDown={(e) => handleResizeStart(e, "nw")}
-        />
-        <div
-          className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize z-50"
-          onMouseDown={(e) => handleResizeStart(e, "ne")}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize z-50"
-          onMouseDown={(e) => handleResizeStart(e, "sw")}
-        />
-        <div
-          className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize z-50"
-          onMouseDown={(e) => handleResizeStart(e, "se")}
-        />
-
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-5xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
         {/* Header */}
-        <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-orange-500 to-red-600 text-white flex-shrink-0">
+        <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-slate-900 to-zinc-950 text-white flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <FileText className="h-6 w-6" />
+              <FileText className="h-6 w-6 text-indigo-500" />
               <div>
-                <DialogTitle className="text-white text-lg">Laudo Técnico para Seguradora</DialogTitle>
-                <DialogDescription className="text-orange-100">
+                <SheetTitle className="text-white text-lg font-bold">Laudo Técnico para Seguradora</SheetTitle>
+                <SheetDescription className="text-zinc-400 text-xs">
                   Orçamento {orcamento.numero} - {orcamento.cliente_nome}
-                </DialogDescription>
+                </SheetDescription>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="text-zinc-400 hover:text-white hover:bg-white/10 mr-8">
               <X className="h-5 w-5" />
             </Button>
           </div>
-        </DialogHeader>
+        </SheetHeader>
 
         {/* Content */}
         <div className="flex-1 overflow-hidden flex">
@@ -726,7 +689,7 @@ export function LaudoTecnicoPrintEditor({ orcamento, itens, onClose }: LaudoTecn
             <ScrollArea className="flex-1 p-6">
               <div className="space-y-6">
                 {/* Dados do Cliente (somente leitura) */}
-                <div className="p-4 bg-slate-50 rounded-lg border">
+                <div className="p-4 bg-muted/40 rounded-lg border border-border">
                   <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-orange-500" />
                     Dados do Cliente
@@ -886,7 +849,7 @@ export function LaudoTecnicoPrintEditor({ orcamento, itens, onClose }: LaudoTecn
             </div>
 
             <ScrollArea className="flex-1 p-4">
-              <div className="bg-white shadow-lg mx-auto" style={{ width: "210mm", minHeight: "297mm", padding: "15mm 20mm" }}>
+              <div className="bg-white shadow-lg mx-auto text-black w-full max-w-[210mm]" style={{ minHeight: "297mm", padding: "8mm 12mm" }}>
                 {/* Header do Preview */}
                 <div className="text-center border-b-2 border-black pb-4 mb-5">
                   {logoImpressao?.dados && (
@@ -1016,24 +979,24 @@ export function LaudoTecnicoPrintEditor({ orcamento, itens, onClose }: LaudoTecn
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t bg-slate-50 flex justify-between items-center flex-shrink-0">
+        <div className="px-6 py-4 border-t bg-muted/40 flex justify-between items-center flex-shrink-0">
           <div className="text-sm text-muted-foreground">
             {equipamentosSelecionados.length} equipamento(s) selecionado(s)
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
             <Button
               onClick={handlePrint}
-              className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
             >
               <Printer className="h-4 w-4 mr-2" />
               Imprimir Laudo
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

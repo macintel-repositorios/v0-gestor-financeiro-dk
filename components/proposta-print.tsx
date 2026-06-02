@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Printer, X } from "lucide-react"
+import { Printer, X, Loader2, ExternalLink } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
 
 interface PropostaDetalhes {
@@ -93,6 +93,66 @@ export function PropostaPrint({ proposta, isOpen, onClose }: PropostaPrintProps)
   const startPos = useRef({ x: 0, y: 0 })
   const startSize = useRef({ width: 0, height: 0 })
   const [loading, setLoading] = useState(true)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [generatingPdf, setGeneratingPdf] = useState(false)
+  const hiddenDivRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+        setPdfUrl(null)
+      }
+    }
+  }, [isOpen, pdfUrl])
+
+  useEffect(() => {
+    if (isOpen && proposta && configuracaoLayout && logos.length > 0 && !loading && !generatingPdf && !pdfUrl) {
+      setGeneratingPdf(true)
+      setTimeout(async () => {
+        try {
+          const element = hiddenDivRef.current
+          if (!element) return
+
+          const html2canvas = (await import("html2canvas")).default
+          const { jsPDF } = await import("jspdf")
+
+          const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+          })
+
+          const imgData = canvas.toDataURL("image/png")
+          const pdf = new jsPDF("p", "mm", "a4")
+          const imgWidth = 210
+          const pageHeight = 297
+          const imgHeight = (canvas.height * imgWidth) / canvas.width
+          let heightLeft = imgHeight
+          let position = 0
+
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
+
+          while (heightLeft > 10) {
+            position = heightLeft - imgHeight
+            pdf.addPage()
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+            heightLeft -= pageHeight
+          }
+
+          const pdfBlob = pdf.output("blob")
+          const url = URL.createObjectURL(pdfBlob)
+          setPdfUrl(url)
+        } catch (error) {
+          console.error("Erro ao gerar PDF da proposta:", error)
+        } finally {
+          setGeneratingPdf(false)
+        }
+      }, 600)
+    }
+  }, [isOpen, proposta, configuracaoLayout, logos, loading, generatingPdf, pdfUrl])
 
   useEffect(() => {
     if (isOpen) {
@@ -607,292 +667,319 @@ export function PropostaPrint({ proposta, isOpen, onClose }: PropostaPrintProps)
         >
           {/* Header fixo */}
           <SheetHeader className="px-6 py-4 border-b shrink-0 bg-muted/30">
-            <SheetTitle className="text-foreground flex items-center gap-2">
-              <Printer className="h-5 w-5 text-purple-600" />
-              Visualizar Proposta para Impressão
+            <SheetTitle className="text-foreground flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Printer className="h-5 w-5 text-purple-600" />
+                Visualizar Proposta para Impressão
+              </span>
+              <div className="flex gap-2 mr-6">
+                {pdfUrl && (
+                  <Button
+                    size="sm"
+                    onClick={() => window.open(pdfUrl, "_blank")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Abrir em Nova Aba
+                  </Button>
+                )}
+              </div>
             </SheetTitle>
           </SheetHeader>
 
-          {/* Conteúdo scrollável */}
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <div className="bg-white text-black min-h-[297mm] flex flex-col">
-              {/* Cabeçalho fixo no topo */}
-              <div className="mb-3 pb-3 border-b-2 border-black flex-shrink-0">
-                {logoImpressao && (
-                  <div className="text-center mb-2">
-                    <img
-                      src={logoImpressao.url || "/placeholder.svg"}
-                      alt="Logo da empresa"
-                      className="mx-auto max-h-14 object-contain"
-                    />
-                  </div>
-                )}
+          {loading || generatingPdf ? (
+            <div className="flex-1 flex items-center justify-center py-16">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-600 mx-auto mb-4" />
+                <p className="text-muted-foreground text-sm">Gerando visualização em PDF...</p>
+              </div>
+            </div>
+          ) : pdfUrl ? (
+            <div className="flex-1 bg-white">
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full border-0"
+                title="Proposta PDF Preview"
+              />
+            </div>
+          ) : (
+            <div className="py-8 text-center text-muted-foreground">Proposta não encontrada</div>
+          )}
+        </SheetContent>
+      </Sheet>
 
-                {configuracaoLayout?.cabecalho && (
-                  <div className="text-center mb-2 font-medium text-[9px]">{configuracaoLayout.cabecalho}</div>
-                )}
-
+      {/* Hidden Div for PDF generation */}
+      {proposta && !pdfUrl && (
+        <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "800px" }}>
+          <div ref={hiddenDivRef} className="p-6 bg-white text-black flex flex-col" style={{ width: "210mm", minHeight: "297mm" }}>
+            {/* Cabeçalho fixo no topo */}
+            <div className="mb-3 pb-3 border-b-2 border-black flex-shrink-0 text-center">
+              {logoImpressao && (
                 <div className="text-center mb-2">
-                  <h1 className="text-sm font-bold mb-1">PROPOSTA DE CONTRATO Nº {proposta.numero}</h1>
+                  <img
+                    src={logoImpressao.url || "/placeholder.svg"}
+                    alt="Logo da empresa"
+                    className="mx-auto max-h-14 object-contain"
+                  />
                 </div>
-              </div>
+              )}
 
-              {/* Conteúdo principal */}
-              <div className="flex-1 p-4 text-[10px] leading-snug">
-                {/* Dados do Cliente e Empresa */}
-                <div className="mb-3 grid grid-cols-2 gap-3">
-                  <div>
-                    <h2 className="text-[10px] font-bold mb-1 border-b border-gray-300 pb-1 bg-blue-50 px-2 py-1 border-l-[3px] border-l-blue-500">
-                      DADOS DO CLIENTE
-                    </h2>
+              {configuracaoLayout?.cabecalho && (
+                <div className="text-center mb-2 font-medium text-[9px]">{configuracaoLayout.cabecalho}</div>
+              )}
+
+              <div className="text-center mb-2">
+                <h1 className="text-sm font-bold mb-1">PROPOSTA DE CONTRATO Nº {proposta.numero}</h1>
+              </div>
+            </div>
+
+            {/* Conteúdo principal */}
+            <div className="flex-1 p-4 text-[10px] leading-snug">
+              {/* Dados do Cliente e Empresa */}
+              <div className="mb-3 grid grid-cols-2 gap-3 text-left">
+                <div>
+                  <h2 className="text-[10px] font-bold mb-1 border-b border-gray-300 pb-1 bg-blue-50 px-2 py-1 border-l-[3px] border-l-blue-500">
+                    DADOS DO CLIENTE
+                  </h2>
+                  <div className="text-[9px] space-y-0.5">
+                    <div>
+                      <strong>Cliente:</strong> {proposta.cliente_nome}
+                    </div>
+                    {proposta.cliente_endereco && (
+                      <div>
+                        <strong>Endereço:</strong> {proposta.cliente_endereco}
+                      </div>
+                    )}
+                    {proposta.cliente_telefone && (
+                      <div>
+                        <strong>Telefone:</strong> {proposta.cliente_telefone}
+                      </div>
+                    )}
+                    {proposta.cliente_email && (
+                      <div>
+                        <strong>E-mail:</strong> {proposta.cliente_email}
+                      </div>
+                    )}
+                    <div>
+                      <strong>A/C Sr(a):</strong> {proposta.sindico || "Síndico"}
+                    </div>
+                    <div className="mt-1.5 pt-1.5 border-t border-gray-200">
+                      <div>
+                        <strong>Data:</strong> {formatDate(proposta.data_proposta)}
+                      </div>
+                      {proposta.data_validade && (
+                        <div>
+                          <strong>Validade:</strong> {formatDate(proposta.data_validade)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="text-[10px] font-bold mb-1 border-b border-gray-300 pb-1 bg-blue-50 px-2 py-1 border-l-[3px] border-l-blue-500">
+                    DADOS DA EMPRESA
+                  </h2>
+                  {configuracaoLayout ? (
                     <div className="text-[9px] space-y-0.5">
-                      <div>
-                        <strong>Cliente:</strong> {proposta.cliente_nome}
+                      {configuracaoLayout.empresa_nome && (
+                        <div>
+                          <strong>Empresa:</strong> {configuracaoLayout.empresa_nome}
+                        </div>
+                      )}
+                      {configuracaoLayout.empresa_cnpj && (
+                        <div>
+                          <strong>CNPJ:</strong> {configuracaoLayout.empresa_cnpj}
+                        </div>
+                      )}
+                      {configuracaoLayout.empresa_endereco && (
+                        <div>
+                          <strong>Endereço:</strong> {configuracaoLayout.empresa_endereco}
+                        </div>
+                      )}
+                      {configuracaoLayout.empresa_cidade && configuracaoLayout.empresa_uf && (
+                        <div>
+                          <strong>Cidade:</strong> {configuracaoLayout.empresa_cidade} -{" "}
+                          {configuracaoLayout.empresa_uf}
+                        </div>
+                      )}
+                      {configuracaoLayout.empresa_telefone && (
+                        <div>
+                          <strong>Telefone:</strong> {configuracaoLayout.empresa_telefone}
+                        </div>
+                      )}
+                      {configuracaoLayout.empresa_email && (
+                        <div>
+                          <strong>E-mail:</strong> {configuracaoLayout.empresa_email}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-[9px] text-gray-500">Configurações não encontradas</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Equipamentos Inclusos */}
+              <div className="mb-3 pt-2 border-t border-black text-left">
+                <h2 className="text-[10px] font-bold mb-1 border-b border-gray-300 pb-1 underline bg-purple-50 px-2 py-1 border-l-[3px] border-l-purple-500">
+                  Equipamentos Inclusos
+                </h2>
+                <div className="text-[9px] leading-tight space-y-2 grid grid-cols-2 gap-2">
+                  {Object.entries(equipamentosPorCategoria).map(([categoria, itens]) => (
+                    <div key={categoria}>
+                      <div className="font-bold mb-0.5 text-[9px]">
+                        {CATEGORIAS[categoria as keyof typeof CATEGORIAS] || categoria.toUpperCase()}:
                       </div>
-                      {proposta.cliente_endereco && (
-                        <div>
-                          <strong>Endereço:</strong> {proposta.cliente_endereco}
-                        </div>
-                      )}
-                      {proposta.cliente_telefone && (
-                        <div>
-                          <strong>Telefone:</strong> {proposta.cliente_telefone}
-                        </div>
-                      )}
-                      {proposta.cliente_email && (
-                        <div>
-                          <strong>E-mail:</strong> {proposta.cliente_email}
-                        </div>
-                      )}
-                      <div>
-                        <strong>A/C Sr(a):</strong> {proposta.sindico || "Síndico"}
-                      </div>
-                      <div className="mt-1.5 pt-1.5 border-t border-gray-200">
-                        <div>
-                          <strong>Data:</strong> {formatDate(proposta.data_proposta)}
-                        </div>
-                        {proposta.data_validade && (
-                          <div>
-                            <strong>Validade:</strong> {formatDate(proposta.data_validade)}
+                      <div className="ml-2 space-y-0.5">
+                        {itens.map((item, index) => (
+                          <div key={index}>
+                            {item.quantidade}x {item.nome}
                           </div>
-                        )}
+                        ))}
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Valor Total */}
+              <div className="mb-3">
+                <div className="text-center text-xs font-bold bg-gray-100 p-1.5 border">
+                  VALOR TOTAL DA PROPOSTA: {formatCurrency(proposta.valor_total_proposta)}
+                </div>
+              </div>
+
+              {/* Condições Gerais do Contrato */}
+              <div className="mb-3 text-left">
+                <h2 className="text-[10px] font-bold mb-1 underline bg-gray-50 px-2 py-1 border-l-[3px] border-l-gray-500">
+                  Condições Gerais do Contrato
+                </h2>
+                <div className="text-[10px] leading-tight space-y-1 text-justify">
+                  <div>
+                    <div className="font-bold mb-0.5 text-[10px]">1. VISITAS MENSAIS:</div>
+                    <div>
+                      O presente contrato compreende <strong>01 (uma) visita mensal</strong>, realizada{" "}
+                      <strong>em horário comercial</strong>, com o objetivo de verificar o funcionamento dos
+                      equipamentos, realizar <strong>limpeza e lubrificação preventiva</strong>. Caso seja constatada
+                      a necessidade de substituição de alguma peça, a CONTRATANTE será{" "}
+                      <strong>comunicada previamente</strong>, e a troca somente será efetuada{" "}
+                      <strong>mediante autorização expressa</strong>, sendo o valor da peça e do serviço cobrados à
+                      parte.
                     </div>
                   </div>
 
                   <div>
-                    <h2 className="text-[10px] font-bold mb-1 border-b border-gray-300 pb-1 bg-blue-50 px-2 py-1 border-l-[3px] border-l-blue-500">
-                      DADOS DA EMPRESA
-                    </h2>
-                    {configuracaoLayout ? (
-                      <div className="text-[9px] space-y-0.5">
-                        {configuracaoLayout.empresa_nome && (
-                          <div>
-                            <strong>Empresa:</strong> {configuracaoLayout.empresa_nome}
-                          </div>
-                        )}
-                        {configuracaoLayout.empresa_cnpj && (
-                          <div>
-                            <strong>CNPJ:</strong> {configuracaoLayout.empresa_cnpj}
-                          </div>
-                        )}
-                        {configuracaoLayout.empresa_endereco && (
-                          <div>
-                            <strong>Endereço:</strong> {configuracaoLayout.empresa_endereco}
-                          </div>
-                        )}
-                        {configuracaoLayout.empresa_cidade && configuracaoLayout.empresa_uf && (
-                          <div>
-                            <strong>Cidade:</strong> {configuracaoLayout.empresa_cidade} -{" "}
-                            {configuracaoLayout.empresa_uf}
-                          </div>
-                        )}
-                        {configuracaoLayout.empresa_telefone && (
-                          <div>
-                            <strong>Telefone:</strong> {configuracaoLayout.empresa_telefone}
-                          </div>
-                        )}
-                        {configuracaoLayout.empresa_email && (
-                          <div>
-                            <strong>E-mail:</strong> {configuracaoLayout.empresa_email}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-[9px] text-gray-500">Configurações não encontradas</div>
-                    )}
+                    <div className="font-bold mb-0.5 text-[10px]">2. VISITAS EMERGENCIAIS:</div>
+                    <div>
+                      Chamados efetuados <strong>dentro do horário comercial</strong> serão{" "}
+                      <strong>atendidos no mesmo dia</strong>. Chamados realizados{" "}
+                      <strong>após o horário comercial</strong> serão atendidos{" "}
+                      <strong>em até 15 (quinze) horas</strong> após o registro do chamado. Nos casos de{" "}
+                      <strong>finais de semana e feriados</strong>, este prazo poderá <strong>sofrer variação</strong>
+                      , conforme disponibilidade técnica.
+                    </div>
                   </div>
+
+                  <div>
+                    <div className="font-bold mb-0.5 text-[10px]">3. MÃO DE OBRA:</div>
+                    <div>
+                      O presente contrato <strong>não inclui serviços de mão de obra</strong> referentes a:
+                    </div>
+                    <ul className="ml-4 list-disc">
+                      <li>Equipamentos que não possuam manutenção pelo fabricante; ou</li>
+                      <li>Instalação de novos equipamentos.</li>
+                    </ul>
+                    <div>
+                      Nessas hipóteses, o condomínio fará jus a um{" "}
+                      <strong>desconto de 50% (cinquenta por cento)</strong> sobre o valor da mão de obra praticado
+                      pela CONTRATADA.
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="font-bold mb-0.5 text-[10px]">4. GARANTIA E RESPONSABILIDADE:</div>
+                    <div>
+                      A CONTRATADA se compromete a prestar os serviços contratados com{" "}
+                      <strong>zelo, segurança e observância das normas técnicas aplicáveis</strong>,
+                      responsabilizando-se pela <strong>qualidade dos serviços executados</strong> e pela{" "}
+                      <strong>integridade dos equipamentos durante o período de manutenção</strong>.
+                    </div>
+                    <div className="mt-1">
+                      A CONTRATADA <strong>não se responsabiliza por danos decorrentes</strong> de mau uso,
+                      vandalismo, descargas elétricas, quedas de energia, intempéries climáticas ou intervenções
+                      realizadas por terceiros não autorizados pela CONTRATADA.
+                    </div>
+                    <div className="mt-1">
+                      As peças substituídas terão{" "}
+                      <strong>garantia de fábrica, conforme condições do fabricante</strong>, sendo de
+                      responsabilidade da CONTRATANTE providenciar as condições adequadas de uso e conservação dos
+                      equipamentos.
+                    </div>
+                  </div>
+
+                  {proposta.equipamentos_consignacao && (
+                    <div>
+                      <div className="font-bold mb-0.5 text-[10px]">5. EQUIPAMENTOS EM CONSIGNAÇÃO:</div>
+                      <div>
+                        Caso o contrato seja firmado nas condições de consignação, os equipamentos consignados serão{" "}
+                        <strong>instalados pela CONTRATADA</strong> e permanecerão sob essa condição até o{" "}
+                        <strong>término do prazo contratual</strong>. Em caso de renovação do contrato, os referidos
+                        equipamentos passarão automaticamente à{" "}
+                        <strong>posse do condomínio, sem ônus adicional</strong>.
+                      </div>
+                      <div className="mt-1 bg-amber-50 border border-amber-200 rounded p-1.5">
+                        <strong>Equipamentos:</strong> {proposta.equipamentos_consignacao}
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* Equipamentos Inclusos */}
-                <div className="mb-3 pt-2 border-t border-black">
-                  <h2 className="text-[10px] font-bold mb-1 border-b border-gray-300 pb-1 underline bg-purple-50 px-2 py-1 border-l-[3px] border-l-purple-500">
-                    Equipamentos Inclusos
-                  </h2>
-                  <div className="text-[9px] leading-tight space-y-2 grid grid-cols-2 gap-2">
-                    {Object.entries(equipamentosPorCategoria).map(([categoria, itens]) => (
-                      <div key={categoria}>
-                        <div className="font-bold mb-0.5 text-[9px]">
-                          {CATEGORIAS[categoria as keyof typeof CATEGORIAS] || categoria.toUpperCase()}:
-                        </div>
-                        <div className="ml-2 space-y-0.5">
-                          {itens.map((item, index) => (
-                            <div key={index}>
-                              {item.quantidade}x {item.nome}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Valor Total */}
-                <div className="mb-3">
-                  <div className="text-center text-xs font-bold bg-gray-100 p-1.5 border">
-                    VALOR TOTAL DA PROPOSTA: {formatCurrency(proposta.valor_total_proposta)}
-                  </div>
-                </div>
-
-                {/* Condições Gerais do Contrato */}
-                <div className="mb-3">
-                  <h2 className="text-[10px] font-bold mb-1 underline bg-gray-50 px-2 py-1 border-l-[3px] border-l-gray-500">
-                    Condições Gerais do Contrato
-                  </h2>
-                  <div className="text-[10px] leading-tight space-y-1 text-justify">
-                    <div>
-                      <div className="font-bold mb-0.5 text-[10px]">1. VISITAS MENSAIS:</div>
-                      <div>
-                        O presente contrato compreende <strong>01 (uma) visita mensal</strong>, realizada{" "}
-                        <strong>em horário comercial</strong>, com o objetivo de verificar o funcionamento dos
-                        equipamentos, realizar <strong>limpeza e lubrificação preventiva</strong>. Caso seja constatada
-                        a necessidade de substituição de alguma peça, a CONTRATANTE será{" "}
-                        <strong>comunicada previamente</strong>, e a troca somente será efetuada{" "}
-                        <strong>mediante autorização expressa</strong>, sendo o valor da peça e do serviço cobrados à
-                        parte.
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="font-bold mb-0.5 text-[10px]">2. VISITAS EMERGENCIAIS:</div>
-                      <div>
-                        Chamados efetuados <strong>dentro do horário comercial</strong> serão{" "}
-                        <strong>atendidos no mesmo dia</strong>. Chamados realizados{" "}
-                        <strong>após o horário comercial</strong> serão atendidos{" "}
-                        <strong>em até 15 (quinze) horas</strong> após o registro do chamado. Nos casos de{" "}
-                        <strong>finais de semana e feriados</strong>, este prazo poderá <strong>sofrer variação</strong>
-                        , conforme disponibilidade técnica.
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="font-bold mb-0.5 text-[10px]">3. MÃO DE OBRA:</div>
-                      <div>
-                        O presente contrato <strong>não inclui serviços de mão de obra</strong> referentes a:
-                      </div>
-                      <ul className="ml-4 list-disc">
-                        <li>Equipamentos que não possuam manutenção pelo fabricante; ou</li>
-                        <li>Instalação de novos equipamentos.</li>
-                      </ul>
-                      <div>
-                        Nessas hipóteses, o condomínio fará jus a um{" "}
-                        <strong>desconto de 50% (cinquenta por cento)</strong> sobre o valor da mão de obra praticado
-                        pela CONTRATADA.
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="font-bold mb-0.5 text-[10px]">4. GARANTIA E RESPONSABILIDADE:</div>
-                      <div>
-                        A CONTRATADA se compromete a prestar os serviços contratados com{" "}
-                        <strong>zelo, segurança e observância das normas técnicas aplicáveis</strong>,
-                        responsabilizando-se pela <strong>qualidade dos serviços executados</strong> e pela{" "}
-                        <strong>integridade dos equipamentos durante o período de manutenção</strong>.
-                      </div>
-                      <div className="mt-1">
-                        A CONTRATADA <strong>não se responsabiliza por danos decorrentes</strong> de mau uso,
-                        vandalismo, descargas elétricas, quedas de energia, intempéries climáticas ou intervenções
-                        realizadas por terceiros não autorizados pela CONTRATADA.
-                      </div>
-                      <div className="mt-1">
-                        As peças substituídas terão{" "}
-                        <strong>garantia de fábrica, conforme condições do fabricante</strong>, sendo de
-                        responsabilidade da CONTRATANTE providenciar as condições adequadas de uso e conservação dos
-                        equipamentos.
-                      </div>
-                    </div>
-
-                    {proposta.equipamentos_consignacao && (
-                      <div>
-                        <div className="font-bold mb-0.5 text-[10px]">5. EQUIPAMENTOS EM CONSIGNAÇÃO:</div>
-                        <div>
-                          Caso o contrato seja firmado nas condições de consignação, os equipamentos consignados serão{" "}
-                          <strong>instalados pela CONTRATADA</strong> e permanecerão sob essa condição até o{" "}
-                          <strong>término do prazo contratual</strong>. Em caso de renovação do contrato, os referidos
-                          equipamentos passarão automaticamente à{" "}
-                          <strong>posse do condomínio, sem ônus adicional</strong>.
-                        </div>
-                        <div className="mt-1 bg-amber-50 border border-amber-200 rounded p-1.5">
-                          <strong>Equipamentos:</strong> {proposta.equipamentos_consignacao}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Informações do Contrato */}
-                <div className="mb-3 border-t-2 border-black pt-2 mt-2">
-                  <div className="grid grid-cols-3 gap-2 text-[11px] leading-tight">
-                    <div>
-                      <strong>Validade da proposta:</strong> 30 dias
-                    </div>
-                    <div>
-                      <strong>Forma de pagamento:</strong> {proposta.forma_pagamento}
-                    </div>
-                    <div>
-                      <strong>Garantia:</strong> {proposta.garantia} dias
-                    </div>
-                    <div>
-                      <strong>Prazo do contrato:</strong> {proposta.prazo_contrato} meses
-                    </div>
-                    <div className="col-span-2">
-                      <strong>Início dos serviços:</strong> Após assinatura do contrato e primeira mensalidade
-                    </div>
-                  </div>
-                </div>
-
-                {/* Observações */}
-                {proposta.observacoes && (
-                  <div className="mb-3">
-                    <h3 className="text-[10px] font-bold mb-0.5 bg-blue-50 px-2 py-1 border-l-[3px] border-l-blue-500">
-                      OBSERVAÇÕES:
-                    </h3>
-                    <div className="text-[10px] leading-tight">{proposta.observacoes}</div>
-                  </div>
-                )}
               </div>
 
-              {/* Rodapé fixo no final */}
-              {configuracaoLayout && (configuracaoLayout.rodape || configuracaoLayout.rodape_texto) && (
-                <div className="mt-auto pt-2 border-t-2 border-black flex-shrink-0">
-                  <div className="text-center text-[8px] leading-tight space-y-0.5 font-bold">
-                    {configuracaoLayout.rodape && <div>{configuracaoLayout.rodape}</div>}
-                    {configuracaoLayout.rodape_texto && <div>{configuracaoLayout.rodape_texto}</div>}
+              {/* Informações do Contrato */}
+              <div className="mb-3 border-t-2 border-black pt-2 mt-2 text-left">
+                <div className="grid grid-cols-3 gap-2 text-[11px] leading-tight">
+                  <div>
+                    <strong>Validade da proposta:</strong> 30 dias
                   </div>
+                  <div>
+                    <strong>Forma de pagamento:</strong> {proposta.forma_pagamento}
+                  </div>
+                  <div>
+                    <strong>Garantia:</strong> {proposta.garantia} dias
+                  </div>
+                  <div>
+                    <strong>Prazo do contrato:</strong> {proposta.prazo_contrato} meses
+                  </div>
+                  <div className="col-span-2">
+                    <strong>Início dos serviços:</strong> Após assinatura do contrato e primeira mensalidade
+                  </div>
+                </div>
+              </div>
+
+              {/* Observações */}
+              {proposta.observacoes && (
+                <div className="mb-3 text-left">
+                  <h3 className="text-[10px] font-bold mb-0.5 bg-blue-50 px-2 py-1 border-l-[3px] border-l-blue-500">
+                    OBSERVAÇÕES:
+                  </h3>
+                  <div className="text-[10px] leading-tight">{proposta.observacoes}</div>
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Botões de Ação fixos */}
-          <div className="flex justify-end gap-2 px-6 py-4 border-t shrink-0">
-            <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
-            </Button>
+            {/* Rodapé fixo no final */}
+            {configuracaoLayout && (configuracaoLayout.rodape || configuracaoLayout.rodape_texto) && (
+              <div className="mt-auto pt-2 border-t-2 border-black flex-shrink-0 text-center">
+                <div className="text-center text-[8px] leading-tight space-y-0.5 font-bold">
+                  {configuracaoLayout.rodape && <div>{configuracaoLayout.rodape}</div>}
+                  {configuracaoLayout.rodape_texto && <div>{configuracaoLayout.rodape_texto}</div>}
+                </div>
+              </div>
+            )}
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      )}
 
       {/* Estilos de impressão */}
       <style jsx>{`

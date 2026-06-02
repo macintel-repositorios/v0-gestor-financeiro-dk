@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
@@ -30,9 +30,10 @@ import { OrcamentoPrintView } from "@/components/orcamento-print-view"
 import { createRoot } from "react-dom/client"
 
 interface OrcamentoPrintEditorProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   orcamento: any
   itens: any[]
-  onClose: () => void
 }
 
 interface LayoutConfig {
@@ -122,7 +123,7 @@ interface TermoOrcamento {
   ativo: boolean
 }
 
-export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEditorProps) {
+export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: OrcamentoPrintEditorProps) {
   const [timbradoConfig, setTimbradoConfig] = useState<TimbradoConfig | null>(null)
   const [logoImpressao, setLogoImpressao] = useState<LogoConfig | null>(null)
   const [termoOrcamento, setTermoOrcamento] = useState<TermoOrcamento | null>(null)
@@ -1226,98 +1227,57 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
 
   if (loading) {
     return (
-      <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Carregando...</DialogTitle>
-            <DialogDescription>Aguarde enquanto carregamos as configurações de layout</DialogDescription>
-          </DialogHeader>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full sm:max-w-5xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Carregando...</SheetTitle>
+            <SheetDescription>Aguarde enquanto carregamos as configurações de layout</SheetDescription>
+          </SheetHeader>
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     )
   }
 
   if (!termoOrcamento) {
     return (
-      <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-[95vw] max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>Termo de Orçamento não encontrado</DialogTitle>
-            <DialogDescription>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full sm:max-w-md h-full flex flex-col p-6 overflow-y-auto border-l border-border bg-card text-foreground">
+          <SheetHeader>
+            <SheetTitle>Termo de Orçamento não encontrado</SheetTitle>
+            <SheetDescription>
               Configure um termo do tipo "Orçamento" antes de usar o editor de layout
-            </DialogDescription>
-          </DialogHeader>
+            </SheetDescription>
+          </SheetHeader>
           <div className="py-8 text-center">
-            <p className="text-gray-600 mb-4">Nenhum termo do tipo "Orçamento" foi encontrado nas configurações.</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-muted-foreground mb-4">Nenhum termo do tipo "Orçamento" foi encontrado nas configurações.</p>
+            <p className="text-sm text-zinc-400">
               Por favor, crie um termo do tipo "Orçamento" na página de Configurações → Termos.
             </p>
-            <Button onClick={onClose} className="mt-4">
+            <Button onClick={() => onOpenChange(false)} className="mt-4">
               Fechar
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     )
   }
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent
-        className="overflow-hidden p-0 border-4 border-blue-500"
-        style={{
-          width: `${modalSize.width}vw`,
-          height: `${modalSize.height}vh`,
-          maxWidth: "98vw",
-          maxHeight: "98vh",
-        }}
-      >
-        <div
-          className="absolute top-0 left-0 w-full h-2 cursor-n-resize hover:bg-blue-400 transition-colors z-50"
-          onMouseDown={(e) => handleResizeStart(e, "n")}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-full h-2 cursor-s-resize hover:bg-blue-400 transition-colors z-50"
-          onMouseDown={(e) => handleResizeStart(e, "s")}
-        />
-        <div
-          className="absolute top-0 left-0 w-2 h-full cursor-w-resize hover:bg-blue-400 transition-colors z-50"
-          onMouseDown={(e) => handleResizeStart(e, "w")}
-        />
-        <div
-          className="absolute top-0 right-0 w-2 h-full cursor-e-resize hover:bg-blue-400 transition-colors z-50"
-          onMouseDown={(e) => handleResizeStart(e, "e")}
-        />
-        <div
-          className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize hover:bg-blue-500 transition-colors z-50"
-          onMouseDown={(e) => handleResizeStart(e, "nw")}
-        />
-        <div
-          className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize hover:bg-blue-500 transition-colors z-50"
-          onMouseDown={(e) => handleResizeStart(e, "ne")}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize hover:bg-blue-500 transition-colors z-50"
-          onMouseDown={(e) => handleResizeStart(e, "sw")}
-        />
-        <div
-          className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize hover:bg-blue-500 transition-colors z-50"
-          onMouseDown={(e) => handleResizeStart(e, "se")}
-        />
-
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-5xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
         <div className="h-full overflow-y-auto p-6">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
+          <SheetHeader className="pb-4 border-b border-border">
+            <SheetTitle className="flex items-center gap-2 font-bold text-lg text-foreground">
+              <Settings className="h-5 w-5 text-indigo-500" />
               Editor de Layout - Orçamento {orcamento.numero}
-            </DialogTitle>
-            <DialogDescription>
+            </SheetTitle>
+            <SheetDescription className="text-zinc-400 text-xs">
               Personalize o layout de impressão do orçamento ajustando fontes, margens e quebras de página
-            </DialogDescription>
-          </DialogHeader>
+            </SheetDescription>
+          </SheetHeader>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
             <div className="lg:col-span-1 space-y-4 max-h-[70vh] overflow-y-auto">
@@ -1803,7 +1763,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
               </div>
 
               <div
-                className="border rounded-lg p-4 bg-white max-h-[70vh] overflow-y-auto"
+                className="border rounded-lg p-4 bg-white text-black max-h-[70vh] overflow-y-auto"
                 style={{
                   fontSize: `${layoutConfig.fontSize}px`,
                   lineHeight: layoutConfig.lineHeight,
@@ -1989,14 +1949,14 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
 
           <Separator />
 
-          <div className="flex items-center justify-end space-x-2">
-            <Button onClick={onClose} variant="outline">
+          <div className="flex items-center justify-end space-x-2 mt-4">
+            <Button onClick={() => onOpenChange(false)} variant="outline" className="mr-8">
               <X className="mr-2 h-4 w-4" />
               Fechar
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

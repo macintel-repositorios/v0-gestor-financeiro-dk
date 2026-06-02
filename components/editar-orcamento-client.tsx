@@ -1542,6 +1542,8 @@ export function EditarOrcamentoClient({
       {/* Modal de Impressão */}
       {showPrintModal && (
         <OrcamentoPrintEditor
+          open={showPrintModal}
+          onOpenChange={setShowPrintModal}
           orcamento={{
             ...orcamento,
             itens: itens.map((item) => ({
@@ -1559,7 +1561,6 @@ export function EditarOrcamentoClient({
             produto_unidade: item.produto?.unidade || item.produto_unidade,
             marca_nome: item.marca_nome || item.produto?.marca,
           }))}
-          onClose={() => setShowPrintModal(false)}
         />
       )}
     </div>
