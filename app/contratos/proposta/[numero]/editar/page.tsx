@@ -136,12 +136,14 @@ export default function EditarPropostaPage({
   const [valorPorKm, setValorPorKm] = useState(1.5)
   const [dataValidade, setDataValidade] = useState("")
   const [descontoVisitas, setDescontoVisitas] = useState(0)
+  const [salarioMinimo, setSalarioMinimo] = useState(1412)
 
   useEffect(() => {
     if (numero) {
       loadProposta()
       loadEquipamentos()
       loadValorPorKm()
+      loadSalarioMinimo()
     }
   }, [numero])
 
@@ -244,6 +246,18 @@ export default function EditarPropostaPage({
       }
     } catch (error) {
       console.error("Erro ao carregar valor por km:", error)
+    }
+  }
+
+  const loadSalarioMinimo = async () => {
+    try {
+      const response = await fetch("/api/configuracoes/equipamentos/salario-minimo")
+      const result = await response.json()
+      if (result.success) {
+        setSalarioMinimo(result.salario_minimo || 1412.00)
+      }
+    } catch (error) {
+      console.error("Erro ao carregar salário mínimo:", error)
     }
   }
 
@@ -401,7 +415,9 @@ export default function EditarPropostaPage({
   }
 
   const calcularTotal = () => {
-    return calcularValorEquipamentos() + calcularDeslocamento() + calcularValorVisitas()
+    const totalCalculado = calcularValorEquipamentos() + calcularDeslocamento() + calcularValorVisitas()
+    const valorMinimoContrato = (salarioMinimo || 1412.00) / 4
+    return Math.max(totalCalculado, valorMinimoContrato)
   }
 
   const handleClienteChange = async (novoCliente: Cliente | null) => {
@@ -982,6 +998,11 @@ export default function EditarPropostaPage({
                         <span>Valor Total da Proposta:</span>
                         <span className="text-green-600 dark:text-green-400">{formatCurrency(calcularTotal())}</span>
                       </div>
+                      {(calcularValorEquipamentos() + calcularDeslocamento() + calcularValorVisitas()) < (salarioMinimo / 4) && (
+                        <div className="text-xs text-amber-600 dark:text-amber-400 font-medium text-right mt-1">
+                          Valor mínimo de contrato aplicado (1/4 do salário mínimo: {formatCurrency(salarioMinimo / 4)})
+                        </div>
+                      )}
                     </div>
                   </div>
 

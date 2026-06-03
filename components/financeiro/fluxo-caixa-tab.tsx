@@ -1768,7 +1768,9 @@ export function FluxoCaixaTab() {
                     <span key={acc.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3 bg-card">
                       <span className="flex items-center gap-2">
                         {getAccountIcon(acc.tipo)}
-                        <span className="text-xs font-semibold text-foreground">{acc.nome}</span>
+                        <span className="text-xs font-semibold text-foreground">
+                          {acc.nome} <span className="text-[10px] text-muted-foreground font-normal">({getAccountTypeLabel(acc.tipo)})</span>
+                        </span>
                       </span>
 
                       <span className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
