@@ -19,7 +19,7 @@ export async function GET() {
 
     // 3. Fetch Financial Transactions (Statements) joined with Account info
     const [transacoesOriginal]: any = await pool.execute(`
-      SELECT t.id, t.data, t.valor, t.tipo, t.descricao, c.nome as conta_nome, t.conta_id, c.tipo as conta_tipo
+      SELECT t.id, t.data, t.valor, t.tipo, t.descricao, c.nome as conta_nome, t.conta_id, c.tipo as conta_tipo, t.categoria
       FROM transacoes_financeiras t
       JOIN contas_financeiras c ON t.conta_id = c.id
       WHERE t.ativo = 1
@@ -123,8 +123,8 @@ export async function GET() {
     // Add manual / imported transactions (either inflow or outflow)
     // This is our primary source of truth for actual cash flow
     for (const t of transacoes) {
-      // 1. Skip internal transfers
-      if (transferIdsToIgnore.has(t.id)) {
+      // 1. Skip internal transfers or manually categorized transfers
+      if (transferIdsToIgnore.has(t.id) || t.categoria === "Transferências entre contas") {
         continue
       }
 

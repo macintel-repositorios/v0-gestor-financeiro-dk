@@ -19,6 +19,7 @@ const DEFAULT_CATEGORIES = [
   { nome: "Tarifas Bancárias", tipo: "saida" },
   { nome: "Material de Escritório", tipo: "saida" },
   { nome: "Fornecedores", tipo: "saida" },
+  { nome: "Transferências entre contas", tipo: "saida" },
   { nome: "Outras Despesas", tipo: "saida" },
   { nome: "Outros", tipo: "saida" }
 ]
