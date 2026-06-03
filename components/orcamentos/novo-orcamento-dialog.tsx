@@ -33,6 +33,14 @@ import { ProdutoCombobox } from "@/components/produto-combobox"
 import { ProdutoFormDialog } from "@/components/produto-form-dialog"
 import { ClienteFormDialog } from "@/components/cliente-form-dialog"
 import { EditarServicoDialog } from "@/components/editar-servico-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface OrcamentoItem {
   produto_id: string
@@ -94,6 +102,22 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
 
   const [valorPorKm, setValorPorKm] = useState(1.5)
   const [dataOrcamento, setDataOrcamento] = useState(new Date().toISOString().split("T")[0])
+
+  // Estados para edição do item do orçamento
+  const [showEditItemDialog, setShowEditItemDialog] = useState(false)
+  const [editItemIndex, setEditItemIndex] = useState<number | null>(null)
+  const [editItemQtd, setEditItemQtd] = useState<number>(1)
+  const [editItemValorUnit, setEditItemValorUnit] = useState<number>(0)
+  const [editItemMaoObra, setEditItemMaoObra] = useState<number>(0)
+
+  const salvarEdicaoItem = () => {
+    if (editItemIndex === null) return
+    atualizarItem(editItemIndex, "quantidade", editItemQtd)
+    atualizarItem(editItemIndex, "valor_unitario", editItemValorUnit)
+    atualizarItem(editItemIndex, "valor_mao_obra", editItemMaoObra)
+    setShowEditItemDialog(false)
+    setEditItemIndex(null)
+  }
 
   // Reset form when open changes
   useEffect(() => {
@@ -832,118 +856,88 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                   </div>
 
                   {itens.length > 0 ? (
-                    <>
-                      {/* Layout de Tabela (Visível apenas em telas grandes) */}
-                      <div className="hidden md:block border border-border rounded-lg overflow-x-auto">
-                        <Table className="text-xs">
-                          <TableHeader>
-                            <TableRow className="bg-muted/40">
-                              <TableHead className="font-semibold w-10"></TableHead>
-                              <TableHead className="font-semibold">Item</TableHead>
-                              <TableHead className="font-semibold w-20 text-center">Quant.</TableHead>
-                              <TableHead className="font-semibold w-24">Vlr Unit</TableHead>
-                              <TableHead className="font-semibold w-24">Mão Obra</TableHead>
-                              <TableHead className="font-semibold w-24">Total</TableHead>
-                              <TableHead className="w-10"></TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {itens.map((item, index) => (
-                              <TableRow key={index} className="hover:bg-muted/20 border-b border-border">
-                                <TableCell className="py-2 text-center">
-                                  <GripVertical className="h-3.5 w-3.5 text-muted-foreground opacity-60 cursor-grab" />
-                                </TableCell>
-                                <TableCell>
-                                  <div className="font-medium text-foreground">{item.produto.descricao}</div>
-                                  <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">{item.produto.codigo}</div>
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    type="number"
-                                    min="1"
-                                    value={item.quantidade}
-                                    onChange={(e) =>
-                                      atualizarItem(index, "quantidade", Number.parseInt(e.target.value) || 1)
-                                    }
-                                    className="h-7 text-center text-xs"
-                                  />
-                                </TableCell>
-                                <TableCell className="font-medium">{formatCurrency(item.valor_unitario)}</TableCell>
-                                <TableCell className="font-medium">{formatCurrency(item.valor_mao_obra)}</TableCell>
-                                <TableCell className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(item.valor_total)}</TableCell>
-                                <TableCell className="py-2 text-center">
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removerItem(index)}
-                                    className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                                  >
-                                    <Minus className="h-3.5 w-3.5" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-
-                      {/* Layout de Cards (Visível apenas em telas pequenas/mobile) */}
-                      <div className="block md:hidden space-y-3">
-                        {itens.map((item, index) => (
-                          <div
-                            key={index}
-                            className="p-3 border border-border rounded-xl bg-card text-foreground shadow-sm space-y-3 relative"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-center gap-2 flex-1">
-                                <GripVertical className="h-3.5 w-3.5 text-muted-foreground opacity-60 cursor-grab shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <span className="font-medium text-xs text-foreground block break-words">{item.produto.descricao}</span>
-                                  <Badge variant="outline" className="text-[9px] py-0 px-1 font-mono mt-1 bg-muted/50 border-border text-muted-foreground">
-                                    {item.produto.codigo}
-                                  </Badge>
+                    <div className="space-y-3">
+                      {itens.map((item, index) => (
+                        <div
+                          key={index}
+                          draggable={false}
+                          onDragOver={(e) => handleDragOver(e, index)}
+                          onDrop={(e) => handleDrop(e, index)}
+                          onClick={() => {
+                            setEditItemIndex(index)
+                            setEditItemQtd(item.quantidade)
+                            setEditItemValorUnit(item.valor_unitario)
+                            setEditItemMaoObra(item.valor_mao_obra)
+                            setShowEditItemDialog(true)
+                          }}
+                          className={cn(
+                            "p-3 border rounded-xl bg-card text-foreground shadow-sm hover:shadow-md transition-all cursor-pointer relative hover:border-indigo-400 dark:hover:border-indigo-500",
+                            dragOverIndex === index && draggedIndex !== index ? "border-2 border-indigo-400" : "border-border",
+                            draggedIndex === index ? "opacity-40" : ""
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div
+                                draggable
+                                onDragStart={(e) => {
+                                  e.stopPropagation()
+                                  handleDragStart(e, index)
+                                }}
+                                onDragEnd={(e) => {
+                                  e.stopPropagation()
+                                  handleDragEnd()
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="cursor-grab active:cursor-grabbing text-muted-foreground opacity-60 p-1 rounded hover:bg-muted shrink-0"
+                                title="Arrastar para reordenar"
+                              >
+                                <GripVertical className="h-4 w-4" />
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <span className="font-semibold text-xs text-foreground block break-words">{item.produto.descricao}</span>
+                                <Badge variant="outline" className="text-[9px] py-0 px-1.5 font-mono mt-1 bg-muted/50 border-border text-muted-foreground">
+                                  {item.produto.codigo}
+                                </Badge>
+                                
+                                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-[10px] text-muted-foreground border-t border-border/60 pt-2">
+                                  <div>
+                                    <span className="text-muted-foreground">Qtd: </span>
+                                    <span className="font-medium text-foreground">{item.quantidade}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Vlr Unit: </span>
+                                    <span className="font-medium text-foreground">{formatCurrency(item.valor_unitario)}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Mão Obra: </span>
+                                    <span className="font-medium text-foreground">{formatCurrency(item.valor_mao_obra)}</span>
+                                  </div>
                                 </div>
                               </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <div className="text-right mr-1">
+                                <span className="text-[9px] text-muted-foreground block uppercase">Subtotal</span>
+                                <span className="font-bold text-xs text-emerald-600 dark:text-emerald-400">{formatCurrency(item.valor_total)}</span>
+                              </div>
+                              
                               <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => removerItem(index)}
-                                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200 dark:hover:border-red-900/30 shrink-0"
+                                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200 dark:hover:border-red-900/30"
+                                title="Remover item"
                               >
                                 <Minus className="h-3.5 w-3.5" />
                               </Button>
                             </div>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-border text-[10px]">
-                              <div>
-                                <span className="text-muted-foreground block mb-0.5">Quant.</span>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  value={item.quantidade}
-                                  onChange={(e) =>
-                                    atualizarItem(index, "quantidade", Number.parseInt(e.target.value) || 1)
-                                  }
-                                  className="h-7 text-center text-xs w-16"
-                                />
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground block mb-0.5">Vlr Unit</span>
-                                <span className="font-medium text-foreground block h-7 flex items-center">{formatCurrency(item.valor_unitario)}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground block mb-0.5">Mão Obra</span>
-                                <span className="font-medium text-foreground block h-7 flex items-center">{formatCurrency(item.valor_mao_obra)}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground block mb-0.5">Total</span>
-                                <span className="font-bold text-emerald-600 dark:text-emerald-400 block h-7 flex items-center">{formatCurrency(item.valor_total)}</span>
-                              </div>
-                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <div className="text-center py-6 border border-dashed border-border rounded-lg">
                       <Package className="mx-auto h-8 w-8 text-muted-foreground opacity-50 mb-2" />
@@ -1103,6 +1097,73 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
           servico={servicoParaEditar}
           onSuccess={handleServicoEditSuccess}
         />
+        
+        {/* Dialog para Editar Item do Orçamento */}
+        <Dialog open={showEditItemDialog} onOpenChange={setShowEditItemDialog}>
+          <DialogContent className="max-w-md bg-card text-foreground border-border shadow-2xl">
+            <DialogHeader>
+              <DialogTitle>Editar Valores do Item</DialogTitle>
+              <DialogDescription className="text-muted-foreground text-xs">
+                {editItemIndex !== null && itens[editItemIndex] ? (itens[editItemIndex].produto?.descricao || "") : ""}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 text-xs">
+              <div className="space-y-1">
+                <Label htmlFor="item_quantidade_dialog">Quantidade</Label>
+                <Input
+                  id="item_quantidade_dialog"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={editItemQtd}
+                  onChange={(e) => setEditItemQtd(Number.parseInt(e.target.value) || 1)}
+                  className="h-9 border-border text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="item_valor_unitario_dialog">Valor Unitário (R$)</Label>
+                <Input
+                  id="item_valor_unitario_dialog"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editItemValorUnit}
+                  onChange={(e) => setEditItemValorUnit(Number.parseFloat(e.target.value) || 0)}
+                  className="h-9 border-border text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="item_valor_mao_obra_dialog">Mão de Obra (R$)</Label>
+                <Input
+                  id="item_valor_mao_obra_dialog"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editItemMaoObra}
+                  onChange={(e) => setEditItemMaoObra(Number.parseFloat(e.target.value) || 0)}
+                  className="h-9 border-border text-xs"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEditItemDialog(false)}
+                className="h-9 border-border text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={salvarEdicaoItem}
+                className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs"
+              >
+                Salvar Alterações
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </SheetContent>
     </Sheet>
   )

@@ -33,6 +33,14 @@ import { ProdutoCombobox } from "@/components/produto-combobox"
 import { ProdutoFormDialog } from "@/components/produto-form-dialog"
 import { EditarServicoDialog } from "@/components/editar-servico-dialog"
 import { OrcamentoPrintEditor } from "@/components/orcamento-print-editor"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface OrcamentoItem {
   id?: string
@@ -112,6 +120,22 @@ export function EditarOrcamentoClient({
 
   // Estado para controlar o modal de impressão
   const [showPrintModal, setShowPrintModal] = useState(false)
+
+  // Estados para edição do item do orçamento
+  const [showEditItemDialog, setShowEditItemDialog] = useState(false)
+  const [editItemIndex, setEditItemIndex] = useState<number | null>(null)
+  const [editItemQtd, setEditItemQtd] = useState<number>(1)
+  const [editItemValorUnit, setEditItemValorUnit] = useState<number>(0)
+  const [editItemMaoObra, setEditItemMaoObra] = useState<number>(0)
+
+  const salvarEdicaoItem = () => {
+    if (editItemIndex === null) return
+    atualizarItem(editItemIndex, "quantidade", editItemQtd)
+    atualizarItem(editItemIndex, "valor_unitario", editItemValorUnit)
+    atualizarItem(editItemIndex, "valor_mao_obra", editItemMaoObra)
+    setShowEditItemDialog(false)
+    setEditItemIndex(null)
+  }
 
   const router = useRouter()
   const { toast } = useToast()
@@ -1156,223 +1180,118 @@ export function EditarOrcamentoClient({
 
 
                 {itens.length > 0 && (
-                  <>
-                    {/* Layout de Tabela (Visível apenas em telas grandes) */}
-                    <div className="hidden md:block border rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-gray-50 dark:bg-slate-900/50">
-                            <TableHead className="w-8 px-2"></TableHead>
-                            <TableHead className="font-semibold">Produto</TableHead>
-                            <TableHead className="font-semibold w-32">Quantidade</TableHead>
-                            <TableHead className="font-semibold w-28">Valor Unit.</TableHead>
-                            <TableHead className="font-semibold w-28">Mão de Obra</TableHead>
-                            <TableHead className="font-semibold w-28">Total</TableHead>
-                            <TableHead className="font-semibold w-20">Ações</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {itens.map((item, index) => (
-                            <TableRow
-                              key={index}
-                              draggable={false}
-                              onDragOver={(e) => handleDragOver(e, index)}
-                              onDrop={(e) => handleDrop(e, index)}
-                              className={cn(
-                                "transition-colors",
-                                dragOverIndex === index && draggedIndex !== index
-                                  ? "bg-blue-50 dark:bg-blue-950/20 border-t-2 border-blue-400"
-                                  : "",
-                                draggedIndex === index ? "opacity-40" : ""
-                              )}
+                  <div className="space-y-3">
+                    {itens.map((item, index) => (
+                      <div
+                        key={index}
+                        draggable={false}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDrop={(e) => handleDrop(e, index)}
+                        onClick={() => {
+                          setEditItemIndex(index)
+                          setEditItemQtd(item.quantidade)
+                          setEditItemValorUnit(item.valor_unitario)
+                          setEditItemMaoObra(item.valor_mao_obra)
+                          setShowEditItemDialog(true)
+                        }}
+                        className={cn(
+                          "p-4 border rounded-xl bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all cursor-pointer relative hover:border-blue-400 dark:hover:border-blue-500",
+                          dragOverIndex === index && draggedIndex !== index ? "border-2 border-blue-400" : "border-border",
+                          draggedIndex === index ? "opacity-40" : ""
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div
+                              draggable
+                              onDragStart={(e) => {
+                                e.stopPropagation()
+                                handleDragStart(e, index)
+                              }}
+                              onDragEnd={(e) => {
+                                e.stopPropagation()
+                                handleDragEnd()
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-800 shrink-0"
+                              title="Arrastar para reordenar"
                             >
-                              <TableCell className="px-2 py-2 w-8">
-                                <div
-                                  draggable
-                                  onDragStart={(e) => handleDragStart(e, index)}
-                                  onDragEnd={handleDragEnd}
-                                  className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 flex items-center justify-center h-full"
-                                  title="Arrastar para reordenar"
-                                >
-                                  <GripVertical className="h-4 w-4" />
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{item.produto.descricao}</span>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => editarProduto(item.produto)}
-                                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-1 h-6 w-6"
-                                      title="Editar produto"
-                                    >
-                                      <Edit2 className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs font-mono bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/30"
-                                    >
-                                      {item.produto.codigo}
-                                    </Badge>
-                                    {item.marca_nome && (
-                                      <Badge className="text-xs bg-green-100 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/30 hover:bg-green-100">
-                                        {item.marca_nome}
-                                      </Badge>
-                                    )}
-                                    {item.produto_ncm && (
-                                      <Badge className="text-xs bg-purple-100 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-900/30 hover:bg-purple-100 font-mono">
-                                        {item.produto_ncm}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  step="1"
-                                  value={item.quantidade}
-                                  onChange={(e) =>
-                                    atualizarItem(index, "quantidade", Number.parseInt(e.target.value) || 1)
-                                  }
-                                  className="w-full text-center font-medium"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm font-medium">
-                                  {formatCurrency(item.valor_unitario)}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm font-medium">{formatCurrency(item.valor_mao_obra)}</span>
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm font-semibold text-green-600">
-                                  {formatCurrency(item.valor_total)}
-                                </span>
-                              </TableCell>
-                              <TableCell>
+                              <GripVertical className="h-4 w-4" />
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-semibold text-sm text-gray-900 dark:text-gray-100 block break-words">{item.produto.descricao}</span>
                                 <Button
                                   size="sm"
-                                  variant="outline"
-                                  onClick={() => removerItem(index)}
-                                  className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-900/30"
-                                  title="Remover item"
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    editarProduto(item.produto)
+                                  }}
+                                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-1 h-6 w-6 inline-flex"
+                                  title="Editar produto"
                                 >
-                                  <Minus className="h-3 w-3" />
+                                  <Edit2 className="h-3 w-3" />
                                 </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-
-                    {/* Layout de Cards (Visível apenas em telas pequenas/mobile) */}
-                    <div className="block md:hidden space-y-3">
-                      {itens.map((item, index) => (
-                        <div
-                          key={index}
-                          draggable={false}
-                          onDragOver={(e) => handleDragOver(e, index)}
-                          onDrop={(e) => handleDrop(e, index)}
-                          className={cn(
-                            "p-3 border rounded-xl bg-white dark:bg-slate-900 shadow-sm space-y-3 relative transition-colors",
-                            dragOverIndex === index && draggedIndex !== index ? "border-2 border-blue-400" : "border-border",
-                            draggedIndex === index ? "opacity-40" : ""
-                          )}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2 flex-1">
-                              <div
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, index)}
-                                onDragEnd={handleDragEnd}
-                                className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-800 shrink-0"
-                                title="Arrastar para reordenar"
-                              >
-                                <GripVertical className="h-4 w-4" />
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className="font-medium text-xs text-gray-900 dark:text-gray-100 block break-words">{item.produto.descricao}</span>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => editarProduto(item.produto)}
-                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-1 h-6 w-6 inline-flex"
-                                    title="Editar produto"
-                                  >
-                                    <Edit2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  <Badge
-                                    variant="outline"
-                                    className="text-[10px] py-0 px-1.5 font-mono bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/30"
-                                  >
-                                    {item.produto.codigo}
+                              
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] py-0 px-2 font-mono bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/30"
+                                >
+                                  {item.produto.codigo}
+                                </Badge>
+                                {item.marca_nome && (
+                                  <Badge className="text-[10px] py-0 px-2 bg-green-100 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/30 hover:bg-green-100">
+                                    {item.marca_nome}
                                   </Badge>
-                                  {item.marca_nome && (
-                                    <Badge className="text-[10px] py-0 px-1.5 bg-green-100 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/30 hover:bg-green-100">
-                                      {item.marca_nome}
-                                    </Badge>
-                                  )}
-                                  {item.produto_ncm && (
-                                    <Badge className="text-[10px] py-0 px-1.5 bg-purple-100 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-900/30 hover:bg-purple-100 font-mono">
-                                      {item.produto_ncm}
-                                    </Badge>
-                                  )}
+                                )}
+                                {item.produto_ncm && (
+                                  <Badge className="text-[10px] py-0 px-2 bg-purple-100 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-900/30 hover:bg-purple-100 font-mono">
+                                    {item.produto_ncm}
+                                  </Badge>
+                                )}
+                              </div>
+
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-slate-800/60 pt-2.5">
+                                <div>
+                                  <span className="text-gray-400">Qtd: </span>
+                                  <span className="font-medium text-gray-800 dark:text-gray-200">{item.quantidade}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">Valor Unit: </span>
+                                  <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(item.valor_unitario)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">Mão de Obra: </span>
+                                  <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(item.valor_mao_obra)}</span>
                                 </div>
                               </div>
                             </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <div className="text-right mr-1">
+                              <span className="text-[10px] text-gray-400 block uppercase">Subtotal</span>
+                              <span className="font-bold text-sm text-green-600 dark:text-green-400">{formatCurrency(item.valor_total)}</span>
+                            </div>
+                            
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => removerItem(index)}
-                              className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-900/30 h-7 w-7 p-0 flex items-center justify-center shrink-0"
+                              className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-900/30 h-8 w-8 p-0 flex items-center justify-center"
                               title="Remover item"
                             >
-                              <Minus className="h-3.5 w-3.5" />
+                              <Minus className="h-4 w-4" />
                             </Button>
                           </div>
-
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-gray-100 dark:border-slate-800 text-[10px]">
-                            <div>
-                              <span className="text-gray-500 dark:text-gray-400 block mb-1">Quant.</span>
-                              <Input
-                                type="number"
-                                min="1"
-                                step="1"
-                                value={item.quantidade}
-                                onChange={(e) =>
-                                  atualizarItem(index, "quantidade", Number.parseInt(e.target.value) || 1)
-                                }
-                                className="h-7 text-center font-medium w-16 text-xs"
-                              />
-                            </div>
-                            <div>
-                              <span className="text-gray-500 dark:text-gray-400 block mb-1">Vlr Unit.</span>
-                              <span className="font-semibold text-gray-800 dark:text-gray-200 block h-7 flex items-center">{formatCurrency(item.valor_unitario)}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-500 dark:text-gray-400 block mb-1">Mão de Obra</span>
-                              <span className="font-semibold text-gray-800 dark:text-gray-200 block h-7 flex items-center">{formatCurrency(item.valor_mao_obra)}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-500 dark:text-gray-400 block mb-1">Total</span>
-                              <span className="font-bold text-green-600 block h-7 flex items-center">{formatCurrency(item.valor_total)}</span>
-                            </div>
-                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </>
+                      </div>
+                    ))}
+                  </div>
                 )}
 
                 {itens.length === 0 && (
@@ -1666,6 +1585,73 @@ export function EditarOrcamentoClient({
           }))}
         />
       )}
+
+      {/* Dialog para Editar Item do Orçamento */}
+      <Dialog open={showEditItemDialog} onOpenChange={setShowEditItemDialog}>
+        <DialogContent className="max-w-md bg-card text-foreground border-border shadow-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar Valores do Item</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs">
+              {editItemIndex !== null && itens[editItemIndex] ? (itens[editItemIndex].produto?.descricao || itens[editItemIndex].produto_descricao) : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 text-xs">
+            <div className="space-y-1">
+              <Label htmlFor="item_quantidade">Quantidade</Label>
+              <Input
+                id="item_quantidade"
+                type="number"
+                min="1"
+                step="1"
+                value={editItemQtd}
+                onChange={(e) => setEditItemQtd(Number.parseInt(e.target.value) || 1)}
+                className="h-9 border-border text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="item_valor_unitario">Valor Unitário (R$)</Label>
+              <Input
+                id="item_valor_unitario"
+                type="number"
+                step="0.01"
+                min="0"
+                value={editItemValorUnit}
+                onChange={(e) => setEditItemValorUnit(Number.parseFloat(e.target.value) || 0)}
+                className="h-9 border-border text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="item_valor_mao_obra">Mão de Obra (R$)</Label>
+              <Input
+                id="item_valor_mao_obra"
+                type="number"
+                step="0.01"
+                min="0"
+                value={editItemMaoObra}
+                onChange={(e) => setEditItemMaoObra(Number.parseFloat(e.target.value) || 0)}
+                className="h-9 border-border text-xs"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowEditItemDialog(false)}
+              className="h-9 border-border text-xs"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={salvarEdicaoItem}
+              className="h-9 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs"
+            >
+              Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
