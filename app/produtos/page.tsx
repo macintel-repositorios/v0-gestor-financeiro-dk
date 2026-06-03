@@ -818,31 +818,31 @@ export default function ProdutosPage({
 
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
         {/* Desktop: TabsList normal */}
-        <TabsList className="hidden md:grid w-full grid-cols-4 bg-muted rounded-xl p-1.5 h-12 max-w-2xl">
+        <TabsList className="hidden md:grid w-full grid-cols-4 bg-slate-100 dark:bg-slate-900/60 rounded-xl p-1.5 h-12 max-w-2xl border border-border">
           <TabsTrigger
             value="produtos"
-            className="flex items-center gap-2 h-full rounded-lg transition-all text-xs font-semibold data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+            className="flex items-center gap-2 h-full rounded-lg transition-all text-xs font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-blue-650 data-[state=active]:text-white data-[state=active]:shadow-sm"
           >
             <Package className="h-4 w-4" />
             Produtos
           </TabsTrigger>
           <TabsTrigger
             value="servicos"
-            className="flex items-center gap-2 h-full rounded-lg transition-all text-xs font-semibold data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+            className="flex items-center gap-2 h-full rounded-lg transition-all text-xs font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-sm"
           >
             <Wrench className="h-4 w-4" />
             Serviços
           </TabsTrigger>
           <TabsTrigger
             value="categorias"
-            className="flex items-center gap-2 h-full rounded-lg transition-all text-xs font-semibold data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+            className="flex items-center gap-2 h-full rounded-lg transition-all text-xs font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-sm"
           >
             <Tag className="h-4 w-4" />
             Categorias
           </TabsTrigger>
           <TabsTrigger
             value="marcas"
-            className="flex items-center gap-2 h-full rounded-lg transition-all text-xs font-semibold data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+            className="flex items-center gap-2 h-full rounded-lg transition-all text-xs font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-sm"
           >
             <Award className="h-4 w-4" />
             Marcas
@@ -869,14 +869,14 @@ export default function ProdutosPage({
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Total */}
             <Card
-              className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+              className={`border border-border shadow-xs hover:border-indigo-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
                 produtoCardFilter === "all" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
               }`}
               onClick={() => handleProdutoCardToggle("all")}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total</CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground/70" />
+                <CardTitle className="text-xs lg:text-sm font-semibold text-indigo-600 dark:text-indigo-400">Total</CardTitle>
+                <Package className="h-4 w-4 text-indigo-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <div className="text-xl lg:text-2xl font-bold text-foreground">{produtos.length}</div>
@@ -886,14 +886,14 @@ export default function ProdutosPage({
 
             {/* Ativos */}
             <Card
-              className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-                produtoCardFilter === "ativos" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+              className={`border border-border shadow-xs hover:border-emerald-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+                produtoCardFilter === "ativos" ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : ""
               }`}
               onClick={() => handleProdutoCardToggle("ativos")}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Ativos</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground/70" />
+                <CardTitle className="text-xs lg:text-sm font-semibold text-emerald-600 dark:text-emerald-400">Ativos</CardTitle>
+                <CheckCircle className="h-4 w-4 text-emerald-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <div className="text-xl lg:text-2xl font-bold text-foreground">{produtos.filter((p) => p.ativo).length}</div>
@@ -903,14 +903,14 @@ export default function ProdutosPage({
 
             {/* Estoque Baixo */}
             <Card
-              className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-                produtoCardFilter === "estoque_baixo" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+              className={`border border-border shadow-xs hover:border-red-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+                produtoCardFilter === "estoque_baixo" ? "ring-2 ring-red-500 ring-offset-2 ring-offset-background" : ""
               }`}
               onClick={() => handleProdutoCardToggle("estoque_baixo")}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-                <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Estoque Baixo</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-muted-foreground/70" />
+                <CardTitle className="text-xs lg:text-sm font-semibold text-red-650 dark:text-red-400">Estoque Baixo</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0 col-span-2 lg:col-span-1">
                 <div className="text-xl lg:text-2xl font-bold text-foreground">
@@ -923,25 +923,29 @@ export default function ProdutosPage({
 
           {/* Table Card */}
           <Card className="border border-border bg-card">
-            <CardHeader className="border-b border-border/60 p-4 lg:p-6">
+            <CardHeader className="bg-gradient-to-r from-indigo-500 to-violet-650 text-white rounded-t-lg p-4 lg:p-6 dark:from-indigo-950/40 dark:to-violet-950/40 dark:border-b dark:border-border">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-foreground text-lg">Lista de Produtos</CardTitle>
-                  <CardDescription className="text-muted-foreground text-xs mt-1">
+                  <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
+                    <Package className="h-5 w-5" />
+                    Lista de Produtos
+                  </CardTitle>
+                  <CardDescription className="text-indigo-100 text-xs mt-1 dark:text-indigo-200/80">
                     Gerencie todos os produtos do sistema.
                   </CardDescription>
                 </div>
                 <Button
                   onClick={() => setIsNovoProdutoOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all"
+                  className="bg-white text-indigo-650 hover:bg-indigo-50 dark:bg-slate-900 dark:text-indigo-400 dark:hover:bg-slate-800 border dark:border-indigo-500/20 shadow-sm h-9 px-4 text-sm font-medium transition-all"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Novo Produto
                 </Button>
               </div>
-
+            </CardHeader>
+            <CardContent className="p-0">
               {/* Filters / Search Bar */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4 pt-4 border-t border-border/40">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-border/60">
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -956,8 +960,6 @@ export default function ProdutosPage({
                   <MarcaFilter value={selectedMarca} onValueChange={setSelectedMarca} marcas={marcas} />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
               {/* Desktop View */}
               <div className="hidden md:block">
                 {renderProdutoTable(filteredProdutos)}
@@ -1114,24 +1116,29 @@ export default function ProdutosPage({
 
         <TabsContent value="servicos" className="space-y-6 outline-none">
           <Card className="border border-border bg-card">
-            <CardHeader className="border-b border-border/60 p-4 lg:p-6">
+            <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-orange-950/40 dark:to-amber-950/40 dark:border-b dark:border-border">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-foreground text-lg">Lista de Serviços</CardTitle>
-                  <CardDescription className="text-muted-foreground text-xs mt-1">
+                  <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
+                    <Wrench className="h-5 w-5" />
+                    Lista de Serviços
+                  </CardTitle>
+                  <CardDescription className="text-orange-100 text-xs mt-1 dark:text-orange-200/80">
                     Gerencie todos os serviços e tabelas de mão de obra.
                   </CardDescription>
                 </div>
                 <Button
                   onClick={() => setIsNovoServicoOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all"
+                  className="bg-white text-orange-650 hover:bg-orange-50 dark:bg-slate-900 dark:text-orange-400 dark:hover:bg-slate-800 border dark:border-orange-500/20 shadow-sm h-9 px-4 text-sm font-medium transition-all"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Novo Serviço
                 </Button>
               </div>
-
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4 pt-4 border-t border-border/40">
+            </CardHeader>
+            <CardContent className="p-0">
+              {/* Filters / Search Bar */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-border/60">
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -1142,8 +1149,6 @@ export default function ProdutosPage({
                   />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
               {renderServicoTable(servicos)}
             </CardContent>
           </Card>
@@ -1151,24 +1156,29 @@ export default function ProdutosPage({
 
         <TabsContent value="categorias" className="space-y-6 outline-none">
           <Card className="border border-border bg-card">
-            <CardHeader className="border-b border-border/60 p-4 lg:p-6">
+            <CardHeader className="bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-purple-950/40 dark:to-fuchsia-950/40 dark:border-b dark:border-border">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-foreground text-lg">Categorias de Produtos</CardTitle>
-                  <CardDescription className="text-muted-foreground text-xs mt-1">
+                  <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
+                    <Tag className="h-5 w-5" />
+                    Categorias de Produtos
+                  </CardTitle>
+                  <CardDescription className="text-purple-150 text-xs mt-1 dark:text-purple-200/80">
                     Gerencie as divisões de categorias de produtos.
                   </CardDescription>
                 </div>
                 <Button
                   onClick={() => setIsNovaCategoriaOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all"
+                  className="bg-white text-purple-650 hover:bg-purple-50 dark:bg-slate-900 dark:text-purple-400 dark:hover:bg-slate-800 border dark:border-purple-500/20 shadow-sm h-9 px-4 text-sm font-medium transition-all"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Nova Categoria
                 </Button>
               </div>
-
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4 pt-4 border-t border-border/40">
+            </CardHeader>
+            <CardContent className="p-0">
+              {/* Filters / Search Bar */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-border/60">
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -1179,8 +1189,6 @@ export default function ProdutosPage({
                   />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
               {renderCategoriaTable(categorias)}
             </CardContent>
           </Card>
@@ -1188,24 +1196,29 @@ export default function ProdutosPage({
 
         <TabsContent value="marcas" className="space-y-6 outline-none">
           <Card className="border border-border bg-card">
-            <CardHeader className="border-b border-border/60 p-4 lg:p-6">
+            <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-emerald-950/40 dark:to-teal-950/40 dark:border-b dark:border-border">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-foreground text-lg">Marcas de Produtos</CardTitle>
-                  <CardDescription className="text-muted-foreground text-xs mt-1">
+                  <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
+                    <Award className="h-5 w-5" />
+                    Marcas de Produtos
+                  </CardTitle>
+                  <CardDescription className="text-emerald-150 text-xs mt-1 dark:text-emerald-200/80">
                     Gerencie as fabricantes e marcas vinculadas.
                   </CardDescription>
                 </div>
                 <Button
                   onClick={() => setIsNovaMarcaOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-9 px-4 text-sm font-medium transition-all"
+                  className="bg-white text-emerald-650 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-400 dark:hover:bg-slate-800 border dark:border-emerald-500/20 shadow-sm h-9 px-4 text-sm font-medium transition-all"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Nova Marca
                 </Button>
               </div>
-
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4 pt-4 border-t border-border/40">
+            </CardHeader>
+            <CardContent className="p-0">
+              {/* Filters / Search Bar */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-border/60">
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -1216,8 +1229,6 @@ export default function ProdutosPage({
                   />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
               {renderMarcaTable(marcas)}
             </CardContent>
           </Card>
