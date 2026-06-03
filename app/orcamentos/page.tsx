@@ -627,20 +627,20 @@ export default function OrcamentosPage({
             <p className="text-sm text-muted-foreground mt-0.5 font-medium">
               Gerencie e acompanhe todos os orçamentos e faturamentos do sistema
             </p>
-            <div className="mt-4 flex items-center gap-2">
+            <div className="mt-4 flex items-center gap-2.5">
               <Button
                 onClick={toggleOcultarValores}
                 variant="outline"
-                className="border-border text-foreground hover:bg-muted/40 h-10 px-4 text-xs font-semibold"
+                className="border-border text-foreground hover:bg-muted/40 h-9 px-4 text-xs font-medium transition-all"
               >
-                {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+                {shouldHideValues ? <Eye className="h-4 w-4 mr-1.5" /> : <EyeOff className="h-4 w-4 mr-1.5" />}
                 {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
               </Button>
               <Button
                 onClick={() => setIsNovoOrcamentoOpen(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm h-10 px-4 text-xs lg:text-sm font-semibold transition-all rounded-xl"
+                className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-650 text-white shadow-md hover:shadow-indigo-500/10 h-9 px-4 text-xs lg:text-sm font-medium transition-all rounded-lg"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-1.5 h-4 w-4" />
                 Novo Orçamento
               </Button>
             </div>
@@ -651,14 +651,14 @@ export default function OrcamentosPage({
       {/* Stats Cards - Clicáveis */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+          className={`border border-border shadow-xs hover:border-indigo-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
             situacaoFilter === "todos" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setSituacaoFilter("todos")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Total</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-indigo-600 dark:text-indigo-400">Total</CardTitle>
+            <FileText className="h-4 w-4 text-indigo-500" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{total}</div>
@@ -667,14 +667,14 @@ export default function OrcamentosPage({
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "pendente" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border shadow-xs hover:border-yellow-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "pendente" ? "ring-2 ring-yellow-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setSituacaoFilter("pendente")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Pendentes</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-yellow-600 dark:text-yellow-400">Pendentes</CardTitle>
+            <Calendar className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{pendentes}</div>
@@ -683,14 +683,14 @@ export default function OrcamentosPage({
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "aprovado" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border shadow-xs hover:border-emerald-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "aprovado" ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setSituacaoFilter("aprovado")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Aprovados</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-emerald-600 dark:text-emerald-400">Aprovados</CardTitle>
+            <CheckCircle className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{aprovados}</div>
@@ -699,14 +699,14 @@ export default function OrcamentosPage({
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "enviado" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border shadow-xs hover:border-blue-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "enviado" ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setSituacaoFilter("enviado")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Enviados</CardTitle>
-            <Send className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-blue-600 dark:text-blue-400">Enviados</CardTitle>
+            <Send className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{enviados}</div>
@@ -715,14 +715,14 @@ export default function OrcamentosPage({
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "nf-emitida" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border shadow-xs hover:border-purple-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "nf-emitida" ? "ring-2 ring-purple-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setSituacaoFilter("nf-emitida")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">NF Emitida</CardTitle>
-            <FileCheck className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-purple-600 dark:text-purple-400">NF Emitida</CardTitle>
+            <FileCheck className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{notaFiscal}</div>
@@ -731,14 +731,14 @@ export default function OrcamentosPage({
         </Card>
 
         <Card
-          className={`border border-border shadow-xs hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer select-none ${
-            situacaoFilter === "concluido" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
+          className={`border border-border shadow-xs hover:border-teal-500/30 transition-all duration-200 bg-card cursor-pointer select-none ${
+            situacaoFilter === "concluido" ? "ring-2 ring-teal-500 ring-offset-2 ring-offset-background" : ""
           }`}
           onClick={() => setSituacaoFilter("concluido")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Concluídos</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground/70" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-teal-650 dark:text-teal-400">Concluídos</CardTitle>
+            <CheckCircle className="h-4 w-4 text-teal-500" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground">{concluidos}</div>
@@ -746,10 +746,10 @@ export default function OrcamentosPage({
           </CardContent>
         </Card>
 
-        <Card className="border border-border bg-card col-span-2 md:col-span-1">
+        <Card className="border border-border bg-card col-span-2 md:col-span-1 hover:border-rose-500/35 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-xs lg:text-sm font-semibold text-muted-foreground">Soma Total</CardTitle>
-            <DollarSign className="h-4 w-4 text-indigo-500" />
+            <CardTitle className="text-xs lg:text-sm font-semibold text-rose-600 dark:text-rose-450">Soma Total</CardTitle>
+            <DollarSign className="h-4 w-4 text-rose-500" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-xl lg:text-2xl font-bold text-foreground truncate">
@@ -762,44 +762,48 @@ export default function OrcamentosPage({
 
       {/* Tabela de orçamentos */}
       <Card className="border border-border bg-card">
-        <CardHeader className="border-b border-border/60 p-4 lg:p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-650 text-white rounded-t-lg p-4 lg:p-6 dark:from-blue-950/40 dark:to-indigo-950/40 dark:border-b dark:border-border">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-foreground text-lg">Lista de Orçamentos</CardTitle>
-              <CardDescription className="text-muted-foreground text-xs mt-1">
+              <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
+                <FileText className="h-5 w-5" />
+                Lista de Orçamentos
+              </CardTitle>
+              <CardDescription className="text-blue-100 text-xs mt-1 dark:text-blue-200/80">
                 Acompanhe e emita notas fiscais (NF-e/NFS-e) para orçamentos aprovados.
               </CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar orçamento..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-9 text-xs border-border bg-background text-foreground"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <Select value={situacaoFilter} onValueChange={setSituacaoFilter}>
-                  <SelectTrigger className="w-full sm:w-44 h-9 text-xs border-border bg-background">
-                    <SelectValue placeholder="Situação" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todas situações</SelectItem>
-                    <SelectItem value="pendente">Pendentes</SelectItem>
-                    <SelectItem value="aprovado">Aprovados</SelectItem>
-                    <SelectItem value="enviado">Enviados</SelectItem>
-                    <SelectItem value="nf-emitida">NF Emitida</SelectItem>
-                    <SelectItem value="concluido">Concluídos</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
+          {/* Filters / Search Bar */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-border/60">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar orçamento..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 h-9 text-xs border-border bg-background text-foreground"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={situacaoFilter} onValueChange={setSituacaoFilter}>
+                <SelectTrigger className="w-full sm:w-44 h-9 text-xs border-border bg-background">
+                  <SelectValue placeholder="Situação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todas situações</SelectItem>
+                  <SelectItem value="pendente">Pendentes</SelectItem>
+                  <SelectItem value="aprovado">Aprovados</SelectItem>
+                  <SelectItem value="enviado">Enviados</SelectItem>
+                  <SelectItem value="nf-emitida">NF Emitida</SelectItem>
+                  <SelectItem value="concluido">Concluídos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           {filteredOrcamentos.length === 0 ? (
             <div className="text-center py-12 px-4">
               <FileText className="mx-auto h-16 w-16 text-muted-foreground mb-4 opacity-50" />

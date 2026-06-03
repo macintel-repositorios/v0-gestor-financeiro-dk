@@ -876,36 +876,36 @@ export default function NotaFiscalPage() {
               <p className="text-xs md:text-sm text-muted-foreground">
                 Gerenciamento de NFS-e (Serviço) e NF-e (Material)
               </p>
-              <div className="mt-4 flex flex-wrap items-center gap-2">
+              <div className="mt-4 flex flex-wrap items-center gap-2.5">
                 <Button
                   variant="outline"
                   onClick={toggleShowValues}
-                  className="flex items-center justify-center gap-2 h-10 rounded-xl border border-border bg-card hover:bg-muted text-foreground px-4 text-xs font-semibold"
+                  className="border-border text-foreground hover:bg-muted/40 h-9 px-4 text-xs font-medium transition-all"
                 >
                   {!shouldShow ? (
                     <>
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 mr-1.5" />
                       <span>Mostrar Valores</span>
                     </>
                   ) : (
                     <>
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-4 w-4 mr-1.5" />
                       <span>Ocultar Valores</span>
                     </>
                   )}
                 </Button>
                 <Button
                   onClick={() => setEmitirNfseOpen(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-10 rounded-xl px-4"
+                  className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-555 dark:hover:bg-emerald-600 text-white shadow-md hover:shadow-emerald-500/10 h-9 px-4 text-xs font-medium transition-all rounded-lg"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-1.5" />
                   <span>Emitir NFS-e</span>
                 </Button>
                 <Button
                   onClick={() => setEmitirNfeOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-10 rounded-xl px-4"
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-555 dark:hover:bg-blue-600 text-white shadow-md hover:shadow-blue-500/10 h-9 px-4 text-xs font-medium transition-all rounded-lg"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-1.5" />
                   <span>Emitir NF-e</span>
                 </Button>
               </div>
@@ -919,16 +919,16 @@ export default function NotaFiscalPage() {
           <Card 
             onClick={() => { setTipoFilter("todos"); setStatusFilter("todos"); }}
             className={cn(
-              "border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer hover:scale-102 select-none",
-              tipoFilter === "todos" && statusFilter === "todos" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : "opacity-90 hover:opacity-100"
+              "border border-border shadow-xs hover:border-indigo-500/30 transition-all duration-200 bg-card cursor-pointer select-none",
+              tipoFilter === "todos" && statusFilter === "todos" ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-background" : ""
             )}
           >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Total</p>
+                <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Total</p>
                 <h3 className="text-xl md:text-3xl font-bold text-foreground mt-1">{stats.total}</h3>
               </div>
-              <FileText className="h-8 w-8 text-blue-500/20 shrink-0" />
+              <FileText className="h-8 w-8 text-indigo-500 shrink-0 opacity-70" />
             </CardContent>
           </Card>
 
@@ -936,16 +936,16 @@ export default function NotaFiscalPage() {
           <Card 
             onClick={() => { setTipoFilter("nfse"); }}
             className={cn(
-              "border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer hover:scale-102 select-none",
-              tipoFilter === "nfse" ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : "opacity-90 hover:opacity-100"
+              "border border-border shadow-xs hover:border-emerald-500/30 transition-all duration-200 bg-card cursor-pointer select-none",
+              tipoFilter === "nfse" ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : ""
             )}
           >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">NFS-e</p>
+                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">NFS-e</p>
                 <h3 className="text-xl md:text-3xl font-bold text-foreground mt-1">{stats.totalNfse}</h3>
               </div>
-              <Wrench className="h-8 w-8 text-emerald-500/20 shrink-0" />
+              <Wrench className="h-8 w-8 text-emerald-500 shrink-0 opacity-70" />
             </CardContent>
           </Card>
 
@@ -953,16 +953,16 @@ export default function NotaFiscalPage() {
           <Card 
             onClick={() => { setTipoFilter("nfe"); }}
             className={cn(
-              "border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer hover:scale-102 select-none",
-              tipoFilter === "nfe" ? "ring-2 ring-cyan-500 ring-offset-2 ring-offset-background" : "opacity-90 hover:opacity-100"
+              "border border-border shadow-xs hover:border-cyan-500/30 transition-all duration-200 bg-card cursor-pointer select-none",
+              tipoFilter === "nfe" ? "ring-2 ring-cyan-500 ring-offset-2 ring-offset-background" : ""
             )}
           >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">NF-e</p>
+                <p className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">NF-e</p>
                 <h3 className="text-xl md:text-3xl font-bold text-foreground mt-1">{stats.totalNfe}</h3>
               </div>
-              <Package className="h-8 w-8 text-cyan-500/20 shrink-0" />
+              <Package className="h-8 w-8 text-cyan-500 shrink-0 opacity-70" />
             </CardContent>
           </Card>
 
@@ -970,16 +970,16 @@ export default function NotaFiscalPage() {
           <Card 
             onClick={() => { setStatusFilter("emitida"); }}
             className={cn(
-              "border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer hover:scale-102 select-none",
-              statusFilter === "emitida" ? "ring-2 ring-green-500 ring-offset-2 ring-offset-background" : "opacity-90 hover:opacity-100"
+              "border border-border shadow-xs hover:border-green-500/30 transition-all duration-200 bg-card cursor-pointer select-none",
+              statusFilter === "emitida" ? "ring-2 ring-green-500 ring-offset-2 ring-offset-background" : ""
             )}
           >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold text-green-400 uppercase tracking-wider">Emitidas</p>
+                <p className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider">Emitidas</p>
                 <h3 className="text-xl md:text-3xl font-bold text-foreground mt-1">{stats.emitidas}</h3>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-500/20 shrink-0" />
+              <CheckCircle2 className="h-8 w-8 text-green-500 shrink-0 opacity-70" />
             </CardContent>
           </Card>
 
@@ -987,43 +987,43 @@ export default function NotaFiscalPage() {
           <Card 
             onClick={() => { setStatusFilter("erro"); }}
             className={cn(
-              "border border-border shadow-sm hover:border-muted-foreground/30 transition-all duration-200 bg-card cursor-pointer hover:scale-102 select-none",
-              statusFilter === "erro" ? "ring-2 ring-red-500 ring-offset-2 ring-offset-background" : "opacity-90 hover:opacity-100"
+              "border border-border shadow-xs hover:border-red-500/30 transition-all duration-200 bg-card cursor-pointer select-none",
+              statusFilter === "erro" ? "ring-2 ring-red-500 ring-offset-2 ring-offset-background" : ""
             )}
           >
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Erros</p>
+                <p className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">Erros</p>
                 <h3 className="text-xl md:text-3xl font-bold text-foreground mt-1">{stats.erros}</h3>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-500/20 shrink-0" />
+              <AlertCircle className="h-8 w-8 text-red-500 shrink-0 opacity-70" />
             </CardContent>
           </Card>
 
           {/* Card Valor Total */}
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-border shadow-xs bg-card hover:border-amber-500/35 transition-all duration-200">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Valor Total</p>
+                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-450 uppercase tracking-wider">Valor Total</p>
                 <h3 className="text-sm md:text-xl font-bold text-foreground mt-1 truncate">
                   {shouldShow ? formatCurrency(stats.valorTotal) : "R$ •••"}
                 </h3>
               </div>
-              <DollarSign className="h-8 w-8 text-amber-500/20 shrink-0" />
+              <DollarSign className="h-8 w-8 text-amber-500 shrink-0 opacity-70" />
             </CardContent>
           </Card>
         </div>
 
         {/* Filtros e Tabela */}
-        <Card className="border border-border bg-card shadow-lg rounded-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-4 lg:p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <Card className="border border-border bg-card shadow-md rounded-xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-650 text-white p-4 lg:p-6 dark:from-emerald-950/40 dark:to-teal-950/40 dark:border-b dark:border-border">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-base md:text-lg text-white flex items-center gap-2">
+                <CardTitle className="text-white flex items-center gap-2 text-lg lg:text-xl">
                   <FileCheck className="h-5 w-5" />
                   Notas Fiscais Emitidas
                 </CardTitle>
-                <CardDescription className="text-emerald-100 text-xs md:text-sm">Consulte, imprima e gerencie suas notas fiscais de serviço e material</CardDescription>
+                <CardDescription className="text-emerald-100 text-xs mt-1 dark:text-emerald-200/80">Consulte, imprima e gerencie suas notas fiscais de serviço e material</CardDescription>
               </div>
               <div className="flex items-center gap-2">
                 {stats.pendentes > 0 && (
@@ -1032,7 +1032,7 @@ export default function NotaFiscalPage() {
                     size="sm"
                     onClick={handleConsultarTodas}
                     disabled={consultandoId !== null}
-                    className="text-white border-white/20 bg-white/10 hover:bg-white/20"
+                    className="text-emerald-600 bg-white hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-400 dark:hover:bg-slate-800 border dark:border-emerald-500/20"
                   >
                     {consultandoId !== null ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1042,16 +1042,19 @@ export default function NotaFiscalPage() {
                     Consultar Pendentes ({stats.pendentes})
                   </Button>
                 )}
-                <Button variant="outline" size="sm" onClick={() => { setLoading(true); fetchTodasNotas() }} className="text-white border-white/20 bg-white/10 hover:bg-white/20">
+                <Button
+                  onClick={() => { setLoading(true); fetchTodasNotas() }}
+                  className="bg-white text-emerald-600 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-400 dark:hover:bg-slate-800 border dark:border-emerald-500/20"
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Atualizar
                 </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-0">
             {/* Filtros */}
-            <div className="flex flex-col md:flex-row gap-3 mb-6">
+            <div className="flex flex-col md:flex-row gap-3 p-4 md:p-6 border-b border-border/60">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
