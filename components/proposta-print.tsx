@@ -15,12 +15,12 @@ interface PropostaDetalhes {
   cliente_endereco: string
   cliente_telefone: string
   cliente_email: string
-  sindico: string
+  sindico?: string
   tipo: string
   frequencia: string
   valor_total_proposta: number
   forma_pagamento: string
-  prazo_contrato: number
+  prazo_contrato: number | string
   garantia: number
   observacoes: string
   data_proposta: string

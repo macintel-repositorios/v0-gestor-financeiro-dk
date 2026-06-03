@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     console.error("Erro ao salvar configurações de visitas técnicas:", error)
 
     // Verificar se é erro de duplicata
-    if (error.code === "ER_DUP_ENTRY") {
+    if ((error as any).code === "ER_DUP_ENTRY") {
       return NextResponse.json(
         {
           success: false,

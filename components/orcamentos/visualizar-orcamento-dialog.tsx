@@ -750,6 +750,7 @@ export function VisualizarOrcamentoDialog({
           open={showLaudoEditor}
           onOpenChange={setShowLaudoEditor}
           orcamento={orcamento}
+          itens={itens}
         />
       )}
 

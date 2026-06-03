@@ -52,7 +52,7 @@ export default function EditarDocumentoPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [documento, setDocumento] = useState<any | null>(null)
-  const [cliente, setCliente] = useState<Cliente | null>(null)
+  const [cliente, setCliente] = useState<any | null>(null)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -309,7 +309,6 @@ export default function EditarDocumentoPage() {
                 <RichTextEditor
                   value={formData.conteudo}
                   onChange={(value) => setFormData({ ...formData, conteudo: value })}
-                  height="500px"
                   placeholder="Digite o conteúdo do documento aqui..."
                 />
               </CardContent>

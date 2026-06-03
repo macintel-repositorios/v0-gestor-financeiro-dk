@@ -20,7 +20,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       [titulo, conteudo, versao || "1.0", obrigatorio || 0, id],
     )
 
-    if (result.affectedRows === 0) {
+    if ((result as any).affectedRows === 0) {
       return NextResponse.json({ success: false, error: "Termo não encontrado ou inativo" }, { status: 404 })
     }
 
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({
       success: true,
-      data: updatedTermo[0],
+      data: (updatedTermo as any)[0],
       message: "Termo atualizado com sucesso",
     })
   } catch (error) {
@@ -57,7 +57,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       [id],
     )
 
-    if (result.affectedRows === 0) {
+    if ((result as any).affectedRows === 0) {
       return NextResponse.json({ success: false, error: "Termo não encontrado" }, { status: 404 })
     }
 

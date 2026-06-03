@@ -1,5 +1,4 @@
 export interface Orcamento {
-  status: ReactNode
   status: string
   data_criacao: string | number | Date
   desconto_valor: any
@@ -15,6 +14,7 @@ export interface Orcamento {
   valor_total: number
   data_orcamento: string
   validade?: number
+  data_validade?: string | null
   situacao: "pendente" | "aprovado" | "rejeitado" | "cancelado" | "concluido"
   observacoes?: string
   created_at: string
@@ -25,7 +25,6 @@ export interface Orcamento {
 
 export interface OrcamentoItem {
   produto: any
-  produto: any
   id: string
   orcamento_id: string
   produto_id: string
@@ -33,12 +32,13 @@ export interface OrcamentoItem {
   produto_nome?: string
   quantidade: number
   valor_unitario: number
-  valor_mao_obra: number
+  valor_mao_obra?: number
   valor_total: number
   descricao_personalizada?: string
+  descricao?: string
   categoria_nome?: string
   marca_nome?: string
-  created_at: string
+  created_at?: string
 }
 
 export interface Cliente {
@@ -69,20 +69,23 @@ export interface Cliente {
 
 export interface Produto {
   id: string
-  codigo: string
+  codigo?: string
+  nome?: string
   descricao: string
-  categoria_id: string
+  categoria_id?: string
   categoria_nome?: string
-  marca_id: string
+  marca_id?: string
   marca_nome?: string
   ncm?: string
-  unidade: string
-  valor_unitario: number
-  valor_mao_obra: number
-  valor_custo: number
-  margem_lucro: number
-  estoque: number
-  estoque_minimo: number
+  unidade?: string
+  valor_unitario?: number
+  valor_mao_obra?: number
+  valor_custo?: number
+  margem_lucro?: number
+  estoque?: number
+  estoque_minimo?: number
   observacoes?: string
   ativo: boolean
+  preco?: number
 }
+

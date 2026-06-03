@@ -44,13 +44,14 @@ interface PropostaDetalhes {
   valor_visitas: number
   valor_total_proposta: number
   forma_pagamento: string
-  prazo_contrato: string
+  prazo_contrato: string | number
   garantia: number
   observacoes: string
   equipamentos_consignacao: string
   status: string
   data_proposta: string
   data_validade: string
+  sindico?: string
   itens: ItemProposta[]
 }
 
@@ -172,8 +173,8 @@ export default function VisualizarPropostaPage({
     )
   }
 
-  const formatarPrazoContrato = (prazo: string) => {
-    return PRAZO_CONTRATO_LABELS[prazo] || prazo
+  const formatarPrazoContrato = (prazo: string | number) => {
+    return PRAZO_CONTRATO_LABELS[String(prazo)] || prazo
   }
 
   if (loading) {

@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     const mergedPdfBytes = await mergedPdf.save()
 
-    return new NextResponse(mergedPdfBytes, {
+    return new NextResponse(Buffer.from(mergedPdfBytes), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": "inline; filename=boletos.pdf",

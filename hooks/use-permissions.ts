@@ -10,12 +10,13 @@ export function usePermissions() {
 
   // Parse seguro das permissões do usuário
   let permissoes: string[] = []
-  if (user?.permissoes) {
-    if (Array.isArray(user.permissoes)) {
-      permissoes = user.permissoes
-    } else if (typeof user.permissoes === "string") {
+  const userPerms = (user as any)?.permissoes
+  if (userPerms) {
+    if (Array.isArray(userPerms)) {
+      permissoes = userPerms
+    } else if (typeof userPerms === "string") {
       try {
-        const trimmed = user.permissoes.trim()
+        const trimmed = userPerms.trim()
         if (trimmed.startsWith("[")) {
           permissoes = JSON.parse(trimmed)
         } else if (trimmed) {

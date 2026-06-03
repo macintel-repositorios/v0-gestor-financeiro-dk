@@ -4,7 +4,7 @@ import { pool } from "@/lib/database"
 export async function GET() {
   try {
     const [rows] = await pool.execute("SELECT salario_minimo FROM equipamentos LIMIT 1")
-    const salario = Array.isArray(rows) && rows.length > 0 ? rows[0].salario_minimo : 1412.00
+    const salario = Array.isArray(rows) && rows.length > 0 ? (rows as any[])[0].salario_minimo : 1412.00
     return NextResponse.json({ success: true, salario_minimo: Number(salario) || 1412.00 })
   } catch (error) {
     console.error("Erro ao obter salário mínimo:", error)

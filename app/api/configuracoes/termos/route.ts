@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       [tipo],
     )
 
-    if (existing.length > 0) {
+    if ((existing as any[]).length > 0) {
       // Desativar o termo existente
       await pool.execute(
         `
@@ -62,12 +62,12 @@ export async function POST(request: NextRequest) {
       `
       SELECT * FROM termos_contratos WHERE id = ?
     `,
-      [result.insertId],
+      [(result as any).insertId],
     )
 
     return NextResponse.json({
       success: true,
-      data: newTermo[0],
+      data: (newTermo as any)[0],
       message: "Termo criado com sucesso",
     })
   } catch (error) {

@@ -62,7 +62,7 @@ export async function createConnection() {
 
 export const getConnection = createConnection
 
-export async function query(sql: string, params?: any[]) {
+export async function query(sql: string, params?: any[]): Promise<any> {
   const maxRetries = 3
   let lastError: any
 

@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Nenhum cliente selecionado" }, { status: 400 })
     }
 
-    const resultados = {
+    const resultados: { sucesso: any[]; erros: any[] } = {
       sucesso: [],
       erros: [],
     }

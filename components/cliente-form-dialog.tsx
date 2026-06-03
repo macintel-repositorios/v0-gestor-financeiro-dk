@@ -313,7 +313,6 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
                 value={formData.cnpj}
                 onChange={(e) => handleInputChange("cnpj", e.target.value)}
                 placeholder="00.000.000/0000-00"
-                disabled={documentoUtilizado === "cpf"}
               />
               {documentoUtilizado === "cnpj" && (
                 <p className="text-xs text-green-600 mt-1">✓ Usado para gerar o código</p>
@@ -328,7 +327,6 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
                 value={formData.cpf}
                 onChange={(e) => handleInputChange("cpf", e.target.value)}
                 placeholder="000.000.000-00"
-                disabled={documentoUtilizado === "cnpj"}
               />
               {documentoUtilizado === "cpf" && (
                 <p className="text-xs text-green-600 mt-1">✓ Usado para gerar o código</p>

@@ -137,14 +137,14 @@ export async function POST(request: Request) {
       let hasHeader = false
       if (lines.length > 0) {
         const firstLineCols = lines[0].split(delimiter).map((c: string) => c.replace(/^["']|["']$/g, "").trim().toLowerCase())
-        if (firstLineCols.some(col => col.includes("data") || col.includes("date") || col.includes("lançamento") || col.includes("lancamento"))) {
+        if (firstLineCols.some((col: string) => col.includes("data") || col.includes("date") || col.includes("lançamento") || col.includes("lancamento"))) {
           hasHeader = true
           
-          const dateIdx = firstLineCols.findIndex(col => col.includes("data") || col.includes("date"))
-          const descIdx = firstLineCols.findIndex(col => col.includes("descri") || col.includes("memo") || col.includes("histórico") || col.includes("historico"))
-          const entradaIdx = firstLineCols.findIndex(col => col.includes("entrada") || col.includes("crédito") || col.includes("credito") || col.includes("recebido"))
-          const saidaIdx = firstLineCols.findIndex(col => col.includes("saída") || col.includes("saida") || col.includes("débito") || col.includes("debito") || col.includes("pago"))
-          const amountIdx = firstLineCols.findIndex(col => col.includes("valor") || col.includes("value") || col.includes("quantia") || col.includes("monto") || col.includes("lançamento") || col.includes("lancamento"))
+          const dateIdx = firstLineCols.findIndex((col: string) => col.includes("data") || col.includes("date"))
+          const descIdx = firstLineCols.findIndex((col: string) => col.includes("descri") || col.includes("memo") || col.includes("histórico") || col.includes("historico"))
+          const entradaIdx = firstLineCols.findIndex((col: string) => col.includes("entrada") || col.includes("crédito") || col.includes("credito") || col.includes("recebido"))
+          const saidaIdx = firstLineCols.findIndex((col: string) => col.includes("saída") || col.includes("saida") || col.includes("débito") || col.includes("debito") || col.includes("pago"))
+          const amountIdx = firstLineCols.findIndex((col: string) => col.includes("valor") || col.includes("value") || col.includes("quantia") || col.includes("monto") || col.includes("lançamento") || col.includes("lancamento"))
           
           if (dateIdx !== -1) headerIndices.date = dateIdx
           if (descIdx !== -1) headerIndices.desc = descIdx

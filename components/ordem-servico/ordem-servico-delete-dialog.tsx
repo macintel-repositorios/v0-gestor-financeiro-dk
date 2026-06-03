@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast"
 interface OrdemServico {
   id: number
   numero: string
-  cliente_nome: string
+  cliente_nome?: string
   tipo_servico: string
   situacao: string
   data_atual: string

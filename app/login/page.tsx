@@ -68,12 +68,12 @@ export default function LoginPage() {
     const result = await login(email, senha)
 
     if (result.success) {
-      setMessage({ type: "success", text: result.message })
+      setMessage({ type: "success", text: result.message || "" })
       setTimeout(() => {
         router.push("/")
       }, 1000)
     } else {
-      setMessage({ type: "error", text: result.message })
+      setMessage({ type: "error", text: result.message || "" })
     }
 
     setLoading(false)

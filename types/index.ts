@@ -48,12 +48,11 @@ export interface Cliente {
 }
 
 export interface Produto {
-  valor_mao_obra: number
-  valor_mao_obra: number
   id: string
   codigo: string
   descricao: string
   valor_unitario: number
+  valor_mao_obra: number
   estoque: number
   ativo: boolean
   created_at: string
@@ -61,10 +60,39 @@ export interface Produto {
 
 export interface DashboardStats {
   totalClientes: number
-  clientesComContrato: number
-  totalEmpresas: number
+  totalProdutos: number
   totalBoletos: number
-  valorTotalBoletos: number
-  boletosPendentes: number
+  totalRecibos: number
+  faturamentoMes: number
   boletosVencidos: number
+  estoqueMinimo: number
+  clientesAtivos: number
 }
+
+export interface RecentBoleto {
+  id: number
+  numero: string
+  cliente_nome: string
+  valor_total: number
+  data_vencimento: string
+  status: string
+}
+
+export interface RecentCliente {
+  id: string
+  codigo: string
+  nome: string
+  email?: string
+  telefone?: string
+  created_at: string
+}
+
+export interface FinancialStats {
+  totalIncome: number
+  totalExpenses: number
+  netProfit: number
+  pendingBoletos: number
+  paidBoletos: number
+  overdueBoletos: number
+}
+

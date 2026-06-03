@@ -33,6 +33,15 @@ export enum ConversationStage {
   CONSULTAR_OS_SELECIONAR = "consultar_os_selecionar",
   QUERY_ORDER = "query_order",
   WAIT_AGENT = "wait_agent",
+  CADASTRO_SOLICITANTE_NOME = "cadastro_solicitante_nome",
+  CADASTRO_SOLICITANTE_TELEFONE = "cadastro_solicitante_telefone",
+  CRIAR_OS_CONTATO_NOME = "criar_os_contato_nome",
+  CRIAR_OS_CONTATO_TELEFONE = "criar_os_contato_telefone",
+  BUSCAR_CLIENTE_POR_NOME = "buscar_cliente_por_nome",
+  BUSCAR_CLIENTE_POR_CNPJ = "buscar_cliente_por_cnpj",
+  CONSULTAR_OS_UNICA = "consultar_os_unica",
+  SELECIONAR_OS_CONSULTA = "selecionar_os_consulta",
+  FINALIZADA = "finalizada",
 }
 
 export interface ConversationState {
@@ -110,7 +119,7 @@ export async function getConversationState(phoneNumber: string): Promise<Convers
 
 export async function updateConversationState(
   phoneNumber: string,
-  stage: ConversationStage,
+  stage: ConversationStage | string,
   data: any = {},
 ): Promise<void> {
   try {
@@ -376,6 +385,7 @@ export async function createClient(data: {
   telefone: string
   email?: string
   sindico?: string
+  contato?: string
   distanciaKm?: number
   latitude?: number
   longitude?: number
@@ -391,8 +401,8 @@ export async function createClient(data: {
     const result = await query(
       `INSERT INTO clientes (
         codigo, nome, cnpj, cep, endereco, bairro, cidade, estado, 
-        telefone, email, sindico, distancia_km, latitude, longitude, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        telefone, email, sindico, contato, distancia_km, latitude, longitude, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         codigo,
         data.nome.toUpperCase(),
@@ -405,6 +415,7 @@ export async function createClient(data: {
         data.telefone,
         data.email?.toLowerCase() || null,
         data.sindico?.toUpperCase() || null,
+        data.contato?.toUpperCase() || null,
         data.distanciaKm || null,
         data.latitude || null,
         data.longitude || null,

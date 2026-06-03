@@ -70,7 +70,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
     }
 
     // Buscar itens da proposta se existir proposta_id
-    let itens_proposta = []
+    let itens_proposta: any[] = []
     if (contrato.proposta_id) {
       const [itensRows] = await pool.execute(
         `

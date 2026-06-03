@@ -403,7 +403,6 @@ export default function NovoClientePage() {
                       onChange={(e) => handleInputChange("cnpj", e.target.value)}
                       placeholder="00.000.000/0000-00"
                       className="h-9"
-                      disabled={documentoUtilizado === "cpf"}
                     />
                     {documentoUtilizado === "cnpj" && (
                       <p className="text-xs text-green-600">✓ Usado para gerar o código</p>
@@ -419,7 +418,6 @@ export default function NovoClientePage() {
                       onChange={(e) => handleInputChange("cpf", e.target.value)}
                       placeholder="000.000.000-00"
                       className="h-9"
-                      disabled={documentoUtilizado === "cnpj"}
                     />
                     {documentoUtilizado === "cpf" && (
                       <p className="text-xs text-green-600">✓ Usado para gerar o código</p>

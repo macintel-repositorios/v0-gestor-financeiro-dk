@@ -232,7 +232,7 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
     setEquipamentosSelecionados([])
 
     if (cliente) {
-      buscarContratoConservacao(cliente.id)
+      buscarContratoConservacao(Number(cliente.id))
     } else {
       setFormData((prev) => ({
         ...prev,

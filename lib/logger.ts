@@ -52,7 +52,7 @@ export async function registrarLog(data: LogData) {
       console.log("✅ Log registrado:", data.acao)
     }
   } catch (error) {
-    console.error("❌ Erro ao registrar log:", error.message)
+    console.error("❌ Erro ao registrar log:", (error as any).message)
   }
 }
 
