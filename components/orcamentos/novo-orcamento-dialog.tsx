@@ -255,13 +255,13 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
     e.dataTransfer.effectAllowed = "move"
   }
 
-  const handleDragOver = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+  const handleDragOver = (e: React.DragEvent<HTMLElement>, index: number) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
     setDragOverIndex(index)
   }
 
-  const handleDrop = (e: React.DragEvent<HTMLTableRowElement>, targetIndex: number) => {
+  const handleDrop = (e: React.DragEvent<HTMLElement>, targetIndex: number) => {
     e.preventDefault()
     if (draggedIndex === null || draggedIndex === targetIndex) {
       setDraggedIndex(null)
@@ -832,30 +832,91 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                   </div>
 
                   {itens.length > 0 ? (
-                    <div className="border border-border rounded-lg overflow-x-auto">
-                      <Table className="text-xs">
-                        <TableHeader>
-                          <TableRow className="bg-muted/40">
-                            <TableHead className="font-semibold w-10"></TableHead>
-                            <TableHead className="font-semibold">Item</TableHead>
-                            <TableHead className="font-semibold w-20 text-center">Quant.</TableHead>
-                            <TableHead className="font-semibold w-24">Vlr Unit</TableHead>
-                            <TableHead className="font-semibold w-24">Mão Obra</TableHead>
-                            <TableHead className="font-semibold w-24">Total</TableHead>
-                            <TableHead className="w-10"></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {itens.map((item, index) => (
-                            <TableRow key={index} className="hover:bg-muted/20 border-b border-border">
-                              <TableCell className="py-2 text-center">
-                                <GripVertical className="h-3.5 w-3.5 text-muted-foreground opacity-60 cursor-grab" />
-                              </TableCell>
-                              <TableCell>
-                                <div className="font-medium text-foreground">{item.produto.descricao}</div>
-                                <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">{item.produto.codigo}</div>
-                              </TableCell>
-                              <TableCell>
+                    <>
+                      {/* Layout de Tabela (Visível apenas em telas grandes) */}
+                      <div className="hidden md:block border border-border rounded-lg overflow-x-auto">
+                        <Table className="text-xs">
+                          <TableHeader>
+                            <TableRow className="bg-muted/40">
+                              <TableHead className="font-semibold w-10"></TableHead>
+                              <TableHead className="font-semibold">Item</TableHead>
+                              <TableHead className="font-semibold w-20 text-center">Quant.</TableHead>
+                              <TableHead className="font-semibold w-24">Vlr Unit</TableHead>
+                              <TableHead className="font-semibold w-24">Mão Obra</TableHead>
+                              <TableHead className="font-semibold w-24">Total</TableHead>
+                              <TableHead className="w-10"></TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {itens.map((item, index) => (
+                              <TableRow key={index} className="hover:bg-muted/20 border-b border-border">
+                                <TableCell className="py-2 text-center">
+                                  <GripVertical className="h-3.5 w-3.5 text-muted-foreground opacity-60 cursor-grab" />
+                                </TableCell>
+                                <TableCell>
+                                  <div className="font-medium text-foreground">{item.produto.descricao}</div>
+                                  <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">{item.produto.codigo}</div>
+                                </TableCell>
+                                <TableCell>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={item.quantidade}
+                                    onChange={(e) =>
+                                      atualizarItem(index, "quantidade", Number.parseInt(e.target.value) || 1)
+                                    }
+                                    className="h-7 text-center text-xs"
+                                  />
+                                </TableCell>
+                                <TableCell className="font-medium">{formatCurrency(item.valor_unitario)}</TableCell>
+                                <TableCell className="font-medium">{formatCurrency(item.valor_mao_obra)}</TableCell>
+                                <TableCell className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(item.valor_total)}</TableCell>
+                                <TableCell className="py-2 text-center">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => removerItem(index)}
+                                    className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                  >
+                                    <Minus className="h-3.5 w-3.5" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      {/* Layout de Cards (Visível apenas em telas pequenas/mobile) */}
+                      <div className="block md:hidden space-y-3">
+                        {itens.map((item, index) => (
+                          <div
+                            key={index}
+                            className="p-3 border border-border rounded-xl bg-card text-foreground shadow-sm space-y-3 relative"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center gap-2 flex-1">
+                                <GripVertical className="h-3.5 w-3.5 text-muted-foreground opacity-60 cursor-grab shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <span className="font-medium text-xs text-foreground block break-words">{item.produto.descricao}</span>
+                                  <Badge variant="outline" className="text-[9px] py-0 px-1 font-mono mt-1 bg-muted/50 border-border text-muted-foreground">
+                                    {item.produto.codigo}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removerItem(index)}
+                                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200 dark:hover:border-red-900/30 shrink-0"
+                              >
+                                <Minus className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-border text-[10px]">
+                              <div>
+                                <span className="text-muted-foreground block mb-0.5">Quant.</span>
                                 <Input
                                   type="number"
                                   min="1"
@@ -863,27 +924,26 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                                   onChange={(e) =>
                                     atualizarItem(index, "quantidade", Number.parseInt(e.target.value) || 1)
                                   }
-                                  className="h-7 text-center text-xs"
+                                  className="h-7 text-center text-xs w-16"
                                 />
-                              </TableCell>
-                              <TableCell className="font-medium">{formatCurrency(item.valor_unitario)}</TableCell>
-                              <TableCell className="font-medium">{formatCurrency(item.valor_mao_obra)}</TableCell>
-                              <TableCell className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(item.valor_total)}</TableCell>
-                              <TableCell className="py-2 text-center">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => removerItem(index)}
-                                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                                >
-                                  <Minus className="h-3.5 w-3.5" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block mb-0.5">Vlr Unit</span>
+                                <span className="font-medium text-foreground block h-7 flex items-center">{formatCurrency(item.valor_unitario)}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block mb-0.5">Mão Obra</span>
+                                <span className="font-medium text-foreground block h-7 flex items-center">{formatCurrency(item.valor_mao_obra)}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block mb-0.5">Total</span>
+                                <span className="font-bold text-emerald-600 dark:text-emerald-400 block h-7 flex items-center">{formatCurrency(item.valor_total)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   ) : (
                     <div className="text-center py-6 border border-dashed border-border rounded-lg">
                       <Package className="mx-auto h-8 w-8 text-muted-foreground opacity-50 mb-2" />
