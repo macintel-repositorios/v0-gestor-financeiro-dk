@@ -626,6 +626,72 @@ export function FluxoCaixaTab() {
   }))
 
   const currentPeriodData = (() => {
+    if (selectedConta !== "all") {
+      const selectedAcc = accounts.find((a) => String(a.id) === selectedConta)
+      const initialBalance = selectedAcc ? parseFloat(selectedAcc.saldo_inicial as any) || 0 : 0
+
+      const getTxMonthKey = (dateString: string) => {
+        try {
+          const d = new Date(dateString)
+          if (isNaN(d.getTime())) return ""
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+        } catch {
+          return ""
+        }
+      }
+
+      if (selectedPeriod === "all") {
+        let entradas = 0
+        let saidas = 0
+        transactions.forEach((tx) => {
+          if (tx.categoria === "Transferências entre contas") return
+          const val = Math.abs(tx.valor) || 0
+          if (tx.tipo === "entrada") entradas += val
+          else saidas += val
+        })
+
+        return {
+          entradas,
+          entradasProjetadas: 0,
+          saidas,
+          saidasProjetadas: 0,
+          saldo: entradas - saidas,
+          saldoAnterior: initialBalance,
+          saldoFinal: initialBalance + entradas - saidas,
+          rendimentos: 0,
+        }
+      } else {
+        let saldoAnterior = initialBalance
+        let entradas = 0
+        let saidas = 0
+
+        transactions.forEach((tx) => {
+          if (tx.categoria === "Transferências entre contas") return
+          const txMonth = getTxMonthKey(tx.data)
+          const val = Math.abs(tx.valor) || 0
+
+          if (txMonth < selectedPeriod) {
+            if (tx.tipo === "entrada") saldoAnterior += val
+            else saldoAnterior -= val
+          } else if (txMonth === selectedPeriod) {
+            if (tx.tipo === "entrada") entradas += val
+            else saidas += val
+          }
+        })
+
+        return {
+          entradas,
+          entradasProjetadas: 0,
+          saidas,
+          saidasProjetadas: 0,
+          saldo: entradas - saidas,
+          saldoAnterior,
+          saldoFinal: saldoAnterior + entradas - saidas,
+          rendimentos: 0,
+        }
+      }
+    }
+
     const initialBalanceTotal = accounts.reduce((acc, a) => acc + (parseFloat(a.saldo_inicial as any) || 0), 0)
     let runningBalance = initialBalanceTotal
 
