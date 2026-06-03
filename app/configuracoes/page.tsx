@@ -93,82 +93,82 @@ export default function ConfiguracoesPage() {
         <Card className="border border-border/80 shadow-2xl bg-card text-foreground overflow-hidden rounded-xl">
           <CardContent className="p-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              {/* Desktop: Grid 11 colunas */}
-              <div className="hidden md:block border-b border-border bg-slate-100/50 dark:bg-slate-900/40 p-1.5">
-                <TabsList className="grid w-full grid-cols-11 h-auto p-0 bg-transparent gap-1">
+              {/* Desktop: Fichário de abas com quebra de linha responsiva */}
+              <div className="hidden md:block border-b border-border bg-slate-100/30 dark:bg-slate-900/20 p-2">
+                <TabsList className="flex flex-wrap w-full h-auto p-0 bg-transparent gap-2 justify-start">
                   <TabsTrigger
                     value="logos"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-purple-500/15 data-[state=active]:text-purple-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-purple-500/15 data-[state=active]:text-purple-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-purple-500/30"
                   >
                     <ImageIcon className="h-4 w-4" />
                     Logos
                   </TabsTrigger>
                   <TabsTrigger
                     value="layout"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-blue-500/15 data-[state=active]:text-blue-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-blue-500/15 data-[state=active]:text-blue-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-blue-500/30"
                   >
                     <Layout className="h-4 w-4" />
                     Layout
                   </TabsTrigger>
                   <TabsTrigger
                     value="equipamentos"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-emerald-500/30"
                   >
                     <Wrench className="h-4 w-4" />
                     Equipamentos
                   </TabsTrigger>
                   <TabsTrigger
                     value="feriados"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-amber-500/15 data-[state=active]:text-amber-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-amber-500/15 data-[state=active]:text-amber-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-amber-500/30"
                   >
                     <Calendar className="h-4 w-4" />
                     Feriados
                   </TabsTrigger>
                   <TabsTrigger
                     value="visitas"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-violet-500/15 data-[state=active]:text-violet-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-purple-500/15 data-[state=active]:text-purple-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-purple-500/30"
                   >
                     <Settings className="h-4 w-4" />
                     Visitas
                   </TabsTrigger>
                   <TabsTrigger
                     value="valor-km"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-red-500/15 data-[state=active]:text-red-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-red-500/15 data-[state=active]:text-red-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-red-500/30"
                   >
                     <Car className="h-4 w-4" />
                     Valor KM
                   </TabsTrigger>
                   <TabsTrigger
                     value="termos"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-teal-500/15 data-[state=active]:text-teal-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-teal-500/15 data-[state=active]:text-teal-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-teal-500/30"
                   >
                     <FileText className="h-4 w-4" />
                     Termos
                   </TabsTrigger>
                   <TabsTrigger
                     value="backup"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-orange-500/15 data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-orange-500/15 data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-orange-500/30"
                   >
                     <Database className="h-4 w-4" />
                     Backup
                   </TabsTrigger>
                   <TabsTrigger
                     value="asaas"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-cyan-500/15 data-[state=active]:text-cyan-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-cyan-500/15 data-[state=active]:text-cyan-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-cyan-500/30"
                   >
                     <CreditCard className="h-4 w-4" />
                     Asaas
                   </TabsTrigger>
                   <TabsTrigger
                     value="nfse"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-emerald-500/30"
                   >
                     <FileCheck className="h-4 w-4" />
                     NFS-e
                   </TabsTrigger>
                   <TabsTrigger
                     value="nfe"
-                    className="flex flex-col items-center gap-1.5 py-2.5 text-xs font-semibold data-[state=active]:bg-blue-500/15 data-[state=active]:text-blue-400 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-blue-500/15 data-[state=active]:text-blue-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-blue-500/30"
                   >
                     <Package className="h-4 w-4" />
                     NF-e

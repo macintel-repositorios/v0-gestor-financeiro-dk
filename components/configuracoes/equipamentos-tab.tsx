@@ -40,6 +40,8 @@ const CATEGORIAS = [
 export function EquipamentosTab() {
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([])
   const [loading, setLoading] = useState(true)
+  const [salarioMinimo, setSalarioMinimo] = useState<string>("1412.00")
+  const [salvandoSalario, setSalvandoSalario] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingEquipamento, setEditingEquipamento] = useState<Equipamento | null>(null)
   const [expandedEquipamentoId, setExpandedEquipamentoId] = useState<number | null>(null)
@@ -54,6 +56,20 @@ export function EquipamentosTab() {
     carregarEquipamentos()
   }, [])
 
+  const carregarSalarioMinimo = async () => {
+    try {
+      const response = await fetch("/api/configuracoes/equipamentos/salario-minimo")
+      if (response.ok) {
+        const res = await response.json()
+        if (res.success) {
+          setSalarioMinimo(String(res.salario_minimo))
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar salário mínimo:", error)
+    }
+  }
+
   const carregarEquipamentos = async () => {
     try {
       const response = await fetch("/api/configuracoes/equipamentos")
@@ -61,11 +77,37 @@ export function EquipamentosTab() {
         const data = await response.json()
         setEquipamentos(Array.isArray(data) ? data : [])
       }
+      await carregarSalarioMinimo()
     } catch (error) {
       console.error("Erro ao carregar equipamentos:", error)
       toast.error("Erro ao carregar equipamentos")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSaveSalarioMinimo = async () => {
+    if (!salarioMinimo || isNaN(Number(salarioMinimo))) {
+      toast.error("Insira um valor numérico válido para o salário mínimo")
+      return
+    }
+    setSalvandoSalario(true)
+    try {
+      const response = await fetch("/api/configuracoes/equipamentos/salario-minimo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ salario_minimo: Number(salarioMinimo) }),
+      })
+      if (response.ok) {
+        toast.success("Salário mínimo atualizado!")
+      } else {
+        toast.error("Erro ao salvar salário mínimo")
+      }
+    } catch (error) {
+      console.error("Erro ao salvar salário mínimo:", error)
+      toast.error("Erro ao salvar salário mínimo")
+    } finally {
+      setSalvandoSalario(false)
     }
   }
 
@@ -174,6 +216,39 @@ export function EquipamentosTab() {
 
   return (
     <div className="space-y-6">
+      {/* Seção do Salário Mínimo */}
+      <Card className="border border-border bg-card">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="salario_minimo_config" className="text-sm font-semibold text-foreground">Salário Mínimo Vigente</Label>
+              <p className="text-xs text-muted-foreground">Define o salário base utilizado para cálculo de propostas de contratos.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative max-w-[200px]">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-semibold">R$</span>
+                <Input
+                  id="salario_minimo_config"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={salarioMinimo}
+                  onChange={(e) => setSalarioMinimo(e.target.value)}
+                  className="pl-8 h-9 text-sm border-border bg-background text-foreground"
+                />
+              </div>
+              <Button
+                onClick={handleSaveSalarioMinimo}
+                disabled={salvandoSalario}
+                className="bg-purple-600 hover:bg-purple-700 text-white h-9 px-4 text-xs font-semibold"
+              >
+                {salvandoSalario ? "Salvando..." : "Salvar Salário"}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium text-foreground">Equipamentos</h3>
         <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
