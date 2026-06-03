@@ -1704,149 +1704,150 @@ export function FluxoCaixaTab() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Dialog: Centro de Conciliação */}
       <AlertDialog open={showConciliationModal} onOpenChange={setShowConciliationModal}>
         <AlertDialogContent className="border-border bg-card text-foreground shadow-2xl max-w-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-foreground flex items-center gap-2">
               📊 Centro de Conciliação & Status de Extratos
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4 mt-2">
-              <span className="block text-xs text-muted-foreground">
-                Selecione o período de referência para verificar quais contas já possuem extratos importados. Você pode realizar a importação diretamente para cada conta pendente nesta tela.
-              </span>
-              
-              {/* Selectors for Month/Year in the modal */}
-              <span className="flex gap-4 bg-muted/30 p-3 rounded-lg border border-border">
-                <span className="flex-1">
-                  <Label htmlFor="conc-month" className="text-[10px] uppercase font-bold text-muted-foreground">Mês de Referência</Label>
-                  <Select value={conciliationMonth} onValueChange={conciliationMonth => setConciliationMonth(conciliationMonth)}>
-                    <SelectTrigger id="conc-month" className="h-9 mt-1 bg-card text-foreground text-xs">
-                      <SelectValue placeholder="Selecione o mês" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="01">Janeiro</SelectItem>
-                      <SelectItem value="02">Fevereiro</SelectItem>
-                      <SelectItem value="03">Março</SelectItem>
-                      <SelectItem value="04">Abril</SelectItem>
-                      <SelectItem value="05">Maio</SelectItem>
-                      <SelectItem value="06">Junho</SelectItem>
-                      <SelectItem value="07">Julho</SelectItem>
-                      <SelectItem value="08">Agosto</SelectItem>
-                      <SelectItem value="09">Setembro</SelectItem>
-                      <SelectItem value="10">Outubro</SelectItem>
-                      <SelectItem value="11">Novembro</SelectItem>
-                      <SelectItem value="12">Dezembro</SelectItem>
-                    </SelectContent>
-                  </Select>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 mt-2">
+                <span className="block text-xs text-muted-foreground">
+                  Selecione o período de referência para verificar quais contas já possuem extratos importados. Você pode realizar a importação diretamente para cada conta pendente nesta tela.
                 </span>
-                <span className="flex-1">
-                  <Label htmlFor="conc-year" className="text-[10px] uppercase font-bold text-muted-foreground">Ano de Referência</Label>
-                  <Select value={conciliationYear} onValueChange={conciliationYear => setConciliationYear(conciliationYear)}>
-                    <SelectTrigger id="conc-year" className="h-9 mt-1 bg-card text-foreground text-xs">
-                      <SelectValue placeholder="Selecione o ano" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2024">2024</SelectItem>
-                      <SelectItem value="2025">2025</SelectItem>
-                      <SelectItem value="2026">2026</SelectItem>
-                      <SelectItem value="2027">2027</SelectItem>
-                      <SelectItem value="2028">2028</SelectItem>
-                    </SelectContent>
-                  </Select>
+                
+                {/* Selectors for Month/Year in the modal */}
+                <span className="flex gap-4 bg-muted/30 p-3 rounded-lg border border-border">
+                  <span className="flex-1">
+                    <Label htmlFor="conc-month" className="text-[10px] uppercase font-bold text-muted-foreground">Mês de Referência</Label>
+                    <Select value={conciliationMonth} onValueChange={conciliationMonth => setConciliationMonth(conciliationMonth)}>
+                      <SelectTrigger id="conc-month" className="h-9 mt-1 bg-card text-foreground text-xs">
+                        <SelectValue placeholder="Selecione o mês" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="01">Janeiro</SelectItem>
+                        <SelectItem value="02">Fevereiro</SelectItem>
+                        <SelectItem value="03">Março</SelectItem>
+                        <SelectItem value="04">Abril</SelectItem>
+                        <SelectItem value="05">Maio</SelectItem>
+                        <SelectItem value="06">Junho</SelectItem>
+                        <SelectItem value="07">Julho</SelectItem>
+                        <SelectItem value="08">Agosto</SelectItem>
+                        <SelectItem value="09">Setembro</SelectItem>
+                        <SelectItem value="10">Outubro</SelectItem>
+                        <SelectItem value="11">Novembro</SelectItem>
+                        <SelectItem value="12">Dezembro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </span>
+                  <span className="flex-1">
+                    <Label htmlFor="conc-year" className="text-[10px] uppercase font-bold text-muted-foreground">Ano de Referência</Label>
+                    <Select value={conciliationYear} onValueChange={conciliationYear => setConciliationYear(conciliationYear)}>
+                      <SelectTrigger id="conc-year" className="h-9 mt-1 bg-card text-foreground text-xs">
+                        <SelectValue placeholder="Selecione o ano" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2024">2024</SelectItem>
+                        <SelectItem value="2025">2025</SelectItem>
+                        <SelectItem value="2026">2026</SelectItem>
+                        <SelectItem value="2027">2027</SelectItem>
+                        <SelectItem value="2028">2028</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </span>
                 </span>
-              </span>
 
-              {/* Accounts list table */}
-              <span className="block max-h-[300px] overflow-y-auto border border-border rounded-lg divide-y divide-border">
-                {accounts.filter(acc => acc.tipo !== "aplicacao").map((acc) => {
-                  const targetPeriod = `${conciliationYear}-${conciliationMonth.padStart(2, "0")}`
-                  const importedList = acc.periodos_importados ? acc.periodos_importados.split(",") : []
-                  const isImported = importedList.includes(targetPeriod)
-                  
-                  return (
-                    <span key={acc.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3 bg-card">
-                      <span className="flex items-center gap-2">
-                        {getAccountIcon(acc.tipo)}
-                        <span className="text-xs font-semibold text-foreground">
-                          {acc.nome} <span className="text-[10px] text-muted-foreground font-normal">({getAccountTypeLabel(acc.tipo)})</span>
+                {/* Accounts list table */}
+                <span className="block max-h-[300px] overflow-y-auto border border-border rounded-lg divide-y divide-border">
+                  {accounts.filter(acc => acc.tipo !== "aplicacao").map((acc) => {
+                    const targetPeriod = `${conciliationYear}-${conciliationMonth.padStart(2, "0")}`
+                    const importedList = acc.periodos_importados ? acc.periodos_importados.split(",") : []
+                    const isImported = importedList.includes(targetPeriod)
+                    
+                    return (
+                      <span key={acc.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3 bg-card">
+                        <span className="flex items-center gap-2">
+                          {getAccountIcon(acc.tipo)}
+                          <span className="text-xs font-semibold text-foreground">
+                            {acc.nome} <span className="text-[10px] text-muted-foreground font-normal">({getAccountTypeLabel(acc.tipo)})</span>
+                          </span>
+                        </span>
+
+                        <span className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                          {isImported ? (
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded">
+                                <Check className="h-3 w-3" /> Importado
+                              </span>
+                              <Button
+                                onClick={() => handleUndoImport(acc.id, targetPeriod, acc.nome)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-[10px] text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-0 p-1 flex items-center justify-center"
+                                title="Desfazer Importação"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <span className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                              <span className="flex items-center justify-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 px-2 py-1 rounded">
+                                <AlertCircle className="h-3 w-3" /> Pendente
+                              </span>
+                              
+                              {/* File Upload Inline Input */}
+                              <span className="flex items-center gap-1">
+                                <input
+                                  type="file"
+                                  accept=".ofx,.csv"
+                                  id={`conc-file-${acc.id}`}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) {
+                                      setConciliationFiles(prev => ({ ...prev, [acc.id]: file }))
+                                    }
+                                  }}
+                                  className="hidden"
+                                />
+                                <Button
+                                  asChild
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 text-[10px] cursor-pointer hover:bg-muted border-border text-foreground"
+                                >
+                                  <label htmlFor={`conc-file-${acc.id}`}>
+                                    {conciliationFiles[acc.id] ? (
+                                      <span className="truncate max-w-[100px] inline-block text-emerald-600 dark:text-emerald-400">
+                                        {conciliationFiles[acc.id].name}
+                                      </span>
+                                    ) : (
+                                      "Escolher Extrato"
+                                    )}
+                                  </label>
+                                </Button>
+                                
+                                <Button
+                                  size="sm"
+                                  disabled={!conciliationFiles[acc.id] || importing}
+                                  onClick={() => handleConciliationImport(acc.id)}
+                                  className="h-7 text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white"
+                                >
+                                  {importing ? "..." : "Importar"}
+                                </Button>
+                              </span>
+                            </span>
+                          )}
                         </span>
                       </span>
-
-                      <span className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        {isImported ? (
-                          <div className="flex items-center gap-2">
-                            <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded">
-                              <Check className="h-3 w-3" /> Importado
-                            </span>
-                            <Button
-                              onClick={() => handleUndoImport(acc.id, targetPeriod, acc.nome)}
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 text-[10px] text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-0 p-1 flex items-center justify-center"
-                              title="Desfazer Importação"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <span className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                            <span className="flex items-center justify-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 px-2 py-1 rounded">
-                              <AlertCircle className="h-3 w-3" /> Pendente
-                            </span>
-                            
-                            {/* File Upload Inline Input */}
-                            <span className="flex items-center gap-1">
-                              <input
-                                type="file"
-                                accept=".ofx,.csv"
-                                id={`conc-file-${acc.id}`}
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0]
-                                  if (file) {
-                                    setConciliationFiles(prev => ({ ...prev, [acc.id]: file }))
-                                  }
-                                }}
-                                className="hidden"
-                              />
-                              <Button
-                                asChild
-                                variant="outline"
-                                size="sm"
-                                className="h-7 text-[10px] cursor-pointer hover:bg-muted border-border text-foreground"
-                              >
-                                <label htmlFor={`conc-file-${acc.id}`}>
-                                  {conciliationFiles[acc.id] ? (
-                                    <span className="truncate max-w-[100px] inline-block text-emerald-600 dark:text-emerald-400">
-                                      {conciliationFiles[acc.id].name}
-                                    </span>
-                                  ) : (
-                                    "Escolher Extrato"
-                                  )}
-                                </label>
-                              </Button>
-                              
-                              <Button
-                                size="sm"
-                                disabled={!conciliationFiles[acc.id] || importing}
-                                onClick={() => handleConciliationImport(acc.id)}
-                                className="h-7 text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white"
-                              >
-                                {importing ? "..." : "Importar"}
-                              </Button>
-                            </span>
-                          </span>
-                        )}
-                      </span>
+                    )
+                  })}
+                  {accounts.length === 0 && (
+                    <span className="block text-center text-xs text-muted-foreground py-6">
+                      Nenhuma conta cadastrada para conciliar.
                     </span>
-                  )
-                })}
-                {accounts.length === 0 && (
-                  <span className="block text-center text-xs text-muted-foreground py-6">
-                    Nenhuma conta cadastrada para conciliar.
-                  </span>
-                )}
-              </span>
+                  )}
+                </span>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
