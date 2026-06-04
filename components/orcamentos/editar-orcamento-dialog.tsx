@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { EditarOrcamentoClient } from "@/components/editar-orcamento-client"
 import { Loader2, Edit } from "lucide-react"
@@ -23,6 +23,8 @@ export function EditarOrcamentoDialog({
   const [itensIniciais, setItensIniciais] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
+  
+  const triggerSaveRef = useRef<(() => Promise<boolean>) | null>(null)
 
   useEffect(() => {
     if (open && numero) {
@@ -61,8 +63,24 @@ export function EditarOrcamentoDialog({
     }
   }
 
+  const handleOpenChange = async (openState: boolean) => {
+    if (!openState) {
+      // Auto-save changes before closing
+      if (triggerSaveRef.current) {
+        toast({
+          title: "Salvando...",
+          description: "Gravando alterações antes de fechar o painel.",
+        })
+        await triggerSaveRef.current()
+      }
+      onOpenChange(false)
+    } else {
+      onOpenChange(true)
+    }
+  }
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
         <SheetHeader className="mb-4">
           <SheetTitle className="flex items-center gap-2">
@@ -82,12 +100,12 @@ export function EditarOrcamentoDialog({
             <EditarOrcamentoClient
               orcamento={orcamento}
               itensIniciais={itensIniciais}
-              onClose={() => onOpenChange(false)}
+              onClose={() => handleOpenChange(false)}
               onSuccess={() => {
                 onSuccess()
-                onOpenChange(false)
               }}
               asDrawer={true}
+              triggerSaveRef={triggerSaveRef}
             />
           </div>
         ) : (

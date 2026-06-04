@@ -68,6 +68,7 @@ interface EditarOrcamentoClientProps {
   onClose?: () => void
   onSuccess?: () => void
   asDrawer?: boolean
+  triggerSaveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>
 }
 
 export function EditarOrcamentoClient({
@@ -76,6 +77,7 @@ export function EditarOrcamentoClient({
   onClose,
   onSuccess,
   asDrawer = false,
+  triggerSaveRef,
 }: EditarOrcamentoClientProps) {
   const [cliente, setCliente] = useState<Cliente | null>(null)
   const [itens, setItens] = useState<OrcamentoItem[]>([])
@@ -662,7 +664,7 @@ export function EditarOrcamentoClient({
         description: "Selecione um cliente",
         variant: "destructive",
       })
-      return
+      return false
     }
 
     if (!tipoServico.trim()) {
@@ -671,7 +673,7 @@ export function EditarOrcamentoClient({
         description: "Informe o tipo de serviço",
         variant: "destructive",
       })
-      return
+      return false
     }
 
     // Só exige itens se parcelamento material > 0 (com cobrança de material)
@@ -681,7 +683,7 @@ export function EditarOrcamentoClient({
         description: "Adicione pelo menos um item ao orçamento",
         variant: "destructive",
       })
-      return
+      return false
     }
 
     try {
@@ -778,12 +780,14 @@ export function EditarOrcamentoClient({
         })
         if (onSuccess) onSuccess()
         router.refresh()
+        return true
       } else {
         toast({
           title: "Erro",
           description: result.message || "Erro ao atualizar orçamento",
           variant: "destructive",
         })
+        return false
       }
     } catch (error) {
       console.error("Erro ao salvar orçamento:", error)
@@ -792,10 +796,22 @@ export function EditarOrcamentoClient({
         description: "Erro de conexão. Tente novamente.",
         variant: "destructive",
       })
+      return false
     } finally {
       setSaving(false)
     }
   }
+
+  useEffect(() => {
+    if (triggerSaveRef) {
+      triggerSaveRef.current = salvarOrcamento
+    }
+    return () => {
+      if (triggerSaveRef) {
+        triggerSaveRef.current = null
+      }
+    }
+  }, [triggerSaveRef, cliente, tipoServico, itens, detailsTextareaRef, detalhesServico, observacoes, situacao, dataOrcamento, dataInicio, distanciaKm, valorBoleto, prazoDias, jurosAm, impostoServico, impostoMaterial, descontoMdoPercent, parcelamentoMdo, parcelamentoMaterial, materialAVista, desconto])
 
   if (!cliente) {
     return (
@@ -810,23 +826,25 @@ export function EditarOrcamentoClient({
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Editar Orçamento</h1>
-            <p className="text-purple-100">
-              Orçamento {orcamento.numero} - {cliente?.nome || "Carregando..."}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg shadow-lg p-4 sm:p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 truncate">Editar Orçamento</h1>
+            <p className="text-purple-100 text-sm sm:text-base font-medium">
+              Orçamento <span className="font-mono bg-white/20 px-1.5 py-0.5 rounded text-white">{orcamento.numero}</span>
+            </p>
+            <p className="text-white text-xs sm:text-sm mt-1 opacity-90 truncate font-semibold">
+              {cliente?.nome || "Carregando..."}
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
             {!asDrawer && (
               <Button
                 variant="outline"
                 onClick={() => {
                   router.push(`/orcamentos/${orcamento.numero}`)
                 }}
-                className="bg-white/10 hover:bg-white/20 text-white border-white/30"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Voltar
@@ -835,7 +853,7 @@ export function EditarOrcamentoClient({
             <Button
               variant="outline"
               onClick={() => setShowPrintModal(true)}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/30"
+              className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
             >
               <Printer className="h-4 w-4 mr-2" />
               Imprimir
@@ -845,7 +863,7 @@ export function EditarOrcamentoClient({
               variant="outline"
               onClick={handleDuplicar} // Use the new handleDuplicar function
               disabled={isLoading || saving} // Use isLoading to disable during duplication
-              className="bg-white/10 hover:bg-white/20 text-white border-white/30"
+              className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
             >
               <Copy className="h-4 w-4 mr-2" />
               {isLoading ? "Duplicando..." : "Duplicar"} {/* Show loading state */}
@@ -853,7 +871,7 @@ export function EditarOrcamentoClient({
             <Button
               onClick={salvarOrcamento}
               disabled={saving || isLoading || !cliente || (itens.length === 0 && parcelamentoMaterial > 0) || !tipoServico.trim()} // Also disable if duplicating
-              className="bg-white text-purple-600 hover:bg-purple-50"
+              className="bg-white text-purple-600 hover:bg-purple-50 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4 font-semibold shadow-sm"
             >
               <Save className="h-4 w-4 mr-2" />
               {saving ? "Salvando..." : "Salvar Alterações"}
