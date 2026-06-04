@@ -27,6 +27,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileText,
+  Settings,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -855,8 +856,8 @@ export function EditarOrcamentoClient({
               onClick={() => setShowPrintModal(true)}
               className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
             >
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
+              <Settings className="h-4 w-4 mr-2" />
+              Editor de impressão
             </Button>
             {/* Changed button to use Copy icon and handle duplication */}
             <Button

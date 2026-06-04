@@ -19,6 +19,7 @@ import {
   Package as PackageIcon,
   Shield,
   Loader2,
+  Settings,
 } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -111,6 +112,7 @@ export function VisualizarOrcamentoDialog({
   const [loading, setLoading] = useState(true)
   const [valorPorKm, setValorPorKm] = useState(1.5)
   const [showPrintEditor, setShowPrintEditor] = useState(false)
+  const [printEditorMode, setPrintEditorMode] = useState<"editor" | "direct-print" >("direct-print")
   const [showLaudoEditor, setShowLaudoEditor] = useState(false)
   const [nfseDialogOpen, setNfseDialogOpen] = useState(false)
   const [nfeDialogOpen, setNfeDialogOpen] = useState(false)
@@ -512,8 +514,27 @@ export function VisualizarOrcamentoDialog({
                 >
                   <Edit className="h-3.5 w-3.5 mr-1" /> Editar
                 </Button>
-                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setShowPrintEditor(true)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs"
+                  onClick={() => {
+                    setPrintEditorMode("direct-print")
+                    setShowPrintEditor(true)
+                  }}
+                >
                   <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs"
+                  onClick={() => {
+                    setPrintEditorMode("editor")
+                    setShowPrintEditor(true)
+                  }}
+                >
+                  <Settings className="h-3.5 w-3.5 mr-1" /> Layout
                 </Button>
                 <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setShowLaudoEditor(true)}>
                   <Shield className="h-3.5 w-3.5 mr-1" /> Laudo
@@ -741,6 +762,7 @@ export function VisualizarOrcamentoDialog({
           onOpenChange={setShowPrintEditor}
           orcamento={orcamento}
           itens={itens}
+          mode={printEditorMode}
         />
       )}
 

@@ -35,6 +35,7 @@ interface OrcamentoPrintEditorProps {
   onOpenChange: (open: boolean) => void
   orcamento: any
   itens: any[]
+  mode?: "editor" | "direct-print"
 }
 
 interface LayoutConfig {
@@ -124,7 +125,7 @@ interface TermoOrcamento {
   ativo: boolean
 }
 
-export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: OrcamentoPrintEditorProps) {
+export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mode = "editor" }: OrcamentoPrintEditorProps) {
   const [timbradoConfig, setTimbradoConfig] = useState<TimbradoConfig | null>(null)
   const [logoImpressao, setLogoImpressao] = useState<LogoConfig | null>(null)
   const [termoOrcamento, setTermoOrcamento] = useState<TermoOrcamento | null>(null)
@@ -140,6 +141,12 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
   const [showVisualizarSheet, setShowVisualizarSheet] = useState(false)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [generatingPdf, setGeneratingPdf] = useState(false)
+
+  useEffect(() => {
+    if (open && mode === "direct-print") {
+      setShowVisualizarSheet(true)
+    }
+  }, [open, mode])
   const hiddenDivRef = useRef<HTMLDivElement>(null)
 
   const [modalSize, setModalSize] = useState({ width: 90, height: 85 })
@@ -1000,8 +1007,12 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
             pdf.addImage(imgData, "PNG", 0, 0, 210, 297)
           }
 
+          pdf.setProperties({
+            title: `Orçamento ${orcamento.numero}`
+          })
           const pdfBlob = pdf.output("blob")
-          const url = URL.createObjectURL(pdfBlob)
+          const namedFile = new File([pdfBlob], `Orçamento_${orcamento.numero}.pdf`, { type: "application/pdf" })
+          const url = URL.createObjectURL(namedFile) + `#filename=Orçamento_${orcamento.numero}.pdf`
           setPdfUrl(url)
         } catch (error) {
           console.error("Erro ao gerar PDF do orçamento:", error)
@@ -1337,7 +1348,7 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
 
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
+      <Sheet open={open && mode === "editor"} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[90vw] xl:max-w-[85vw] h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
         <div className="h-full overflow-y-auto p-6">
           <SheetHeader className="pb-4 border-b border-border">
@@ -2037,9 +2048,14 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
 
       <Sheet open={showVisualizarSheet} onOpenChange={(open) => {
         setShowVisualizarSheet(open);
-        if (!open && pdfUrl) {
-          URL.revokeObjectURL(pdfUrl);
-          setPdfUrl(null);
+        if (!open) {
+          if (pdfUrl) {
+            URL.revokeObjectURL(pdfUrl);
+            setPdfUrl(null);
+          }
+          if (mode === "direct-print") {
+            onOpenChange(false);
+          }
         }
       }}>
         <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">

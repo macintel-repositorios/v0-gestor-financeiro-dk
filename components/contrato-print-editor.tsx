@@ -923,8 +923,12 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
             pdf.addImage(imgData, "PNG", 0, 0, 210, 297)
           }
 
+          pdf.setProperties({
+            title: `Contrato ${contrato.numero}`
+          })
           const pdfBlob = pdf.output("blob")
-          const url = URL.createObjectURL(pdfBlob)
+          const namedFile = new File([pdfBlob], `Contrato_${contrato.numero}.pdf`, { type: "application/pdf" })
+          const url = URL.createObjectURL(namedFile) + `#filename=Contrato_${contrato.numero}.pdf`
           setPdfUrl(url)
         } catch (error) {
           console.error("Erro ao gerar PDF do contrato:", error)
