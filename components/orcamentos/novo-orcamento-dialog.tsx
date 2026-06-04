@@ -108,6 +108,12 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
   // Estado para controlar a expansão dos cards de itens
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
+  // Estados para expansão de seções do formulário
+  const [expandCliente, setExpandCliente] = useState(false)
+  const [expandParametros, setExpandParametros] = useState(false)
+  const [expandDetalhes, setExpandDetalhes] = useState(false)
+  const [expandObservacoes, setExpandObservacoes] = useState(false)
+
   // Reset form when open changes
   useEffect(() => {
     if (open) {
@@ -642,176 +648,219 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
             <div className="lg:col-span-2 space-y-6">
               {/* Cliente */}
               <Card className="border border-border bg-card">
-                <CardHeader className="bg-muted/40 border-b border-border p-4">
-                  <CardTitle className="text-foreground text-sm flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    Dados do Cliente
-                  </CardTitle>
+                <CardHeader 
+                  onClick={() => setExpandCliente(!expandCliente)}
+                  className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none hover:bg-muted/65 transition-colors"
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <CardTitle className="text-foreground text-sm flex items-center gap-2 flex-wrap">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      Dados do Cliente
+                      {!expandCliente && cliente && (
+                        <Badge variant="secondary" className="font-semibold text-[10px] sm:text-xs ml-2 py-0 px-2">
+                          {cliente.nome}
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    {expandCliente ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                  </div>
                 </CardHeader>
                 <CardContent className="p-4 space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <div className="flex-1">
-                      <Label className="text-xs">Cliente *</Label>
-                      <ClienteCombobox
-                        value={cliente}
-                        onValueChange={setCliente}
-                        placeholder="Selecione um cliente..."
-                        showNewClientButton={false}
-                      />
-                    </div>
-                    {!cliente && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setShowNewClientDialog(true)}
-                        className="sm:self-end h-9 border-border text-xs"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Novo Cliente
-                      </Button>
+                  {expandCliente && (
+                    <>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <div className="flex-1">
+                          <Label className="text-xs">Cliente *</Label>
+                          <ClienteCombobox
+                            value={cliente}
+                            onValueChange={setCliente}
+                            placeholder="Selecione um cliente..."
+                            showNewClientButton={false}
+                          />
+                        </div>
+                        {!cliente && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowNewClientDialog(true)}
+                            className="sm:self-end h-9 border-border text-xs"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Novo Cliente
+                          </Button>
+                        )}
+                      </div>
+
+                      {cliente && (
+                        <div className="p-3 bg-muted/40 rounded-lg border border-border text-xs space-y-1">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            {cliente.codigo && <Badge variant="outline" className="font-mono text-[10px]">{cliente.codigo}</Badge>}
+                            <span className="font-semibold text-foreground">{cliente.nome}</span>
+                          </div>
+                          <div>CNPJ/CPF: {cliente.cnpj || cliente.cpf || "Não informado"}</div>
+                          <div>Endereço: {cliente.endereco || "Não informado"}</div>
+                          <div>Cidade: {cliente.cidade || "Não informado"}</div>
+                        </div>
+                      )}
+
+                    </>
+                  )}
+
+                  {/* Parâmetros */}
+                  <div className="border-t border-border pt-4">
+                    <h4 
+                      onClick={() => setExpandParametros(!expandParametros)}
+                      className="font-semibold text-xs text-foreground flex items-center justify-between gap-2 cursor-pointer select-none hover:text-indigo-500 transition-colors py-1"
+                    >
+                      <span className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        Parâmetros e Taxas
+                      </span>
+                      {expandParametros ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    </h4>
+                    {expandParametros && (
+                      <div className="space-y-4 mt-3">
+                        <div className="grid grid-cols-3 gap-3">
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Distância (Km)</Label>
+                            <Input
+                              type="number"
+                              value={distanciaKm}
+                              onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Taxa Boleto (R$)</Label>
+                            <Input
+                              type="number"
+                              value={valorBoleto}
+                              onChange={(e) => setValorBoleto(Number.parseFloat(e.target.value) || 3.5)}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Prazo (dias)</Label>
+                            <Input
+                              type="number"
+                              value={prazoDias}
+                              onChange={(e) => setPrazoDias(Number.parseInt(e.target.value) || 5)}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Data Início</Label>
+                            <Input
+                              type="date"
+                              value={dataInicio}
+                              onChange={(e) => setDataInicio(e.target.value)}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Juros (a.m.) %</Label>
+                            <Input
+                              type="number"
+                              value={jurosAm}
+                              onChange={(e) => setJurosAm(Number.parseFloat(e.target.value) || 2.0)}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Desconto MDO %</Label>
+                            <Input
+                              type="number"
+                              value={descontoMdoPercent}
+                              onChange={(e) => setDescontoMdoPercent(Number.parseFloat(e.target.value) || 0)}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Imp. Serviço %</Label>
+                            <Input
+                              type="number"
+                              value={impostoServico}
+                              onChange={(e) => setImpostoServico(Number.parseFloat(e.target.value) || 10.9)}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Imp. Material %</Label>
+                            <Input
+                              type="number"
+                              value={impostoMaterial}
+                              onChange={(e) => setImpostoMaterial(Number.parseFloat(e.target.value) || 12.7)}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
 
-                  {cliente && (
-                    <div className="p-3 bg-muted/40 rounded-lg border border-border text-xs space-y-1">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        {cliente.codigo && <Badge variant="outline" className="font-mono text-[10px]">{cliente.codigo}</Badge>}
-                        <span className="font-semibold text-foreground">{cliente.nome}</span>
-                      </div>
-                      <div>CNPJ/CPF: {cliente.cnpj || cliente.cpf || "Não informado"}</div>
-                      <div>Endereço: {cliente.endereco || "Não informado"}</div>
-                      <div>Cidade: {cliente.cidade || "Não informado"}</div>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs">Tipo de Serviço *</Label>
-                      <Input
-                        value={tipoServico}
-                        onChange={(e) => setTipoServico(e.target.value)}
-                        placeholder="Ex: Manutenção..."
-                        className="h-9 border-border text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Validade (dias)</Label>
-                      <Input
-                        type="number"
-                        value={validade}
-                        onChange={(e) => setValidade(Number.parseInt(e.target.value) || 30)}
-                        className="h-9 border-border text-xs"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs">Data do Orçamento</Label>
-                    <Input
-                      type="date"
-                      value={dataOrcamento}
-                      onChange={(e) => setDataOrcamento(e.target.value)}
-                      className="h-9 border-border text-xs"
-                    />
-                  </div>
-
-                  {/* Parâmetros */}
-                  <div className="border-t border-border pt-4 space-y-4">
-                    <h4 className="font-semibold text-xs text-foreground flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      Parâmetros e Taxas
+                  <div className="border-t border-border pt-4">
+                    <h4 
+                      onClick={() => setExpandDetalhes(!expandDetalhes)}
+                      className="font-semibold text-xs text-foreground flex items-center justify-between gap-2 cursor-pointer select-none hover:text-indigo-500 transition-colors py-1"
+                    >
+                      <span className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        Detalhes do Serviço
+                      </span>
+                      {expandDetalhes ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                     </h4>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Distância (Km)</Label>
-                        <Input
-                          type="number"
-                          value={distanciaKm}
-                          onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Taxa Boleto (R$)</Label>
-                        <Input
-                          type="number"
-                          value={valorBoleto}
-                          onChange={(e) => setValorBoleto(Number.parseFloat(e.target.value) || 3.5)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Prazo (dias)</Label>
-                        <Input
-                          type="number"
-                          value={prazoDias}
-                          onChange={(e) => setPrazoDias(Number.parseInt(e.target.value) || 5)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                    </div>
+                    {expandDetalhes && (
+                      <div className="space-y-4 mt-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs">Tipo de Serviço *</Label>
+                            <Input
+                              value={tipoServico}
+                              onChange={(e) => setTipoServico(e.target.value)}
+                              placeholder="Ex: Manutenção..."
+                              className="h-9 border-border text-xs"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Validade (dias)</Label>
+                            <Input
+                              type="number"
+                              value={validade}
+                              onChange={(e) => setValidade(Number.parseInt(e.target.value) || 30)}
+                              className="h-9 border-border text-xs"
+                            />
+                          </div>
+                        </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Data Início</Label>
-                        <Input
-                          type="date"
-                          value={dataInicio}
-                          onChange={(e) => setDataInicio(e.target.value)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Juros (a.m.) %</Label>
-                        <Input
-                          type="number"
-                          value={jurosAm}
-                          onChange={(e) => setJurosAm(Number.parseFloat(e.target.value) || 2.0)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Desconto MDO %</Label>
-                        <Input
-                          type="number"
-                          value={descontoMdoPercent}
-                          onChange={(e) => setDescontoMdoPercent(Number.parseFloat(e.target.value) || 0)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                    </div>
+                        <div>
+                          <Label className="text-xs">Data do Orçamento</Label>
+                          <Input
+                            type="date"
+                            value={dataOrcamento}
+                            onChange={(e) => setDataOrcamento(e.target.value)}
+                            className="h-9 border-border text-xs"
+                          />
+                        </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Imp. Serviço %</Label>
-                        <Input
-                          type="number"
-                          value={impostoServico}
-                          onChange={(e) => setImpostoServico(Number.parseFloat(e.target.value) || 10.9)}
-                          className="h-8 text-xs"
-                        />
+                        <div className="space-y-1.5 mt-2">
+                          <Label className="text-xs">Descrição dos Detalhes</Label>
+                          <Textarea
+                            value={detalhesServico}
+                            onChange={(e) => setDetalhesServico(e.target.value)}
+                            placeholder="Descreva detalhadamente o escopo do serviço a ser executado..."
+                            rows={4}
+                            className="text-xs border-border bg-slate-50/50 dark:bg-slate-900/50 focus:bg-background transition-colors focus-visible:ring-indigo-500 focus-visible:ring-offset-0 focus:border-indigo-500 min-h-[100px]"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Imp. Material %</Label>
-                        <Input
-                          type="number"
-                          value={impostoMaterial}
-                          onChange={(e) => setImpostoMaterial(Number.parseFloat(e.target.value) || 12.7)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs">Detalhes do Serviço</Label>
-                    <Textarea
-                      value={detalhesServico}
-                      onChange={(e) => setDetalhesServico(e.target.value)}
-                      placeholder="Descreva o escopo do serviço..."
-                      rows={2}
-                      className="text-xs border-border bg-background"
-                    />
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -995,18 +1044,26 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
 
               {/* Observações */}
               <Card className="border border-border bg-card">
-                <CardHeader className="bg-muted/40 border-b border-border p-4">
-                  <CardTitle className="text-foreground text-sm">Observações</CardTitle>
+                <CardHeader 
+                  onClick={() => setExpandObservacoes(!expandObservacoes)}
+                  className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none hover:bg-muted/65 transition-colors"
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <CardTitle className="text-foreground text-sm">Observações</CardTitle>
+                    {expandObservacoes ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                  </div>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <Textarea
-                    placeholder="Digite observações sobre o orçamento..."
-                    value={observacoes}
-                    onChange={(e) => setObservacoes(e.target.value)}
-                    rows={2}
-                    className="text-xs border-border bg-background"
-                  />
-                </CardContent>
+                {expandObservacoes && (
+                  <CardContent className="p-4">
+                    <Textarea
+                      placeholder="Digite observações sobre o orçamento..."
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      rows={2}
+                      className="text-xs border-border bg-background"
+                    />
+                  </CardContent>
+                )}
               </Card>
             </div>
 

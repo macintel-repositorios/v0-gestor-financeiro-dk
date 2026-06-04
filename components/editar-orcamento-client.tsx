@@ -26,6 +26,7 @@ import {
   GripVertical,
   ChevronDown,
   ChevronUp,
+  FileText,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -125,6 +126,12 @@ export function EditarOrcamentoClient({
 
   // Estado para controlar a expansão dos cards de itens
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
+
+  // Estados para expansão de seções do formulário
+  const [expandCliente, setExpandCliente] = useState(false)
+  const [expandParametros, setExpandParametros] = useState(false)
+  const [expandDetalhes, setExpandDetalhes] = useState(false)
+  const [expandObservacoes, setExpandObservacoes] = useState(false)
 
   const router = useRouter()
   const { toast } = useToast()
@@ -851,282 +858,325 @@ export function EditarOrcamentoClient({
         <div className="lg:col-span-2 space-y-6">
           {/* Dados do Cliente */}
           <Card className="border border-border shadow-lg bg-white dark:bg-card">
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6">
-              <CardTitle className="text-white flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Dados do Cliente
-              </CardTitle>
-              <CardDescription className="text-blue-100">
-                Informações do cliente e parâmetros do orçamento
-              </CardDescription>
+            <CardHeader 
+              onClick={() => setExpandCliente(!expandCliente)}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="space-y-1">
+                  <CardTitle className="text-white flex items-center gap-2 flex-wrap">
+                    <User className="h-5 w-5" />
+                    Dados do Cliente
+                    {!expandCliente && cliente && (
+                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-normal ml-2">
+                        {cliente.nome}
+                      </span>
+                    )}
+                  </CardTitle>
+                  <CardDescription className="text-blue-100">
+                    {!expandCliente && cliente ? `Cliente selecionado: ${cliente.nome}` : "Informações do cliente e parâmetros do orçamento"}
+                  </CardDescription>
+                </div>
+                {expandCliente ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+              </div>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="cliente">Cliente *</Label>
-                  <ClienteCombobox
-                    value={cliente}
-                    onValueChange={setCliente}
-                    placeholder="Selecione um cliente..."
-                    showNewClientButton={false}
-                  />
-                </div>
-
-                {cliente && (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900/30">
-                    <div className="flex items-center gap-2 mb-2">
-                      {cliente.codigo && (
-                        <Badge variant="outline" className="font-mono">
-                          {cliente.codigo}
-                        </Badge>
-                      )}
-                      <span className="font-medium text-blue-900 dark:text-blue-100">{cliente.nome}</span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
-                      <div>
-                        {cliente.cnpj && (
-                          <div>
-                            <strong>CNPJ:</strong> {cliente.cnpj}
-                          </div>
-                        )}
-                        {cliente.cpf && (
-                          <div>
-                            <strong>CPF:</strong> {cliente.cpf}
-                          </div>
-                        )}
-                        {cliente.endereco && (
-                          <div>
-                            <strong>Endereço:</strong> {cliente.endereco}
-                          </div>
-                        )}
-                        {cliente.cep && (
-                          <div>
-                            <strong>CEP:</strong> {cliente.cep}
-                          </div>
-                        )}
-                        {cliente.email && (
-                          <div>
-                            <strong>Email:</strong> {cliente.email}
-                          </div>
-                        )}
-                        {cliente.telefone && (
-                          <div>
-                            <strong>Telefone:</strong> {cliente.telefone}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        {cliente.cidade && (
-                          <div>
-                            <strong>Cidade:</strong> {cliente.cidade}/{cliente.estado}
-                          </div>
-                        )}
-                        {cliente.distancia_km && (
-                          <div>
-                            <strong>Distância:</strong> {cliente.distancia_km} km
-                          </div>
-                        )}
-                      </div>
+              <div className="space-y-6">
+                {expandCliente && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="cliente">Cliente *</Label>
+                      <ClienteCombobox
+                        value={cliente}
+                        onValueChange={setCliente}
+                        placeholder="Selecione um cliente..."
+                        showNewClientButton={false}
+                      />
                     </div>
 
-                    {(cliente.nome_adm || cliente.contato_adm || cliente.telefone_adm || cliente.email_adm) && (
-                      <div className="mt-4 pt-3 border-t border-blue-200 dark:border-blue-900/30">
+                    {cliente && (
+                      <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900/30">
                         <div className="flex items-center gap-2 mb-2">
-                          <Building2 className="h-4 w-4 text-blue-600" />
-                          <span className="font-medium text-blue-800 dark:text-blue-200">Administradora</span>
+                          {cliente.codigo && (
+                            <Badge variant="outline" className="font-mono">
+                              {cliente.codigo}
+                            </Badge>
+                          )}
+                          <span className="font-medium text-blue-900 dark:text-blue-100">{cliente.nome}</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
                           <div>
-                            {cliente.nome_adm && (
+                            {cliente.cnpj && (
                               <div>
-                                <strong>Nome:</strong> {cliente.nome_adm}
+                                <strong>CNPJ:</strong> {cliente.cnpj}
                               </div>
                             )}
-                            {cliente.contato_adm && (
+                            {cliente.cpf && (
                               <div>
-                                <strong>Contato:</strong> {cliente.contato_adm}
+                                <strong>CPF:</strong> {cliente.cpf}
+                              </div>
+                            )}
+                            {cliente.endereco && (
+                              <div>
+                                <strong>Endereço:</strong> {cliente.endereco}
+                              </div>
+                            )}
+                            {cliente.cep && (
+                              <div>
+                                <strong>CEP:</strong> {cliente.cep}
+                              </div>
+                            )}
+                            {cliente.email && (
+                              <div>
+                                <strong>Email:</strong> {cliente.email}
+                              </div>
+                            )}
+                            {cliente.telefone && (
+                              <div>
+                                <strong>Telefone:</strong> {cliente.telefone}
                               </div>
                             )}
                           </div>
                           <div>
-                            {cliente.telefone_adm && (
+                            {cliente.cidade && (
                               <div>
-                                <strong>Telefone:</strong> {cliente.telefone_adm}
+                                <strong>Cidade:</strong> {cliente.cidade}/{cliente.estado}
                               </div>
                             )}
-                            {cliente.email_adm && (
+                            {cliente.distancia_km && (
                               <div>
-                                <strong>Email:</strong> {cliente.email_adm}
+                                <strong>Distância:</strong> {cliente.distancia_km} km
                               </div>
                             )}
                           </div>
                         </div>
+
+                        {(cliente.nome_adm || cliente.contato_adm || cliente.telefone_adm || cliente.email_adm) && (
+                          <div className="mt-4 pt-3 border-t border-blue-200 dark:border-blue-900/30">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Building2 className="h-4 w-4 text-blue-600" />
+                              <span className="font-medium text-blue-800 dark:text-blue-200">Administradora</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
+                              <div>
+                                {cliente.nome_adm && (
+                                  <div>
+                                    <strong>Nome:</strong> {cliente.nome_adm}
+                                  </div>
+                                )}
+                                {cliente.contato_adm && (
+                                  <div>
+                                    <strong>Contato:</strong> {cliente.contato_adm}
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                {cliente.telefone_adm && (
+                                  <div>
+                                    <strong>Telefone:</strong> {cliente.telefone_adm}
+                                  </div>
+                                )}
+                                {cliente.email_adm && (
+                                  <div>
+                                    <strong>Email:</strong> {cliente.email_adm}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="tipo_servico">Tipo de Serviço *</Label>
-                    <Input
-                      id="tipo_servico"
-                      value={tipoServico}
-                      onChange={(e) => setTipoServico(e.target.value)}
-                      placeholder="Ex: Manutenção, Instalação, Reparo..."
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="validade">Validade (dias)</Label>
-                    <Input
-                      id="validade"
-                      type="number"
-                      min="1"
-                      value={validade}
-                      onChange={(e) => setValidade(Number.parseInt(e.target.value) || 30)}
-                    />
-                  </div>
-                </div>
+                <div className="border-t pt-4">
+                  <h4 
+                    onClick={() => setExpandParametros(!expandParametros)}
+                    className="font-semibold text-gray-800 dark:text-gray-200 flex items-center justify-between gap-2 cursor-pointer select-none hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1"
+                  >
+                    <span className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      Parâmetros do Orçamento
+                    </span>
+                    {expandParametros ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </h4>
+                  {expandParametros && (
+                    <div className="space-y-4 mt-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="distancia_km">Distância (Km)</Label>
+                          <Input
+                            id="distancia_km"
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            value={distanciaKm}
+                            onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="valor_boleto">Valor do Boleto (R$)</Label>
+                          <Input
+                            id="valor_boleto"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={valorBoleto}
+                            onChange={(e) => setValorBoleto(Number.parseFloat(e.target.value) || 3.5)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="prazo_dias">Prazo (dias)</Label>
+                          <Input
+                            id="prazo_dias"
+                            type="number"
+                            min="1"
+                            value={prazoDias}
+                            onChange={(e) => setPrazoDias(Number.parseInt(e.target.value) || 5)}
+                          />
+                        </div>
+                      </div>
 
-                <div>
-                  <Label htmlFor="data_orcamento">Data do Orçamento</Label>
-                  <Input
-                    id="data_orcamento"
-                    type="date"
-                    value={dataOrcamento}
-                    onChange={(e) => setDataOrcamento(e.target.value)}
-                  />
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div>
+                          <Label htmlFor="data_inicio">Data Início</Label>
+                          <Input
+                            id="data_inicio"
+                            type="date"
+                            value={dataInicio}
+                            onChange={(e) => setDataInicio(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="juros_am">Juros (a.m.) %</Label>
+                          <Input
+                            id="juros_am"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={jurosAm}
+                            onChange={(e) => setJurosAm(Number.parseFloat(e.target.value) || 2.0)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="desconto_mdo_percent">Desconto MDO (%)</Label>
+                          <Input
+                            id="desconto_mdo_percent"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={descontoMdoPercent}
+                            onChange={(e) => setDescontoMdoPercent(Number.parseFloat(e.target.value) || 0)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <Label htmlFor="imposto_servico">Imposto Serviço (%)</Label>
+                          <Input
+                            id="imposto_servico"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={impostoServico}
+                            onChange={(e) => setImpostoServico(Number.parseFloat(e.target.value) || 10.9)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="imposto_material">Imposto Material (%)</Label>
+                          <Input
+                            id="imposto_material"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={impostoMaterial}
+                            onChange={(e) => setImpostoMaterial(Number.parseFloat(e.target.value) || 12.7)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Parâmetros do Orçamento
+                  <h4 
+                    onClick={() => setExpandDetalhes(!expandDetalhes)}
+                    className="font-semibold text-gray-800 dark:text-gray-200 flex items-center justify-between gap-2 cursor-pointer select-none hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1"
+                  >
+                    <span className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      Detalhes do Serviço
+                    </span>
+                    {expandDetalhes ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="distancia_km">Distância (Km)</Label>
-                      <Input
-                        id="distancia_km"
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        value={distanciaKm}
-                        onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="valor_boleto">Valor do Boleto (R$)</Label>
-                      <Input
-                        id="valor_boleto"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={valorBoleto}
-                        onChange={(e) => setValorBoleto(Number.parseFloat(e.target.value) || 3.5)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="prazo_dias">Prazo (dias)</Label>
-                      <Input
-                        id="prazo_dias"
-                        type="number"
-                        min="1"
-                        value={prazoDias}
-                        onChange={(e) => setPrazoDias(Number.parseInt(e.target.value) || 5)}
-                      />
-                    </div>
-                  </div>
+                  {expandDetalhes && (
+                    <div className="space-y-4 mt-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="tipo_servico">Tipo de Serviço *</Label>
+                          <Input
+                            id="tipo_servico"
+                            value={tipoServico}
+                            onChange={(e) => setTipoServico(e.target.value)}
+                            placeholder="Ex: Manutenção, Instalação, Reparo..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="situacao">Situação</Label>
+                          <Select value={situacao} onValueChange={setSituacao}>
+                            <SelectTrigger id="situacao">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pendente">Pendente</SelectItem>
+                              <SelectItem value="aprovado">Aprovado</SelectItem>
+                              <SelectItem value="enviado por email">Enviado por Email</SelectItem>
+                              <SelectItem value="nota fiscal emitida">Nota Fiscal Emitida</SelectItem>
+                              <SelectItem value="concluido">Concluído</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <div>
-                      <Label htmlFor="data_inicio">Data Início</Label>
-                      <Input
-                        id="data_inicio"
-                        type="date"
-                        value={dataInicio}
-                        onChange={(e) => setDataInicio(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="juros_am">Juros (a.m.) %</Label>
-                      <Input
-                        id="juros_am"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={jurosAm}
-                        onChange={(e) => setJurosAm(Number.parseFloat(e.target.value) || 2.0)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="desconto_mdo_percent">Desconto MDO (%)</Label>
-                      <Input
-                        id="desconto_mdo_percent"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={descontoMdoPercent}
-                        onChange={(e) => setDescontoMdoPercent(Number.parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
-                  </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="data_orcamento">Data do Orçamento</Label>
+                          <Input
+                            id="data_orcamento"
+                            type="date"
+                            value={dataOrcamento}
+                            onChange={(e) => setDataOrcamento(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="validade">Validade (dias)</Label>
+                          <Input
+                            id="validade"
+                            type="number"
+                            min="1"
+                            value={validade}
+                            onChange={(e) => setValidade(Number.parseInt(e.target.value) || 30)}
+                          />
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <Label htmlFor="imposto_servico">Imposto Serviço (%)</Label>
-                      <Input
-                        id="imposto_servico"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={impostoServico}
-                        onChange={(e) => setImpostoServico(Number.parseFloat(e.target.value) || 10.9)}
-                      />
+                      <div className="space-y-1.5 mt-2">
+                        <Label htmlFor="detalhes_servico">Descrição dos Detalhes</Label>
+                        <Textarea
+                          id="detalhes_servico"
+                          value={detalhesServico}
+                          onChange={(e) => setDetalhesServico(e.target.value)}
+                          placeholder="Descreva detalhadamente o escopo do serviço a ser executado..."
+                          rows={5}
+                          className="text-sm border-border bg-slate-50/50 dark:bg-slate-900/50 focus:bg-background transition-colors focus-visible:ring-indigo-500 focus-visible:ring-offset-0 focus:border-indigo-500 min-h-[120px]"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="imposto_material">Imposto Material (%)</Label>
-                      <Input
-                        id="imposto_material"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={impostoMaterial}
-                        onChange={(e) => setImpostoMaterial(Number.parseFloat(e.target.value) || 12.7)}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="situacao">Situação</Label>
-                    <Select value={situacao} onValueChange={setSituacao}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pendente">Pendente</SelectItem>
-                        <SelectItem value="aprovado">Aprovado</SelectItem>
-                        <SelectItem value="enviado por email">Enviado por Email</SelectItem>
-                        <SelectItem value="nota fiscal emitida">Nota Fiscal Emitida</SelectItem>
-                        <SelectItem value="concluido">Concluído</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="detalhes_servico">Detalhes do Serviço</Label>
-                  <Textarea
-                    id="detalhes_servico"
-                    value={detalhesServico}
-                    onChange={(e) => setDetalhesServico(e.target.value)}
-                    placeholder="Descreva os detalhes do serviço a ser executado..."
-                    rows={3}
-                  />
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -1352,20 +1402,30 @@ export function EditarOrcamentoClient({
 
           {/* Observações */}
           <Card className="border border-border shadow-lg bg-white dark:bg-card">
-            <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
-              <CardTitle>Observações</CardTitle>
-              <CardDescription>Informações adicionais sobre o orçamento</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <Textarea
-                  placeholder="Digite observações sobre o orçamento..."
-                  value={observacoes}
-                  onChange={(e) => setObservacoes(e.target.value)}
-                  rows={4}
-                />
+            <CardHeader 
+              onClick={() => setExpandObservacoes(!expandObservacoes)}
+              className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="space-y-1">
+                  <CardTitle>Observações</CardTitle>
+                  <CardDescription className="text-green-100">Informações adicionais sobre o orçamento</CardDescription>
+                </div>
+                {expandObservacoes ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
               </div>
-            </CardContent>
+            </CardHeader>
+            {expandObservacoes && (
+              <CardContent className="p-6">
+                <div>
+                  <Textarea
+                    placeholder="Digite observações sobre o orçamento..."
+                    value={observacoes}
+                    onChange={(e) => setObservacoes(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+              </CardContent>
+            )}
           </Card>
         </div>
 
