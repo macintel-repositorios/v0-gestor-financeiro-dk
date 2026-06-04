@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { Save, ArrowLeft, Calculator, Package, User, Settings, CheckCircle } from "lucide-react"
+import { Save, ArrowLeft, Calculator, Package, User, Settings, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -104,11 +104,13 @@ export default function EditarPropostaPage({
   onClose,
   onSuccess,
   asDrawer = false,
+  triggerSaveRef,
 }: {
   numero?: string
   onClose?: () => void
   onSuccess?: () => void
   asDrawer?: boolean
+  triggerSaveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>
 } = {}) {
   const params = useParams()
   const router = useRouter()
@@ -127,6 +129,16 @@ export default function EditarPropostaPage({
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // Expand state
+  const [expandCliente, setExpandCliente] = useState(false)
+  const [expandCondicoes, setExpandCondicoes] = useState(false)
+  const [expandedCategorias, setExpandedCategorias] = useState<Record<string, boolean>>({
+    basicos: false,
+    portoes_veiculos: false,
+    portoes_pedestre: false,
+    software_redes: false,
+  })
+
   // Campos de configuração
   const [distanciaKm, setDistanciaKm] = useState(0)
   const [quantidadeVisitas, setQuantidadeVisitas] = useState(1)
@@ -137,6 +149,17 @@ export default function EditarPropostaPage({
   const [dataValidade, setDataValidade] = useState("")
   const [descontoVisitas, setDescontoVisitas] = useState(0)
   const [salarioMinimo, setSalarioMinimo] = useState(1412)
+
+  useEffect(() => {
+    if (triggerSaveRef) {
+      triggerSaveRef.current = salvarProposta
+    }
+    return () => {
+      if (triggerSaveRef) {
+        triggerSaveRef.current = null
+      }
+    }
+  }, [triggerSaveRef, cliente, tipo, frequencia, observacoes, status, dataValidade, quantidadeVisitas, equipamentosSelecionados, formaPagamento, prazoContrato, garantia, equipamentosConsignacao, distanciaKm])
 
   useEffect(() => {
     if (numero) {
@@ -500,7 +523,7 @@ export default function EditarPropostaPage({
         description: "Selecione um cliente",
         variant: "destructive",
       })
-      return
+      return false
     }
 
     if (equipamentosSelecionados.length === 0) {
@@ -509,7 +532,7 @@ export default function EditarPropostaPage({
         description: "Selecione pelo menos um equipamento",
         variant: "destructive",
       })
-      return
+      return false
     }
 
     try {
@@ -572,17 +595,14 @@ export default function EditarPropostaPage({
               : "Proposta atualizada com sucesso",
         })
         if (onSuccess) onSuccess()
-        if (asDrawer && onClose) {
-          onClose()
-        } else {
-          router.push(`/contratos/proposta/${numero}`)
-        }
+        return true
       } else {
         toast({
           title: "Erro",
           description: result.message || "Erro ao atualizar proposta",
           variant: "destructive",
         })
+        return false
       }
     } catch (error) {
       console.error("Erro ao salvar proposta:", error)
@@ -591,6 +611,7 @@ export default function EditarPropostaPage({
         description: "Erro de conexão. Tente novamente.",
         variant: "destructive",
       })
+      return false
     } finally {
       setSaving(false)
     }
@@ -631,6 +652,11 @@ export default function EditarPropostaPage({
             <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent dark:from-green-400 dark:to-blue-400">
               Editar Proposta {numero}
             </h1>
+            {cliente && (
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">
+                Cliente: {cliente.nome}
+              </p>
+            )}
             <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">Edite os detalhes da proposta de contrato</p>
           </div>
           <div className="flex gap-2">
@@ -658,122 +684,108 @@ export default function EditarPropostaPage({
           <div className="lg:col-span-2 space-y-6">
             {/* Dados do Cliente */}
             <Card className="border border-border bg-card text-card-foreground shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-blue-900/50 dark:to-purple-900/50 dark:border-b dark:border-border">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Dados do Cliente
-                </CardTitle>
-                <CardDescription className="text-blue-100 dark:text-blue-200">
-                  Selecione o cliente e configure os parâmetros
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="cliente">Cliente *</Label>
-                    <ClienteCombobox
-                      value={cliente}
-                      onValueChange={handleClienteChange}
-                      placeholder="Selecione um cliente..."
-                    />
-                    {cliente && <p className="text-xs text-gray-500 mt-1">Cliente: {cliente.nome}</p>}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="tipo">Tipo de Serviço</Label>
-                      <Select value={tipo} onValueChange={setTipo}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="conservacao">Conservação</SelectItem>
-                          <SelectItem value="servicos">Serviços</SelectItem>
-                          <SelectItem value="manutencao">Manutenção</SelectItem>
-                          <SelectItem value="bimestral">Bimestral</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="frequencia">Frequência</Label>
-                      <Select value={frequencia} onValueChange={setFrequencia}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="mensal">Mensal</SelectItem>
-                          <SelectItem value="quinzenal">Quinzenal</SelectItem>
-                          <SelectItem value="semanal">Semanal</SelectItem>
-                          <SelectItem value="bimestral">Bimestral</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="distancia_km">Distância (Km)</Label>
-                      <Input
-                        id="distancia_km"
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        value={distanciaKm || 0}
-                        onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Distância: {distanciaKm || 0} km</p>
-                    </div>
-                    <div>
-                      <Label htmlFor="quantidade_visitas">Quantidade de Visitas</Label>
-                      <Input
-                        id="quantidade_visitas"
-                        type="number"
-                        min="1"
-                        value={quantidadeVisitas || 1}
-                        onChange={(e) => setQuantidadeVisitas(Number.parseInt(e.target.value) || 1)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="data_validade">Data de Validade</Label>
-                      <Input
-                        id="data_validade"
-                        type="date"
-                        value={dataValidade}
-                        onChange={(e) => setDataValidade(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Campo de Status */}
-                  <div>
-                    <Label htmlFor="status">Status da Proposta</Label>
-                    <div className="flex items-center gap-4 mt-2">
-                      <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger className="w-48">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUS_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full ${option.color}`}></div>
-                                {option.label}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {getStatusBadge(status)}
-                      {status === "aprovada" && (
-                        <div className="flex items-center gap-2 text-green-600">
-                          <CheckCircle className="h-4 w-4" />
-                          <span className="text-sm font-medium">Contrato será gerado automaticamente</span>
-                        </div>
+              <CardHeader 
+                onClick={() => setExpandCliente(!expandCliente)}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="space-y-1">
+                    <CardTitle className="text-white flex items-center gap-2 flex-wrap">
+                      <User className="h-5 w-5" />
+                      Dados do Cliente
+                      {!expandCliente && cliente && (
+                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-normal ml-2">
+                          {cliente.nome}
+                        </span>
                       )}
+                    </CardTitle>
+                    <CardDescription className="text-blue-100 dark:text-blue-200">
+                      {!expandCliente && cliente ? `Cliente selecionado: ${cliente.nome}` : "Selecione o cliente e configure os parâmetros"}
+                    </CardDescription>
+                  </div>
+                  {expandCliente ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                </div>
+              </CardHeader>
+              {expandCliente && (
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="cliente">Cliente *</Label>
+                      <ClienteCombobox
+                        value={cliente}
+                        onValueChange={handleClienteChange}
+                        placeholder="Selecione um cliente..."
+                      />
+                      {cliente && <p className="text-xs text-gray-500 mt-1">Cliente: {cliente.nome}</p>}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="tipo">Tipo de Serviço</Label>
+                        <Select value={tipo} onValueChange={setTipo}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="conservacao">Conservação</SelectItem>
+                            <SelectItem value="servicos">Serviços</SelectItem>
+                            <SelectItem value="manutencao">Manutenção</SelectItem>
+                            <SelectItem value="bimestral">Bimestral</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="frequencia">Frequência</Label>
+                        <Select value={frequencia} onValueChange={setFrequencia}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mensal">Mensal</SelectItem>
+                            <SelectItem value="quinzenal">Quinzenal</SelectItem>
+                            <SelectItem value="semanal">Semanal</SelectItem>
+                            <SelectItem value="bimestral">Bimestral</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="distancia_km">Distância (Km)</Label>
+                        <Input
+                          id="distancia_km"
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          value={distanciaKm || 0}
+                          onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">Distância: {distanciaKm || 0} km</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="quantidade_visitas">Quantidade de Visitas</Label>
+                        <Input
+                          id="quantidade_visitas"
+                          type="number"
+                          min="1"
+                          value={quantidadeVisitas || 1}
+                          onChange={(e) => setQuantidadeVisitas(Number.parseInt(e.target.value) || 1)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="data_validade">Data de Validade</Label>
+                        <Input
+                          id="data_validade"
+                          type="date"
+                          value={dataValidade}
+                          onChange={(e) => setDataValidade(e.target.value)}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
 
             {/* Equipamentos por Categoria */}
@@ -791,76 +803,98 @@ export default function EditarPropostaPage({
                 <div className="space-y-6">
                   {Object.entries(CATEGORIAS).map(([categoria, config]) => {
                     const equipamentosCategoria = equipamentos.filter((eq) => eq.categoria === categoria)
+                    const isExpanded = !!expandedCategorias[categoria]
+                    const selecionadosCategoria = equipamentosSelecionados.filter(sel => sel.equipamento.categoria === categoria)
 
                     return (
-                      <div key={categoria} className="space-y-3">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{config.nome}</h3>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {equipamentosCategoria.map((equipamento) => {
-                            const selecionado = equipamentosSelecionados.find(
-                              (sel) => sel.equipamento_id === equipamento.id,
-                            )
-
-                            return (
-                              <div key={equipamento.id} className="border border-border rounded-lg p-3 bg-card/50">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <Checkbox
-                                    checked={!!selecionado}
-                                    onCheckedChange={() => toggleEquipamento(equipamento)}
-                                  />
-                                  <div className="flex-1">
-                                    <div className="font-medium text-sm">{equipamento.nome}</div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {formatCurrency(equipamento.valor_hora)}/hora
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {selecionado && (
-                                  <div className="mt-2 space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <Label className="text-xs">Quantidade:</Label>
-                                      <Input
-                                        type="number"
-                                        min="1"
-                                        value={selecionado.quantidade}
-                                        onChange={(e) =>
-                                          atualizarQuantidade(equipamento.id, Number.parseInt(e.target.value) || 1)
-                                        }
-                                        className="w-20 h-8 text-xs"
-                                      />
-                                    </div>
-                                    <div className="text-xs space-y-1">
-                                      <div className="flex justify-between">
-                                        <span>Valor unitário:</span>
-                                        <span>{formatCurrency(selecionado.valor_unitario || 0)}</span>
-                                      </div>
-                                      {(selecionado.valor_desconto_individual || 0) > 0 && (
-                                        <div className="flex justify-between text-red-600 dark:text-red-400">
-                                          <span>Desconto individual:</span>
-                                          <span>-{formatCurrency(selecionado.valor_desconto_individual || 0)}</span>
-                                        </div>
-                                      )}
-                                      {(selecionado.valor_desconto_categoria || 0) > 0 && (
-                                        <div className="flex justify-between text-blue-600 dark:text-blue-400">
-                                          <span>Desconto categoria:</span>
-                                          <span>-{formatCurrency(selecionado.valor_desconto_categoria || 0)}</span>
-                                        </div>
-                                      )}
-                                      <div className="flex justify-between font-semibold border-t pt-1">
-                                        <span>Total:</span>
-                                        <span className="text-green-600 dark:text-green-400">
-                                          {formatCurrency(selecionado.valor_total || 0)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
+                      <div key={categoria} className="border border-border rounded-lg overflow-hidden bg-card/20">
+                        <div
+                          onClick={() => setExpandedCategorias(prev => ({ ...prev, [categoria]: !prev[categoria] }))}
+                          className="flex items-center justify-between p-3 bg-muted/40 hover:bg-muted/80 cursor-pointer select-none transition-colors border-b border-border/40"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2.5 h-2.5 rounded-full ${config.cor}`}></span>
+                            <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">
+                              {config.nome}
+                            </h3>
+                            {selecionadosCategoria.length > 0 && (
+                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 ml-2 font-normal">
+                                {selecionadosCategoria.length} selecionado{selecionadosCategoria.length > 1 ? 's' : ''}
+                              </Badge>
+                            )}
+                          </div>
+                          {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                         </div>
+
+                        {isExpanded && (
+                          <div className="p-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {equipamentosCategoria.map((equipamento) => {
+                                const selecionado = equipamentosSelecionados.find(
+                                  (sel) => sel.equipamento_id === equipamento.id,
+                                )
+
+                                return (
+                                  <div key={equipamento.id} className="border border-border rounded-lg p-3 bg-card/50">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                      <Checkbox
+                                        checked={!!selecionado}
+                                        onCheckedChange={() => toggleEquipamento(equipamento)}
+                                      />
+                                      <div className="flex-1">
+                                        <div className="font-medium text-sm">{equipamento.nome}</div>
+                                        <div className="text-xs text-muted-foreground">
+                                          {formatCurrency(equipamento.valor_hora)}/hora
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {selecionado && (
+                                      <div className="mt-2 space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <Label className="text-xs">Quantidade:</Label>
+                                          <Input
+                                            type="number"
+                                            min="1"
+                                            value={selecionado.quantidade}
+                                            onChange={(e) =>
+                                              atualizarQuantidade(equipamento.id, Number.parseInt(e.target.value) || 1)
+                                            }
+                                            className="w-20 h-8 text-xs"
+                                          />
+                                        </div>
+                                        <div className="text-xs space-y-1">
+                                          <div className="flex justify-between">
+                                            <span>Valor unitário:</span>
+                                            <span>{formatCurrency(selecionado.valor_unitario || 0)}</span>
+                                          </div>
+                                          {(selecionado.valor_desconto_individual || 0) > 0 && (
+                                            <div className="flex justify-between text-red-600 dark:text-red-400">
+                                              <span>Desconto individual:</span>
+                                              <span>-{formatCurrency(selecionado.valor_desconto_individual || 0)}</span>
+                                            </div>
+                                          )}
+                                          {(selecionado.valor_desconto_categoria || 0) > 0 && (
+                                            <div className="flex justify-between text-blue-600 dark:text-blue-400">
+                                              <span>Desconto categoria:</span>
+                                              <span>-{formatCurrency(selecionado.valor_desconto_categoria || 0)}</span>
+                                            </div>
+                                          )}
+                                          <div className="flex justify-between font-semibold border-t pt-1">
+                                            <span>Total:</span>
+                                            <span className="text-green-600 dark:text-green-400">
+                                              {formatCurrency(selecionado.valor_total || 0)}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   })}
@@ -870,82 +904,120 @@ export default function EditarPropostaPage({
 
             {/* Condições do Contrato */}
             <Card className="border border-border bg-card text-card-foreground shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-purple-900/50 dark:to-pink-900/50 dark:border-b dark:border-border">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Condições do Contrato
-                </CardTitle>
-                <CardDescription className="text-purple-100 dark:text-purple-200">Configure as condições comerciais</CardDescription>
+              <CardHeader 
+                onClick={() => setExpandCondicoes(!expandCondicoes)}
+                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="space-y-1">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      Condições do Contrato
+                    </CardTitle>
+                    <CardDescription className="text-purple-100 dark:text-purple-200">Configure as condições comerciais e o status</CardDescription>
+                  </div>
+                  {expandCondicoes ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                </div>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
-                    <Select value={formaPagamento} onValueChange={setFormaPagamento}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mensal">Mensal</SelectItem>
-                        <SelectItem value="bimestral">Bimestral</SelectItem>
-                        <SelectItem value="trimestral">Trimestral</SelectItem>
-                        <SelectItem value="semestral">Semestral</SelectItem>
-                        <SelectItem value="anual">Anual</SelectItem>
-                      </SelectContent>
-                    </Select>
+              {expandCondicoes && (
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
+                      <Select value={formaPagamento} onValueChange={setFormaPagamento}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="mensal">Mensal</SelectItem>
+                          <SelectItem value="bimestral">Bimestral</SelectItem>
+                          <SelectItem value="trimestral">Trimestral</SelectItem>
+                          <SelectItem value="semestral">Semestral</SelectItem>
+                          <SelectItem value="anual">Anual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="prazo_contrato">Prazo do Contrato</Label>
+                      <Select value={prazoContrato} onValueChange={(value) => setPrazoContrato(value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRAZO_CONTRATO_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="garantia">Garantia dos Serviços (dias)</Label>
+                      <Input
+                        id="garantia"
+                        type="number"
+                        min="0"
+                        value={garantia}
+                        onChange={(e) => setGarantia(Number.parseInt(e.target.value) || 90)}
+                      />
+                    </div>
+                    {/* Campo de Status */}
+                    <div>
+                      <Label htmlFor="status">Status da Proposta</Label>
+                      <div className="flex items-center gap-4 mt-2">
+                        <Select value={status} onValueChange={setStatus}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {STATUS_OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-3 h-3 rounded-full ${option.color}`}></div>
+                                  {option.label}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {getStatusBadge(status)}
+                      </div>
+                      {status === "aprovada" && (
+                        <div className="flex items-center gap-2 text-green-600 mt-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span className="text-xs font-medium">Contrato será gerado automaticamente</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="prazo_contrato">Prazo do Contrato</Label>
-                    <Select value={prazoContrato} onValueChange={(value) => setPrazoContrato(value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRAZO_CONTRATO_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+
+                  <div className="mt-4">
+                    <Label htmlFor="equipamentos_consignacao">Equipamentos em Consignação</Label>
+                    <Textarea
+                      id="equipamentos_consignacao"
+                      value={equipamentosConsignacao}
+                      onChange={(e) => setEquipamentosConsignacao(e.target.value)}
+                      placeholder="Liste os equipamentos fornecidos em consignação (ex: 2x Interfone, 1x Controle Remoto Universal)..."
+                      rows={3}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ℹ️ Opcional. Será exibido na visualização e impressão logo após os equipamentos inclusos
+                    </p>
                   </div>
-                  <div>
-                    <Label htmlFor="garantia">Garantia dos Serviços (dias)</Label>
-                    <Input
-                      id="garantia"
-                      type="number"
-                      min="0"
-                      value={garantia}
-                      onChange={(e) => setGarantia(Number.parseInt(e.target.value) || 90)}
+
+                  <div className="mt-4">
+                    <Label htmlFor="observacoes">Observações</Label>
+                    <Textarea
+                      id="observacoes"
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      placeholder="Observações adicionais sobre a proposta..."
+                      rows={4}
                     />
                   </div>
-                </div>
-
-                <div className="mt-4">
-                  <Label htmlFor="equipamentos_consignacao">Equipamentos em Consignação</Label>
-                  <Textarea
-                    id="equipamentos_consignacao"
-                    value={equipamentosConsignacao}
-                    onChange={(e) => setEquipamentosConsignacao(e.target.value)}
-                    placeholder="Liste os equipamentos fornecidos em consignação (ex: 2x Interfone, 1x Controle Remoto Universal)..."
-                    rows={3}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    ℹ️ Opcional. Será exibido na visualização e impressão logo após os equipamentos inclusos
-                  </p>
-                </div>
-
-                <div className="mt-4">
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Textarea
-                    id="observacoes"
-                    value={observacoes}
-                    onChange={(e) => setObservacoes(e.target.value)}
-                    placeholder="Observações adicionais sobre a proposta..."
-                    rows={4}
-                  />
-                </div>
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
           </div>
 
