@@ -44,6 +44,7 @@ import {
   Filter,
   X,
   Loader2,
+  Printer,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
@@ -56,6 +57,7 @@ import { VisualizarContratoDialog } from "@/components/contratos/visualizar-cont
 import { NovaPropostaDialog } from "@/components/contratos/nova-proposta-dialog"
 import { EditarPropostaDialog } from "@/components/contratos/editar-proposta-dialog"
 import { VisualizarPropostaDialog } from "@/components/contratos/visualizar-proposta-dialog"
+import { PropostaPrint } from "@/components/proposta-print"
 
 interface PropostaContrato {
   id: string
@@ -200,6 +202,36 @@ export default function ContratosPage() {
   const [isNovaPropostaOpen, setIsNovaPropostaOpen] = useState(false)
   const [isEditarPropostaOpen, setIsEditarPropostaOpen] = useState(false)
   const [isVisualizarPropostaOpen, setIsVisualizarPropostaOpen] = useState(false)
+  const [propostaParaImprimir, setPropostaParaImprimir] = useState<any | null>(null)
+  const [isPrintPropostaOpen, setIsPrintPropostaOpen] = useState(false)
+  const [loadingPrint, setLoadingPrint] = useState(false)
+
+  const handlePrintProposta = async (numero: string) => {
+    try {
+      setLoadingPrint(true)
+      const response = await fetch(`/api/propostas-contratos/${numero}`)
+      const result = await response.json()
+      if (result.success) {
+        setPropostaParaImprimir(result.data)
+        setIsPrintPropostaOpen(true)
+      } else {
+        toast({
+          title: "Erro",
+          description: result.message || "Erro ao carregar dados da proposta para impressão",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Erro ao carregar proposta para impressão:", error)
+      toast({
+        title: "Erro",
+        description: "Erro de conexão ao carregar proposta para impressão.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingPrint(false)
+    }
+  }
   const [propostaStatusFilter, setPropostaStatusFilter] = useState("all")
   const [contratoStatusFilter, setContratoStatusFilter] = useState("all")
   // NFS-e state
@@ -1207,17 +1239,17 @@ export default function ContratosPage() {
                     </div>
                   ) : (
                     <ResizableTable
-                      storageKey="propostas"
+                      storageKey="propostas-v2"
                       columns={[
-                        { key: "numero",                label: "Número",      width: 100, sortable: true },
+                        { key: "numero",                label: "Número",      width: 80,  sortable: true },
                         { key: "cliente_nome",          label: "Cliente",      width: 180, sortable: true },
                         { key: "tipo",                  label: "Tipo",         width: 100, sortable: true },
-                        { key: "frequencia",             label: "Frequência",   width: 110, sortable: true },
-                        { key: "valor_total_proposta",   label: "Valor Total",  width: 130, sortable: true },
-                        { key: "status",                label: "Status",       width: 100, sortable: true },
-                        { key: "data_proposta",          label: "Data",         width: 90,  sortable: true },
-                        { key: "data_validade",          label: "Validade",     width: 90,  sortable: true },
-                        { key: "acoes",                 label: "Ações",        width: 120,  sortable: false, noResize: true },
+                        { key: "frequencia",             label: "Frequência",   width: 95,  sortable: true },
+                        { key: "valor_total_proposta",   label: "Valor Total",  width: 95,  sortable: true },
+                        { key: "status",                label: "Status",       width: 85,  sortable: true },
+                        { key: "data_proposta",          label: "Data",         width: 75,  sortable: true },
+                        { key: "data_validade",          label: "Validade",     width: 75,  sortable: true },
+                        { key: "acoes",                 label: "Ações",        width: 120, sortable: false, noResize: true },
                       ]}
                       data={filteredPropostas}
                       rowKey={(row) => row.id}
@@ -1240,7 +1272,6 @@ export default function ContratosPage() {
                           case "acoes":
                             return (
                               <div className="flex items-center gap-1">
-                                {/* Desktop View: Show buttons directly on large screens */}
                                 <div className="hidden xl:flex gap-1">
                                   <Button size="sm" variant="outline"
                                     onClick={() => {
@@ -1249,6 +1280,12 @@ export default function ContratosPage() {
                                     }}
                                     className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-200 dark:border-blue-900/50 bg-transparent h-8 w-8 p-0" title="Visualizar">
                                     <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="sm" variant="outline"
+                                    disabled={loadingPrint}
+                                    onClick={() => handlePrintProposta(proposta.numero)}
+                                    className="text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 border-purple-200 dark:border-purple-900/50 bg-transparent h-8 w-8 p-0" title="Imprimir">
+                                    <Printer className="h-4 w-4" />
                                   </Button>
                                   <Button size="sm" variant="outline"
                                     onClick={() => {
@@ -1264,7 +1301,6 @@ export default function ContratosPage() {
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
-                                {/* Mobile/Tablet View: Show dropdown menu on smaller screens */}
                                 <div className="xl:hidden">
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -1276,6 +1312,9 @@ export default function ContratosPage() {
                                         setIsVisualizarPropostaOpen(true)
                                       }}>
                                         <Eye className="h-4 w-4 mr-2" />Visualizar
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handlePrintProposta(proposta.numero)}>
+                                        <Printer className="h-4 w-4 mr-2" />Imprimir
                                       </DropdownMenuItem>
                                       <DropdownMenuItem onClick={() => {
                                         setSelectedPropostaNumero(proposta.numero)
@@ -1411,6 +1450,15 @@ export default function ContratosPage() {
                                   <Eye className="h-3 w-3 mr-1" /> Visualizar
                                 </Button>
                               </Link>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 text-xs"
+                                disabled={loadingPrint}
+                                onClick={() => handlePrintProposta(proposta.numero)}
+                              >
+                                <Printer className="h-3 w-3 mr-1" /> Imprimir
+                              </Button>
                               <Link 
                                 href={`/contratos/proposta/${proposta.numero}/editar`} 
                                 className="flex-1"
@@ -1542,15 +1590,15 @@ export default function ContratosPage() {
                     </div>
                   ) : (
                     <ResizableTable
-                      storageKey="contratos-ativos"
+                      storageKey="contratos-ativos-v2"
                       columns={[
-                        { key: "numero",         label: "Número",              width: 100, sortable: true },
+                        { key: "numero",         label: "Número",              width: 80,  sortable: true },
                         { key: "cliente_nome",   label: "Cliente/Equipamentos", width: 220, sortable: true },
-                        { key: "valor_mensal",   label: "Valor Mensal",        width: 130, sortable: true },
-                        { key: "dia_vencimento", label: "Dia",                 width: 60,  sortable: true },
-                        { key: "status",         label: "Status",              width: 100, sortable: true },
-                        { key: "data_inicio",    label: "Início",              width: 90,  sortable: true },
-                        { key: "prazo_meses",    label: "Prazo",               width: 100, sortable: true },
+                        { key: "valor_mensal",   label: "Valor Mensal",        width: 100, sortable: true },
+                        { key: "dia_vencimento", label: "Dia",                 width: 50,  sortable: true },
+                        { key: "status",         label: "Status",              width: 85,  sortable: true },
+                        { key: "data_inicio",    label: "Início",              width: 75,  sortable: true },
+                        { key: "prazo_meses",    label: "Prazo",               width: 75,  sortable: true },
                         { key: "acoes",          label: "Ações",               width: 160, sortable: false, noResize: true },
                       ]}
                       data={filteredContratos}
@@ -2647,6 +2695,15 @@ export default function ContratosPage() {
           setIsVisualizarPropostaOpen(false)
           setSelectedPropostaNumero(numero)
           setIsEditarPropostaOpen(true)
+        }}
+      />
+
+      <PropostaPrint
+        proposta={propostaParaImprimir}
+        isOpen={isPrintPropostaOpen}
+        onClose={() => {
+          setIsPrintPropostaOpen(false)
+          setPropostaParaImprimir(null)
         }}
       />
     </div>

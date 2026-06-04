@@ -47,7 +47,7 @@ export function useResizableColumns(
     const onMouseMove = (ev: MouseEvent) => {
       if (!resizingRef.current) return
       const delta = ev.clientX - resizingRef.current.startX
-      const newWidth = Math.max(60, resizingRef.current.startWidth + delta)
+      const newWidth = Math.max(40, resizingRef.current.startWidth + delta)
       setColumnWidths((prev) => ({ ...prev, [resizingRef.current!.key]: newWidth }))
     }
 

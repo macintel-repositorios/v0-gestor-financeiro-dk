@@ -507,11 +507,11 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
   <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
     <thead>
       <tr style="background-color: #f0f0f0;">
-        <th style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; font-size: 9px;">Item</th>
-        <th style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; font-size: 9px;">Código</th>
-        <th style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; font-size: 9px;">Marca</th>
-        <th style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; font-size: 9px;">Qtd</th>
-        <th style="border: 1px solid #000; padding: 3px; text-align: left; font-weight: bold; font-size: 9px;">Descrição</th>
+        <th style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9px;">Item</th>
+        <th style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9px;">Código</th>
+        <th style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9px;">Marca</th>
+        <th style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9px;">Qtd</th>
+        <th style="border: 1px solid #000; padding: 6px 4px; text-align: left; vertical-align: middle; font-weight: bold; font-size: 9px;">Descrição</th>
       </tr>
     </thead>
     <tbody>
@@ -521,18 +521,18 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
       orcamento.itens.forEach((item: any, index: number) => {
         tabelaProdutosHTML += `
       <tr>
-        <td style="border: 1px solid #000; padding: 3px; text-align: center; font-size: 9px;">${index + 1}</td>
-        <td style="border: 1px solid #000; padding: 3px; text-align: center; font-size: 9px;">${item.produto_codigo || "-"}</td>
-        <td style="border: 1px solid #000; padding: 3px; text-align: center; font-size: 9px;">${item.marca_nome || "Sem marca"}</td>
-        <td style="border: 1px solid #000; padding: 3px; text-align: center; font-size: 9px;">${item.quantidade}</td>
-        <td style="border: 1px solid #000; padding: 3px; font-size: 9px; line-height: 1.2;">${item.produto_descricao}</td>
+        <td style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-size: 9px;">${index + 1}</td>
+        <td style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-size: 9px;">${item.produto_codigo || "-"}</td>
+        <td style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-size: 9px;">${item.marca_nome || "Sem marca"}</td>
+        <td style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-size: 9px;">${item.quantidade}</td>
+        <td style="border: 1px solid #000; padding: 6px 4px; vertical-align: middle; font-size: 9px; line-height: 1.2;">${item.produto_descricao}</td>
       </tr>
     `
       })
     } else {
       tabelaProdutosHTML += `
     <tr>
-      <td colspan="5" style="border: 1px solid #000; padding: 3px; text-align: center; color: #666; font-size: 9px;">Nenhum produto incluído</td>
+      <td colspan="5" style="border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; color: #666; font-size: 9px;">Nenhum produto incluído</td>
     </tr>
   `
     }
