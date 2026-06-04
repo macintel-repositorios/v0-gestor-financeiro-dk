@@ -130,8 +130,7 @@ export default function EditarPropostaPage({
   const [loading, setLoading] = useState(true)
 
   // Expand state
-  const [expandCliente, setExpandCliente] = useState(false)
-  const [expandCondicoes, setExpandCondicoes] = useState(false)
+  const [activeSection, setActiveSection] = useState<"cliente" | "equipamentos" | "condicoes" | null>(null)
   const [expandedCategorias, setExpandedCategorias] = useState<Record<string, boolean>>({
     basicos: false,
     portoes_veiculos: false,
@@ -461,6 +460,7 @@ export default function EditarPropostaPage({
       } catch (error) {
         console.error("Erro ao buscar dados do cliente:", error)
       }
+      setActiveSection("equipamentos")
     } else {
       setDistanciaKm(0)
     }
@@ -685,7 +685,7 @@ export default function EditarPropostaPage({
             {/* Dados do Cliente */}
             <Card className="border border-border bg-card text-card-foreground shadow-sm">
               <CardHeader 
-                onClick={() => setExpandCliente(!expandCliente)}
+                onClick={() => setActiveSection(activeSection === "cliente" ? null : "cliente")}
                 className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
               >
                 <div className="flex items-center justify-between w-full">
@@ -693,20 +693,20 @@ export default function EditarPropostaPage({
                     <CardTitle className="text-white flex items-center gap-2 flex-wrap">
                       <User className="h-5 w-5" />
                       Dados do Cliente
-                      {!expandCliente && cliente && (
+                      {activeSection !== "cliente" && cliente && (
                         <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-normal ml-2">
                           {cliente.nome}
                         </span>
                       )}
                     </CardTitle>
                     <CardDescription className="text-blue-100 dark:text-blue-200">
-                      {!expandCliente && cliente ? `Cliente selecionado: ${cliente.nome}` : "Selecione o cliente e configure os parâmetros"}
+                      {activeSection !== "cliente" && cliente ? `Cliente selecionado: ${cliente.nome}` : "Selecione o cliente e configure os parâmetros"}
                     </CardDescription>
                   </div>
-                  {expandCliente ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                  {activeSection === "cliente" ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
                 </div>
               </CardHeader>
-              {expandCliente && (
+              {activeSection === "cliente" && (
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div>
@@ -783,6 +783,19 @@ export default function EditarPropostaPage({
                         />
                       </div>
                     </div>
+
+                    {cliente && (
+                      <div className="flex justify-end pt-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => setActiveSection("equipamentos")}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        >
+                          Avançar
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               )}
@@ -790,122 +803,143 @@ export default function EditarPropostaPage({
 
             {/* Equipamentos por Categoria */}
             <Card className="border border-border bg-card text-card-foreground shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-green-900/50 dark:to-blue-900/50 dark:border-b dark:border-border">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Equipamentos por Categoria
-                </CardTitle>
-                <CardDescription className="text-green-100 dark:text-green-200">
-                  Selecione os equipamentos necessários para o contrato
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  {Object.entries(CATEGORIAS).map(([categoria, config]) => {
-                    const equipamentosCategoria = equipamentos.filter((eq) => eq.categoria === categoria)
-                    const isExpanded = !!expandedCategorias[categoria]
-                    const selecionadosCategoria = equipamentosSelecionados.filter(sel => sel.equipamento.categoria === categoria)
-
-                    return (
-                      <div key={categoria} className="border border-border rounded-lg overflow-hidden bg-card/20">
-                        <div
-                          onClick={() => setExpandedCategorias(prev => ({ ...prev, [categoria]: !prev[categoria] }))}
-                          className="flex items-center justify-between p-3 bg-muted/40 hover:bg-muted/80 cursor-pointer select-none transition-colors border-b border-border/40"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2.5 h-2.5 rounded-full ${config.cor}`}></span>
-                            <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">
-                              {config.nome}
-                            </h3>
-                            {selecionadosCategoria.length > 0 && (
-                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 ml-2 font-normal">
-                                {selecionadosCategoria.length} selecionado{selecionadosCategoria.length > 1 ? 's' : ''}
-                              </Badge>
-                            )}
-                          </div>
-                          {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                        </div>
-
-                        {isExpanded && (
-                          <div className="p-3">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {equipamentosCategoria.map((equipamento) => {
-                                const selecionado = equipamentosSelecionados.find(
-                                  (sel) => sel.equipamento_id === equipamento.id,
-                                )
-
-                                return (
-                                  <div key={equipamento.id} className="border border-border rounded-lg p-3 bg-card/50">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                      <Checkbox
-                                        checked={!!selecionado}
-                                        onCheckedChange={() => toggleEquipamento(equipamento)}
-                                      />
-                                      <div className="flex-1">
-                                        <div className="font-medium text-sm">{equipamento.nome}</div>
-                                        <div className="text-xs text-muted-foreground">
-                                          {formatCurrency(equipamento.valor_hora)}/hora
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    {selecionado && (
-                                      <div className="mt-2 space-y-2">
-                                        <div className="flex items-center gap-2">
-                                          <Label className="text-xs">Quantidade:</Label>
-                                          <Input
-                                            type="number"
-                                            min="1"
-                                            value={selecionado.quantidade}
-                                            onChange={(e) =>
-                                              atualizarQuantidade(equipamento.id, Number.parseInt(e.target.value) || 1)
-                                            }
-                                            className="w-20 h-8 text-xs"
-                                          />
-                                        </div>
-                                        <div className="text-xs space-y-1">
-                                          <div className="flex justify-between">
-                                            <span>Valor unitário:</span>
-                                            <span>{formatCurrency(selecionado.valor_unitario || 0)}</span>
-                                          </div>
-                                          {(selecionado.valor_desconto_individual || 0) > 0 && (
-                                            <div className="flex justify-between text-red-600 dark:text-red-400">
-                                              <span>Desconto individual:</span>
-                                              <span>-{formatCurrency(selecionado.valor_desconto_individual || 0)}</span>
-                                            </div>
-                                          )}
-                                          {(selecionado.valor_desconto_categoria || 0) > 0 && (
-                                            <div className="flex justify-between text-blue-600 dark:text-blue-400">
-                                              <span>Desconto categoria:</span>
-                                              <span>-{formatCurrency(selecionado.valor_desconto_categoria || 0)}</span>
-                                            </div>
-                                          )}
-                                          <div className="flex justify-between font-semibold border-t pt-1">
-                                            <span>Total:</span>
-                                            <span className="text-green-600 dark:text-green-400">
-                                              {formatCurrency(selecionado.valor_total || 0)}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
+              <CardHeader 
+                onClick={() => setActiveSection(activeSection === "equipamentos" ? null : "equipamentos")}
+                className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity dark:from-green-900/50 dark:to-blue-900/50 dark:border-b dark:border-border"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="space-y-1">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      Equipamentos por Categoria
+                      {activeSection !== "equipamentos" && (
+                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-normal ml-2">
+                          {equipamentosSelecionados.length} selecionado(s)
+                        </span>
+                      )}
+                    </CardTitle>
+                    <CardDescription className="text-green-100 dark:text-green-200">
+                      Selecione os equipamentos necessários para o contrato
+                    </CardDescription>
+                  </div>
+                  {activeSection === "equipamentos" ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
                 </div>
-              </CardContent>
+              </CardHeader>
+              {activeSection === "equipamentos" && (
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {Object.entries(CATEGORIAS).map(([categoria, config]) => {
+                      const equipamentosCategoria = equipamentos.filter((eq) => eq.categoria === categoria)
+                      const isExpanded = !!expandedCategorias[categoria]
+                      const selecionadosCategoria = equipamentosSelecionados.filter(sel => sel.equipamento.categoria === categoria)
+
+                      return (
+                        <div key={categoria} className="border border-border rounded-lg overflow-hidden bg-card/20">
+                          <div
+                            onClick={() => setExpandedCategorias(prev => ({ ...prev, [categoria]: !prev[categoria] }))}
+                            className="flex items-center justify-between p-3 bg-muted/40 hover:bg-muted/80 cursor-pointer select-none transition-colors border-b border-border/40"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`w-3 h-3 rounded-full ${config.cor}`} />
+                              <span className="font-medium text-sm text-foreground">{config.nome}</span>
+                              <Badge variant="secondary" className="text-[10px] py-0 px-2 font-normal">
+                                {selecionadosCategoria.length} de {equipamentosCategoria.length}
+                              </Badge>
+                            </div>
+                            {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                          </div>
+
+                          {isExpanded && (
+                            <div className="p-4 bg-card/10 border-t border-border/10 space-y-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {equipamentosCategoria.map((equipamento) => {
+                                  const selecionado = equipamentosSelecionados.find(
+                                    (sel) => sel.equipamento_id === equipamento.id,
+                                  )
+
+                                  return (
+                                    <div key={equipamento.id} className="border border-border rounded-lg p-3 bg-card/50">
+                                      <div className="flex items-center space-x-2 mb-2">
+                                        <Checkbox
+                                          checked={!!selecionado}
+                                          onCheckedChange={() => toggleEquipamento(equipamento)}
+                                        />
+                                        <div className="flex-1">
+                                          <div className="font-medium text-sm">{equipamento.nome}</div>
+                                          <div className="text-xs text-muted-foreground">
+                                            {formatCurrency(equipamento.valor_hora)}/hora
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {selecionado && (
+                                        <div className="mt-2 space-y-2">
+                                          <div className="flex items-center gap-2">
+                                            <Label className="text-xs">Quantidade:</Label>
+                                            <Input
+                                              type="number"
+                                              min="1"
+                                              value={selecionado.quantidade}
+                                              onChange={(e) =>
+                                                atualizarQuantidade(equipamento.id, Number.parseInt(e.target.value) || 1)
+                                              }
+                                              className="w-20 h-8 text-xs"
+                                            />
+                                          </div>
+                                          <div className="text-xs space-y-1">
+                                            <div className="flex justify-between">
+                                              <span>Valor unitário:</span>
+                                              <span>{formatCurrency(selecionado.valor_unitario || 0)}</span>
+                                            </div>
+                                            {(selecionado.valor_desconto_individual || 0) > 0 && (
+                                              <div className="flex justify-between text-red-600 dark:text-red-400">
+                                                <span>Desconto individual:</span>
+                                                <span>-{formatCurrency(selecionado.valor_desconto_individual || 0)}</span>
+                                              </div>
+                                            )}
+                                            {(selecionado.valor_desconto_categoria || 0) > 0 && (
+                                              <div className="flex justify-between text-blue-600 dark:text-blue-400">
+                                                <span>Desconto categoria:</span>
+                                                <span>-{formatCurrency(selecionado.valor_desconto_categoria || 0)}</span>
+                                              </div>
+                                            )}
+                                            <div className="flex justify-between font-semibold border-t pt-1">
+                                              <span>Total:</span>
+                                              <span className="text-green-600 dark:text-green-400">
+                                                {formatCurrency(selecionado.valor_total || 0)}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setActiveSection("condicoes")}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      Avançar
+                    </Button>
+                  </div>
+                </CardContent>
+              )}
             </Card>
 
             {/* Condições do Contrato */}
             <Card className="border border-border bg-card text-card-foreground shadow-sm">
               <CardHeader 
-                onClick={() => setExpandCondicoes(!expandCondicoes)}
+                onClick={() => setActiveSection(activeSection === "condicoes" ? null : "condicoes")}
                 className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
               >
                 <div className="flex items-center justify-between w-full">
@@ -916,12 +950,13 @@ export default function EditarPropostaPage({
                     </CardTitle>
                     <CardDescription className="text-purple-100 dark:text-purple-200">Configure as condições comerciais e o status</CardDescription>
                   </div>
-                  {expandCondicoes ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                  {activeSection === "condicoes" ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
                 </div>
               </CardHeader>
-              {expandCondicoes && (
+              {activeSection === "condicoes" && (
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                     <div>
                       <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
                       <Select value={formaPagamento} onValueChange={setFormaPagamento}>
@@ -939,7 +974,7 @@ export default function EditarPropostaPage({
                     </div>
                     <div>
                       <Label htmlFor="prazo_contrato">Prazo do Contrato</Label>
-                      <Select value={prazoContrato} onValueChange={(value) => setPrazoContrato(value)}>
+                      <Select value={prazoContrato} onValueChange={setPrazoContrato}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -962,7 +997,6 @@ export default function EditarPropostaPage({
                         onChange={(e) => setGarantia(Number.parseInt(e.target.value) || 90)}
                       />
                     </div>
-                    {/* Campo de Status */}
                     <div>
                       <Label htmlFor="status">Status da Proposta</Label>
                       <div className="flex items-center gap-4 mt-2">

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Save, ArrowLeft, Calculator, Package, User, Settings, Plus, Building2, FileText } from "lucide-react"
+import { Save, ArrowLeft, Calculator, Package, User, Settings, Plus, Building2, FileText, ChevronDown, ChevronUp } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -75,6 +75,7 @@ export default function NovaPropostaPage({
   const router = useRouter()
   const { toast } = useToast()
 
+  const [activeSection, setActiveSection] = useState<"cliente" | "equipamentos" | "condicoes" | null>(null)
   const [numeroProposta, setNumeroProposta] = useState<string>("")
   const [cliente, setCliente] = useState<Cliente | null>(null)
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([])
@@ -323,6 +324,7 @@ export default function NovaPropostaPage({
       } catch (error) {
         console.error("Erro ao buscar dados do cliente:", error)
       }
+      setActiveSection("equipamentos")
     } else {
       setDistanciaKm(0)
     }
@@ -520,374 +522,437 @@ export default function NovaPropostaPage({
           <div className="lg:col-span-2 space-y-6">
             {/* Dados do Cliente */}
             <Card className="border border-border bg-card text-card-foreground shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-blue-900/50 dark:to-purple-900/50 dark:border-b dark:border-border">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Dados do Cliente
-                </CardTitle>
-                <CardDescription className="text-blue-100 dark:text-blue-200">
-                  Selecione o cliente e configure os parâmetros
-                </CardDescription>
+              <CardHeader 
+                onClick={() => setActiveSection(activeSection === "cliente" ? null : "cliente")}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity dark:from-blue-900/50 dark:to-purple-900/50 dark:border-b dark:border-border"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="space-y-1">
+                    <CardTitle className="text-white flex items-center gap-2 flex-wrap">
+                      <User className="h-5 w-5" />
+                      Dados do Cliente
+                      {activeSection !== "cliente" && cliente && (
+                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-normal ml-2">
+                          {cliente.nome}
+                        </span>
+                      )}
+                    </CardTitle>
+                    <CardDescription className="text-blue-100 dark:text-blue-200">
+                      {activeSection !== "cliente" && cliente ? `Cliente selecionado: ${cliente.nome}` : "Selecione o cliente e configure os parâmetros"}
+                    </CardDescription>
+                  </div>
+                  {activeSection === "cliente" ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                </div>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <Label htmlFor="cliente">Cliente *</Label>
-                      <ClienteCombobox
-                        value={cliente}
-                        onValueChange={handleClienteChange}
-                        placeholder="Selecione um cliente..."
-                        showNewClientButton={false}
-                      />
+              {activeSection === "cliente" && (
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <Label htmlFor="cliente">Cliente *</Label>
+                        <ClienteCombobox
+                          value={cliente}
+                          onValueChange={handleClienteChange}
+                          placeholder="Selecione um cliente..."
+                          showNewClientButton={false}
+                        />
+                      </div>
+                      {!cliente && (
+                        <div className="flex items-end">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowNewClientDialog(true)}
+                            className="bg-green-50 dark:bg-green-950/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/30"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Novo Cliente
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    {!cliente && (
-                      <div className="flex items-end">
+
+                    {cliente && (
+                      <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          {cliente.codigo && (
+                            <Badge variant="outline" className="font-mono">
+                              {cliente.codigo}
+                            </Badge>
+                          )}
+                          <span className="font-medium text-blue-900 dark:text-blue-200">{cliente.nome}</span>
+                          {cliente.tem_contrato && (
+                            <Badge variant="outline" className="text-green-600 border-green-200">
+                              Contrato
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                          <div>
+                            {cliente.cnpj && (
+                              <div>
+                                <strong className="text-foreground">CNPJ:</strong> {cliente.cnpj}
+                              </div>
+                            )}
+                            {cliente.cpf && (
+                              <div>
+                                <strong className="text-foreground">CPF:</strong> {cliente.cpf}
+                              </div>
+                            )}
+                            {cliente.endereco && (
+                              <div>
+                                <strong className="text-foreground">Endereço:</strong> {cliente.endereco}
+                              </div>
+                            )}
+                            {cliente.email && (
+                              <div>
+                                <strong className="text-foreground">Email:</strong> {cliente.email}
+                              </div>
+                            )}
+                            {cliente.telefone && (
+                              <div>
+                                <strong className="text-foreground">Telefone:</strong> {cliente.telefone}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            {cliente.cidade && (
+                              <div>
+                                <strong className="text-foreground">Cidade:</strong> {cliente.cidade}/{cliente.estado}
+                              </div>
+                            )}
+                            {cliente.distancia_km !== undefined && (
+                              <div>
+                                <strong className="text-foreground">Distância:</strong> {cliente.distancia_km} km
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {(cliente.nome_adm || cliente.contato_adm || cliente.telefone_adm || cliente.email_adm) && (
+                          <div className="mt-4 pt-3 border-t border-blue-200 dark:border-blue-900/30">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              <span className="font-medium text-blue-850 dark:text-blue-300">Administradora</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                              <div>
+                                {cliente.nome_adm && (
+                                  <div>
+                                    <strong className="text-foreground">Nome:</strong> {cliente.nome_adm}
+                                  </div>
+                                )}
+                                {cliente.contato_adm && (
+                                  <div>
+                                    <strong className="text-foreground">Contato:</strong> {cliente.contato_adm}
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                {cliente.telefone_adm && (
+                                  <div>
+                                    <strong className="text-foreground">Telefone:</strong> {cliente.telefone_adm}
+                                  </div>
+                                )}
+                                {cliente.email_adm && (
+                                  <div>
+                                    <strong className="text-foreground">Email:</strong> {cliente.email_adm}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="tipo">Tipo de Serviço</Label>
+                        <Select value={tipo} onValueChange={setTipo}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="conservacao">Conservação</SelectItem>
+                            <SelectItem value="servicos">Serviços</SelectItem>
+                            <SelectItem value="manutencao">Manutenção</SelectItem>
+                            <SelectItem value="bimestral">Bimestral</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="frequencia">Frequência</Label>
+                        <Select value={frequencia} onValueChange={setFrequencia}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mensal">Mensal</SelectItem>
+                            <SelectItem value="quinzenal">Quinzenal</SelectItem>
+                            <SelectItem value="semanal">Semanal</SelectItem>
+                            <SelectItem value="bimestral">Bimestral</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="distancia_km">Distância (Km)</Label>
+                        <Input
+                          id="distancia_km"
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          value={distanciaKm || 0}
+                          onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">Distância: {distanciaKm || 0} km</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="quantidade_visitas">Quantidade de Visitas</Label>
+                        <Input
+                          id="quantidade_visitas"
+                          type="number"
+                          min="1"
+                          value={quantidadeVisitas || 1}
+                          onChange={(e) => setQuantidadeVisitas(Number.parseInt(e.target.value) || 1)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="data_validade">Data de Validade</Label>
+                        <Input
+                          id="data_validade"
+                          type="date"
+                          value={dataValidade}
+                          onChange={(e) => setDataValidade(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {cliente && (
+                      <div className="flex justify-end pt-2">
                         <Button
                           type="button"
-                          variant="outline"
-                          onClick={() => setShowNewClientDialog(true)}
-                          className="bg-green-50 dark:bg-green-950/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/30"
+                          size="sm"
+                          onClick={() => setActiveSection("equipamentos")}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white"
                         >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Novo Cliente
+                          Avançar
                         </Button>
                       </div>
                     )}
                   </div>
+                </CardContent>
+              )}
+            </Card>
 
-                  {cliente && (
-                    <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900/30">
-                      <div className="flex items-center gap-2 mb-2">
-                        {cliente.codigo && (
-                          <Badge variant="outline" className="font-mono">
-                            {cliente.codigo}
-                          </Badge>
-                        )}
-                        <span className="font-medium text-blue-900 dark:text-blue-200">{cliente.nome}</span>
-                        {cliente.tem_contrato && (
-                          <Badge variant="outline" className="text-green-600 border-green-200">
-                            Contrato
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                        <div>
-                          {cliente.cnpj && (
-                            <div>
-                              <strong className="text-foreground">CNPJ:</strong> {cliente.cnpj}
-                            </div>
-                          )}
-                          {cliente.cpf && (
-                            <div>
-                              <strong className="text-foreground">CPF:</strong> {cliente.cpf}
-                            </div>
-                          )}
-                          {cliente.endereco && (
-                            <div>
-                              <strong className="text-foreground">Endereço:</strong> {cliente.endereco}
-                            </div>
-                          )}
-                          {cliente.email && (
-                            <div>
-                              <strong className="text-foreground">Email:</strong> {cliente.email}
-                            </div>
-                          )}
-                          {cliente.telefone && (
-                            <div>
-                              <strong className="text-foreground">Telefone:</strong> {cliente.telefone}
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          {cliente.cidade && (
-                            <div>
-                              <strong className="text-foreground">Cidade:</strong> {cliente.cidade}/{cliente.estado}
-                            </div>
-                          )}
-                          {cliente.distancia_km !== undefined && (
-                            <div>
-                              <strong className="text-foreground">Distância:</strong> {cliente.distancia_km} km
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {(cliente.nome_adm || cliente.contato_adm || cliente.telefone_adm || cliente.email_adm) && (
-                        <div className="mt-4 pt-3 border-t border-blue-200 dark:border-blue-900/30">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                            <span className="font-medium text-blue-850 dark:text-blue-300">Administradora</span>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                            <div>
-                              {cliente.nome_adm && (
-                                <div>
-                                  <strong className="text-foreground">Nome:</strong> {cliente.nome_adm}
-                                </div>
-                              )}
-                              {cliente.contato_adm && (
-                                <div>
-                                  <strong className="text-foreground">Contato:</strong> {cliente.contato_adm}
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              {cliente.telefone_adm && (
-                                <div>
-                                  <strong className="text-foreground">Telefone:</strong> {cliente.telefone_adm}
-                                </div>
-                              )}
-                              {cliente.email_adm && (
-                                <div>
-                                  <strong className="text-foreground">Email:</strong> {cliente.email_adm}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+            {/* Equipamentos por Categoria */}
+            <Card className="border border-border bg-card text-card-foreground shadow-sm">
+              <CardHeader 
+                onClick={() => setActiveSection(activeSection === "equipamentos" ? null : "equipamentos")}
+                className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity dark:from-green-900/50 dark:to-blue-900/50 dark:border-b dark:border-border"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="space-y-1">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      Equipamentos por Categoria
+                      {activeSection !== "equipamentos" && (
+                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-normal ml-2">
+                          {equipamentosSelecionados.length} selecionado(s)
+                        </span>
                       )}
-                    </div>
-                  )}
+                    </CardTitle>
+                    <CardDescription className="text-green-100 dark:text-green-200">
+                      Selecione os equipamentos necessários para o contrato
+                    </CardDescription>
+                  </div>
+                  {activeSection === "equipamentos" ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                </div>
+              </CardHeader>
+              {activeSection === "equipamentos" && (
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {Object.entries(CATEGORIAS).map(([categoria, config]) => {
+                      const equipamentosCategoria = equipamentos.filter((eq) => eq.categoria === categoria)
 
+                      return (
+                        <div key={categoria} className="space-y-3">
+                          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{config.nome}</h3>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {equipamentosCategoria.map((equipamento) => {
+                              const selecionado = equipamentosSelecionados.find(
+                                (sel) => sel.equipamento_id === equipamento.id,
+                              )
+
+                              return (
+                                <div key={equipamento.id} className="border border-border rounded-lg p-3 bg-card/50">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <Checkbox
+                                      checked={!!selecionado}
+                                      onCheckedChange={() => toggleEquipamento(equipamento)}
+                                    />
+                                    <div className="flex-1">
+                                      <div className="font-medium text-sm">{equipamento.nome}</div>
+                                      <div className="text-xs text-muted-foreground">
+                                        {formatCurrency(equipamento.valor_hora)}/hora
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {selecionado && (
+                                    <div className="mt-2 space-y-2">
+                                      <div className="flex items-center gap-2">
+                                        <Label className="text-xs">Quantidade:</Label>
+                                        <Input
+                                          type="number"
+                                          min="1"
+                                          value={selecionado.quantidade}
+                                          onChange={(e) =>
+                                            atualizarQuantidade(equipamento.id, Number.parseInt(e.target.value) || 1)
+                                          }
+                                          className="w-20 h-8 text-xs"
+                                        />
+                                      </div>
+                                      <div className="text-xs space-y-1">
+                                        <div className="flex justify-between">
+                                          <span>Valor unitário:</span>
+                                          <span>{formatCurrency(selecionado.valor_unitario || 0)}</span>
+                                        </div>
+                                        {(selecionado.valor_desconto_individual || 0) > 0 && (
+                                          <div className="flex justify-between text-red-600 dark:text-red-400">
+                                            <span>Desconto individual:</span>
+                                            <span>-{formatCurrency(selecionado.valor_desconto_individual || 0)}</span>
+                                          </div>
+                                        )}
+                                        {(selecionado.valor_desconto_categoria || 0) > 0 && (
+                                          <div className="flex justify-between text-blue-600 dark:text-blue-400">
+                                            <span>Desconto categoria:</span>
+                                            <span>-{formatCurrency(selecionado.valor_desconto_categoria || 0)}</span>
+                                          </div>
+                                        )}
+                                        <div className="flex justify-between font-semibold border-t pt-1">
+                                          <span>Total:</span>
+                                          <span className="text-green-600 dark:text-green-400">
+                                            {formatCurrency(selecionado.valor_total || 0)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setActiveSection("condicoes")}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      Avançar
+                    </Button>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Condições do Contrato */}
+            <Card className="border border-border bg-card text-card-foreground shadow-sm">
+              <CardHeader 
+                onClick={() => setActiveSection(activeSection === "condicoes" ? null : "condicoes")}
+                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity dark:from-purple-900/50 dark:to-pink-900/50 dark:border-b dark:border-border"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="space-y-1">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      Condições do Contrato
+                    </CardTitle>
+                    <CardDescription className="text-purple-100 dark:text-purple-200">Configure as condições comerciais</CardDescription>
+                  </div>
+                  {activeSection === "condicoes" ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                </div>
+              </CardHeader>
+              {activeSection === "condicoes" && (
+                <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="tipo">Tipo de Serviço</Label>
-                      <Select value={tipo} onValueChange={setTipo}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="conservacao">Conservação</SelectItem>
-                          <SelectItem value="servicos">Serviços</SelectItem>
-                          <SelectItem value="manutencao">Manutenção</SelectItem>
-                          <SelectItem value="bimestral">Bimestral</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="frequencia">Frequência</Label>
-                      <Select value={frequencia} onValueChange={setFrequencia}>
+                      <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
+                      <Select value={formaPagamento} onValueChange={setFormaPagamento}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="mensal">Mensal</SelectItem>
-                          <SelectItem value="quinzenal">Quinzenal</SelectItem>
-                          <SelectItem value="semanal">Semanal</SelectItem>
                           <SelectItem value="bimestral">Bimestral</SelectItem>
+                          <SelectItem value="trimestral">Trimestral</SelectItem>
+                          <SelectItem value="semestral">Semestral</SelectItem>
+                          <SelectItem value="anual">Anual</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="distancia_km">Distância (Km)</Label>
+                      <Label htmlFor="prazo_contrato">Prazo do Contrato</Label>
+                      <Select value={prazoContrato} onValueChange={setPrazoContrato}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRAZO_CONTRATO_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="garantia">Garantia dos Serviços (dias)</Label>
                       <Input
-                        id="distancia_km"
+                        id="garantia"
                         type="number"
-                        step="0.1"
                         min="0"
-                        value={distanciaKm || 0}
-                        onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Distância: {distanciaKm || 0} km</p>
-                    </div>
-                    <div>
-                      <Label htmlFor="quantidade_visitas">Quantidade de Visitas</Label>
-                      <Input
-                        id="quantidade_visitas"
-                        type="number"
-                        min="1"
-                        value={quantidadeVisitas || 1}
-                        onChange={(e) => setQuantidadeVisitas(Number.parseInt(e.target.value) || 1)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="data_validade">Data de Validade</Label>
-                      <Input
-                        id="data_validade"
-                        type="date"
-                        value={dataValidade}
-                        onChange={(e) => setDataValidade(e.target.value)}
+                        value={garantia}
+                        onChange={(e) => setGarantia(Number.parseInt(e.target.value) || 90)}
                       />
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Equipamentos por Categoria */}
-            <Card className="border border-border bg-card text-card-foreground shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-green-900/50 dark:to-blue-900/50 dark:border-b dark:border-border">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Equipamentos por Categoria
-                </CardTitle>
-                <CardDescription className="text-green-100 dark:text-green-200">
-                  Selecione os equipamentos necessários para o contrato
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  {Object.entries(CATEGORIAS).map(([categoria, config]) => {
-                    const equipamentosCategoria = equipamentos.filter((eq) => eq.categoria === categoria)
-
-                    return (
-                      <div key={categoria} className="space-y-3">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{config.nome}</h3>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {equipamentosCategoria.map((equipamento) => {
-                            const selecionado = equipamentosSelecionados.find(
-                              (sel) => sel.equipamento_id === equipamento.id,
-                            )
-
-                            return (
-                              <div key={equipamento.id} className="border border-border rounded-lg p-3 bg-card/50">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <Checkbox
-                                    checked={!!selecionado}
-                                    onCheckedChange={() => toggleEquipamento(equipamento)}
-                                  />
-                                  <div className="flex-1">
-                                    <div className="font-medium text-sm">{equipamento.nome}</div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {formatCurrency(equipamento.valor_hora)}/hora
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {selecionado && (
-                                  <div className="mt-2 space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <Label className="text-xs">Quantidade:</Label>
-                                      <Input
-                                        type="number"
-                                        min="1"
-                                        value={selecionado.quantidade}
-                                        onChange={(e) =>
-                                          atualizarQuantidade(equipamento.id, Number.parseInt(e.target.value) || 1)
-                                        }
-                                        className="w-20 h-8 text-xs"
-                                      />
-                                    </div>
-                                    <div className="text-xs space-y-1">
-                                      <div className="flex justify-between">
-                                        <span>Valor unitário:</span>
-                                        <span>{formatCurrency(selecionado.valor_unitario || 0)}</span>
-                                      </div>
-                                      {(selecionado.valor_desconto_individual || 0) > 0 && (
-                                        <div className="flex justify-between text-red-600 dark:text-red-400">
-                                          <span>Desconto individual:</span>
-                                          <span>-{formatCurrency(selecionado.valor_desconto_individual || 0)}</span>
-                                        </div>
-                                      )}
-                                      {(selecionado.valor_desconto_categoria || 0) > 0 && (
-                                        <div className="flex justify-between text-blue-600 dark:text-blue-400">
-                                          <span>Desconto categoria:</span>
-                                          <span>-{formatCurrency(selecionado.valor_desconto_categoria || 0)}</span>
-                                        </div>
-                                      )}
-                                      <div className="flex justify-between font-semibold border-t pt-1">
-                                        <span>Total:</span>
-                                        <span className="text-green-600 dark:text-green-400">
-                                          {formatCurrency(selecionado.valor_total || 0)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Condições do Contrato */}
-            <Card className="border border-border bg-card text-card-foreground shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-4 lg:p-6 dark:from-purple-900/50 dark:to-pink-900/50 dark:border-b dark:border-border">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Condições do Contrato
-                </CardTitle>
-                <CardDescription className="text-purple-100 dark:text-purple-200">Configure as condições comerciais</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
-                    <Select value={formaPagamento} onValueChange={setFormaPagamento}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mensal">Mensal</SelectItem>
-                        <SelectItem value="bimestral">Bimestral</SelectItem>
-                        <SelectItem value="trimestral">Trimestral</SelectItem>
-                        <SelectItem value="semestral">Semestral</SelectItem>
-                        <SelectItem value="anual">Anual</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="mt-4">
+                    <Label htmlFor="equipamentos_consignacao">Equipamentos em Consignação</Label>
+                    <Textarea
+                      id="equipamentos_consignacao"
+                      value={equipamentosConsignacao}
+                      onChange={(e) => setEquipamentosConsignacao(e.target.value)}
+                      placeholder="Liste os equipamentos fornecidos em consignação (ex: 2x Interfone, 1x Controle Remoto Universal)..."
+                      rows={3}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ℹ️ Opcional. Será exibido na visualização e impressão logo após os equipamentos inclusos
+                    </p>
                   </div>
-                  <div>
-                    <Label htmlFor="prazo_contrato">Prazo do Contrato</Label>
-                    <Select value={prazoContrato} onValueChange={setPrazoContrato}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRAZO_CONTRATO_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="garantia">Garantia dos Serviços (dias)</Label>
-                    <Input
-                      id="garantia"
-                      type="number"
-                      min="0"
-                      value={garantia}
-                      onChange={(e) => setGarantia(Number.parseInt(e.target.value) || 90)}
+
+                  <div className="mt-4">
+                    <Label htmlFor="observacoes">Observações</Label>
+                    <Textarea
+                      id="observacoes"
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      placeholder="Observações adicionais sobre a proposta..."
+                      rows={4}
                     />
                   </div>
-                </div>
-
-                <div className="mt-4">
-                  <Label htmlFor="equipamentos_consignacao">Equipamentos em Consignação</Label>
-                  <Textarea
-                    id="equipamentos_consignacao"
-                    value={equipamentosConsignacao}
-                    onChange={(e) => setEquipamentosConsignacao(e.target.value)}
-                    placeholder="Liste os equipamentos fornecidos em consignação (ex: 2x Interfone, 1x Controle Remoto Universal)..."
-                    rows={3}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    ℹ️ Opcional. Será exibido na visualização e impressão logo após os equipamentos inclusos
-                  </p>
-                </div>
-
-                <div className="mt-4">
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Textarea
-                    id="observacoes"
-                    value={observacoes}
-                    onChange={(e) => setObservacoes(e.target.value)}
-                    placeholder="Observações adicionais sobre a proposta..."
-                    rows={4}
-                  />
-                </div>
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
           </div>
 

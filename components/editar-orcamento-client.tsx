@@ -135,6 +135,92 @@ export function EditarOrcamentoClient({
   const [expandParametros, setExpandParametros] = useState(false)
   const [expandDetalhes, setExpandDetalhes] = useState(false)
   const [expandObservacoes, setExpandObservacoes] = useState(false)
+  const [expandItens, setExpandItens] = useState(false)
+  const [expandResumo, setExpandResumo] = useState(false)
+
+  const handleToggleCliente = () => {
+    setExpandCliente((prev) => {
+      const next = !prev
+      if (next) {
+        setExpandParametros(false)
+        setExpandDetalhes(false)
+        setExpandObservacoes(false)
+        setExpandItens(false)
+        setExpandResumo(false)
+      }
+      return next
+    })
+  }
+
+  const handleToggleParametros = () => {
+    setExpandParametros((prev) => {
+      const next = !prev
+      if (next) {
+        setExpandCliente(false)
+        setExpandDetalhes(false)
+        setExpandObservacoes(false)
+        setExpandItens(false)
+        setExpandResumo(false)
+      }
+      return next
+    })
+  }
+
+  const handleToggleDetalhes = () => {
+    setExpandDetalhes((prev) => {
+      const next = !prev
+      if (next) {
+        setExpandCliente(false)
+        setExpandParametros(false)
+        setExpandObservacoes(false)
+        setExpandItens(false)
+        setExpandResumo(false)
+      }
+      return next
+    })
+  }
+
+  const handleToggleObservacoes = () => {
+    setExpandObservacoes((prev) => {
+      const next = !prev
+      if (next) {
+        setExpandCliente(false)
+        setExpandParametros(false)
+        setExpandDetalhes(false)
+        setExpandItens(false)
+        setExpandResumo(false)
+      }
+      return next
+    })
+  }
+
+  const handleToggleItens = () => {
+    setExpandItens((prev) => {
+      const next = !prev
+      if (next) {
+        setExpandCliente(false)
+        setExpandParametros(false)
+        setExpandDetalhes(false)
+        setExpandObservacoes(false)
+        setExpandResumo(false)
+      }
+      return next
+    })
+  }
+
+  const handleToggleResumo = () => {
+    setExpandResumo((prev) => {
+      const next = !prev
+      if (next) {
+        setExpandCliente(false)
+        setExpandParametros(false)
+        setExpandDetalhes(false)
+        setExpandObservacoes(false)
+        setExpandItens(false)
+      }
+      return next
+    })
+  }
 
   const detailsTextareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -881,14 +967,11 @@ export function EditarOrcamentoClient({
         </div>
       </div>
 
-      {/* Rest of the existing content starts here */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Formulário Principal */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Dados do Cliente */}
           <Card className="border border-border shadow-lg bg-white dark:bg-card">
             <CardHeader 
-              onClick={() => setExpandCliente(!expandCliente)}
+              onClick={handleToggleCliente}
               className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
             >
               <div className="flex items-center justify-between w-full">
@@ -917,7 +1000,13 @@ export function EditarOrcamentoClient({
                       <Label htmlFor="cliente">Cliente *</Label>
                       <ClienteCombobox
                         value={cliente}
-                        onValueChange={setCliente}
+                        onValueChange={(val) => {
+                          setCliente(val)
+                          if (val) {
+                            setExpandCliente(false)
+                            setExpandParametros(true)
+                          }
+                        }}
                         placeholder="Selecione um cliente..."
                         showNewClientButton={false}
                       />
@@ -1021,7 +1110,7 @@ export function EditarOrcamentoClient({
 
                 <div className="border-t pt-4">
                   <h4 
-                    onClick={() => setExpandParametros(!expandParametros)}
+                    onClick={handleToggleParametros}
                     className="font-semibold text-gray-800 dark:text-gray-200 flex items-center justify-between gap-2 cursor-pointer select-none hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1"
                   >
                     <span className="flex items-center gap-2">
@@ -1126,13 +1215,26 @@ export function EditarOrcamentoClient({
                           />
                         </div>
                       </div>
+                      <div className="flex justify-end pt-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            setExpandParametros(false)
+                            setExpandDetalhes(true)
+                          }}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs"
+                        >
+                          Avançar
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
 
                 <div className="border-t pt-4">
                   <h4 
-                    onClick={() => setExpandDetalhes(!expandDetalhes)}
+                    onClick={handleToggleDetalhes}
                     className="font-semibold text-gray-800 dark:text-gray-200 flex items-center justify-between gap-2 cursor-pointer select-none hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1"
                   >
                     <span className="flex items-center gap-2">
@@ -1196,13 +1298,26 @@ export function EditarOrcamentoClient({
                       <div className="space-y-1.5 mt-2">
                         <Label htmlFor="detalhes_servico">Descrição dos Detalhes</Label>
                         <Textarea
-                          ref={detailsTextareaRef}
                           id="detalhes_servico"
+                          ref={detailsTextareaRef}
                           value={detalhesServico}
                           onChange={(e) => setDetalhesServico(e.target.value)}
                           placeholder="Descreva detalhadamente o escopo do serviço a ser executado..."
-                          className="text-sm border-border bg-slate-50/50 dark:bg-slate-900/50 focus:bg-background transition-all focus-visible:ring-indigo-500 focus-visible:ring-offset-0 focus:border-indigo-500 min-h-[100px] resize-none overflow-hidden"
+                          className="min-h-[100px] resize-none overflow-hidden"
                         />
+                      </div>
+                      <div className="flex justify-end pt-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            setExpandDetalhes(false)
+                            setExpandObservacoes(true)
+                          }}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs"
+                        >
+                          Avançar
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -1213,14 +1328,28 @@ export function EditarOrcamentoClient({
 
           {/* Itens do Orçamento */}
           <Card className="border border-border shadow-lg bg-white dark:bg-card">
-            <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Itens do Orçamento
-              </CardTitle>
-              <CardDescription className="text-green-100">Produtos e serviços do orçamento</CardDescription>
+            <CardHeader 
+              onClick={handleToggleItens}
+              className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="space-y-1">
+                  <CardTitle className="text-white flex items-center gap-2 flex-wrap">
+                    <Package className="h-5 w-5" />
+                    Itens do Orçamento
+                    {!expandItens && itens.length > 0 && (
+                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-normal ml-2">
+                        {itens.length} {itens.length === 1 ? "item" : "itens"} ({formatCurrency(calcularValorMaterial() + calcularValorMaoObra())})
+                      </span>
+                    )}
+                  </CardTitle>
+                  <CardDescription className="text-green-100">Produtos e serviços do orçamento</CardDescription>
+                </div>
+                {expandItens ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+              </div>
             </CardHeader>
-            <CardContent className="p-6">
+            {expandItens && (
+              <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <div className="flex-1">
@@ -1427,6 +1556,7 @@ export function EditarOrcamentoClient({
                 )}
               </div>
             </CardContent>
+            )}
           </Card>
 
           {/* Observações */}
@@ -1461,13 +1591,90 @@ export function EditarOrcamentoClient({
         {/* Resumo */}
         <div className="space-y-6">
           <Card className="border border-border shadow-lg bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/10 dark:to-blue-950/10 sticky top-6">
-            <CardHeader className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Calculator className="h-5 w-5" />
-                Resumo do Orçamento
-              </CardTitle>
+            <CardHeader 
+              onClick={handleToggleResumo}
+              className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="space-y-1">
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Calculator className="h-5 w-5" />
+                    Resumo do Orçamento
+                  </CardTitle>
+                </div>
+                {expandResumo ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+              </div>
+              {!expandResumo && (
+                <div className="mt-4 pt-4 border-t border-purple-400/40 space-y-3 text-xs text-purple-100 font-normal">
+                  <div className="flex items-center gap-2 font-semibold text-white mb-2">
+                    <Calendar className="h-4 w-4 text-purple-200" />
+                    <span>Forma de Pagamento</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center text-purple-200">
+                    <span>Mão de Obra:</span>
+                    <span className="font-medium text-white">
+                      {parcelamentoMdo === 0
+                        ? "Sem cobrança"
+                        : parcelamentoMdo === 1
+                          ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
+                          : `${parcelamentoMdo}x de ${formatCurrency(calcularSubtotalMdo() / parcelamentoMdo)}`}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-purple-200">
+                    <span>Material:</span>
+                    <span className="font-medium text-white">
+                      {materialAVista
+                        ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
+                        : parcelamentoMaterial === 0
+                          ? "Sem cobrança"
+                          : parcelamentoMaterial === 1
+                            ? `1x - ${formatCurrency(calcularSubtotalMaterial())}`
+                            : `${parcelamentoMaterial}x de ${formatCurrency(calcularSubtotalMaterial() / parcelamentoMaterial)}`}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-purple-400/40 my-2"></div>
+
+                  <div className="flex justify-between items-center text-sm font-bold text-white">
+                    <span>Total:</span>
+                    <span className="text-emerald-400 font-extrabold">{formatCurrency(calcularTotal())}</span>
+                  </div>
+
+                  <div className="border-t border-purple-400/40 my-2"></div>
+
+                  <div className="space-y-2 pt-1 text-[11px] text-purple-200 animate-in fade-in duration-200">
+                    <div className="flex justify-between">
+                      <span>Itens:</span>
+                      <span className="text-white font-medium">{itens.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Cliente:</span>
+                      <span className="text-white font-medium truncate max-w-[200px]" title={cliente ? cliente.nome : ""}>
+                        {cliente ? cliente.nome : "Não selecionado"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Validade:</span>
+                      <span className="text-white font-medium">{validade} dias</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>Situação:</span>
+                      <Badge variant="outline" className="text-[10px] py-0 px-2 uppercase font-semibold border-white/40 text-white bg-white/10 hover:bg-white/20">
+                        {situacao === "pendente" && "Pendente"}
+                        {situacao === "aprovado" && "Aprovado"}
+                        {situacao === "enviado por email" && "Enviado por Email"}
+                        {situacao === "nota fiscal emitida" && "Nota Fiscal Emitida"}
+                        {situacao === "concluido" && "Concluído"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardHeader>
-            <CardContent className="p-6">
+            {expandResumo && (
+              <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="border-b pb-4">
                   <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
@@ -1671,6 +1878,7 @@ export function EditarOrcamentoClient({
                 </div>
               </div>
             </CardContent>
+            )}
           </Card>
         </div>
       </div>

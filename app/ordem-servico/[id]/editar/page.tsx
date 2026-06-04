@@ -157,6 +157,22 @@ export default function EditarOrdemServicoPage({
   const [infoOrdemExpanded, setInfoOrdemExpanded] = useState(false)
   const [execucaoExpanded, setExecucaoExpanded] = useState(false)
 
+  const handleToggleInfoOrdem = () => {
+    setInfoOrdemExpanded((prev) => {
+      const next = !prev
+      if (next) setExecucaoExpanded(false)
+      return next
+    })
+  }
+
+  const handleToggleExecucao = () => {
+    setExecucaoExpanded((prev) => {
+      const next = !prev
+      if (next) setInfoOrdemExpanded(false)
+      return next
+    })
+  }
+
   // Estados dos equipamentos
   const [itensEquipamentos, setItensEquipamentos] = useState<OrdemServicoItem[]>([])
   const [novoEquipamentoId, setNovoEquipamentoId] = useState<number | null>(null)
@@ -849,7 +865,7 @@ export default function EditarOrdemServicoPage({
             <Card className="border border-border/50 shadow-xl bg-white/90 dark:bg-card/90 backdrop-blur-sm text-foreground">
               <CardHeader 
                 className="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 text-white rounded-t-lg p-3 md:p-6 cursor-pointer select-none"
-                onClick={() => setInfoOrdemExpanded(!infoOrdemExpanded)}
+                onClick={handleToggleInfoOrdem}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -904,6 +920,19 @@ export default function EditarOrdemServicoPage({
                         </div>
                       </div>
                     )}
+                    <div className="flex justify-end md:col-span-2 pt-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          setInfoOrdemExpanded(false)
+                          setExecucaoExpanded(true)
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                      >
+                        Avançar
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-xs md:text-sm font-medium">
@@ -918,7 +947,7 @@ export default function EditarOrdemServicoPage({
             <Card className="border border-border/50 shadow-xl bg-white/90 dark:bg-card/90 backdrop-blur-sm text-foreground">
               <CardHeader 
                 className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white rounded-t-lg p-3 md:p-6 cursor-pointer select-none"
-                onClick={() => setExecucaoExpanded(!execucaoExpanded)}
+                onClick={handleToggleExecucao}
               >
                 <div className="flex items-center justify-between">
                   <div>

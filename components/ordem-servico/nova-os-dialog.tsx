@@ -92,10 +92,7 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
   const [showNovoClienteDialog, setShowNovoClienteDialog] = useState(false)
   const [desejaAgendar, setDesejaAgendar] = useState(false)
 
-  const [clienteExpanded, setClienteExpanded] = useState(true)
-  const [basicasExpanded, setBasicasExpanded] = useState(false)
-  const [equipamentosExpanded, setEquipamentosExpanded] = useState(false)
-  const [problemaExpanded, setProblemaExpanded] = useState(false)
+  const [activeSection, setActiveSection] = useState<"cliente" | "basicas" | "equipamentos" | "problema" | null>(null)
 
   const [formData, setFormData] = useState({
     tipo_servico: "manutencao",
@@ -115,10 +112,7 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
       setEquipamentosSelecionados([])
       setNumeroOS("")
       setDesejaAgendar(false)
-      setClienteExpanded(true)
-      setBasicasExpanded(false)
-      setEquipamentosExpanded(false)
-      setProblemaExpanded(false)
+      setActiveSection(null)
       setFormData({
         tipo_servico: "manutencao",
         data_atual: new Date().toISOString().split("T")[0],
@@ -244,10 +238,7 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
 
     if (cliente) {
       buscarContratoConservacao(Number(cliente.id))
-      setClienteExpanded(false)
-      setBasicasExpanded(true)
-      setEquipamentosExpanded(true)
-      setProblemaExpanded(true)
+      setActiveSection("basicas")
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -494,17 +485,17 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
               <Card className="border border-border bg-card">
                 <CardHeader 
                   className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none"
-                  onClick={() => setClienteExpanded(!clienteExpanded)}
+                  onClick={() => setActiveSection(activeSection === "cliente" ? null : "cliente")}
                 >
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
                       <User className="h-4 w-4 text-muted-foreground shrink-0" />
                       Dados do Cliente {clienteSelecionado && ` - ${clienteSelecionado.nome}`}
                     </CardTitle>
-                    {clienteExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    {activeSection === "cliente" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                   </div>
                 </CardHeader>
-                {clienteExpanded && (
+                {activeSection === "cliente" && (
                   <CardContent className="p-4 space-y-4">
                     <div>
                       <Label className="text-xs">Cliente *</Label>
@@ -585,6 +576,19 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
                         </div>
                       </div>
                     )}
+
+                    {clienteSelecionado && (
+                      <div className="flex justify-end pt-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => setActiveSection("basicas")}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        >
+                          Avançar
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 )}
               </Card>
@@ -593,17 +597,17 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
               <Card className="border border-border bg-card">
                 <CardHeader 
                   className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none"
-                  onClick={() => setBasicasExpanded(!basicasExpanded)}
+                  onClick={() => setActiveSection(activeSection === "basicas" ? null : "basicas")}
                 >
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
                       <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                       Informações Básicas
                     </CardTitle>
-                    {basicasExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    {activeSection === "basicas" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                   </div>
                 </CardHeader>
-                {basicasExpanded && (
+                {activeSection === "basicas" && (
                   <CardContent className="p-4 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
@@ -698,6 +702,17 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
                         </div>
                       )}
                     </div>
+
+                    <div className="flex justify-end pt-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setActiveSection("equipamentos")}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                      >
+                        Avançar
+                      </Button>
+                    </div>
                   </CardContent>
                 )}
               </Card>
@@ -706,17 +721,17 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
               <Card className="border border-border bg-card">
                 <CardHeader 
                   className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none"
-                  onClick={() => setEquipamentosExpanded(!equipamentosExpanded)}
+                  onClick={() => setActiveSection(activeSection === "equipamentos" ? null : "equipamentos")}
                 >
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
                       <Package className="h-4 w-4 text-muted-foreground shrink-0" />
                       Equipamentos {equipamentosSelecionados.length > 0 && `(${equipamentosSelecionados.length})`}
                     </CardTitle>
-                    {equipamentosExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    {activeSection === "equipamentos" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                   </div>
                 </CardHeader>
-                {equipamentosExpanded && (
+                {activeSection === "equipamentos" && (
                   <CardContent className="p-4 space-y-4">
                     <div>
                       <Label className="text-xs">Adicionar Equipamento Adicional</Label>
@@ -759,6 +774,17 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
                         </div>
                       </div>
                     )}
+
+                    <div className="flex justify-end pt-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setActiveSection(formData.tipo_servico === "preventiva" ? null : "problema")}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                      >
+                        {formData.tipo_servico === "preventiva" ? "Concluir" : "Avançar"}
+                      </Button>
+                    </div>
                   </CardContent>
                 )}
               </Card>
@@ -768,17 +794,17 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
                 <Card className="border border-border bg-card">
                   <CardHeader 
                     className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none"
-                    onClick={() => setProblemaExpanded(!problemaExpanded)}
+                    onClick={() => setActiveSection(activeSection === "problema" ? null : "problema")}
                   >
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
                         <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                         Descrição do Problema
                       </CardTitle>
-                      {problemaExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                      {activeSection === "problema" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                     </div>
                   </CardHeader>
-                  {problemaExpanded && (
+                  {activeSection === "problema" && (
                     <CardContent className="p-4">
                       <Textarea
                         value={formData.descricao_defeito}
