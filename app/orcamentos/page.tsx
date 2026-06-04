@@ -25,7 +25,8 @@ import {
   Wrench,
   Package,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Printer,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -43,6 +44,7 @@ import { NovoOrcamentoDialog } from "@/components/orcamentos/novo-orcamento-dial
 import { VisualizarOrcamentoDialog } from "@/components/orcamentos/visualizar-orcamento-dialog"
 import { EditarOrcamentoDialog } from "@/components/orcamentos/editar-orcamento-dialog"
 import { OrcamentoDeleteDialog } from "@/components/orcamentos/orcamento-delete-dialog"
+import { OrcamentoPrintEditor } from "@/components/orcamento-print-editor"
 
 interface Orcamento {
   id: string
@@ -99,6 +101,66 @@ export default function OrcamentosPage({
   const [isVisualizarOrcamentoOpen, setIsVisualizarOrcamentoOpen] = useState(false)
   const [selectedOrcamentoNumeroEditar, setSelectedOrcamentoNumeroEditar] = useState<string | null>(null)
   const [isEditarOrcamentoOpen, setIsEditarOrcamentoOpen] = useState(false)
+
+  const [printOrcamento, setPrintOrcamento] = useState<any | null>(null)
+  const [printItens, setPrintItens] = useState<any[]>([])
+  const [isPrintOpen, setIsPrintOpen] = useState(false)
+  const [loadingPrint, setLoadingPrint] = useState(false)
+
+  const handleImprimirClick = async (orc: Orcamento) => {
+    try {
+      setLoadingPrint(true)
+      toast({
+        title: "Carregando...",
+        description: "Preparando visualização do orçamento...",
+      })
+      const response = await fetch(`/api/orcamentos/${orc.numero}`)
+      const result = await response.json()
+      if (result.success) {
+        setPrintOrcamento(result.data)
+        const data = result.data
+        if (data.itens && data.itens.length > 0) {
+          const itensFormatados = data.itens.map((item: any) => ({
+            id: item.id,
+            produto_id: item.produto_id,
+            produto: {
+              id: item.produto_id,
+              codigo: item.produto_codigo,
+              descricao: item.produto_descricao,
+              unidade: item.produto_unidade,
+              valor_unitario: Number(item.valor_unitario),
+              valor_mao_obra: Number(item.valor_mao_obra),
+              ncm: item.produto_ncm,
+            },
+            quantidade: Number(item.quantidade),
+            valor_unitario: Number(item.valor_unitario),
+            valor_mao_obra: Number(item.valor_mao_obra),
+            valor_total: Number(item.valor_total),
+            marca_nome: item.marca_nome,
+          }))
+          setPrintItens(itensFormatados)
+        } else {
+          setPrintItens([])
+        }
+        setIsPrintOpen(true)
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os itens do orçamento para impressão",
+          variant: "destructive",
+        })
+      }
+    } catch (err) {
+      console.error(err)
+      toast({
+        title: "Erro",
+        description: "Erro de rede ao carregar orçamento",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingPrint(false)
+    }
+  }
 
   // Parse URL Search Params
   useEffect(() => {
@@ -835,7 +897,7 @@ export default function OrcamentosPage({
                     { key: "data_orcamento", label: "Data", width: 110, sortable: true },
                     { key: "valor_total", label: "Valor Total", width: 130, sortable: true },
                     { key: "situacao", label: "Status", width: 130, sortable: true },
-                    { key: "acoes", label: "Ações", width: 160, sortable: false, noResize: true },
+                    { key: "acoes", label: "Ações", width: 200, sortable: false, noResize: true },
                   ]}
                   data={filteredOrcamentos}
                   rowKey={(row) => row.id}
@@ -916,6 +978,15 @@ export default function OrcamentosPage({
                               <Button
                                 size="sm"
                                 variant="outline"
+                                onClick={() => handleImprimirClick(orcamento)}
+                                className="text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 border-purple-200 dark:border-purple-900/50 bg-transparent h-8 w-8 p-0"
+                                title="Imprimir"
+                              >
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 onClick={handleEditarClick}
                                 className="text-green-600 dark:text-green-400 hover:bg-green-500/10 border-green-200 dark:border-green-900/50 bg-transparent h-8 w-8 p-0"
                                 title="Editar"
@@ -966,6 +1037,9 @@ export default function OrcamentosPage({
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem onClick={handleVisualizarClick}>
                                     <Eye className="h-4 w-4 mr-2" />Visualizar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleImprimirClick(orcamento)}>
+                                    <Printer className="h-4 w-4 mr-2" />Imprimir
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={handleEditarClick}>
                                     <Edit className="h-4 w-4 mr-2" />Editar
@@ -1268,6 +1342,16 @@ export default function OrcamentosPage({
         }}
         onSuccess={fetchOrcamentos}
       />
+
+      {isPrintOpen && printOrcamento && (
+        <OrcamentoPrintEditor
+          open={isPrintOpen}
+          onOpenChange={setIsPrintOpen}
+          orcamento={printOrcamento}
+          itens={printItens}
+          mode="direct-print"
+        />
+      )}
     </div>
   )
 }

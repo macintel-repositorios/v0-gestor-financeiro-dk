@@ -904,23 +904,24 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
           const { jsPDF } = await import("jspdf")
 
           // Capture each page div (.page) individually
-          const pageElements = element.querySelectorAll(".page")
+          const pageElements = Array.from(element.querySelectorAll(".page")) as HTMLElement[]
           const pdf = new jsPDF("p", "mm", "a4")
 
           for (let i = 0; i < pageElements.length; i++) {
-            const pageEl = pageElements[i] as HTMLElement
+            const pageEl = pageElements[i]
             const canvas = await html2canvas(pageEl, {
-              scale: 2,
+              scale: 1.5, // 1.5 is extremely fast and provides great print readability
               useCORS: true,
               allowTaint: true,
               logging: false,
             })
 
-            const imgData = canvas.toDataURL("image/png")
+            // JPEG is significantly faster to compress and serialize than PNG
+            const imgData = canvas.toDataURL("image/jpeg", 0.9)
             if (i > 0) {
               pdf.addPage()
             }
-            pdf.addImage(imgData, "PNG", 0, 0, 210, 297)
+            pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST")
           }
 
           pdf.setProperties({
