@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Save,
   Trash2,
+  ExternalLink,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
@@ -136,6 +137,10 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
   const [saveConfigName, setSaveConfigName] = useState("")
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [clienteCompleto, setClienteCompleto] = useState<any>(null)
+  const [showVisualizarSheet, setShowVisualizarSheet] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [generatingPdf, setGeneratingPdf] = useState(false)
+  const hiddenDivRef = useRef<HTMLDivElement>(null)
 
   const [modalSize, setModalSize] = useState({ width: 90, height: 85 })
   const [isResizing, setIsResizing] = useState(false)
@@ -682,9 +687,7 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
     }
   }
 
-  const dataParaExtenso = (dataString: string): string => {
-    if (!dataString) return ""
-
+  const dataParaExtenso = (dataString: string | null | undefined): string => {
     const meses = [
       "janeiro",
       "fevereiro",
@@ -700,12 +703,35 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
       "dezembro",
     ]
 
-    const data = new Date(dataString + "T00:00:00")
-    const dia = data.getDate()
-    const mes = data.getMonth()
-    const ano = data.getFullYear()
+    try {
+      if (!dataString) {
+        const d = new Date()
+        return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+      }
 
-    return `${dia} de ${meses[mes]} de ${ano}`
+      // Se já tiver "T", pegamos apenas a parte da data YYYY-MM-DD
+      const dateOnly = dataString.includes("T") ? dataString.split("T")[0] : dataString
+      const parts = dateOnly.split("-")
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10)
+        const month = parseInt(parts[1], 10) - 1
+        const day = parseInt(parts[2], 10)
+        const d = new Date(year, month, day)
+        if (!isNaN(d.getTime())) {
+          return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+        }
+      }
+
+      const d = new Date(dataString)
+      if (!isNaN(d.getTime())) {
+        return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+      }
+    } catch (e) {
+      console.error(e)
+    }
+
+    const d = new Date()
+    return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
   }
 
   const dividirConteudoEmPaginas = (conteudo: string) => {
@@ -938,9 +964,53 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
 
       setTimeout(() => {
         printWindow.print()
+        printWindow.close()
       }, 1000)
     }
   }
+
+  useEffect(() => {
+    if (showVisualizarSheet && !generatingPdf && !pdfUrl) {
+      setGeneratingPdf(true)
+      setTimeout(async () => {
+        try {
+          const element = hiddenDivRef.current
+          if (!element) return
+
+          const html2canvas = (await import("html2canvas")).default
+          const { jsPDF } = await import("jspdf")
+
+          // Capture each page div (.page) individually
+          const pageElements = element.querySelectorAll(".page")
+          const pdf = new jsPDF("p", "mm", "a4")
+
+          for (let i = 0; i < pageElements.length; i++) {
+            const pageEl = pageElements[i] as HTMLElement
+            const canvas = await html2canvas(pageEl, {
+              scale: 2,
+              useCORS: true,
+              allowTaint: true,
+              logging: false,
+            })
+
+            const imgData = canvas.toDataURL("image/png")
+            if (i > 0) {
+              pdf.addPage()
+            }
+            pdf.addImage(imgData, "PNG", 0, 0, 210, 297)
+          }
+
+          const pdfBlob = pdf.output("blob")
+          const url = URL.createObjectURL(pdfBlob)
+          setPdfUrl(url)
+        } catch (error) {
+          console.error("Erro ao gerar PDF do orçamento:", error)
+        } finally {
+          setGeneratingPdf(false)
+        }
+      }, 600)
+    }
+  }, [showVisualizarSheet, generatingPdf, pdfUrl, orcamento, timbradoConfig, logoImpressao, layoutConfig, paginasPreview, clienteCompleto])
 
   const updateLayoutConfig = (key: keyof LayoutConfig, value: any) => {
     setLayoutConfig((prev) => ({
@@ -1266,8 +1336,9 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-5xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[90vw] xl:max-w-[85vw] h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
         <div className="h-full overflow-y-auto p-6">
           <SheetHeader className="pb-4 border-b border-border">
             <SheetTitle className="flex items-center gap-2 font-bold text-lg text-foreground">
@@ -1748,185 +1819,190 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    onClick={handleVisualizarCompleto}
+                    onClick={() => setShowVisualizarSheet(true)}
                     variant="outline"
                     className="bg-green-50 hover:bg-green-100"
                   >
                     <Eye className="mr-2 h-4 w-4" />
                     Visualizar Completo
                   </Button>
-                  <Button onClick={handleImprimir} className="bg-blue-600 hover:bg-blue-700">
+                  <Button onClick={() => setShowVisualizarSheet(true)} className="bg-blue-600 hover:bg-blue-700">
                     <Printer className="mr-2 h-4 w-4" />
                     Imprimir
                   </Button>
                 </div>
               </div>
 
-              <div
-                className="border rounded-lg p-4 bg-white text-black max-h-[70vh] overflow-y-auto"
-                style={{
-                  fontSize: `${layoutConfig.fontSize}px`,
-                  lineHeight: layoutConfig.lineHeight,
-                  paddingTop: `${layoutConfig.marginTop * 2}px`,
-                  paddingBottom: `${layoutConfig.marginBottom * 2}px`,
-                }}
-              >
-                <div className="space-y-4">
-                  {layoutConfig.showLogo && (logoImpressao?.dados || timbradoConfig?.logo_url) && (
-                    <div className="text-center border-b pb-4">
-                      <img
-                        src={logoImpressao?.dados || timbradoConfig?.logo_url || "/placeholder.svg"}
-                        alt="Logo da Empresa"
-                        className="mx-auto object-contain"
-                        style={{ height: `${layoutConfig.logoSize}px` }}
+              <div className="border rounded-lg p-4 bg-zinc-100 dark:bg-zinc-950/60 max-h-[72vh] overflow-y-auto flex justify-center">
+                <div
+                  className="bg-white text-black shadow-2xl w-full max-w-[21cm] min-h-[29.7cm] flex flex-col justify-between"
+                  style={{
+                    fontSize: `${layoutConfig.fontSize}px`,
+                    lineHeight: layoutConfig.lineHeight,
+                    paddingTop: `${layoutConfig.marginTop}mm`,
+                    paddingBottom: `${layoutConfig.marginBottom}mm`,
+                    paddingLeft: `${layoutConfig.pageMargin}mm`,
+                    paddingRight: `${layoutConfig.pageMargin}mm`,
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <div className="space-y-4 flex-1 flex flex-col">
+                    {layoutConfig.showLogo && (logoImpressao?.dados || timbradoConfig?.logo_url) && (
+                      <div className="text-center border-b pb-4">
+                        <img
+                          src={logoImpressao?.dados || timbradoConfig?.logo_url || "/placeholder.svg"}
+                          alt="Logo da Empresa"
+                          className="mx-auto object-contain"
+                          style={{ height: `${layoutConfig.logoSize}px` }}
+                        />
+                      </div>
+                    )}
+
+                    {layoutConfig.showHeader && timbradoConfig?.cabecalho && (
+                      <div
+                        className="text-center border-b pb-4"
+                        style={{ fontSize: `${layoutConfig.headerFontSize}px` }}
+                        dangerouslySetInnerHTML={{ __html: timbradoConfig.cabecalho }}
                       />
-                    </div>
-                  )}
+                    )}
 
-                  {layoutConfig.showHeader && timbradoConfig?.cabecalho && (
-                    <div
-                      className="text-center border-b pb-4"
-                      style={{ fontSize: `${layoutConfig.headerFontSize}px` }}
-                      dangerouslySetInnerHTML={{ __html: timbradoConfig.cabecalho }}
-                    />
-                  )}
+                    {paginaAtual === 0 &&
+                      (() => {
+                        const clienteInfo = getClienteInfoForDisplay()
+                        // Declare observacoes here
+                        const observacoes = (orcamento.observacoes || "").replace(/\n/g, "<br>")
 
-                  {paginaAtual === 0 &&
-                    (() => {
-                      const clienteInfo = getClienteInfoForDisplay()
-                      // Declare observacoes here
-                      const observacoes = (orcamento.observacoes || "").replace(/\n/g, "<br>")
-
-                      return (
-                        <>
-                          <div className="text-center">
-                            <h1 className="font-bold mb-2" style={{ fontSize: `${layoutConfig.titleFontSize}px` }}>
-                              ORÇAMENTO {orcamento.numero}
-                            </h1>
-                          </div>
-
-                          <div className="w-full h-0.5 bg-black my-4"></div>
-
-                          <div className="grid grid-cols-2 gap-6 mb-6">
-                            <div className="space-y-2">
-                              <h3
-                                className="font-bold underline mb-3"
-                                style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }}
-                              >
-                                Dados do Cliente
-                              </h3>
-                              <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                <strong>Nome:</strong> {orcamento.cliente_nome || ""}
-                              </div>
-                              {clienteInfo?.sindico && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>A/C Sr(a):</strong> {clienteInfo.sindico}
-                                </div>
-                              )}
-                              <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                <strong>Data:</strong> {formatDate(orcamento.data_orcamento)}
-                              </div>
-                              <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                <strong>Validade:</strong> {calcularDataValidade()}
-                              </div>
-                              {orcamento.cliente_email && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>E-mail:</strong> {orcamento.cliente_email}
-                                </div>
-                              )}
-                              {orcamento.cliente_cnpj && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>CNPJ:</strong> {orcamento.cliente_cnpj}
-                                </div>
-                              )}
-                              {orcamento.cliente_cpf && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>CPF:</strong> {orcamento.cliente_cpf}
-                                </div>
-                              )}
-                              {clienteInfo?.endereco && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>Endereço:</strong> {clienteInfo.endereco}
-                                </div>
-                              )}
-                              {clienteInfo?.bairro && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>Bairro:</strong> {clienteInfo.bairro}
-                                </div>
-                              )}
-                              {clienteInfo?.cidade && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>Cidade:</strong> {clienteInfo.cidade} - {clienteInfo.estado || ""}
-                                </div>
-                              )}
+                        return (
+                          <>
+                            <div className="text-center">
+                              <h1 className="font-bold mb-2" style={{ fontSize: `${layoutConfig.titleFontSize}px` }}>
+                                ORÇAMENTO {orcamento.numero}
+                              </h1>
                             </div>
 
-                            <div className="space-y-2">
-                              <h3
-                                className="font-bold underline mb-3"
-                                style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }}
-                              >
-                                Dados do Orçamento
-                              </h3>
-                              <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                <strong>Tipo de Serviço:</strong> {orcamento.tipo_servico || ""}
-                              </div>
-                              {orcamento.prazo_dias && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>Prazo:</strong> {orcamento.prazo_dias} dias úteis
-                                </div>
-                              )}
-                              {timbradoConfig?.empresa_representante_legal && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>Contato:</strong>{" "}
-                                  {timbradoConfig.empresa_representante_legal.split(" ").length > 1
-                                    ? timbradoConfig.empresa_representante_legal.split(" ")[0] +
-                                      " " +
-                                      timbradoConfig.empresa_representante_legal.split(" ").pop()
-                                    : timbradoConfig.empresa_representante_legal}
-                                </div>
-                              )}
-                              {timbradoConfig?.empresa_telefone && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>Telefone:</strong> {timbradoConfig.empresa_telefone}
-                                </div>
-                              )}
-                              {timbradoConfig?.empresa_email && (
-                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                  <strong>E-mail:</strong> {timbradoConfig.empresa_email}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          {/* Adiciona a variável de observações aqui, se existir e for necessário exibi-la */}
-                          {orcamento.observacoes && (
-                            <div className="mt-6">
-                              <h3
-                                className="font-bold underline mb-3"
-                                style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }}
-                              >
-                                Observações
-                              </h3>
-                              <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
-                                <div dangerouslySetInnerHTML={{ __html: observacoes }} />
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )
-                    })()}
+                            <div className="w-full h-0.5 bg-black my-4"></div>
 
-                  {paginasPreview[paginaAtual] && (
-                    <div className="text-justify" dangerouslySetInnerHTML={{ __html: paginasPreview[paginaAtual] }} />
-                  )}
+                            <div className="grid grid-cols-2 gap-6 mb-6">
+                              <div className="space-y-2">
+                                <h3
+                                  className="font-bold underline mb-3"
+                                  style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }}
+                                >
+                                  Dados do Cliente
+                                </h3>
+                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                  <strong>Nome:</strong> {orcamento.cliente_nome || ""}
+                                </div>
+                                {clienteInfo?.sindico && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>A/C Sr(a):</strong> {clienteInfo.sindico}
+                                  </div>
+                                )}
+                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                  <strong>Data:</strong> {formatDate(orcamento.data_orcamento)}
+                                </div>
+                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                  <strong>Validade:</strong> {calcularDataValidade()}
+                                </div>
+                                {orcamento.cliente_email && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>E-mail:</strong> {orcamento.cliente_email}
+                                  </div>
+                                )}
+                                {orcamento.cliente_cnpj && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>CNPJ:</strong> {orcamento.cliente_cnpj}
+                                  </div>
+                                )}
+                                {orcamento.cliente_cpf && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>CPF:</strong> {orcamento.cliente_cpf}
+                                  </div>
+                                )}
+                                {clienteInfo?.endereco && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>Endereço:</strong> {clienteInfo.endereco}
+                                  </div>
+                                )}
+                                {clienteInfo?.bairro && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>Bairro:</strong> {clienteInfo.bairro}
+                                  </div>
+                                )}
+                                {clienteInfo?.cidade && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>Cidade:</strong> {clienteInfo.cidade} - {clienteInfo.estado || ""}
+                                  </div>
+                                )}
+                              </div>
 
-                  {layoutConfig.showFooter && timbradoConfig?.rodape && (
-                    <div
-                      className="text-center border-t pt-4 mt-8"
-                      style={{ fontSize: `${layoutConfig.footerFontSize}px` }}
-                      dangerouslySetInnerHTML={{ __html: timbradoConfig.rodape }}
-                    />
-                  )}
+                              <div className="space-y-2">
+                                <h3
+                                  className="font-bold underline mb-3"
+                                  style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }}
+                                >
+                                  Dados do Orçamento
+                                </h3>
+                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                  <strong>Tipo de Serviço:</strong> {orcamento.tipo_servico || ""}
+                                </div>
+                                {orcamento.prazo_dias && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>Prazo:</strong> {orcamento.prazo_dias} dias úteis
+                                  </div>
+                                )}
+                                {timbradoConfig?.empresa_representante_legal && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>Contato:</strong>{" "}
+                                    {timbradoConfig.empresa_representante_legal.split(" ").length > 1
+                                      ? timbradoConfig.empresa_representante_legal.split(" ")[0] +
+                                        " " +
+                                        timbradoConfig.empresa_representante_legal.split(" ").pop()
+                                      : timbradoConfig.empresa_representante_legal}
+                                  </div>
+                                )}
+                                {timbradoConfig?.empresa_telefone && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>Telefone:</strong> {timbradoConfig.empresa_telefone}
+                                  </div>
+                                )}
+                                {timbradoConfig?.empresa_email && (
+                                  <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                    <strong>E-mail:</strong> {timbradoConfig.empresa_email}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {/* Adiciona a variável de observações aqui, se existir e for necessário exibi-la */}
+                            {orcamento.observacoes && (
+                              <div className="mt-6">
+                                <h3
+                                  className="font-bold underline mb-3"
+                                  style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }}
+                                >
+                                  Observações
+                                </h3>
+                                <div style={{ fontSize: `${layoutConfig.fontSize}px` }}>
+                                  <div dangerouslySetInnerHTML={{ __html: observacoes }} />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )
+                      })()}
+
+                    {paginasPreview[paginaAtual] && (
+                      <div className="text-justify flex-1" dangerouslySetInnerHTML={{ __html: paginasPreview[paginaAtual] }} />
+                    )}
+
+                    {layoutConfig.showFooter && timbradoConfig?.rodape && (
+                      <div
+                        className="text-center border-t pt-4 mt-8"
+                        style={{ fontSize: `${layoutConfig.footerFontSize}px` }}
+                        dangerouslySetInnerHTML={{ __html: timbradoConfig.rodape }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1957,6 +2033,69 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens }: O
           </div>
         </div>
       </SheetContent>
-    </Sheet>
+      </Sheet>
+
+      <Sheet open={showVisualizarSheet} onOpenChange={(open) => {
+        setShowVisualizarSheet(open);
+        if (!open && pdfUrl) {
+          URL.revokeObjectURL(pdfUrl);
+          setPdfUrl(null);
+        }
+      }}>
+        <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
+          <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+            <SheetTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2 text-foreground">
+                <Printer className="h-5 w-5 text-indigo-500" />
+                Imprimir Orçamento {orcamento.numero}
+              </span>
+              <div className="flex gap-2 mr-6">
+                {pdfUrl && (
+                  <Button
+                    size="sm"
+                    onClick={() => window.open(pdfUrl, "_blank")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Abrir em Nova Aba
+                  </Button>
+                )}
+              </div>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 bg-white">
+            {generatingPdf ? (
+              <div className="h-full flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div>
+                <p className="text-sm text-muted-foreground">Gerando visualização em PDF...</p>
+              </div>
+            ) : pdfUrl ? (
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full border-0"
+                title="PDF Preview"
+              />
+            ) : (
+              <div className="p-8 text-center text-muted-foreground">Nenhuma visualização gerada</div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Container invisível para renderização do PDF */}
+      <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
+        <div ref={hiddenDivRef}>
+          <OrcamentoPrintView
+            orcamento={orcamento}
+            timbradoConfig={timbradoConfig}
+            logoImpressao={logoImpressao}
+            layoutConfig={layoutConfig}
+            paginasPreview={paginasPreview}
+            clienteCompleto={clienteCompleto}
+            onClose={() => {}}
+          />
+        </div>
+      </div>
+    </>
   )
 }

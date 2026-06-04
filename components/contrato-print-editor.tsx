@@ -2,9 +2,10 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { createRoot } from "react-dom/client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
@@ -25,6 +26,7 @@ import {
   Trash2,
   Printer,
   Eye,
+  ExternalLink,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { ContratoPrintView } from "./contrato-print-view"
@@ -120,6 +122,10 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
   const [saveConfigName, setSaveConfigName] = useState("")
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [clienteCompleto, setClienteCompleto] = useState<any>(null)
+  const [showVisualizarSheet, setShowVisualizarSheet] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [generatingPdf, setGeneratingPdf] = useState(false)
+  const hiddenDivRef = useRef<HTMLDivElement>(null)
 
   const [modalSize, setModalSize] = useState({ width: 90, height: 85 })
   const [isResizing, setIsResizing] = useState(false)
@@ -685,9 +691,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
     return resultado
   }
 
-  const dataParaExtenso = (dataString: string): string => {
-    if (!dataString) return ""
-
+  const dataParaExtenso = (dataString: string | null | undefined): string => {
     const meses = [
       "janeiro",
       "fevereiro",
@@ -703,12 +707,35 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
       "dezembro",
     ]
 
-    const data = new Date(dataString + "T00:00:00")
-    const dia = data.getDate()
-    const mes = data.getMonth()
-    const ano = data.getFullYear()
+    try {
+      if (!dataString) {
+        const d = new Date()
+        return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+      }
 
-    return `${dia} de ${meses[mes]} de ${ano}`
+      // Se já tiver "T", pegamos apenas a parte da data YYYY-MM-DD
+      const dateOnly = dataString.includes("T") ? dataString.split("T")[0] : dataString
+      const parts = dateOnly.split("-")
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10)
+        const month = parseInt(parts[1], 10) - 1
+        const day = parseInt(parts[2], 10)
+        const d = new Date(year, month, day)
+        if (!isNaN(d.getTime())) {
+          return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+        }
+      }
+
+      const d = new Date(dataString)
+      if (!isNaN(d.getTime())) {
+        return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+      }
+    } catch (e) {
+      console.error(e)
+    }
+
+    const d = new Date()
+    return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
   }
 
   const formatDate = (dateString: string) => {
@@ -839,6 +866,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
 
       setTimeout(() => {
         printWindow.print()
+        printWindow.close()
       }, 1000)
     }
   }
@@ -863,6 +891,49 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
       )
     }
   }
+
+  useEffect(() => {
+    if (showVisualizarSheet && !generatingPdf && !pdfUrl) {
+      setGeneratingPdf(true)
+      setTimeout(async () => {
+        try {
+          const element = hiddenDivRef.current
+          if (!element) return
+
+          const html2canvas = (await import("html2canvas")).default
+          const { jsPDF } = await import("jspdf")
+
+          // Capture each page div (.page) individually
+          const pageElements = element.querySelectorAll(".page")
+          const pdf = new jsPDF("p", "mm", "a4")
+
+          for (let i = 0; i < pageElements.length; i++) {
+            const pageEl = pageElements[i] as HTMLElement
+            const canvas = await html2canvas(pageEl, {
+              scale: 2,
+              useCORS: true,
+              allowTaint: true,
+              logging: false,
+            })
+
+            const imgData = canvas.toDataURL("image/png")
+            if (i > 0) {
+              pdf.addPage()
+            }
+            pdf.addImage(imgData, "PNG", 0, 0, 210, 297)
+          }
+
+          const pdfBlob = pdf.output("blob")
+          const url = URL.createObjectURL(pdfBlob)
+          setPdfUrl(url)
+        } catch (error) {
+          console.error("Erro ao gerar PDF do contrato:", error)
+        } finally {
+          setGeneratingPdf(false)
+        }
+      }, 600)
+    }
+  }, [showVisualizarSheet, generatingPdf, pdfUrl, contrato, timbradoConfig, logoImpressao, layoutConfig, paginasPreview, clienteCompleto])
 
   const updateLayoutConfig = (key: keyof LayoutConfig, value: any) => {
     setLayoutConfig((prev) => ({
@@ -925,6 +996,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
   const espacamentoAssinaturas = lineHeightCalc * 10
 
   return (
+    <>
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent
         className="overflow-hidden p-0 border-4 border-blue-500"
@@ -1572,11 +1644,11 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
           {/* Botões de ação */}
           <div className="flex items-center justify-between space-x-2">
             <div className="flex gap-2">
-              <Button onClick={handlePreviewExact} variant="outline" className="bg-green-50 hover:bg-green-100">
+              <Button onClick={() => setShowVisualizarSheet(true)} variant="outline" className="bg-green-50 hover:bg-green-100">
                 <Eye className="mr-2 h-4 w-4" />
                 Visualizar Completo
               </Button>
-              <Button onClick={handlePrintExact} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={() => setShowVisualizarSheet(true)} className="bg-blue-600 hover:bg-blue-700">
                 <Printer className="mr-2 h-4 w-4" />
                 Imprimir
               </Button>
@@ -1588,6 +1660,68 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
           </div>
         </div>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      <Sheet open={showVisualizarSheet} onOpenChange={(open) => {
+        setShowVisualizarSheet(open);
+        if (!open && pdfUrl) {
+          URL.revokeObjectURL(pdfUrl);
+          setPdfUrl(null);
+        }
+      }}>
+        <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-0 gap-0 overflow-hidden border-l border-border shadow-2xl bg-card text-foreground animate-in slide-in-from-right duration-300">
+          <SheetHeader className="border-b border-border p-6 flex-shrink-0 bg-muted/30">
+            <SheetTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2 text-foreground">
+                <Printer className="h-5 w-5 text-indigo-500" />
+                Imprimir Contrato {contrato.numero}
+              </span>
+              <div className="flex gap-2 mr-6">
+                {pdfUrl && (
+                  <Button
+                    size="sm"
+                    onClick={() => window.open(pdfUrl, "_blank")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Abrir em Nova Aba
+                  </Button>
+                )}
+              </div>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 bg-white">
+            {generatingPdf ? (
+              <div className="h-full flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div>
+                <p className="text-sm text-muted-foreground">Gerando visualização em PDF...</p>
+              </div>
+            ) : pdfUrl ? (
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full border-0"
+                title="PDF Preview"
+              />
+            ) : (
+              <div className="p-8 text-center text-muted-foreground">Nenhuma visualização gerada</div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Container invisível para renderização do PDF */}
+      <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
+        <div ref={hiddenDivRef}>
+          <ContratoPrintView
+            contrato={contrato}
+            timbradoConfig={timbradoConfig}
+            logoImpressao={logoImpressao}
+            layoutConfig={layoutConfig}
+            paginasConteudo={paginasPreview}
+            clienteCompleto={clienteCompleto}
+          />
+        </div>
+      </div>
+    </>
   )
 }

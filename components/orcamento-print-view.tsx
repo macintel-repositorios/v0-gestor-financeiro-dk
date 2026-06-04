@@ -62,9 +62,7 @@ export function OrcamentoPrintView({
     }
   }
 
-  const dataParaExtenso = (dataString: string): string => {
-    if (!dataString) return ""
-
+  const dataParaExtenso = (dataString: string | null | undefined): string => {
     const meses = [
       "janeiro",
       "fevereiro",
@@ -80,12 +78,35 @@ export function OrcamentoPrintView({
       "dezembro",
     ]
 
-    const data = new Date(dataString + "T00:00:00")
-    const dia = data.getDate()
-    const mes = data.getMonth()
-    const ano = data.getFullYear()
+    try {
+      if (!dataString) {
+        const d = new Date()
+        return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+      }
 
-    return `${dia} de ${meses[mes]} de ${ano}`
+      // Se já tiver "T", pegamos apenas a parte da data YYYY-MM-DD
+      const dateOnly = dataString.includes("T") ? dataString.split("T")[0] : dataString
+      const parts = dateOnly.split("-")
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10)
+        const month = parseInt(parts[1], 10) - 1
+        const day = parseInt(parts[2], 10)
+        const d = new Date(year, month, day)
+        if (!isNaN(d.getTime())) {
+          return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+        }
+      }
+
+      const d = new Date(dataString)
+      if (!isNaN(d.getTime())) {
+        return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+      }
+    } catch (e) {
+      console.error(e)
+    }
+
+    const d = new Date()
+    return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
   }
 
   const getClienteInfoForDisplay = () => {
