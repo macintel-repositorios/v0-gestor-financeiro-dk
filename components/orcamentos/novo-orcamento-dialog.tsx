@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -113,6 +113,16 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
   const [expandParametros, setExpandParametros] = useState(false)
   const [expandDetalhes, setExpandDetalhes] = useState(false)
   const [expandObservacoes, setExpandObservacoes] = useState(false)
+
+  const detailsTextareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    const textarea = detailsTextareaRef.current
+    if (textarea) {
+      textarea.style.height = "auto"
+      textarea.style.height = `${textarea.scrollHeight}px`
+    }
+  }, [detalhesServico, expandDetalhes])
 
   // Reset form when open changes
   useEffect(() => {
@@ -852,11 +862,11 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                         <div className="space-y-1.5 mt-2">
                           <Label className="text-xs">Descrição dos Detalhes</Label>
                           <Textarea
+                            ref={detailsTextareaRef}
                             value={detalhesServico}
                             onChange={(e) => setDetalhesServico(e.target.value)}
                             placeholder="Descreva detalhadamente o escopo do serviço a ser executado..."
-                            rows={4}
-                            className="text-xs border-border bg-slate-50/50 dark:bg-slate-900/50 focus:bg-background transition-colors focus-visible:ring-indigo-500 focus-visible:ring-offset-0 focus:border-indigo-500 min-h-[100px]"
+                            className="text-xs border-border bg-slate-50/50 dark:bg-slate-900/50 focus:bg-background transition-all focus-visible:ring-indigo-500 focus-visible:ring-offset-0 focus:border-indigo-500 min-h-[100px] resize-none overflow-hidden"
                           />
                         </div>
                       </div>
