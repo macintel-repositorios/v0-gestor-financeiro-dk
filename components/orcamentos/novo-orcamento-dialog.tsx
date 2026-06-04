@@ -24,7 +24,9 @@ import {
   Plus,
   GripVertical,
   Loader2,
-  FileText
+  FileText,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, cn } from "@/lib/utils"
@@ -103,21 +105,8 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
   const [valorPorKm, setValorPorKm] = useState(1.5)
   const [dataOrcamento, setDataOrcamento] = useState(new Date().toISOString().split("T")[0])
 
-  // Estados para edição do item do orçamento
-  const [showEditItemDialog, setShowEditItemDialog] = useState(false)
-  const [editItemIndex, setEditItemIndex] = useState<number | null>(null)
-  const [editItemQtd, setEditItemQtd] = useState<number>(1)
-  const [editItemValorUnit, setEditItemValorUnit] = useState<number>(0)
-  const [editItemMaoObra, setEditItemMaoObra] = useState<number>(0)
-
-  const salvarEdicaoItem = () => {
-    if (editItemIndex === null) return
-    atualizarItem(editItemIndex, "quantidade", editItemQtd)
-    atualizarItem(editItemIndex, "valor_unitario", editItemValorUnit)
-    atualizarItem(editItemIndex, "valor_mao_obra", editItemMaoObra)
-    setShowEditItemDialog(false)
-    setEditItemIndex(null)
-  }
+  // Estado para controlar a expansão dos cards de itens
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
   // Reset form when open changes
   useEffect(() => {
@@ -856,7 +845,7 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                   </div>
 
                   {itens.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {itens.map((item, index) => (
                         <div
                           key={index}
@@ -864,19 +853,16 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                           onDragOver={(e) => handleDragOver(e, index)}
                           onDrop={(e) => handleDrop(e, index)}
                           onClick={() => {
-                            setEditItemIndex(index)
-                            setEditItemQtd(item.quantidade)
-                            setEditItemValorUnit(item.valor_unitario)
-                            setEditItemMaoObra(item.valor_mao_obra)
-                            setShowEditItemDialog(true)
+                            setExpandedIndex(expandedIndex === index ? null : index)
                           }}
                           className={cn(
-                            "p-3 border rounded-xl bg-card text-foreground shadow-sm hover:shadow-md transition-all cursor-pointer relative hover:border-indigo-400 dark:hover:border-indigo-500",
+                            "p-3 border rounded-xl bg-card text-foreground shadow-xs hover:shadow-sm transition-all cursor-pointer relative hover:border-indigo-400 dark:hover:border-indigo-500",
                             dragOverIndex === index && draggedIndex !== index ? "border-2 border-indigo-400" : "border-border",
-                            draggedIndex === index ? "opacity-40" : ""
+                            draggedIndex === index ? "opacity-40" : "",
+                            expandedIndex === index ? "border-indigo-400 dark:border-indigo-500 shadow-md bg-indigo-50/10 dark:bg-indigo-950/5" : ""
                           )}
                         >
-                          <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <div
                                 draggable
@@ -896,45 +882,105 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                               </div>
                               
                               <div className="flex-1 min-w-0">
-                                <span className="font-semibold text-xs text-foreground block break-words">{item.produto.descricao}</span>
-                                <Badge variant="outline" className="text-[9px] py-0 px-1.5 font-mono mt-1 bg-muted/50 border-border text-muted-foreground">
-                                  {item.produto.codigo}
-                                </Badge>
+                                {expandedIndex === index ? (
+                                  <span className="font-semibold text-xs text-foreground block break-words">{item.produto.descricao}</span>
+                                ) : (
+                                  <span className="font-medium text-xs text-foreground truncate block">{item.produto.descricao}</span>
+                                )}
                                 
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-[10px] text-muted-foreground border-t border-border/60 pt-2">
-                                  <div>
-                                    <span className="text-muted-foreground">Qtd: </span>
-                                    <span className="font-medium text-foreground">{item.quantidade}</span>
+                                {expandedIndex === index ? (
+                                  <Badge variant="outline" className="text-[9px] py-0 px-1.5 font-mono mt-1 bg-muted/50 border-border text-muted-foreground">
+                                    {item.produto.codigo}
+                                  </Badge>
+                                ) : (
+                                  <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
+                                    <span className="bg-muted px-1.5 py-0.5 rounded text-[10px] font-semibold text-foreground">
+                                      Qtd: {item.quantidade}
+                                    </span>
+                                    <span>•</span>
+                                    <span>Unit: {formatCurrency(item.valor_unitario)}</span>
+                                    {item.valor_mao_obra > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <span>MDO: {formatCurrency(item.valor_mao_obra)}</span>
+                                      </>
+                                    )}
                                   </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Vlr Unit: </span>
-                                    <span className="font-medium text-foreground">{formatCurrency(item.valor_unitario)}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Mão Obra: </span>
-                                    <span className="font-medium text-foreground">{formatCurrency(item.valor_mao_obra)}</span>
-                                  </div>
-                                </div>
+                                )}
                               </div>
                             </div>
 
                             <div className="flex items-center gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
                               <div className="text-right mr-1">
-                                <span className="text-[9px] text-muted-foreground block uppercase">Subtotal</span>
+                                <span className="text-[9px] text-muted-foreground block uppercase tracking-wider">Subtotal</span>
                                 <span className="font-bold text-xs text-emerald-600 dark:text-emerald-400">{formatCurrency(item.valor_total)}</span>
                               </div>
                               
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => removerItem(index)}
-                                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200 dark:hover:border-red-900/30"
-                                title="Remover item"
-                              >
-                                <Minus className="h-3.5 w-3.5" />
-                              </Button>
+                              <div className="flex items-center gap-1.5">
+                                <div className="text-muted-foreground opacity-60 p-1 hover:opacity-100" onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}>
+                                  {expandedIndex === index ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                                </div>
+
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => removerItem(index)}
+                                  className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200 dark:hover:border-red-900/30"
+                                  title="Remover item"
+                                >
+                                  <Minus className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
+
+                          {/* Inputs editáveis exibidos ao expandir (Inline Edit) */}
+                          {expandedIndex === index && (
+                            <div
+                              className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-border mt-2.5"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="space-y-0.5">
+                                <Label className="text-[9px] text-muted-foreground">Quantidade</Label>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  step="1"
+                                  value={item.quantidade}
+                                  onChange={(e) =>
+                                    atualizarItem(index, "quantidade", Number.parseInt(e.target.value) || 1)
+                                  }
+                                  className="h-7 text-xs border-border"
+                                />
+                              </div>
+                              <div className="space-y-0.5">
+                                <Label className="text-[9px] text-muted-foreground">Valor Unitário (R$)</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={item.valor_unitario}
+                                  onChange={(e) =>
+                                    atualizarItem(index, "valor_unitario", Number.parseFloat(e.target.value) || 0)
+                                  }
+                                  className="h-7 text-xs border-border"
+                                />
+                              </div>
+                              <div className="space-y-0.5">
+                                <Label className="text-[9px] text-muted-foreground">Mão de Obra (R$)</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={item.valor_mao_obra}
+                                  onChange={(e) =>
+                                    atualizarItem(index, "valor_mao_obra", Number.parseFloat(e.target.value) || 0)
+                                  }
+                                  className="h-7 text-xs border-border"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -1098,72 +1144,6 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
           onSuccess={handleServicoEditSuccess}
         />
         
-        {/* Dialog para Editar Item do Orçamento */}
-        <Dialog open={showEditItemDialog} onOpenChange={setShowEditItemDialog}>
-          <DialogContent className="max-w-md bg-card text-foreground border-border shadow-2xl">
-            <DialogHeader>
-              <DialogTitle>Editar Valores do Item</DialogTitle>
-              <DialogDescription className="text-muted-foreground text-xs">
-                {editItemIndex !== null && itens[editItemIndex] ? (itens[editItemIndex].produto?.descricao || "") : ""}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4 text-xs">
-              <div className="space-y-1">
-                <Label htmlFor="item_quantidade_dialog">Quantidade</Label>
-                <Input
-                  id="item_quantidade_dialog"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={editItemQtd}
-                  onChange={(e) => setEditItemQtd(Number.parseInt(e.target.value) || 1)}
-                  className="h-9 border-border text-xs"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="item_valor_unitario_dialog">Valor Unitário (R$)</Label>
-                <Input
-                  id="item_valor_unitario_dialog"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={editItemValorUnit}
-                  onChange={(e) => setEditItemValorUnit(Number.parseFloat(e.target.value) || 0)}
-                  className="h-9 border-border text-xs"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="item_valor_mao_obra_dialog">Mão de Obra (R$)</Label>
-                <Input
-                  id="item_valor_mao_obra_dialog"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={editItemMaoObra}
-                  onChange={(e) => setEditItemMaoObra(Number.parseFloat(e.target.value) || 0)}
-                  className="h-9 border-border text-xs"
-                />
-              </div>
-            </div>
-            <DialogFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowEditItemDialog(false)}
-                className="h-9 border-border text-xs"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                onClick={salvarEdicaoItem}
-                className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs"
-              >
-                Salvar Alterações
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </SheetContent>
     </Sheet>
   )
