@@ -35,6 +35,8 @@ import {
   AlertTriangle,
   MapPin,
   Calendar,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 
 interface Equipamento {
@@ -152,6 +154,8 @@ export default function EditarOrdemServicoPage({
   const [responsavel, setResponsavel] = useState("")
   const [nomeResponsavel, setNomeResponsavel] = useState("")
   const [situacao, setSituacao] = useState("em_andamento")
+  const [infoOrdemExpanded, setInfoOrdemExpanded] = useState(false)
+  const [execucaoExpanded, setExecucaoExpanded] = useState(false)
 
   // Estados dos equipamentos
   const [itensEquipamentos, setItensEquipamentos] = useState<OrdemServicoItem[]>([])
@@ -843,285 +847,315 @@ export default function EditarOrdemServicoPage({
           <TabsContent value="info" className="space-y-4">
             {/* Informações Básicas */}
             <Card className="border border-border/50 shadow-xl bg-white/90 dark:bg-card/90 backdrop-blur-sm text-foreground">
-              <CardHeader className="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 text-white rounded-t-lg p-3 md:p-6">
-                <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
-                  <FileText className="h-4 w-4 md:h-5 md:w-5" />
-                  Informações da Ordem
-                </CardTitle>
-                <CardDescription className="text-gray-100 text-xs md:text-sm">
-                  Dados básicos (não editáveis)
-                </CardDescription>
+              <CardHeader 
+                className="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 text-white rounded-t-lg p-3 md:p-6 cursor-pointer select-none"
+                onClick={() => setInfoOrdemExpanded(!infoOrdemExpanded)}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
+                      <FileText className="h-4 w-4 md:h-5 md:w-5" />
+                      Informações da Ordem
+                    </CardTitle>
+                    <CardDescription className="text-gray-100 text-xs md:text-sm">
+                      {infoOrdemExpanded ? "Dados básicos (não editáveis)" : `Cliente: ${clienteSelecionado?.nome || "Não informado"}`}
+                    </CardDescription>
+                  </div>
+                  {infoOrdemExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </div>
               </CardHeader>
               <CardContent className="p-3 md:p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
-                  <div>
-                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Cliente</Label>
-                    <div className="font-medium text-gray-900 dark:text-foreground">{clienteSelecionado?.nome || "Não informado"}</div>
-                  </div>
-                  <div>
-                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Tipo de Serviço</Label>
-                    <div className="font-medium text-gray-900 dark:text-foreground">{getTipoServicoLabel(ordem.tipo_servico)}</div>
-                  </div>
-                  <div>
-                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Data de Criação</Label>
-                    <div className="font-medium text-gray-900 dark:text-foreground">
-                      {ordem.data_atual
-                        ? new Date(ordem.data_atual.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR")
-                        : "Não informada"}
+                {infoOrdemExpanded ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
+                    <div>
+                      <Label className="text-gray-500 dark:text-gray-400 text-xs">Cliente</Label>
+                      <div className="font-medium text-gray-900 dark:text-foreground">{clienteSelecionado?.nome || "Não informado"}</div>
                     </div>
-                  </div>
-                  <div>
-                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Solicitado Por</Label>
-                    <div className="font-medium text-gray-900 dark:text-foreground">{ordem.solicitado_por || "Não informado"}</div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label className="text-gray-500 dark:text-gray-400 flex items-center gap-2 text-xs">
-                      <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-                      Endereço do Cliente
-                    </Label>
-                    <div className="font-medium text-gray-900 dark:text-blue-100 bg-blue-50 dark:bg-blue-950/30 p-2 md:p-3 rounded-lg mt-1 text-xs">
-                      {getEnderecoCompleto(clienteSelecionado)}
+                    <div>
+                      <Label className="text-gray-500 dark:text-gray-400 text-xs">Tipo de Serviço</Label>
+                      <div className="font-medium text-gray-900 dark:text-foreground">{getTipoServicoLabel(ordem.tipo_servico)}</div>
                     </div>
-                  </div>
-                  {ordem.descricao_defeito && (
-                    <div className="md:col-span-2">
-                      <Label className="text-gray-500 dark:text-gray-400 text-xs">Descrição do Problema</Label>
-                      <div className="font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-slate-900/50 p-2 md:p-3 rounded-lg mt-1 whitespace-pre-wrap text-xs">
-                        {ordem.descricao_defeito}
+                    <div>
+                      <Label className="text-gray-500 dark:text-gray-400 text-xs">Data de Criação</Label>
+                      <div className="font-medium text-gray-900 dark:text-foreground">
+                        {ordem.data_atual
+                          ? new Date(ordem.data_atual.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR")
+                          : "Não informada"}
                       </div>
                     </div>
-                  )}
-                </div>
+                    <div>
+                      <Label className="text-gray-500 dark:text-gray-400 text-xs">Solicitado Por</Label>
+                      <div className="font-medium text-gray-900 dark:text-foreground">{ordem.solicitado_por || "Não informado"}</div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-gray-500 dark:text-gray-400 flex items-center gap-2 text-xs">
+                        <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                        Endereço do Cliente
+                      </Label>
+                      <div className="font-medium text-gray-900 dark:text-blue-100 bg-blue-50 dark:bg-blue-950/30 p-2 md:p-3 rounded-lg mt-1 text-xs">
+                        {getEnderecoCompleto(clienteSelecionado)}
+                      </div>
+                    </div>
+                    {ordem.descricao_defeito && (
+                      <div className="md:col-span-2">
+                        <Label className="text-gray-500 dark:text-gray-400 text-xs">Descrição do Problema</Label>
+                        <div className="font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-slate-900/50 p-2 md:p-3 rounded-lg mt-1 whitespace-pre-wrap text-xs">
+                          {ordem.descricao_defeito}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-xs md:text-sm font-medium">
+                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Cliente</Label>
+                    <div className="text-gray-900 dark:text-foreground">{clienteSelecionado?.nome || "Não informado"}</div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Dados de Execução */}
             <Card className="border border-border/50 shadow-xl bg-white/90 dark:bg-card/90 backdrop-blur-sm text-foreground">
-              <CardHeader className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white rounded-t-lg p-3 md:p-6">
-                <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
-                  <User className="h-4 w-4 md:h-5 md:w-5" />
-                  Dados de Execução
-                </CardTitle>
-                <CardDescription className="text-blue-100 text-xs md:text-sm">
-                  Informações do técnico e execução do serviço
-                </CardDescription>
+              <CardHeader 
+                className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white rounded-t-lg p-3 md:p-6 cursor-pointer select-none"
+                onClick={() => setExecucaoExpanded(!execucaoExpanded)}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
+                      <User className="h-4 w-4 md:h-5 md:w-5" />
+                      Dados de Execução
+                    </CardTitle>
+                    <CardDescription className="text-blue-100 text-xs md:text-sm">
+                      {execucaoExpanded ? "Informações do técnico e execução do serviço" : `Técnico: ${tecnicoName || "Não informado"}`}
+                    </CardDescription>
+                  </div>
+                  {execucaoExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </div>
               </CardHeader>
               <CardContent className="p-3 md:p-6">
-                <div className="space-y-3 md:space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                    <div>
-                      <Label htmlFor="tecnico_name" className="text-xs md:text-sm">
-                        Nome do Técnico *
-                      </Label>
-                      <Input
-                        id="tecnico_name"
-                        value={tecnicoName}
-                        onChange={(e) => setTecnicoName(e.target.value)}
-                        placeholder="Nome do técnico responsável"
-                        className="text-xs md:text-sm h-9 md:h-10"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="tecnico_email" className="text-xs md:text-sm">
-                        Email do Técnico
-                      </Label>
-                      <Input
-                        id="tecnico_email"
-                        type="email"
-                        value={tecnicoEmail}
-                        onChange={(e) => setTecnicoEmail(e.target.value)}
-                        placeholder="email@exemplo.com"
-                        className="text-xs md:text-sm h-9 md:h-10"
-                      />
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {isOrdemAgendada && !isDiaExecucao() && (
-                    <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <Calendar className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-semibold text-orange-900">Ordem Agendada</p>
-                          <p className="text-sm text-orange-700 mt-1">
-                            Esta ordem está agendada para{" "}
-                            {ordem?.data_agendamento
-                              ? new Date(ordem.data_agendamento.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR")
-                              : "data indefinida"}
-                            . A situação só poderá ser alterada no dia da execução.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <Separator />
-
-                  {/* Campo de Situação */}
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-3 md:p-4 rounded-lg border border-blue-200 dark:border-blue-900/30">
-                    <Label htmlFor="situacao" className="text-xs md:text-base font-semibold flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                      Situação da Ordem *
-                    </Label>
-                    <Select value={situacao} onValueChange={setSituacao} disabled={isOrdemAgendada && !isDiaExecucao()}>
-                      <SelectTrigger className="mt-2 bg-background h-9 md:h-10 text-xs md:text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="aberta">
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-3 w-3 md:h-4 md:w-4 text-yellow-600" />
-                            <span>Aberta</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="agendada">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-3 w-3 md:h-4 md:w-4 text-cyan-600" />
-                            <span>Agendada</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="em_andamento">
-                          <div className="flex items-center gap-2">
-                            <PlayCircle className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
-                            <span>Em Andamento</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="concluida">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
-                            <span>Concluída</span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-[10px] md:text-xs text-gray-600 mt-2">
-                      {isOrdemAgendada && !isDiaExecucao() && "⚠️ A situação poderá ser alterada apenas no dia agendado"}
-                      {situacao === "agendada" && "Serviço agendado para data futura"}
-                      {situacao === "em_andamento" && "Serviço está sendo executado"}
-                      {situacao === "concluida" && "Serviço finalizado"}
-                      {situacao === "aberta" && "Aguardando início da execução"}
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  {ordem.situacao === "agendada" && (
+                {execucaoExpanded ? (
+                  <div className="space-y-3 md:space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div>
-                        <Label htmlFor="data_agendamento" className="text-xs md:text-sm">
-                          Data de Agendamento
+                        <Label htmlFor="tecnico_name" className="text-xs md:text-sm">
+                          Nome do Técnico *
                         </Label>
                         <Input
-                          id="data_agendamento"
-                          type="date"
-                          value={dataAgendamento}
-                          onChange={(e) => setDataAgendamento(e.target.value)}
-                          className="h-9 md:h-10"
+                          id="tecnico_name"
+                          value={tecnicoName}
+                          onChange={(e) => setTecnicoName(e.target.value)}
+                          placeholder="Nome do técnico responsável"
+                          className="text-xs md:text-sm h-9 md:h-10"
                         />
-                        <div className="text-[10px] md:text-xs text-gray-500 mt-1">Data agendada para a visita</div>
                       </div>
 
                       <div>
-                        <Label htmlFor="periodo_agendamento" className="text-xs md:text-sm">
-                          Período do Agendamento
+                        <Label htmlFor="tecnico_email" className="text-xs md:text-sm">
+                          Email do Técnico
                         </Label>
-                        <Select
-                          value={periodoAgendamento}
-                          onValueChange={(value: "" | "manha" | "tarde") => setPeriodoAgendamento(value)}
-                        >
-                          <SelectTrigger className="h-9 md:h-10 text-xs md:text-sm">
-                            <SelectValue placeholder="Selecione o período" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="manha">Manhã</SelectItem>
-                            <SelectItem value="tarde">Tarde</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <div className="text-[10px] md:text-xs text-gray-500 mt-1">Período da visita agendada</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {ordem.situacao === "agendada" && <Separator />}
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                    <div>
-                      <Label htmlFor="data_execucao" className="text-xs md:text-sm">
-                        Data de Execução
-                      </Label>
-                      <Input
-                        id="data_execucao"
-                        type="date"
-                        value={dataExecucao}
-                        onChange={(e) => setDataExecucao(e.target.value)}
-                        className="h-9 md:h-10"
-                      />
-                      <div className="text-[10px] md:text-xs text-gray-500 mt-1">
-                        Quando o serviço foi/será executado
+                        <Input
+                          id="tecnico_email"
+                          type="email"
+                          value={tecnicoEmail}
+                          onChange={(e) => setTecnicoEmail(e.target.value)}
+                          placeholder="email@exemplo.com"
+                          className="text-xs md:text-sm h-9 md:h-10"
+                        />
                       </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="horario_entrada" className="text-xs md:text-sm">
-                        Hora de Entrada
-                      </Label>
-                      <Input
-                        id="horario_entrada"
-                        type="time"
-                        value={horarioEntrada}
-                        onChange={(e) => setHorarioEntrada(e.target.value)}
-                        className="h-9 md:h-10"
-                      />
-                    </div>
+                    <Separator />
 
-                    <div>
-                      <Label htmlFor="horario_saida" className="text-xs md:text-sm">
-                        Hora de Saída
-                      </Label>
-                      <Input
-                        id="horario_saida"
-                        type="time"
-                        value={horarioSaida}
-                        onChange={(e) => setHorarioSaida(e.target.value)}
-                        className="h-9 md:h-10"
-                      />
-                    </div>
-                  </div>
+                    {isOrdemAgendada && !isDiaExecucao() && (
+                      <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <Calendar className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-semibold text-orange-900">Ordem Agendada</p>
+                            <p className="text-sm text-orange-700 mt-1">
+                              Esta ordem está agendada para{" "}
+                              {ordem?.data_agendamento
+                                ? new Date(ordem.data_agendamento.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR")
+                                : "data indefinida"}
+                              . A situação só poderá ser alterada no dia da execução.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                    <div>
-                      <Label htmlFor="responsavel" className="text-xs md:text-sm">
-                        Tipo de Responsável
+                    <Separator />
+
+                    {/* Campo de Situação */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-3 md:p-4 rounded-lg border border-blue-200 dark:border-blue-900/30">
+                      <Label htmlFor="situacao" className="text-xs md:text-base font-semibold flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                        Situação da Ordem *
                       </Label>
-                      <Select value={responsavel} onValueChange={setResponsavel}>
-                        <SelectTrigger className="h-9 md:h-10 text-xs md:text-sm">
-                          <SelectValue placeholder="Selecione o tipo" />
+                      <Select value={situacao} onValueChange={setSituacao} disabled={isOrdemAgendada && !isDiaExecucao()}>
+                        <SelectTrigger className="mt-2 bg-background h-9 md:h-10 text-xs md:text-sm">
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="zelador">Zelador</SelectItem>
-                          <SelectItem value="porteiro">Porteiro</SelectItem>
-                          <SelectItem value="sindico">Síndico</SelectItem>
-                          <SelectItem value="outros">Outros</SelectItem>
+                          <SelectItem value="aberta">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3 w-3 md:h-4 md:w-4 text-yellow-600" />
+                              <span>Aberta</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="agendada">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3 w-3 md:h-4 md:w-4 text-cyan-600" />
+                              <span>Agendada</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="em_andamento">
+                            <div className="flex items-center gap-2">
+                              <PlayCircle className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
+                              <span>Em Andamento</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="concluida">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
+                              <span>Concluída</span>
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
+                      <p className="text-[10px] md:text-xs text-gray-600 mt-2">
+                        {isOrdemAgendada && !isDiaExecucao() && "⚠️ A situação poderá ser alterada apenas no dia agendado"}
+                        {situacao === "agendada" && "Serviço agendado para data futura"}
+                        {situacao === "em_andamento" && "Serviço está sendo executado"}
+                        {situacao === "concluida" && "Serviço finalizado"}
+                        {situacao === "aberta" && "Aguardando início da execução"}
+                      </p>
                     </div>
 
-                    <div>
-                      <Label htmlFor="nome_responsavel" className="text-xs md:text-sm">
-                        Nome do Responsável
-                      </Label>
-                      <Input
-                        id="nome_responsavel"
-                        value={nomeResponsavel}
-                        onChange={(e) => setNomeResponsavel(e.target.value)}
-                        placeholder="Nome completo"
-                        className="h-9 md:h-10 text-xs md:text-sm"
-                      />
+                    <Separator />
+
+                    {ordem.situacao === "agendada" && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                        <div>
+                          <Label htmlFor="data_agendamento" className="text-xs md:text-sm">
+                            Data de Agendamento
+                          </Label>
+                          <Input
+                            id="data_agendamento"
+                            type="date"
+                            value={dataAgendamento}
+                            onChange={(e) => setDataAgendamento(e.target.value)}
+                            className="h-9 md:h-10"
+                          />
+                          <div className="text-[10px] md:text-xs text-gray-500 mt-1">Data agendada para a visita</div>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="periodo_agendamento" className="text-xs md:text-sm">
+                            Período do Agendamento
+                          </Label>
+                          <Select
+                            value={periodoAgendamento}
+                            onValueChange={(value: "" | "manha" | "tarde") => setPeriodoAgendamento(value)}
+                          >
+                            <SelectTrigger className="h-9 md:h-10 text-xs md:text-sm">
+                              <SelectValue placeholder="Selecione o período" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="manha">Manhã</SelectItem>
+                              <SelectItem value="tarde">Tarde</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <div className="text-[10px] md:text-xs text-gray-500 mt-1">Período da visita agendada</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {ordem.situacao === "agendada" && <Separator />}
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                      <div>
+                        <Label htmlFor="data_execucao" className="text-xs md:text-sm">
+                          Data de Execução
+                        </Label>
+                        <Input
+                          id="data_execucao"
+                          type="date"
+                          value={dataExecucao}
+                          onChange={(e) => setDataExecucao(e.target.value)}
+                          className="h-9 md:h-10"
+                        />
+                        <div className="text-[10px] md:text-xs text-gray-500 mt-1">
+                          Quando o serviço foi/será executado
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="horario_entrada" className="text-xs md:text-sm">
+                          Hora de Entrada
+                        </Label>
+                        <Input
+                          id="horario_entrada"
+                          type="time"
+                          value={horarioEntrada}
+                          onChange={(e) => setHorarioEntrada(e.target.value)}
+                          className="h-9 md:h-10"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="horario_saida" className="text-xs md:text-sm">
+                          Hora de Saída
+                        </Label>
+                        <Input
+                          id="horario_saida"
+                          type="time"
+                          value={horarioSaida}
+                          onChange={(e) => setHorarioSaida(e.target.value)}
+                          className="h-9 md:h-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                      <div>
+                        <Label htmlFor="responsavel" className="text-xs md:text-sm">
+                          Tipo de Responsável
+                        </Label>
+                        <Select value={responsavel} onValueChange={setResponsavel}>
+                          <SelectTrigger className="h-9 md:h-10 text-xs md:text-sm">
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="zelador">Zelador</SelectItem>
+                            <SelectItem value="porteiro">Porteiro</SelectItem>
+                            <SelectItem value="sindico">Síndico</SelectItem>
+                            <SelectItem value="outros">Outros</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="nome_responsavel" className="text-xs md:text-sm">
+                          Nome do Responsável
+                        </Label>
+                        <Input
+                          id="nome_responsavel"
+                          value={nomeResponsavel}
+                          onChange={(e) => setNomeResponsavel(e.target.value)}
+                          placeholder="Nome completo"
+                          className="h-9 md:h-10 text-xs md:text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="text-xs md:text-sm font-medium">
+                    <Label className="text-gray-500 dark:text-gray-400 text-xs">Técnico Responsável</Label>
+                    <div className="text-gray-900 dark:text-foreground">{tecnicoName || "Não informado"}</div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

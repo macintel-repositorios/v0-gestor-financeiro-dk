@@ -24,6 +24,8 @@ import {
   Package,
   FileText,
   User,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { EquipamentoCombobox } from "@/components/equipamento-combobox"
@@ -90,6 +92,11 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
   const [showNovoClienteDialog, setShowNovoClienteDialog] = useState(false)
   const [desejaAgendar, setDesejaAgendar] = useState(false)
 
+  const [clienteExpanded, setClienteExpanded] = useState(true)
+  const [basicasExpanded, setBasicasExpanded] = useState(false)
+  const [equipamentosExpanded, setEquipamentosExpanded] = useState(false)
+  const [problemaExpanded, setProblemaExpanded] = useState(false)
+
   const [formData, setFormData] = useState({
     tipo_servico: "manutencao",
     data_atual: new Date().toISOString().split("T")[0],
@@ -108,6 +115,10 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
       setEquipamentosSelecionados([])
       setNumeroOS("")
       setDesejaAgendar(false)
+      setClienteExpanded(true)
+      setBasicasExpanded(false)
+      setEquipamentosExpanded(false)
+      setProblemaExpanded(false)
       setFormData({
         tipo_servico: "manutencao",
         data_atual: new Date().toISOString().split("T")[0],
@@ -233,6 +244,10 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
 
     if (cliente) {
       buscarContratoConservacao(Number(cliente.id))
+      setClienteExpanded(false)
+      setBasicasExpanded(true)
+      setEquipamentosExpanded(true)
+      setProblemaExpanded(true)
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -477,271 +492,303 @@ export function NovaOSDialog({ open, onOpenChange, onSuccess }: NovaOSDialogProp
             <div className="lg:col-span-2 space-y-6">
               {/* Cliente */}
               <Card className="border border-border bg-card">
-                <CardHeader className="bg-muted/40 border-b border-border p-4">
-                  <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
-                    <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                    Dados do Cliente
-                  </CardTitle>
+                <CardHeader 
+                  className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none"
+                  onClick={() => setClienteExpanded(!clienteExpanded)}
+                >
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
+                      <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                      Dados do Cliente {clienteSelecionado && ` - ${clienteSelecionado.nome}`}
+                    </CardTitle>
+                    {clienteExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                  </div>
                 </CardHeader>
-                <CardContent className="p-4 space-y-4">
-                  <div>
-                    <Label className="text-xs">Cliente *</Label>
-                    <div className="flex flex-col sm:flex-row gap-2 mt-1">
-                      <div className="flex-1">
-                        <ClienteCombobox
-                          value={clienteSelecionado}
-                          onValueChange={handleClienteChange}
-                          placeholder="Selecione um cliente..."
-                        />
-                      </div>
-                      {!clienteSelecionado && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setShowNovoClienteDialog(true)}
-                          className="h-9 px-3 text-xs border-border bg-card"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Novo Cliente
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  {clienteSelecionado && (
-                    <div className="p-3 bg-muted/40 rounded-lg border border-border">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        {clienteSelecionado.codigo && (
-                          <Badge variant="outline" className="font-mono text-[10px]">
-                            {clienteSelecionado.codigo}
-                          </Badge>
-                        )}
-                        <span className="font-medium text-foreground text-xs break-all">{clienteSelecionado.nome}</span>
-                        {clienteTemContrato ? (
-                          <Badge variant="outline" className="text-green-600 border-green-200 dark:border-green-900/50 bg-green-500/10 text-[10px] shrink-0">
-                            Com Contrato
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-red-600 border-red-200 dark:border-red-900/50 bg-red-500/10 text-[10px] shrink-0">
-                            Sem Contrato
-                          </Badge>
+                {clienteExpanded && (
+                  <CardContent className="p-4 space-y-4">
+                    <div>
+                      <Label className="text-xs">Cliente *</Label>
+                      <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                        <div className="flex-1">
+                          <ClienteCombobox
+                            value={clienteSelecionado}
+                            onValueChange={handleClienteChange}
+                            placeholder="Selecione um cliente..."
+                          />
+                        </div>
+                        {!clienteSelecionado && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowNovoClienteDialog(true)}
+                            className="h-9 px-3 text-xs border-border bg-card"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Novo Cliente
+                          </Button>
                         )}
                       </div>
-                      <div className="text-[11px] text-muted-foreground space-y-1">
-                        <div>ID: {clienteSelecionado.id}</div>
-                        {clienteSelecionado.cnpj && <div>CNPJ: {clienteSelecionado.cnpj}</div>}
-                        {clienteSelecionado.cpf && <div>CPF: {clienteSelecionado.cpf}</div>}
-                        {clienteSelecionado.endereco && <div className="break-words">Endereço: {clienteSelecionado.endereco}</div>}
-                        {clienteSelecionado.telefone && <div>Telefone: {clienteSelecionado.telefone}</div>}
-                      </div>
                     </div>
-                  )}
 
-                  <div>
-                    <Label className="text-xs">Número do Contrato</Label>
-                    <Input
-                      id="contrato_numero"
-                      value={formData.contrato_numero}
-                      readOnly
-                      className={`h-9 text-xs border-border ${
-                        formData.contrato_numero === "Cliente sem contrato"
-                          ? "bg-red-500/10 text-red-600 border-red-200 dark:border-red-900/50"
-                          : "bg-green-500/10 text-green-600 border-green-200 dark:border-green-900/50"
-                      }`}
-                    />
-                  </div>
+                    {clienteSelecionado && (
+                      <div className="p-3 bg-muted/40 rounded-lg border border-border">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          {clienteSelecionado.codigo && (
+                            <Badge variant="outline" className="font-mono text-[10px]">
+                              {clienteSelecionado.codigo}
+                            </Badge>
+                          )}
+                          <span className="font-medium text-foreground text-xs break-all">{clienteSelecionado.nome}</span>
+                          {clienteTemContrato ? (
+                            <Badge variant="outline" className="text-green-600 border-green-200 dark:border-green-900/50 bg-green-500/10 text-[10px] shrink-0">
+                              Com Contrato
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-red-600 border-red-200 dark:border-red-900/50 bg-red-500/10 text-[10px] shrink-0">
+                              Sem Contrato
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground space-y-1">
+                          <div>ID: {clienteSelecionado.id}</div>
+                          {clienteSelecionado.cnpj && <div>CNPJ: {clienteSelecionado.cnpj}</div>}
+                          {clienteSelecionado.cpf && <div>CPF: {clienteSelecionado.cpf}</div>}
+                          {clienteSelecionado.endereco && <div className="break-words">Endereço: {clienteSelecionado.endereco}</div>}
+                          {clienteSelecionado.telefone && <div>Telefone: {clienteSelecionado.telefone}</div>}
+                        </div>
+                      </div>
+                    )}
 
-                  {contratoConservacao && (
-                    <div className="p-3 bg-muted/40 rounded-lg border border-border text-xs space-y-2">
-                      <div className="flex items-center gap-1.5 font-medium text-foreground">
-                        <Shield className="h-4 w-4 text-green-600" />
-                        <span>Contrato: {contratoConservacao.numero}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-                        <div>Frequência: {contratoConservacao.frequencia?.toUpperCase()}</div>
-                        <div>Vencimento: {formatarData(contratoConservacao.data_inicio)}</div>
-                      </div>
+                    <div>
+                      <Label className="text-xs">Número do Contrato</Label>
+                      <Input
+                        id="contrato_numero"
+                        value={formData.contrato_numero}
+                        readOnly
+                        className={`h-9 text-xs border-border ${
+                          formData.contrato_numero === "Cliente sem contrato"
+                            ? "bg-red-500/10 text-red-600 border-red-200 dark:border-red-900/50"
+                            : "bg-green-500/10 text-green-600 border-green-200 dark:border-green-900/50"
+                        }`}
+                      />
                     </div>
-                  )}
-                </CardContent>
+
+                    {contratoConservacao && (
+                      <div className="p-3 bg-muted/40 rounded-lg border border-border text-xs space-y-2">
+                        <div className="flex items-center gap-1.5 font-medium text-foreground">
+                          <Shield className="h-4 w-4 text-green-600" />
+                          <span>Contrato: {contratoConservacao.numero}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-muted-foreground">
+                          <div>Frequência: {contratoConservacao.frequencia?.toUpperCase()}</div>
+                          <div>Vencimento: {formatarData(contratoConservacao.data_inicio)}</div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                )}
               </Card>
 
               {/* Informações Básicas */}
               <Card className="border border-border bg-card">
-                <CardHeader className="bg-muted/40 border-b border-border p-4">
-                  <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
-                    <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-                    Informações Básicas
-                  </CardTitle>
+                <CardHeader 
+                  className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none"
+                  onClick={() => setBasicasExpanded(!basicasExpanded)}
+                >
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
+                      <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                      Informações Básicas
+                    </CardTitle>
+                    {basicasExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                  </div>
                 </CardHeader>
-                <CardContent className="p-4 space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs">Tipo de Serviço *</Label>
-                      <Select
-                        value={formData.tipo_servico}
-                        onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo_servico: value }))}
-                      >
-                        <SelectTrigger className="h-9 text-xs border-border bg-background">
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="manutencao">Manutenção</SelectItem>
-                          <SelectItem value="orcamento">Orçamento</SelectItem>
-                          <SelectItem value="vistoria_contrato">Vistoria para Contrato</SelectItem>
-                          <SelectItem value="preventiva">Preventiva</SelectItem>
-                        </SelectContent>
-                      </Select>
+                {basicasExpanded && (
+                  <CardContent className="p-4 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-xs">Tipo de Serviço *</Label>
+                        <Select
+                          value={formData.tipo_servico}
+                          onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo_servico: value }))}
+                        >
+                          <SelectTrigger className="h-9 text-xs border-border bg-background">
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="manutencao">Manutenção</SelectItem>
+                            <SelectItem value="orcamento">Orçamento</SelectItem>
+                            <SelectItem value="vistoria_contrato">Vistoria para Contrato</SelectItem>
+                            <SelectItem value="preventiva">Preventiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Data de Criação *</Label>
+                        <Input
+                          type="date"
+                          value={formData.data_atual}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, data_atual: e.target.value }))}
+                          className="h-9 text-xs border-border bg-background"
+                        />
+                      </div>
                     </div>
 
                     <div>
-                      <Label className="text-xs">Data de Criação *</Label>
+                      <Label className="text-xs">Solicitado Por *</Label>
                       <Input
-                        type="date"
-                        value={formData.data_atual}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, data_atual: e.target.value }))}
+                        value={formData.solicitado_por}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, solicitado_por: e.target.value }))}
+                        placeholder="Nome de quem solicitou o serviço"
                         className="h-9 text-xs border-border bg-background"
                       />
                     </div>
-                  </div>
 
-                  <div>
-                    <Label className="text-xs">Solicitado Por *</Label>
-                    <Input
-                      value={formData.solicitado_por}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, solicitado_por: e.target.value }))}
-                      placeholder="Nome de quem solicitou o serviço"
-                      className="h-9 text-xs border-border bg-background"
-                    />
-                  </div>
+                    <Separator />
 
-                  <Separator />
-
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="deseja_agendar_dialog"
-                        checked={desejaAgendar}
-                        onCheckedChange={(checked) => {
-                          setDesejaAgendar(checked as boolean)
-                          if (!checked) {
-                            setFormData((prev) => ({ ...prev, data_agendamento: "", periodo_agendamento: "" }))
-                          }
-                        }}
-                      />
-                      <Label htmlFor="deseja_agendar_dialog" className="text-xs cursor-pointer">
-                        Deseja agendar esta ordem de serviço?
-                      </Label>
-                    </div>
-
-                    {desejaAgendar && (
-                      <div className="pl-6 space-y-4">
-                        <div>
-                          <Label className="text-xs">Data de Agendamento *</Label>
-                          <Input
-                            type="date"
-                            value={formData.data_agendamento}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, data_agendamento: e.target.value }))}
-                            min={formData.data_atual}
-                            className="h-9 text-xs border-border bg-background"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Período *</Label>
-                          <Select
-                            value={formData.periodo_agendamento}
-                            onValueChange={(value: "manha" | "tarde" | "integral") =>
-                              setFormData((prev) => ({ ...prev, periodo_agendamento: value }))
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="deseja_agendar_dialog"
+                          checked={desejaAgendar}
+                          onCheckedChange={(checked) => {
+                            setDesejaAgendar(checked as boolean)
+                            if (!checked) {
+                              setFormData((prev) => ({ ...prev, data_agendamento: "", periodo_agendamento: "" }))
                             }
-                          >
-                            <SelectTrigger className="h-9 text-xs border-border bg-background">
-                              <SelectValue placeholder="Selecione o período" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="manha">Manhã (9h-12h)</SelectItem>
-                              <SelectItem value="tarde">Tarde (13h-17h)</SelectItem>
-                              <SelectItem value="integral">Integral (9h-17h)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                          }}
+                        />
+                        <Label htmlFor="deseja_agendar_dialog" className="text-xs cursor-pointer">
+                          Deseja agendar esta ordem de serviço?
+                        </Label>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
+
+                      {desejaAgendar && (
+                        <div className="pl-6 space-y-4">
+                          <div>
+                            <Label className="text-xs">Data de Agendamento *</Label>
+                            <Input
+                              type="date"
+                              value={formData.data_agendamento}
+                              onChange={(e) => setFormData((prev) => ({ ...prev, data_agendamento: e.target.value }))}
+                              min={formData.data_atual}
+                              className="h-9 text-xs border-border bg-background"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Período *</Label>
+                            <Select
+                              value={formData.periodo_agendamento}
+                              onValueChange={(value: "manha" | "tarde" | "integral") =>
+                                setFormData((prev) => ({ ...prev, periodo_agendamento: value }))
+                              }
+                            >
+                              <SelectTrigger className="h-9 text-xs border-border bg-background">
+                                <SelectValue placeholder="Selecione o período" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="manha">Manhã (9h-12h)</SelectItem>
+                                <SelectItem value="tarde">Tarde (13h-17h)</SelectItem>
+                                <SelectItem value="integral">Integral (9h-17h)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                )}
               </Card>
 
               {/* Equipamentos */}
               <Card className="border border-border bg-card">
-                <CardHeader className="bg-muted/40 border-b border-border p-4">
-                  <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
-                    <Package className="h-4 w-4 text-muted-foreground shrink-0" />
-                    Equipamentos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 space-y-4">
-                  <div>
-                    <Label className="text-xs">Adicionar Equipamento Adicional</Label>
-                    <EquipamentoCombobox
-                      onSelect={handleEquipamentoSelect}
-                      placeholder="Selecione um equipamento..."
-                      disabled={!clienteSelecionado}
-                    />
+                <CardHeader 
+                  className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none"
+                  onClick={() => setEquipamentosExpanded(!equipamentosExpanded)}
+                >
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
+                      <Package className="h-4 w-4 text-muted-foreground shrink-0" />
+                      Equipamentos {equipamentosSelecionados.length > 0 && `(${equipamentosSelecionados.length})`}
+                    </CardTitle>
+                    {equipamentosExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                   </div>
-
-                  {equipamentosSelecionados.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-foreground text-xs">Equipamentos Selecionados:</h4>
-                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                        {equipamentosSelecionados.map((equipamento) => (
-                          <div key={equipamento.id} className="flex items-center justify-between p-2 border border-border rounded bg-muted/20 text-xs">
-                            <span className="font-medium">{equipamento.nome}</span>
-                            <div className="flex items-center gap-2">
-                              {equipamento.do_contrato ? (
-                                <Badge variant="outline" className="text-green-600 border-green-200 bg-green-500/10 text-[10px]">
-                                  Contrato
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-500/10 text-[10px]">
-                                  Adicional
-                                </Badge>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removerEquipamento(equipamento.id)}
-                                className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                                disabled={equipamento.do_contrato}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                </CardHeader>
+                {equipamentosExpanded && (
+                  <CardContent className="p-4 space-y-4">
+                    <div>
+                      <Label className="text-xs">Adicionar Equipamento Adicional</Label>
+                      <EquipamentoCombobox
+                        onSelect={handleEquipamentoSelect}
+                        placeholder="Selecione um equipamento..."
+                        disabled={!clienteSelecionado}
+                      />
                     </div>
-                  )}
-                </CardContent>
+
+                    {equipamentosSelecionados.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-foreground text-xs">Equipamentos Selecionados:</h4>
+                        <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                          {equipamentosSelecionados.map((equipamento) => (
+                            <div key={equipamento.id} className="flex items-center justify-between p-2 border border-border rounded bg-muted/20 text-xs">
+                              <span className="font-medium">{equipamento.nome}</span>
+                              <div className="flex items-center gap-2">
+                                {equipamento.do_contrato ? (
+                                  <Badge variant="outline" className="text-green-600 border-green-200 bg-green-500/10 text-[10px]">
+                                    Contrato
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-500/10 text-[10px]">
+                                    Adicional
+                                  </Badge>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removerEquipamento(equipamento.id)}
+                                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                  disabled={equipamento.do_contrato}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                )}
               </Card>
 
               {/* Descrição Problema */}
               {formData.tipo_servico !== "preventiva" && (
                 <Card className="border border-border bg-card">
-                  <CardHeader className="bg-muted/40 border-b border-border p-4">
-                    <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
-                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                      Descrição do Problema
-                    </CardTitle>
+                  <CardHeader 
+                    className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none"
+                    onClick={() => setProblemaExpanded(!problemaExpanded)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-foreground flex items-center gap-2 text-sm sm:text-base">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        Descrição do Problema
+                      </CardTitle>
+                      {problemaExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    </div>
                   </CardHeader>
-                  <CardContent className="p-4">
-                    <Textarea
-                      value={formData.descricao_defeito}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, descricao_defeito: e.target.value }))}
-                      placeholder="Descreva o defeito apresentado ou serviço a ser realizado"
-                      rows={4}
-                      className="text-xs border-border bg-background"
-                    />
-                  </CardContent>
+                  {problemaExpanded && (
+                    <CardContent className="p-4">
+                      <Textarea
+                        value={formData.descricao_defeito}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, descricao_defeito: e.target.value }))}
+                        placeholder="Descreva o defeito apresentado ou serviço a ser realizado"
+                        rows={4}
+                        className="text-xs border-border bg-background"
+                      />
+                    </CardContent>
+                  )}
                 </Card>
               )}
             </div>
