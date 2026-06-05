@@ -884,13 +884,6 @@ export default function FinanceiroPage() {
                         {filteredBoletos.length} boleto{filteredBoletos.length !== 1 ? "s" : ""} encontrado{filteredBoletos.length !== 1 ? "s" : ""}
                       </CardDescription>
                     </div>
-                    <Button
-                      onClick={() => setShowNovoBoleto(true)}
-                      className="bg-white text-blue-600 hover:bg-blue-50 text-sm lg:text-base dark:bg-slate-900 dark:text-blue-400 dark:hover:bg-slate-800 dark:border-slate-800"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Novo Boleto
-                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -1292,12 +1285,6 @@ export default function FinanceiroPage() {
                         {filteredRecibos.length} recibo{filteredRecibos.length !== 1 ? "s" : ""} encontrado{filteredRecibos.length !== 1 ? "s" : ""}
                       </CardDescription>
                     </div>
-                    <Link href="/financeiro/novo-recibo">
-                      <Button className="bg-white text-emerald-600 hover:bg-emerald-50 text-sm lg:text-base dark:bg-slate-900 dark:text-emerald-400 dark:hover:bg-slate-800 dark:border-slate-800">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Novo Recibo
-                      </Button>
-                    </Link>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
