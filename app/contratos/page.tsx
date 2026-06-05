@@ -1004,14 +1004,26 @@ export default function ContratosPage() {
               Contratos & Propostas
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5 font-medium">Gerencie contratos e propostas de manutenção</p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <Link 
+                href="/contratos/proposta/nova"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setIsNovaPropostaOpen(true)
+                }}
+              >
+                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold shadow-md rounded-xl h-10 px-4 text-xs lg:text-sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Proposta
+                </Button>
+              </Link>
               <Button
                 onClick={toggleOcultarValores}
                 variant="outline"
-                className="border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 bg-background h-10 px-4 text-xs lg:text-sm font-semibold rounded-xl"
+                className="border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 bg-background w-10 h-10 p-0 flex items-center justify-center rounded-xl"
+                title={shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
               >
-                {shouldHideValues ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
-                {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
+                {shouldHideValues ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </Button>
             </div>
           </div>
@@ -1194,18 +1206,7 @@ export default function ContratosPage() {
                         {filteredPropostas.length} proposta{filteredPropostas.length !== 1 ? "s" : ""} encontrada{filteredPropostas.length !== 1 ? "s" : ""}
                       </CardDescription>
                     </div>
-                    <Link 
-                      href="/contratos/proposta/nova"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setIsNovaPropostaOpen(true)
-                      }}
-                    >
-                      <Button className="bg-white text-blue-600 hover:bg-blue-50 text-sm lg:text-base dark:bg-slate-900 dark:text-blue-400 dark:hover:bg-slate-800 dark:border-slate-800">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Nova Proposta
-                      </Button>
-                    </Link>
+
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 lg:p-6">
@@ -1345,17 +1346,7 @@ export default function ContratosPage() {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   {filteredPropostas.length} proposta{filteredPropostas.length !== 1 ? "s" : ""}
                 </p>
-                <Link 
-                  href="/contratos/proposta/nova"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setIsNovaPropostaOpen(true)
-                  }}
-                >
-                  <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs h-8">
-                    <Plus className="h-3.5 w-3.5 mr-1" /> Nova Proposta
-                  </Button>
-                </Link>
+
               </div>
 
               {!hasActiveFilterProposta ? (

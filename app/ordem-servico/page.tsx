@@ -577,15 +577,6 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
               <CalendarRange className="h-4 w-4 md:mr-2" />
               <span className="hidden md:inline">Preventivas em Lote</span>
             </Button>
-            <Button
-              onClick={() => setIsNovaOSOpen(true)}
-              variant="outline"
-              size="sm"
-              className="border-white/20 bg-background/90 text-foreground hover:bg-background h-8 px-3 text-xs rounded-xl"
-            >
-              <Plus className="h-4 w-4 md:mr-2" />
-              <span className="hidden md:inline">Nova OS</span>
-            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-4">

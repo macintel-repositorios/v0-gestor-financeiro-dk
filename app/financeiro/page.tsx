@@ -649,23 +649,27 @@ export default function FinanceiroPage() {
               Gestão Financeira
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">Controle de boletos e recibos</p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <Button
+                onClick={() => setShowNovoBoleto(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-650 text-white shadow-md hover:shadow-indigo-500/10 h-10 px-4 text-xs lg:text-sm font-semibold transition-all rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Boleto
+              </Button>
+              <Link href="/financeiro/novo-recibo">
+                <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold shadow-md rounded-xl h-10 px-4 text-xs lg:text-sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Recibo
+                </Button>
+              </Link>
               <Button
                 onClick={toggleValoresOcultos}
                 variant="outline"
-                className="flex items-center gap-2 border border-border hover:bg-muted transition-all duration-200 bg-card text-foreground h-10 px-4 text-sm rounded-xl"
+                className="border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 bg-background w-10 h-10 p-0 flex items-center justify-center rounded-xl"
+                title={valoresOcultos ? "Mostrar Valores" : "Ocultar Valores"}
               >
-                {valoresOcultos ? (
-                  <>
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-semibold">Mostrar Valores</span>
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-semibold">Ocultar Valores</span>
-                  </>
-                )}
+                {valoresOcultos ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </Button>
             </div>
           </div>

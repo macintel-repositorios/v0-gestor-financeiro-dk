@@ -691,19 +691,19 @@ export default function OrcamentosPage({
             </p>
             <div className="mt-4 flex items-center gap-2.5">
               <Button
-                onClick={toggleOcultarValores}
-                variant="outline"
-                className="border-border text-foreground hover:bg-muted/40 h-9 px-4 text-xs font-medium transition-all"
-              >
-                {shouldHideValues ? <Eye className="h-4 w-4 mr-1.5" /> : <EyeOff className="h-4 w-4 mr-1.5" />}
-                {shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
-              </Button>
-              <Button
                 onClick={() => setIsNovoOrcamentoOpen(true)}
                 className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-650 text-white shadow-md hover:shadow-indigo-500/10 h-9 px-4 text-xs lg:text-sm font-medium transition-all rounded-lg"
               >
                 <Plus className="mr-1.5 h-4 w-4" />
                 Novo Orçamento
+              </Button>
+              <Button
+                onClick={toggleOcultarValores}
+                variant="outline"
+                className="border-border text-foreground hover:bg-muted/40 w-9 h-9 p-0 flex items-center justify-center transition-all rounded-lg"
+                title={shouldHideValues ? "Mostrar Valores" : "Ocultar Valores"}
+              >
+                {shouldHideValues ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
           </div>

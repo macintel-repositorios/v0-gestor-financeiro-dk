@@ -878,23 +878,6 @@ export default function NotaFiscalPage() {
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-2.5">
                 <Button
-                  variant="outline"
-                  onClick={toggleShowValues}
-                  className="border-border text-foreground hover:bg-muted/40 h-9 px-4 text-xs font-medium transition-all"
-                >
-                  {!shouldShow ? (
-                    <>
-                      <Eye className="h-4 w-4 mr-1.5" />
-                      <span>Mostrar Valores</span>
-                    </>
-                  ) : (
-                    <>
-                      <EyeOff className="h-4 w-4 mr-1.5" />
-                      <span>Ocultar Valores</span>
-                    </>
-                  )}
-                </Button>
-                <Button
                   onClick={() => setEmitirNfseOpen(true)}
                   className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-555 dark:hover:bg-emerald-600 text-white shadow-md hover:shadow-emerald-500/10 h-9 px-4 text-xs font-medium transition-all rounded-lg"
                 >
@@ -907,6 +890,14 @@ export default function NotaFiscalPage() {
                 >
                   <Plus className="h-4 w-4 mr-1.5" />
                   <span>Emitir NF-e</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={toggleShowValues}
+                  className="border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 bg-background w-9 h-9 p-0 flex items-center justify-center rounded-lg"
+                  title={shouldShow ? "Ocultar Valores" : "Mostrar Valores"}
+                >
+                  {shouldShow ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </Button>
               </div>
             </div>

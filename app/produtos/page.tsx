@@ -812,6 +812,22 @@ export default function ProdutosPage({
             <p className="text-sm text-muted-foreground mt-0.5 font-medium">
               Gerencie produtos, serviços, categorias e marcas do sistema
             </p>
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <Button
+                onClick={() => setIsNovoProdutoOpen(true)}
+                className="bg-indigo-650 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-650 text-white shadow-md hover:shadow-indigo-500/10 h-10 px-4 text-xs lg:text-sm font-semibold transition-all rounded-xl"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Produto
+              </Button>
+              <Button
+                onClick={() => setIsNovoServicoOpen(true)}
+                className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold shadow-md rounded-xl h-10 px-4 text-xs lg:text-sm"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Serviço
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -934,13 +950,6 @@ export default function ProdutosPage({
                     Gerencie todos os produtos do sistema.
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={() => setIsNovoProdutoOpen(true)}
-                  className="bg-white text-indigo-650 hover:bg-indigo-50 dark:bg-slate-900 dark:text-indigo-400 dark:hover:bg-slate-800 border dark:border-indigo-500/20 shadow-sm h-9 px-4 text-sm font-medium transition-all"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Novo Produto
-                </Button>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -1127,13 +1136,6 @@ export default function ProdutosPage({
                     Gerencie todos os serviços e tabelas de mão de obra.
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={() => setIsNovoServicoOpen(true)}
-                  className="bg-white text-orange-650 hover:bg-orange-50 dark:bg-slate-900 dark:text-orange-400 dark:hover:bg-slate-800 border dark:border-orange-500/20 shadow-sm h-9 px-4 text-sm font-medium transition-all"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Novo Serviço
-                </Button>
               </div>
             </CardHeader>
             <CardContent className="p-0">
