@@ -52,6 +52,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const itens = await query(itensQuery, [numero])
 
+    // Format dates to YYYY-MM-DD for frontend compatibility
+    if (orcamento.data_orcamento) {
+      if (orcamento.data_orcamento instanceof Date) {
+        orcamento.data_orcamento = orcamento.data_orcamento.toISOString().split('T')[0]
+      } else if (typeof orcamento.data_orcamento === 'string') {
+        orcamento.data_orcamento = orcamento.data_orcamento.split('T')[0]
+      }
+    }
+    if (orcamento.data_inicio) {
+      if (orcamento.data_inicio instanceof Date) {
+        orcamento.data_inicio = orcamento.data_inicio.toISOString().split('T')[0]
+      } else if (typeof orcamento.data_inicio === 'string') {
+        orcamento.data_inicio = orcamento.data_inicio.split('T')[0]
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: {

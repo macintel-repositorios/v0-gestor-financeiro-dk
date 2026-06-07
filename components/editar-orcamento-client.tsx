@@ -107,7 +107,9 @@ export function EditarOrcamentoClient({
   const [distanciaKm, setDistanciaKm] = useState(orcamento.distancia_km || 0)
   const [valorBoleto, setValorBoleto] = useState(orcamento.valor_boleto || 3.5)
   const [prazoDias, setPrazoDias] = useState(orcamento.prazo_dias || 5)
-  const [dataInicio, setDataInicio] = useState(orcamento.data_inicio || "")
+  const [dataInicio, setDataInicio] = useState(
+    orcamento.data_inicio ? orcamento.data_inicio.split("T")[0] : ""
+  )
   const [jurosAm, setJurosAm] = useState(orcamento.juros_am || 2.0)
   const [impostoServico, setImpostoServico] = useState(orcamento.imposto_servico || 10.9)
   const [impostoMaterial, setImpostoMaterial] = useState(orcamento.imposto_material || 12.7)
