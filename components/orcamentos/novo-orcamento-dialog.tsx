@@ -1217,187 +1217,189 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
             </div>
 
             {/* Resumo */}
+            {/* Resumo */}
             <div className="space-y-6">
-              <Card className="border border-border bg-muted/40 overflow-hidden sticky top-0">
-                <CardHeader 
-                  onClick={handleToggleResumo}
-                  className="bg-muted border-b border-border p-4 cursor-pointer select-none hover:bg-muted/90 transition-colors"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <CardTitle className="text-foreground text-sm flex items-center gap-2">
-                      <Calculator className="h-4 w-4 text-indigo-500" />
-                      Resumo do Orçamento
-                    </CardTitle>
-                    {expandResumo ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                  </div>
-                  {!expandResumo && (
-                    <div className="mt-4 pt-4 border-t border-border space-y-3 text-xs text-foreground font-normal">
-                      <div className="flex items-center gap-2 font-semibold text-foreground mb-2">
-                        <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        <span>Forma de Pagamento</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center text-muted-foreground">
-                        <span>Mão de Obra:</span>
-                        <span className="font-medium text-blue-600 dark:text-blue-400">
-                          {parcelamentoMdo === 0
-                            ? "Sem cobrança"
-                            : parcelamentoMdo === 1
-                              ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
-                              : `${parcelamentoMdo}x de ${formatCurrency(calcularSubtotalMdo() / parcelamentoMdo)}`}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center text-muted-foreground">
-                        <span>Material:</span>
-                        <span className="font-medium text-blue-600 dark:text-blue-400">
-                          {materialAVista
-                            ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
-                            : parcelamentoMaterial === 0
-                              ? "Sem cobrança"
-                              : parcelamentoMaterial === 1
-                                ? `1x - ${formatCurrency(calcularSubtotalMaterial())}`
-                                : `${parcelamentoMaterial}x de ${formatCurrency(calcularSubtotalMaterial() / parcelamentoMaterial)}`}
-                        </span>
-                      </div>
-
-                      <div className="border-t border-border my-2"></div>
-
-                      <div className="flex justify-between items-center text-sm font-bold">
-                        <span>Total:</span>
-                        <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calcularTotal())}</span>
-                      </div>
-
-                      <div className="border-t border-border my-2"></div>
-
-                      <div className="space-y-2 pt-1 text-[11px] text-muted-foreground animate-in fade-in duration-200">
-                        <div className="flex justify-between">
-                          <span>Itens:</span>
-                          <span className="text-foreground font-medium">{itens.length}</span>
+              <div className="sticky top-0 space-y-4">
+                <Card className="border border-border bg-muted/40 overflow-hidden">
+                  <CardHeader 
+                    onClick={handleToggleResumo}
+                    className="bg-muted border-b border-border p-4 cursor-pointer select-none hover:bg-muted/90 transition-colors"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <CardTitle className="text-foreground text-sm flex items-center gap-2">
+                        <Calculator className="h-4 w-4 text-indigo-500" />
+                        Resumo do Orçamento
+                      </CardTitle>
+                      {expandResumo ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    </div>
+                    {!expandResumo && (
+                      <div className="mt-4 pt-4 border-t border-border space-y-3 text-xs text-foreground font-normal">
+                        <div className="flex items-center gap-2 font-semibold text-foreground mb-2">
+                          <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          <span>Forma de Pagamento</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Cliente:</span>
-                          <span className="text-foreground font-medium truncate max-w-[200px]" title={cliente ? cliente.nome : ""}>
-                            {cliente ? cliente.nome : "Não selecionado"}
+                        
+                        <div className="flex justify-between items-center text-muted-foreground">
+                          <span>Mão de Obra:</span>
+                          <span className="font-medium text-blue-600 dark:text-blue-400">
+                            {parcelamentoMdo === 0
+                              ? "Sem cobrança"
+                              : parcelamentoMdo === 1
+                                ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
+                                : `${parcelamentoMdo}x de ${formatCurrency(calcularSubtotalMdo() / parcelamentoMdo)}`}
                           </span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Validade:</span>
-                          <span className="text-foreground font-medium">{validade} dias</span>
+
+                        <div className="flex justify-between items-center text-muted-foreground">
+                          <span>Material:</span>
+                          <span className="font-medium text-blue-600 dark:text-blue-400">
+                            {materialAVista
+                              ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
+                              : parcelamentoMaterial === 0
+                                ? "Sem cobrança"
+                                : parcelamentoMaterial === 1
+                                  ? `1x - ${formatCurrency(calcularSubtotalMaterial())}`
+                                  : `${parcelamentoMaterial}x de ${formatCurrency(calcularSubtotalMaterial() / parcelamentoMaterial)}`}
+                          </span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span>Situação:</span>
-                          <Badge variant="outline" className="text-[10px] py-0 px-2 uppercase font-semibold">
-                            {situacao === "pendente" && "Pendente"}
-                            {situacao === "aprovado" && "Aprovado"}
-                            {situacao === "enviado por email" && "Enviado por Email"}
-                            {situacao === "nota fiscal emitida" && "Nota Fiscal Emitida"}
-                            {situacao === "concluido" && "Concluído"}
-                          </Badge>
+
+                        <div className="border-t border-border my-2"></div>
+
+                        <div className="flex justify-between items-center text-sm font-bold">
+                          <span>Total:</span>
+                          <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calcularTotal())}</span>
+                        </div>
+
+                        <div className="border-t border-border my-2"></div>
+
+                        <div className="space-y-2 pt-1 text-[11px] text-muted-foreground animate-in fade-in duration-200">
+                          <div className="flex justify-between">
+                            <span>Itens:</span>
+                            <span className="text-foreground font-medium">{itens.length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Cliente:</span>
+                            <span className="text-foreground font-medium truncate max-w-[200px]" title={cliente ? cliente.nome : ""}>
+                              {cliente ? cliente.nome : "Não selecionado"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Validade:</span>
+                            <span className="text-foreground font-medium">{validade} dias</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span>Situação:</span>
+                            <Badge variant="outline" className="text-[10px] py-0 px-2 uppercase font-semibold">
+                              {situacao === "pendente" && "Pendente"}
+                              {situacao === "aprovado" && "Aprovado"}
+                              {situacao === "enviado por email" && "Enviado por Email"}
+                              {situacao === "nota fiscal emitida" && "Nota Fiscal Emitida"}
+                              {situacao === "concluido" && "Concluído"}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
+                    )}
+                  </CardHeader>
+                  {expandResumo && (
+                    <CardContent className="p-4 space-y-4 text-xs">
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Parcelas</Label>
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        <div>
+                          <Label className="text-[9px]">MDO</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={parcelamentoMdo}
+                            onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 0)}
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-[9px]">Material</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={parcelamentoMaterial}
+                            onChange={(e) => setParcelamentoMaterial(Number.parseInt(e.target.value) || 0)}
+                            className="h-8 text-xs"
+                            disabled={materialAVista}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <input
+                          type="checkbox"
+                          id="material_a_vista_dialog"
+                          checked={materialAVista}
+                          onChange={(e) => {
+                            setMaterialAVista(e.target.checked)
+                            if (e.target.checked) {
+                              setParcelamentoMaterial(1)
+                            }
+                          }}
+                          className="h-3 w-3 rounded border-border"
+                        />
+                        <Label htmlFor="material_a_vista_dialog" className="text-[10px] cursor-pointer">
+                          Material à vista
+                        </Label>
+                      </div>
                     </div>
+
+                    <div className="space-y-2 border-t border-border pt-3">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Valor Material:</span>
+                        <span className="font-medium text-foreground">{formatCurrency(calcularValorMaterial())}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Mão de Obra:</span>
+                        <span className="font-medium text-foreground">{formatCurrency(calcularValorMaoObra())}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Custo Deslocamento:</span>
+                        <span className="font-medium text-foreground">{formatCurrency(calcularCustoDeslocamento())}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Juros Material:</span>
+                        <span className="font-medium text-foreground">{formatCurrency(calcularValorJuros())}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Imposto Serviço:</span>
+                        <span className="font-medium text-foreground">{formatCurrency(calcularImpostoServicoValor())}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Imposto Material:</span>
+                        <span className="font-medium text-foreground">{formatCurrency(calcularImpostoMaterialValor())}</span>
+                      </div>
+
+                      <div className="border-t border-border pt-2 font-semibold">
+                        <div className="flex justify-between text-indigo-600 dark:text-indigo-400">
+                          <span>Subtotal MDO:</span>
+                          <span>{formatCurrency(calcularSubtotalMdo())}</span>
+                        </div>
+                        <div className="flex justify-between text-indigo-600 dark:text-indigo-400">
+                          <span>Subtotal Mat:</span>
+                          <span>{formatCurrency(calcularSubtotalMaterial())}</span>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-border pt-2 text-sm font-bold flex justify-between text-foreground">
+                        <span>Total Geral:</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calcularTotal())}</span>
+                      </div>
+                    </div>
+                    </CardContent>
                   )}
-                </CardHeader>
-                {expandResumo && (
-                  <CardContent className="p-4 space-y-4 text-xs">
-                  <div>
-                    <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Parcelas</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      <div>
-                        <Label className="text-[9px]">MDO</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={parcelamentoMdo}
-                          onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 0)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[9px]">Material</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={parcelamentoMaterial}
-                          onChange={(e) => setParcelamentoMaterial(Number.parseInt(e.target.value) || 0)}
-                          className="h-8 text-xs"
-                          disabled={materialAVista}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <input
-                        type="checkbox"
-                        id="material_a_vista_dialog"
-                        checked={materialAVista}
-                        onChange={(e) => {
-                          setMaterialAVista(e.target.checked)
-                          if (e.target.checked) {
-                            setParcelamentoMaterial(1)
-                          }
-                        }}
-                        className="h-3 w-3 rounded border-border"
-                      />
-                      <Label htmlFor="material_a_vista_dialog" className="text-[10px] cursor-pointer">
-                        Material à vista
-                      </Label>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 border-t border-border pt-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Valor Material:</span>
-                      <span className="font-medium text-foreground">{formatCurrency(calcularValorMaterial())}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Mão de Obra:</span>
-                      <span className="font-medium text-foreground">{formatCurrency(calcularValorMaoObra())}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Custo Deslocamento:</span>
-                      <span className="font-medium text-foreground">{formatCurrency(calcularCustoDeslocamento())}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Juros Material:</span>
-                      <span className="font-medium text-foreground">{formatCurrency(calcularValorJuros())}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Imposto Serviço:</span>
-                      <span className="font-medium text-foreground">{formatCurrency(calcularImpostoServicoValor())}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Imposto Material:</span>
-                      <span className="font-medium text-foreground">{formatCurrency(calcularImpostoMaterialValor())}</span>
-                    </div>
-
-                    <div className="border-t border-border pt-2 font-semibold">
-                      <div className="flex justify-between text-indigo-600 dark:text-indigo-400">
-                        <span>Subtotal MDO:</span>
-                        <span>{formatCurrency(calcularSubtotalMdo())}</span>
-                      </div>
-                      <div className="flex justify-between text-indigo-600 dark:text-indigo-400">
-                        <span>Subtotal Mat:</span>
-                        <span>{formatCurrency(calcularSubtotalMaterial())}</span>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-border pt-2 text-sm font-bold flex justify-between text-foreground">
-                      <span>Total Geral:</span>
-                      <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calcularTotal())}</span>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={salvarOrcamento}
-                    disabled={saving || !cliente || (itens.length === 0 && parcelamentoMaterial > 0) || !tipoServico.trim()}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium h-9 mt-4 text-xs"
-                  >
-                    {saving ? "Salvando..." : "Salvar Orçamento"}
-                  </Button>
-                  </CardContent>
-                )}
-              </Card>
+                </Card>
+                <Button
+                  onClick={salvarOrcamento}
+                  disabled={saving || !cliente || (itens.length === 0 && parcelamentoMaterial > 0) || !tipoServico.trim()}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium h-9 text-xs"
+                >
+                  {saving ? "Salvando..." : "Salvar Orçamento"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
