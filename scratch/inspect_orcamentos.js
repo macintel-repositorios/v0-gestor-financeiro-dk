@@ -10,12 +10,8 @@ async function main() {
   });
 
   try {
-    const [itens] = await connection.execute('SELECT * FROM orcamentos_itens WHERE orcamento_numero = "20260607004"');
-    console.log('Itens for 20260607004:', itens);
-
-    const [orc] = await connection.execute('SELECT * FROM orcamentos WHERE numero = "20260607004"');
-    console.log('Orcamento 20260607004 details:', orc);
-
+    const [columns] = await connection.execute('DESCRIBE orcamentos');
+    console.log('orcamentos columns:', columns);
     process.exit(0);
   } catch (error) {
     console.error('Error:', error);
