@@ -293,15 +293,22 @@ export function EditarOrcamentoClient({
     try {
       const itensFormatados = await Promise.all(
         itensIniciais.map(async (item: any) => {
-          const response = await fetch(`/api/produtos/${item.produto_id}`)
-          const result = await response.json()
-
           let marcaNome = item.marca_nome || null
           let produtoNcm = item.produto_ncm || null
 
-          if (result.success && result.data) {
-            marcaNome = marcaNome || result.data.marca || null
-            produtoNcm = produtoNcm || result.data.ncm || null
+          try {
+            if (item.produto_id) {
+              const response = await fetch(`/api/produtos/${item.produto_id}`)
+              if (response.ok) {
+                const result = await response.json()
+                if (result.success && result.data) {
+                  marcaNome = marcaNome || result.data.marca || null
+                  produtoNcm = produtoNcm || result.data.ncm || null
+                }
+              }
+            }
+          } catch (fetchError) {
+            console.warn(`Erro ao carregar detalhes do produto ${item.produto_id}:`, fetchError)
           }
 
           return {
@@ -309,17 +316,17 @@ export function EditarOrcamentoClient({
             produto_id: item.produto_id,
             produto: {
               id: item.produto_id,
-              codigo: item.produto_codigo,
-              descricao: item.produto_descricao,
-              unidade: item.produto_unidade,
+              codigo: item.produto_codigo || item.codigo_produto || "",
+              descricao: item.produto_descricao || item.descricao || "",
+              unidade: item.produto_unidade || item.unidade || "UN",
               valor_unitario: Number(item.valor_unitario),
-              valor_mao_obra: Number(item.valor_mao_obra),
+              valor_mao_obra: Number(item.valor_mao_obra || 0),
               ncm: produtoNcm,
-              marca: marcaNome, // Add marca to produto object
+              marca: marcaNome,
             },
             quantidade: Number(item.quantidade),
             valor_unitario: Number(item.valor_unitario),
-            valor_mao_obra: Number(item.valor_mao_obra),
+            valor_mao_obra: Number(item.valor_mao_obra || 0),
             valor_total: Number(item.valor_total),
             marca_nome: marcaNome,
             produto_ncm: produtoNcm,
@@ -332,7 +339,29 @@ export function EditarOrcamentoClient({
       setItens(itensFormatados)
     } catch (error) {
       console.error("Erro ao carregar itens:", error)
-      setItens([])
+      const fallbackItens = itensIniciais.map((item: any) => ({
+        id: item.id,
+        produto_id: item.produto_id,
+        produto: {
+          id: item.produto_id,
+          codigo: item.produto_codigo || item.codigo_produto || "",
+          descricao: item.produto_descricao || item.descricao || "",
+          unidade: item.produto_unidade || item.unidade || "UN",
+          valor_unitario: Number(item.valor_unitario),
+          valor_mao_obra: Number(item.valor_mao_obra || 0),
+          ncm: item.produto_ncm || null,
+          marca: item.marca_nome || null,
+        },
+        quantidade: Number(item.quantidade),
+        valor_unitario: Number(item.valor_unitario),
+        valor_mao_obra: Number(item.valor_mao_obra || 0),
+        valor_total: Number(item.valor_total),
+        marca_nome: item.marca_nome || null,
+        produto_ncm: item.produto_ncm || null,
+        valor_unitario_ajustado: item.valor_unitario_ajustado ? Number(item.valor_unitario_ajustado) : undefined,
+        valor_total_ajustado: item.valor_total_ajustado ? Number(item.valor_total_ajustado) : undefined,
+      }))
+      setItens(fallbackItens)
     }
   }
 

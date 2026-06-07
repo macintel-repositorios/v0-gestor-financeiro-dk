@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
           valor_total_ajustado,
           ordem,
           created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       `
 
       for (let i = 0; i < data.itens.length; i++) {
