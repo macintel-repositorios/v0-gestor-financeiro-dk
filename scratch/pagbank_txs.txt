@@ -1,0 +1,79 @@
+ALL PAGBANK TRANSACTIONS:
+1. Date: 2026-01-02 | Type: saida | Value: 993.10 | Desc: Renda Fixa - Aplicação em CDB
+2. Date: 2026-01-05 | Type: entrada | Value: 0.14 | Desc: Transferência Recebida - Pagseguro Internet Ltda
+3. Date: 2026-01-05 | Type: entrada | Value: 0.20 | Desc: Transferência Recebida - Pagseguro Internet Ltda
+4. Date: 2026-01-08 | Type: saida | Value: 10.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+5. Date: 2026-01-08 | Type: saida | Value: 19.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+6. Date: 2026-01-08 | Type: saida | Value: 10.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+7. Date: 2026-01-08 | Type: saida | Value: 10.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+8. Date: 2026-01-08 | Type: entrada | Value: 50.00 | Desc: Pix recebido - Macintel Seguranca Eletronica E Controle De Acess
+9. Date: 2026-01-08 | Type: saida | Value: 1153.34 | Desc: Renda Fixa - Aplicação em CDB
+10. Date: 2026-01-08 | Type: saida | Value: 17.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+11. Date: 2026-01-08 | Type: saida | Value: 16.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+12. Date: 2026-01-08 | Type: saida | Value: 15.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+13. Date: 2026-01-08 | Type: entrada | Value: 1200.00 | Desc: Pix recebido - Macintel Seguranca Eletronica E Controle De Acess
+14. Date: 2026-01-08 | Type: saida | Value: 14.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+15. Date: 2026-01-08 | Type: saida | Value: 13.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+16. Date: 2026-01-08 | Type: saida | Value: 12.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+17. Date: 2026-01-08 | Type: saida | Value: 10.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+18. Date: 2026-01-08 | Type: entrada | Value: 50.00 | Desc: Pix recebido - Macintel Seguranca Eletronica E Controle De Acess
+19. Date: 2026-01-09 | Type: saida | Value: 1.00 | Desc: Renda Fixa - Aplicação em CDB
+20. Date: 2026-01-10 | Type: saida | Value: 7.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+21. Date: 2026-01-10 | Type: saida | Value: 5.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+22. Date: 2026-01-10 | Type: saida | Value: 4.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+23. Date: 2026-01-10 | Type: saida | Value: 6.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+24. Date: 2026-01-10 | Type: saida | Value: 5.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+25. Date: 2026-01-10 | Type: entrada | Value: 30.00 | Desc: Pix recebido - Macintel Seguranca Eletronica E Controle De Acess
+26. Date: 2026-01-10 | Type: saida | Value: 4.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+27. Date: 2026-01-10 | Type: saida | Value: 9.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+28. Date: 2026-01-10 | Type: saida | Value: 7.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+29. Date: 2026-01-10 | Type: saida | Value: 8.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+30. Date: 2026-01-10 | Type: entrada | Value: 25.00 | Desc: Pix recebido - Macintel Seguranca Eletronica E Controle De Acess
+31. Date: 2026-01-10 | Type: saida | Value: 6.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+32. Date: 2026-01-10 | Type: saida | Value: 5.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+33. Date: 2026-01-10 | Type: saida | Value: 20.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+34. Date: 2026-01-10 | Type: saida | Value: 4.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+35. Date: 2026-01-10 | Type: saida | Value: 4.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+36. Date: 2026-01-10 | Type: saida | Value: 4.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+37. Date: 2026-01-10 | Type: saida | Value: 4.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+38. Date: 2026-01-10 | Type: entrada | Value: 50.00 | Desc: Pix recebido - Macintel Seguranca Eletronica E Controle De Acess
+39. Date: 2026-01-11 | Type: saida | Value: 6.80 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+40. Date: 2026-01-11 | Type: saida | Value: 7.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+41. Date: 2026-01-11 | Type: saida | Value: 6.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+42. Date: 2026-01-11 | Type: saida | Value: 5.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+43. Date: 2026-01-11 | Type: saida | Value: 20.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+44. Date: 2026-01-11 | Type: saida | Value: 7.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+45. Date: 2026-01-11 | Type: saida | Value: 6.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+46. Date: 2026-01-11 | Type: saida | Value: 5.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+47. Date: 2026-01-11 | Type: saida | Value: 5.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+48. Date: 2026-01-11 | Type: saida | Value: 6.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+49. Date: 2026-01-11 | Type: saida | Value: 5.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+50. Date: 2026-01-11 | Type: saida | Value: 5.00 | Desc: Pagamento de conta - Macintel Seguranca Eletronica E Controle De Acesso
+51. Date: 2026-01-11 | Type: entrada | Value: 348.11 | Desc: Vendas - Disponivel BOLETO
+52. Date: 2026-01-12 | Type: saida | Value: 1267.31 | Desc: Renda Fixa - Aplicação em CDB
+53. Date: 2026-01-12 | Type: entrada | Value: 1000.00 | Desc: Pix recebido - Macintel Seguranca Eletronica E Controle De Acess
+54. Date: 2026-01-15 | Type: saida | Value: 1173.11 | Desc: Renda Fixa - Aplicação em CDB
+55. Date: 2026-01-15 | Type: entrada | Value: 1173.11 | Desc: Vendas - Disponivel BOLETO
+56. Date: 2026-01-17 | Type: entrada | Value: 504.11 | Desc: Vendas - Disponivel BOLETO
+57. Date: 2026-01-19 | Type: saida | Value: 504.11 | Desc: Renda Fixa - Aplicação em CDB
+58. Date: 2026-01-22 | Type: saida | Value: 123.30 | Desc: Renda Fixa - Aplicação em CDB
+59. Date: 2026-01-22 | Type: entrada | Value: 123.30 | Desc: Vendas - Disponivel BOLETO
+60. Date: 2026-01-23 | Type: saida | Value: 311.53 | Desc: Renda Fixa - Aplicação em CDB
+61. Date: 2026-01-23 | Type: saida | Value: 1100.00 | Desc: QR Code Pix enviado - Macintel Seguranca Eletronica E Controle De Acess
+62. Date: 2026-01-23 | Type: entrada | Value: 1411.53 | Desc: Vendas - Disponivel BOLETO
+63. Date: 2026-01-24 | Type: entrada | Value: 1931.19 | Desc: Vendas - Disponivel BOLETO
+64. Date: 2026-01-25 | Type: entrada | Value: 62.81 | Desc: Vendas - Disponivel BOLETO
+65. Date: 2026-01-26 | Type: saida | Value: 4179.00 | Desc: QR Code Pix enviado - Macintel Seguranca Eletronica E Controle De Acess
+66. Date: 2026-01-26 | Type: entrada | Value: 2185.31 | Desc: Vendas - Disponivel BOLETO
+67. Date: 2026-01-27 | Type: saida | Value: 68.26 | Desc: Renda Fixa - Aplicação em CDB
+68. Date: 2026-01-27 | Type: saida | Value: 3300.00 | Desc: QR Code Pix enviado - Macintel Seguranca Eletronica E Controle De Acess
+69. Date: 2026-01-27 | Type: entrada | Value: 3367.95 | Desc: Vendas - Disponivel BOLETO
+70. Date: 2026-01-28 | Type: saida | Value: 1098.37 | Desc: Renda Fixa - Aplicação em CDB
+71. Date: 2026-01-28 | Type: entrada | Value: 1098.37 | Desc: Vendas - Disponivel BOLETO
+72. Date: 2026-01-29 | Type: saida | Value: 3090.00 | Desc: Pix enviado - Marcus Emerson Rocha Garcia
+73. Date: 2026-01-29 | Type: entrada | Value: 3091.20 | Desc: Vendas - Disponivel BOLETO
+74. Date: 2026-01-30 | Type: saida | Value: 6.90 | Desc: Pagamento com QR Code - Para: PAGSEGURO INTERNET INSTITUICAO DE PAGAMENTO
+75. Date: 2026-01-30 | Type: entrada | Value: 1500.00 | Desc: Pix recebido - Expresso Foods Comercio De Alimentos Ltda
+76. Date: 2026-01-30 | Type: saida | Value: 1420.00 | Desc: QR Code Pix enviado - Macintel Seguranca Eletronica E Controle De Acess
+77. Date: 2026-01-30 | Type: entrada | Value: 1427.62 | Desc: Vendas - Disponivel BOLETO
+78. Date: 2026-01-31 | Type: saida | Value: 1500.00 | Desc: Pix enviado - Marcus Emerson Rocha Garcia

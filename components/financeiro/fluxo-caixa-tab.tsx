@@ -136,7 +136,19 @@ const getCategoryBadgeStyles = (category: string) => {
   }
 }
 
-export function FluxoCaixaTab() {
+interface FluxoCaixaTabProps {
+  valoresOcultos?: boolean
+  isMobile?: boolean
+}
+
+export function FluxoCaixaTab({ valoresOcultos = true, isMobile = false }: FluxoCaixaTabProps) {
+  const formatarValor = (valor: number) => {
+    if (valoresOcultos || isMobile) {
+      return "R$ •••"
+    }
+    return formatCurrency(valor)
+  }
+
   const [accounts, setAccounts] = useState<Account[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [chartData, setChartData] = useState<ChartData[]>([])
@@ -945,24 +957,24 @@ export function FluxoCaixaTab() {
             <div className="space-y-1">
               <div className="flex justify-between items-center text-[11px] text-muted-foreground">
                 <span>Boletos a pagar + Créditos a receber:</span>
-                <span className="font-semibold text-foreground">{formatCurrency(currentPeriodData.entradasProjetadas)}</span>
+                <span className="font-semibold text-foreground">{formatarValor(currentPeriodData.entradasProjetadas)}</span>
               </div>
               {currentPeriodData.entradas > 0 && (
                 <div className="flex justify-between items-center text-[11px] text-muted-foreground">
                   <span>Boletos pagos + Créditos Recebidos:</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(currentPeriodData.entradas)}</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatarValor(currentPeriodData.entradas)}</span>
                 </div>
               )}
             </div>
             <div className="border-t border-border pt-2 mt-1">
               <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                {formatCurrency(currentPeriodData.entradas + currentPeriodData.entradasProjetadas)}
+                {formatarValor(currentPeriodData.entradas + currentPeriodData.entradasProjetadas)}
               </div>
               <p className="text-[10px] text-muted-foreground mt-0.5">Total de Receitas</p>
             </div>
           </CardContent>
         </Card>
-
+ 
         <Card className="border border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center justify-between">
@@ -974,24 +986,24 @@ export function FluxoCaixaTab() {
             <div className="space-y-1">
               <div className="flex justify-between items-center text-[11px] text-muted-foreground">
                 <span>Cartão a Pagar:</span>
-                <span className="font-semibold text-foreground">{formatCurrency(currentPeriodData.saidasProjetadas)}</span>
+                <span className="font-semibold text-foreground">{formatarValor(currentPeriodData.saidasProjetadas)}</span>
               </div>
               {currentPeriodData.saidas > 0 && (
                 <div className="flex justify-between items-center text-[11px] text-muted-foreground">
                   <span>Despesas Pagas:</span>
-                  <span className="font-semibold text-red-600 dark:text-red-400">{formatCurrency(currentPeriodData.saidas)}</span>
+                  <span className="font-semibold text-red-600 dark:text-red-400">{formatarValor(currentPeriodData.saidas)}</span>
                 </div>
               )}
             </div>
             <div className="border-t border-border pt-2 mt-1">
               <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                {formatCurrency(currentPeriodData.saidas + currentPeriodData.saidasProjetadas)}
+                {formatarValor(currentPeriodData.saidas + currentPeriodData.saidasProjetadas)}
               </div>
               <p className="text-[10px] text-muted-foreground mt-0.5">Total de Despesas</p>
             </div>
           </CardContent>
         </Card>
-
+ 
         <Card className="border border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center justify-between">
@@ -1002,29 +1014,29 @@ export function FluxoCaixaTab() {
           <CardContent className="space-y-1.5 pt-1">
             <div className="flex justify-between items-center text-[11px] text-muted-foreground border-b border-border/50 pb-1">
               <span>Saldo Anterior:</span>
-              <span className="font-semibold text-foreground">{formatCurrency((currentPeriodData as any).saldoAnterior || 0)}</span>
+              <span className="font-semibold text-foreground">{formatarValor((currentPeriodData as any).saldoAnterior || 0)}</span>
             </div>
             <div className="flex justify-between items-center text-[11px] text-muted-foreground pb-1">
               <span>{selectedPeriod === "all" ? "Resultado Período:" : "Resultado Mês:"}</span>
               <span className={`font-bold ${currentPeriodData.saldo >= 0 ? "text-indigo-600 dark:text-indigo-400" : "text-red-600 dark:text-red-400"}`}>
-                {currentPeriodData.saldo >= 0 ? "+" : ""}{formatCurrency(currentPeriodData.saldo)}
+                {currentPeriodData.saldo >= 0 ? "+" : ""}{formatarValor(currentPeriodData.saldo)}
               </span>
             </div>
             {((currentPeriodData as any).rendimentos > 0) && (
               <div className="flex justify-between items-center text-[11px] text-emerald-600 dark:text-emerald-500 border-b border-border/50 pb-1">
                 <span>Rendimento Juros (Aplicação):</span>
-                <span className="font-semibold">+{formatCurrency((currentPeriodData as any).rendimentos)}</span>
+                <span className="font-semibold">+{formatarValor((currentPeriodData as any).rendimentos)}</span>
               </div>
             )}
             <div className="flex justify-between items-center text-xs font-bold border-t border-border pt-1.5 mt-0.5">
               <span>Saldo Final:</span>
               <span className={`text-xs ${(currentPeriodData as any).saldoFinal >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-                {formatCurrency((currentPeriodData as any).saldoFinal || 0)}
+                {formatarValor((currentPeriodData as any).saldoFinal || 0)}
               </span>
             </div>
           </CardContent>
         </Card>
-
+ 
         {/* Financial accounts list summary */}
         <Card className="border border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
@@ -1043,7 +1055,7 @@ export function FluxoCaixaTab() {
                       <span className="text-[9px] text-muted-foreground font-medium">{getAccountTypeLabel(acc.tipo)}</span>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-foreground">{formatCurrency(acc.saldo_inicial)}</span>
+                  <span className="text-xs font-bold text-foreground">{formatarValor(acc.saldo_inicial)}</span>
                 </div>
               ))}
               {accounts.length === 0 && (
@@ -1071,8 +1083,9 @@ export function FluxoCaixaTab() {
               <ComposedChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="mes" className="text-xs text-muted-foreground" />
-                <YAxis className="text-xs text-muted-foreground" />
+                <YAxis tickFormatter={(val) => (valoresOcultos || isMobile ? "" : formatCurrency(val))} className="text-xs text-muted-foreground" />
                 <Tooltip
+                  formatter={(value: any) => formatarValor(Number(value))}
                   contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", borderRadius: "8px" }}
                   labelClassName="text-foreground font-bold"
                 />
@@ -1570,7 +1583,7 @@ export function FluxoCaixaTab() {
                         </div>
                         <div className="flex items-center gap-3">
                           <div className={`font-bold text-sm ${tx.tipo === "entrada" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-                            {tx.tipo === "entrada" ? "+" : "-"} {formatCurrency(tx.valor)}
+                            {tx.tipo === "entrada" ? "+" : "-"} {formatarValor(tx.valor)}
                           </div>
                           <Button
                             onClick={() => handleDeleteTransaction(tx.id)}
@@ -1602,19 +1615,19 @@ export function FluxoCaixaTab() {
                           <div className="space-y-0.5">
                             <span className="text-muted-foreground block font-medium">Saldo Anterior</span>
                             <span className="font-semibold text-foreground block truncate">
-                              {formatCurrency(currentPeriodData.saldoAnterior)}
+                              {formatarValor(currentPeriodData.saldoAnterior)}
                             </span>
                           </div>
                           <div className="space-y-0.5 border-x border-border/40 px-2">
                             <span className="text-muted-foreground block font-medium">Total Despesas</span>
                             <span className="font-semibold text-red-600 dark:text-red-400 block truncate">
-                              {formatCurrency(currentPeriodData.saidas)}
+                              {formatarValor(currentPeriodData.saidas)}
                             </span>
                           </div>
                           <div className="space-y-0.5 pl-1">
                             <span className="text-muted-foreground block font-medium">Saldo Final</span>
                             <span className={`font-semibold block truncate ${currentPeriodData.saldoFinal >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-                              {formatCurrency(currentPeriodData.saldoFinal)}
+                              {formatarValor(currentPeriodData.saldoFinal)}
                             </span>
                           </div>
                         </div>
@@ -1636,7 +1649,7 @@ export function FluxoCaixaTab() {
                                 ))}
                               </Pie>
                               <Tooltip
-                                formatter={(value: any) => formatCurrency(value)}
+                                formatter={(value: any) => formatarValor(Number(value))}
                                 contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", borderRadius: "8px" }}
                                 itemStyle={{ color: "var(--foreground)" }}
                               />
@@ -1653,7 +1666,7 @@ export function FluxoCaixaTab() {
                                 <span className="text-[9px] text-muted-foreground">({data.count})</span>
                               </div>
                               <span className={`font-bold ${data.tipo === "entrada" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-                                {data.tipo === "entrada" ? "+" : "-"} {formatCurrency(data.value)}
+                                {data.tipo === "entrada" ? "+" : "-"} {formatarValor(data.value)}
                               </span>
                             </div>
                           ))}
@@ -1681,7 +1694,7 @@ export function FluxoCaixaTab() {
               <span className="block bg-muted/50 p-3 rounded-lg text-xs space-y-1 text-foreground font-medium border border-border">
                 <span className="block"><strong>Nome/Banco:</strong> {newAccNome}</span>
                 <span className="block"><strong>Tipo:</strong> {getAccountTypeLabel(newAccTipo)}</span>
-                <span className="block"><strong>Saldo Inicial:</strong> {formatCurrency(parseFloat(newAccSaldo) || 0)}</span>
+                <span className="block"><strong>Saldo Inicial:</strong> {formatarValor(parseFloat(newAccSaldo) || 0)}</span>
                 <span className="block"><strong>Data de Referência:</strong> {formatDate(newAccDataSaldo)}</span>
               </span>
             </AlertDialogDescription>

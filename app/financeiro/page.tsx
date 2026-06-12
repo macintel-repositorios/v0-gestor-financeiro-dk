@@ -1563,7 +1563,7 @@ export default function FinanceiroPage() {
           </TabsContent>
 
           <TabsContent value="fluxo-caixa" className="p-0">
-            <FluxoCaixaTab />
+            <FluxoCaixaTab valoresOcultos={valoresOcultos} isMobile={isMobile} />
           </TabsContent>
         </Tabs>
 

@@ -254,15 +254,22 @@ export async function POST(request: Request) {
       }
     }
 
-    // Insert into DB (with simple duplicates check)
+    // Insert into DB (with smart duplicates count check)
     let importedCount = 0
     if (transactions.length > 0) {
+      const insertedInSession: Record<string, number> = {}
+
       for (const tx of transactions) {
-        const [existing] = await pool.execute(
-          "SELECT id FROM transacoes_financeiras WHERE conta_id = ? AND data = ? AND descricao = ? AND valor = ? AND ativo = 1",
-          [contaId, tx.data, tx.descricao, tx.valor]
+        const key = `${contaId}_${tx.data}_${tx.descricao}_${tx.valor}_${tx.tipo}`
+        insertedInSession[key] = (insertedInSession[key] || 0) + 1
+
+        const [existing]: any = await pool.execute(
+          "SELECT COUNT(*) as count FROM transacoes_financeiras WHERE conta_id = ? AND data = ? AND descricao = ? AND valor = ? AND tipo = ? AND ativo = 1",
+          [contaId, tx.data, tx.descricao, tx.valor, tx.tipo]
         )
-        if (Array.isArray(existing) && existing.length > 0) {
+        const dbCount = existing[0]?.count || 0
+
+        if (insertedInSession[key] <= dbCount) {
           continue
         }
         

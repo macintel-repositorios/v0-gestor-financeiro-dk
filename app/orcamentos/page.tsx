@@ -1078,172 +1078,186 @@ export default function OrcamentosPage({
 
               {/* Mobile — cards compactos */}
               <div className="md:hidden p-4 space-y-4">
-                {filteredOrcamentos.map((orcamento) => {
-                  const isExpanded = expandedOrcamentoId === orcamento.id
+                {!hasActiveFilter ? (
+                  <div className="text-center py-12 bg-card rounded-xl border border-border p-6 shadow-sm">
+                    <Search className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
+                    <h3 className="text-base font-medium text-foreground mb-1">Busque ou filtre para ver os orçamentos</h3>
+                    <p className="text-sm text-muted-foreground">Digite na busca ou selecione um filtro para começar.</p>
+                  </div>
+                ) : filteredOrcamentos.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FileText className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
+                    <h3 className="text-base font-medium text-foreground mb-1">Nenhum orçamento encontrado</h3>
+                    <p className="text-sm text-muted-foreground">Tente ajustar os filtros de busca.</p>
+                  </div>
+                ) : (
+                  filteredOrcamentos.map((orcamento) => {
+                    const isExpanded = expandedOrcamentoId === orcamento.id
 
-                  return (
-                    <div
-                      key={orcamento.id}
-                      className={`rounded-xl border transition-all duration-200 overflow-hidden border-border bg-card ${
-                        isExpanded ? "shadow-lg ring-1 ring-indigo-500" : "shadow-xs hover:shadow-sm"
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setExpandedOrcamentoId(isExpanded ? null : orcamento.id)}
-                        className="w-full text-left p-4 flex items-center gap-3"
+                    return (
+                      <div
+                        key={orcamento.id}
+                        className={`rounded-xl border transition-all duration-200 overflow-hidden border-border bg-card ${
+                          isExpanded ? "shadow-lg ring-1 ring-indigo-500" : "shadow-xs hover:shadow-sm"
+                        }`}
                       >
-                        {/* Ícone */}
-                        <div className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-indigo-500/10 text-indigo-500">
-                          <FileText className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <span className="font-semibold text-sm text-foreground truncate block">Orç. {orcamento.numero}</span>
-                          <span className="text-[11px] text-muted-foreground break-words whitespace-normal leading-tight mt-1 block">{orcamento.cliente_nome}</span>
-                        </div>
-                        <div className="text-right flex-shrink-0 mr-1">
-                          {getStatusBadge(orcamento.situacao)}
-                        </div>
-                        <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
-                          isExpanded ? "rotate-90" : ""
-                        }`} />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedOrcamentoId(isExpanded ? null : orcamento.id)}
+                          className="w-full text-left p-4 flex items-center gap-3"
+                        >
+                          {/* Ícone */}
+                          <div className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-indigo-500/10 text-indigo-500">
+                            <FileText className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="font-semibold text-sm text-foreground truncate block">Orç. {orcamento.numero}</span>
+                            <span className="text-[11px] text-muted-foreground break-words whitespace-normal leading-tight mt-1 block">{orcamento.cliente_nome}</span>
+                          </div>
+                          <div className="text-right flex-shrink-0 mr-1">
+                            {getStatusBadge(orcamento.situacao)}
+                          </div>
+                          <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
+                            isExpanded ? "rotate-90" : ""
+                          }`} />
+                        </button>
 
-                      {isExpanded && (
-                        <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2 duration-200">
-                          <div className="border-t border-border pt-3 space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="bg-muted/40 rounded-lg p-2.5 col-span-2 border border-border/40">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <User className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-[10px] font-medium text-muted-foreground uppercase">Cliente</span>
+                        {isExpanded && (
+                          <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2 duration-200">
+                            <div className="border-t border-border pt-3 space-y-3">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-muted/40 rounded-lg p-2.5 col-span-2 border border-border/40">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <User className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-[10px] font-medium text-muted-foreground uppercase">Cliente</span>
+                                  </div>
+                                  <p className="text-xs font-semibold text-foreground truncate">{orcamento.cliente_nome}</p>
                                 </div>
-                                <p className="text-xs font-semibold text-foreground truncate">{orcamento.cliente_nome}</p>
-                              </div>
-                              <div className="bg-muted/40 rounded-lg p-2.5 border border-border/40">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <Wrench className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-[10px] font-medium text-muted-foreground uppercase">Serviço</span>
+                                <div className="bg-muted/40 rounded-lg p-2.5 border border-border/40">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <Wrench className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-[10px] font-medium text-muted-foreground uppercase">Serviço</span>
+                                  </div>
+                                  <p className="text-xs text-foreground truncate">{getTipoServicoLabel(orcamento.tipo_servico)}</p>
                                 </div>
-                                <p className="text-xs text-foreground truncate">{getTipoServicoLabel(orcamento.tipo_servico)}</p>
-                              </div>
-                              <div className="bg-muted/40 rounded-lg p-2.5 border border-border/40">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <Calendar className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-[10px] font-medium text-muted-foreground uppercase">Data</span>
+                                <div className="bg-muted/40 rounded-lg p-2.5 border border-border/40">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <Calendar className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-[10px] font-medium text-muted-foreground uppercase">Data</span>
+                                  </div>
+                                  <p className="text-xs text-foreground">{formatDate(orcamento.data_orcamento)}</p>
                                 </div>
-                                <p className="text-xs text-foreground">{formatDate(orcamento.data_orcamento)}</p>
-                              </div>
-                              <div className="bg-emerald-500/10 rounded-lg p-2.5 col-span-2 border border-emerald-500/10">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <DollarSign className="h-3 w-3 text-emerald-500" />
-                                  <span className="text-[10px] font-medium text-emerald-500 uppercase">Valor Total</span>
+                                <div className="bg-emerald-500/10 rounded-lg p-2.5 col-span-2 border border-emerald-500/10">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <DollarSign className="h-3 w-3 text-emerald-500" />
+                                    <span className="text-[10px] font-medium text-emerald-500 uppercase">Valor Total</span>
+                                  </div>
+                                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                                    {shouldHideValues ? "R$ •••" : formatCurrency(Number(orcamento.valor_total))}
+                                  </p>
                                 </div>
-                                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                                  {shouldHideValues ? "R$ •••" : formatCurrency(Number(orcamento.valor_total))}
-                                </p>
                               </div>
-                            </div>
 
-                            {/* Ações */}
-                            {(() => {
-                              const mostraNfBtns = orcamento.situacao === "aprovado" || orcamento.situacao === "nota fiscal emitida"
-                              const notaInfo = notasEmitidas[orcamento.numero]
-                              const nfseJaEmitida = notaInfo?.temNfse || false
-                              const nfeJaEmitida = notaInfo?.temNfe || false
-                              
-                              // Lógica para NFS-e
-                              const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
-                              const subtotalMdo = calcularSubtotalMdoOrcamento(orcamento)
-                              const precisaNfse = parcelamentoMdo !== 0 && subtotalMdo > 0
-                              const nfseDesabilitado = !precisaNfse || nfseJaEmitida
-                              
-                              // Lógica para NF-e
-                              const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
-                              const subtotalMaterial = calcularSubtotalMaterialOrcamento(orcamento)
-                              const precisaNfe = parcelamentoMaterial !== 0 && subtotalMaterial > 0
-                              const nfeDesabilitado = !precisaNfe || nfeJaEmitida
+                              {/* Ações */}
+                              {(() => {
+                                const mostraNfBtns = orcamento.situacao === "aprovado" || orcamento.situacao === "nota fiscal emitida"
+                                const notaInfo = notasEmitidas[orcamento.numero]
+                                const nfseJaEmitida = notaInfo?.temNfse || false
+                                const nfeJaEmitida = notaInfo?.temNfe || false
+                                
+                                // Lógica para NFS-e
+                                const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
+                                const subtotalMdo = calcularSubtotalMdoOrcamento(orcamento)
+                                const precisaNfse = parcelamentoMdo !== 0 && subtotalMdo > 0
+                                const nfseDesabilitado = !precisaNfse || nfseJaEmitida
+                                
+                                // Lógica para NF-e
+                                const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
+                                const subtotalMaterial = calcularSubtotalMaterialOrcamento(orcamento)
+                                const precisaNfe = parcelamentoMaterial !== 0 && subtotalMaterial > 0
+                                const nfeDesabilitado = !precisaNfe || nfeJaEmitida
 
-                              return (
-                                <div className="flex flex-wrap gap-2 pt-1">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedOrcamentoNumeroVisualizar(orcamento.numero)
-                                      setIsVisualizarOrcamentoOpen(true)
-                                    }}
-                                    className="flex-1 h-9 text-xs font-medium text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50 bg-transparent hover:bg-indigo-500/10"
-                                  >
-                                    <Eye className="h-3.5 w-3.5 mr-1.5" />
-                                    Visualizar
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedOrcamentoNumeroEditar(orcamento.numero)
-                                      setIsEditarOrcamentoOpen(true)
-                                    }}
-                                    className="flex-1 h-9 text-xs font-medium text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/50 bg-transparent hover:bg-green-500/10"
-                                  >
-                                    <Edit className="h-3.5 w-3.5 mr-1.5" />
-                                    Editar
-                                  </Button>
-                                  {mostraNfBtns && (
+                                return (
+                                  <div className="flex flex-wrap gap-2 pt-1">
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      disabled={nfseDesabilitado}
-                                      className={`h-9 text-xs font-medium border px-3 flex-1 ${
-                                        nfseDesabilitado
-                                          ? "bg-muted border-border text-muted-foreground cursor-not-allowed opacity-50"
-                                          : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-500"
-                                      }`}
-                                      onClick={() => !nfseDesabilitado && handleEmitirNfse(orcamento)}
-                                      title={!precisaNfse ? "Sem cobrança de serviço" : nfseJaEmitida ? "NFS-e já emitida" : "NFS-e"}
+                                      onClick={() => {
+                                        setSelectedOrcamentoNumeroVisualizar(orcamento.numero)
+                                        setIsVisualizarOrcamentoOpen(true)
+                                      }}
+                                      className="flex-1 h-9 text-xs font-medium text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50 bg-transparent hover:bg-indigo-500/10"
                                     >
-                                      <FileCheck className="h-4 w-4" />
+                                      <Eye className="h-3.5 w-3.5 mr-1.5" />
+                                      Visualizar
                                     </Button>
-                                  )}
-                                  {mostraNfBtns && (
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      disabled={nfeDesabilitado}
-                                      className={`h-9 text-xs font-medium border px-3 flex-1 ${
-                                        nfeDesabilitado
-                                          ? "bg-muted border-border text-muted-foreground cursor-not-allowed opacity-50"
-                                          : "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-500"
-                                      }`}
-                                      onClick={() => !nfeDesabilitado && handleEmitirNfe(orcamento)}
-                                      title={!precisaNfe ? "Sem cobrança de material" : nfeJaEmitida ? "NF-e já emitida" : "NF-e"}
+                                      onClick={() => {
+                                        setSelectedOrcamentoNumeroEditar(orcamento.numero)
+                                        setIsEditarOrcamentoOpen(true)
+                                      }}
+                                      className="flex-1 h-9 text-xs font-medium text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/50 bg-transparent hover:bg-green-500/10"
                                     >
-                                      <Package className="h-4 w-4" />
+                                      <Edit className="h-3.5 w-3.5 mr-1.5" />
+                                      Editar
                                     </Button>
-                                  )}
-                                  <OrcamentoDeleteDialog
-                                    orcamento={orcamento}
-                                    onSuccess={fetchOrcamentos}
-                                    trigger={
+                                    {mostraNfBtns && (
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-9 text-xs bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-500 font-medium px-3"
+                                        disabled={nfseDesabilitado}
+                                        className={`h-9 text-xs font-medium border px-3 flex-1 ${
+                                          nfseDesabilitado
+                                            ? "bg-muted border-border text-muted-foreground cursor-not-allowed opacity-50"
+                                            : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-500"
+                                        }`}
+                                        onClick={() => !nfseDesabilitado && handleEmitirNfse(orcamento)}
+                                        title={!precisaNfse ? "Sem cobrança de serviço" : nfseJaEmitida ? "NFS-e já emitida" : "NFS-e"}
                                       >
-                                        <Trash2 className="h-4 w-4" />
+                                        <FileCheck className="h-4 w-4" />
                                       </Button>
-                                    }
-                                  />
-                                </div>
-                              )
-                            })()}
+                                    )}
+                                    {mostraNfBtns && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={nfeDesabilitado}
+                                        className={`h-9 text-xs font-medium border px-3 flex-1 ${
+                                          nfeDesabilitado
+                                            ? "bg-muted border-border text-muted-foreground cursor-not-allowed opacity-50"
+                                            : "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-500"
+                                        }`}
+                                        onClick={() => !nfeDesabilitado && handleEmitirNfe(orcamento)}
+                                        title={!precisaNfe ? "Sem cobrança de material" : nfeJaEmitida ? "NF-e já emitida" : "NF-e"}
+                                      >
+                                        <Package className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                    <OrcamentoDeleteDialog
+                                      orcamento={orcamento}
+                                      onSuccess={fetchOrcamentos}
+                                      trigger={
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="h-9 text-xs bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-500 font-medium px-3"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      }
+                                    />
+                                  </div>
+                                )
+                              })()}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+                        )}
+                      </div>
+                    )
+                  })
+                )}
               </div>
             </>
           )}
