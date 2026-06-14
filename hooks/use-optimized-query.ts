@@ -3,7 +3,7 @@
 // CORREÇÃO 7: Hook otimizado para queries
 
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { debounce } from "@/lib/utils-centralized"
+import { debounce } from "@/lib/utils"
 import { apiClient } from "@/lib/api-client"
 import type { PaginationParams } from "@/types/common"
 

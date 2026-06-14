@@ -40,3 +40,7 @@ next-env.d.ts
 pnpm-lock.yaml
 
 .vercel
+
+# scripts utilitários / análises pontuais (mantidos localmente, fora do versionamento)
+/scratch
+/scripts
