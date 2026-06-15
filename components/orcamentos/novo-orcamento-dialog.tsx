@@ -752,21 +752,21 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
             <div className="lg:col-span-2 space-y-6">
               {/* Cliente */}
               <Card className="border border-border bg-card">
-                <CardHeader 
+                <CardHeader
                   onClick={handleToggleCliente}
-                  className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none hover:bg-muted/65 transition-colors"
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-4 cursor-pointer select-none hover:opacity-95 transition-opacity"
                 >
                   <div className="flex items-center justify-between w-full">
-                    <CardTitle className="text-foreground text-sm flex items-center gap-2 flex-wrap">
-                      <User className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-white text-sm flex items-center gap-2 flex-wrap">
+                      <User className="h-4 w-4 shrink-0" />
                       Dados do Cliente
                       {!expandCliente && cliente && (
-                        <Badge variant="secondary" className="font-semibold text-[10px] sm:text-xs ml-2 py-0 px-2">
+                        <Badge variant="secondary" className="font-semibold text-[10px] sm:text-xs ml-2 py-0 px-2 bg-white/20 text-white border-white/30">
                           {cliente.nome}
                         </Badge>
                       )}
                     </CardTitle>
-                    {expandCliente ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    {expandCliente ? <ChevronUp className="h-4 w-4 text-white shrink-0" /> : <ChevronDown className="h-4 w-4 text-white shrink-0" />}
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 space-y-4">
@@ -1016,21 +1016,21 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
 
               {/* Itens */}
               <Card className="border border-border bg-card">
-                <CardHeader 
+                <CardHeader
                   onClick={handleToggleItens}
-                  className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none hover:bg-muted/65 transition-colors"
+                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 cursor-pointer select-none hover:opacity-95 transition-opacity"
                 >
                   <div className="flex items-center justify-between w-full">
-                    <CardTitle className="text-foreground text-sm flex items-center gap-2">
-                      <Package className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                      <Package className="h-4 w-4 shrink-0" />
                       Itens do Orçamento
                       {!expandItens && itens.length > 0 && (
-                        <Badge variant="secondary" className="font-semibold text-[10px] sm:text-xs ml-2 py-0 px-2">
+                        <Badge variant="secondary" className="font-semibold text-[10px] sm:text-xs ml-2 py-0 px-2 bg-white/20 text-white border-white/30">
                           {itens.length} {itens.length === 1 ? "item" : "itens"} ({formatCurrency(calcularValorMaterial() + calcularValorMaoObra())})
                         </Badge>
                       )}
                     </CardTitle>
-                    {expandItens ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    {expandItens ? <ChevronUp className="h-4 w-4 text-white shrink-0" /> : <ChevronDown className="h-4 w-4 text-white shrink-0" />}
                   </div>
                 </CardHeader>
                 {expandItens && (
@@ -1209,13 +1209,13 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
 
               {/* Observações */}
               <Card className="border border-border bg-card">
-                <CardHeader 
+                <CardHeader
                   onClick={handleToggleObservacoes}
-                  className="bg-muted/40 border-b border-border p-4 cursor-pointer select-none hover:bg-muted/65 transition-colors"
+                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg p-4 cursor-pointer select-none hover:opacity-95 transition-opacity"
                 >
                   <div className="flex items-center justify-between w-full">
-                    <CardTitle className="text-foreground text-sm">Observações</CardTitle>
-                    {expandObservacoes ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    <CardTitle className="text-white text-sm">Observações</CardTitle>
+                    {expandObservacoes ? <ChevronUp className="h-4 w-4 text-white shrink-0" /> : <ChevronDown className="h-4 w-4 text-white shrink-0" />}
                   </div>
                 </CardHeader>
                 {expandObservacoes && (
@@ -1237,27 +1237,27 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
             <div className="space-y-6">
               <div className="sticky top-0 space-y-4">
                 <Card className="border border-border bg-muted/40 overflow-hidden">
-                  <CardHeader 
+                  <CardHeader
                     onClick={handleToggleResumo}
-                    className="bg-muted border-b border-border p-4 cursor-pointer select-none hover:bg-muted/90 transition-colors"
+                    className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-t-lg p-4 cursor-pointer select-none hover:opacity-95 transition-opacity"
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <CardTitle className="text-foreground text-sm flex items-center gap-2">
-                        <Calculator className="h-4 w-4 text-indigo-500" />
+                    <div className="flex items-start justify-between w-full gap-3">
+                      <CardTitle className="text-white text-sm flex items-center gap-2">
+                        <Calculator className="h-4 w-4 shrink-0" />
                         Resumo do Orçamento
                       </CardTitle>
-                      {expandResumo ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                      {expandResumo ? <ChevronUp className="h-4 w-4 text-white shrink-0 mt-0.5" /> : <ChevronDown className="h-4 w-4 text-white shrink-0 mt-0.5" />}
                     </div>
                     {!expandResumo && (
-                      <div className="mt-4 pt-4 border-t border-border space-y-3 text-xs text-foreground font-normal">
-                        <div className="flex items-center gap-2 font-semibold text-foreground mb-2">
-                          <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <div className="mt-4 pt-4 border-t border-purple-400/40 space-y-3 text-xs text-purple-100 font-normal">
+                        <div className="flex items-center gap-2 font-semibold text-white mb-2">
+                          <Calendar className="h-4 w-4 text-purple-200" />
                           <span>Forma de Pagamento</span>
                         </div>
-                        
-                        <div className="flex justify-between items-center text-muted-foreground">
+
+                        <div className="flex justify-between items-center text-purple-200">
                           <span>Mão de Obra:</span>
-                          <span className="font-medium text-blue-600 dark:text-blue-400">
+                          <span className="font-medium text-white">
                             {parcelamentoMdo === 0
                               ? "Sem cobrança"
                               : parcelamentoMdo === 1
@@ -1266,9 +1266,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                           </span>
                         </div>
 
-                        <div className="flex justify-between items-center text-muted-foreground">
+                        <div className="flex justify-between items-center text-purple-200">
                           <span>Material:</span>
-                          <span className="font-medium text-blue-600 dark:text-blue-400">
+                          <span className="font-medium text-white">
                             {materialAVista
                               ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
                               : parcelamentoMaterial === 0
@@ -1279,33 +1279,33 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                           </span>
                         </div>
 
-                        <div className="border-t border-border my-2"></div>
+                        <div className="border-t border-purple-400/40 my-2"></div>
 
-                        <div className="flex justify-between items-center text-sm font-bold">
+                        <div className="flex justify-between items-center text-sm font-bold text-white">
                           <span>Total:</span>
-                          <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calcularTotal())}</span>
+                          <span className="text-emerald-300">{formatCurrency(calcularTotal())}</span>
                         </div>
 
-                        <div className="border-t border-border my-2"></div>
+                        <div className="border-t border-purple-400/40 my-2"></div>
 
-                        <div className="space-y-2 pt-1 text-[11px] text-muted-foreground animate-in fade-in duration-200">
+                        <div className="space-y-2 pt-1 text-[11px] text-purple-200 animate-in fade-in duration-200">
                           <div className="flex justify-between">
                             <span>Itens:</span>
-                            <span className="text-foreground font-medium">{itens.length}</span>
+                            <span className="text-white font-medium">{itens.length}</span>
                           </div>
                           <div className="flex justify-between">
                             <span>Cliente:</span>
-                            <span className="text-foreground font-medium truncate max-w-[200px]" title={cliente ? cliente.nome : ""}>
+                            <span className="text-white font-medium truncate max-w-[200px]" title={cliente ? cliente.nome : ""}>
                               {cliente ? cliente.nome : "Não selecionado"}
                             </span>
                           </div>
                           <div className="flex justify-between">
                             <span>Validade:</span>
-                            <span className="text-foreground font-medium">{validade} dias</span>
+                            <span className="text-white font-medium">{validade} dias</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Situação:</span>
-                            <Badge variant="outline" className="text-[10px] py-0 px-2 uppercase font-semibold">
+                            <Badge variant="outline" className="text-[10px] py-0 px-2 uppercase font-semibold border-white/40 text-white bg-white/10">
                               {situacao === "pendente" && "Pendente"}
                               {situacao === "aprovado" && "Aprovado"}
                               {situacao === "enviado por email" && "Enviado por Email"}

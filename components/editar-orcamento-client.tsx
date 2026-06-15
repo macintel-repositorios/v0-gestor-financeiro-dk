@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -944,61 +944,8 @@ export function EditarOrcamentoClient({
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg shadow-lg p-4 sm:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1 truncate">Editar Orçamento</h1>
-            <p className="text-purple-100 text-sm sm:text-base font-medium">
-              Orçamento <span className="font-mono bg-white/20 px-1.5 py-0.5 rounded text-white">{orcamento.numero}</span>
-            </p>
-            <p className="text-white text-xs sm:text-sm mt-1 opacity-90 truncate font-semibold">
-              {cliente?.nome || "Carregando..."}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
-            {!asDrawer && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  router.push(`/orcamentos/${orcamento.numero}`)
-                }}
-                className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={() => setShowPrintModal(true)}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Editor de impressão
-            </Button>
-            {/* Changed button to use Copy icon and handle duplication */}
-            <Button
-              variant="outline"
-              onClick={handleDuplicar} // Use the new handleDuplicar function
-              disabled={isLoading || saving} // Use isLoading to disable during duplication
-              className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
-            >
-              <Copy className="h-4 w-4 mr-2" />
-              {isLoading ? "Duplicando..." : "Duplicar"} {/* Show loading state */}
-            </Button>
-            <Button
-              onClick={salvarOrcamento}
-              disabled={saving || isLoading || !cliente || (itens.length === 0 && parcelamentoMaterial > 0) || !tipoServico.trim()} // Also disable if duplicating
-              className="bg-white text-purple-600 hover:bg-purple-50 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4 font-semibold shadow-sm"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? "Salvando..." : "Salvar Alterações"}
-            </Button>
-          </div>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
         <div className="lg:col-span-2 space-y-6">
           <Card className="border border-border shadow-lg bg-white dark:bg-card">
             <CardHeader 
@@ -1626,19 +1573,18 @@ export function EditarOrcamentoClient({
 
         {/* Resumo */}
         <div className="space-y-6">
-          <Card className="border border-border shadow-lg bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/10 dark:to-blue-950/10 sticky top-6">
-            <CardHeader 
-              onClick={handleToggleResumo}
-              className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-t-lg p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity"
-            >
-              <div className="flex items-center justify-between w-full">
-                <div className="space-y-1">
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Calculator className="h-5 w-5" />
-                    Resumo do Orçamento
-                  </CardTitle>
-                </div>
-                {expandResumo ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+          <div className="sticky top-0 space-y-4">
+            <Card className="w-full overflow-hidden border border-border bg-muted/40">
+              <CardHeader
+                onClick={handleToggleResumo}
+                className={`w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white p-4 lg:p-6 cursor-pointer select-none hover:opacity-95 transition-opacity ${expandResumo ? "rounded-t-lg" : "rounded-lg"}`}
+              >
+              <div className="flex items-start justify-between w-full gap-3">
+                <CardTitle className="text-white text-base flex items-center gap-2">
+                  <Calculator className="h-5 w-5 shrink-0" />
+                  Resumo do Orçamento
+                </CardTitle>
+                {expandResumo ? <ChevronUp className="h-5 w-5 text-white shrink-0 mt-0.5" /> : <ChevronDown className="h-5 w-5 text-white shrink-0 mt-0.5" />}
               </div>
               {!expandResumo && (
                 <div className="mt-4 pt-4 border-t border-purple-400/40 space-y-3 text-xs text-purple-100 font-normal">
@@ -1646,7 +1592,7 @@ export function EditarOrcamentoClient({
                     <Calendar className="h-4 w-4 text-purple-200" />
                     <span>Forma de Pagamento</span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center text-purple-200">
                     <span>Mão de Obra:</span>
                     <span className="font-medium text-white">
@@ -1675,7 +1621,7 @@ export function EditarOrcamentoClient({
 
                   <div className="flex justify-between items-center text-sm font-bold text-white">
                     <span>Total:</span>
-                    <span className="text-emerald-400 font-extrabold">{formatCurrency(calcularTotal())}</span>
+                    <span className="text-emerald-300">{formatCurrency(calcularTotal())}</span>
                   </div>
 
                   <div className="border-t border-purple-400/40 my-2"></div>
@@ -1697,7 +1643,7 @@ export function EditarOrcamentoClient({
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Situação:</span>
-                      <Badge variant="outline" className="text-[10px] py-0 px-2 uppercase font-semibold border-white/40 text-white bg-white/10 hover:bg-white/20">
+                      <Badge variant="outline" className="text-[10px] py-0 px-2 uppercase font-semibold border-white/40 text-white bg-white/10">
                         {situacao === "pendente" && "Pendente"}
                         {situacao === "aprovado" && "Aprovado"}
                         {situacao === "enviado por email" && "Enviado por Email"}
@@ -1710,8 +1656,7 @@ export function EditarOrcamentoClient({
               )}
             </CardHeader>
             {expandResumo && (
-              <CardContent className="p-6">
-              <div className="space-y-4">
+              <CardContent className="p-4 space-y-4 text-xs">
                 <div className="border-b pb-4">
                   <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-blue-600" />
@@ -1913,10 +1858,37 @@ export function EditarOrcamentoClient({
                     </Badge>
                   </div>
                 </div>
-              </div>
             </CardContent>
             )}
-          </Card>
+            </Card>
+
+            <div className="grid gap-3 w-full">
+              <Button
+                variant="outline"
+                onClick={() => setShowPrintModal(true)}
+                className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 text-sm h-11"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Editor de impressão
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleDuplicar}
+                disabled={isLoading || saving}
+                className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 text-sm h-11"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                {isLoading ? "Duplicando..." : "Duplicar"}
+              </Button>
+              <Button
+                onClick={salvarOrcamento}
+                disabled={saving || isLoading || !cliente || (itens.length === 0 && parcelamentoMaterial > 0) || !tipoServico.trim()}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium h-9 text-xs"
+              >
+                {saving ? "Salvando..." : "Salvar Orçamento"}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
