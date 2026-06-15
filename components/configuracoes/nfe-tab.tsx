@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -365,9 +366,9 @@ export function NfeTab() {
             </div>
             <div className="space-y-2">
               <Label className="text-foreground">Telefone</Label>
-              <Input
+              <PhoneInput
                 value={config.telefone}
-                onChange={(e) => updateConfig("telefone", e.target.value)}
+                onChange={(value) => updateConfig("telefone", value)}
                 placeholder="(11) 99999-9999"
                 className="bg-background border-border text-foreground focus-visible:ring-blue-500"
               />

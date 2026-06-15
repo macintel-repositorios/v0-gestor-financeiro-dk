@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
+import { normalizePhoneForStorage } from "@/lib/phone"
 
 export async function GET() {
   try {
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
       INSERT INTO usuarios (nome, email, cpf, telefone, tipo, senha, ativo, permissoes, data_criacao)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `,
-      [nome, email, cpf || null, telefone || null, tipo, senha, ativo, permissoesJson],
+      [nome, email, cpf || null, normalizePhoneForStorage(telefone, "11"), tipo, senha, ativo, permissoesJson],
     )
 
     return NextResponse.json({

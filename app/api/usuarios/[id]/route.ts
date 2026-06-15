@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
+import { normalizePhoneForStorage } from "@/lib/phone"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -33,6 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params
     const body = await request.json()
     const { nome, email, cpf, telefone, tipo, senha, ativo, permissoes } = body
+    const telefoneNormalizado = normalizePhoneForStorage(telefone, "11")
 
     // Verificar se email já existe em outro usuário
     const existingUser = await query("SELECT id FROM usuarios WHERE email = ? AND id != ?", [email, id])
@@ -48,7 +50,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       UPDATE usuarios 
       SET nome = ?, email = ?, cpf = ?, telefone = ?, tipo = ?, ativo = ?, permissoes = ?, updated_at = NOW()
     `
-    const params_array = [nome, email, cpf || null, telefone || null, tipo, ativo, permissoesJson]
+    const params_array = [nome, email, cpf || null, telefoneNormalizado, tipo, ativo, permissoesJson]
 
     if (senha && senha.trim() !== "") {
       updateQuery += ", senha = ?"

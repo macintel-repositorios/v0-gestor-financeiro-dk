@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
@@ -165,10 +166,10 @@ export function EditarUsuarioDialog({ open, onOpenChange, usuario, onUsuarioAtua
 
               <div className="space-y-2">
                 <Label htmlFor="edit-telefone" className="text-foreground font-medium">Telefone</Label>
-                <Input
+                <PhoneInput
                   id="edit-telefone"
                   value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                  onChange={(value) => setFormData({ ...formData, telefone: value })}
                   className="bg-background border-border text-foreground focus:border-purple-500"
                 />
               </div>

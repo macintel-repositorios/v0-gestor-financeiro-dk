@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -358,14 +359,6 @@ export function LayoutTab() {
   const formatarRG = (value: string) => {
     const numeros = value.replace(/\D/g, "")
     return numeros.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4")
-  }
-
-  const formatarTelefone = (value: string) => {
-    const numeros = value.replace(/\D/g, "")
-    if (numeros.length <= 10) {
-      return numeros.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
-    }
-    return numeros.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3")
   }
 
   const gerarHTMLPapelTimbrado = () => {
@@ -780,12 +773,11 @@ export function LayoutTab() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="empresa-telefone" className="text-muted-foreground">Telefone</Label>
-                <Input
+                <PhoneInput
                   id="empresa-telefone"
                   value={config.empresa_telefone || ""}
-                  onChange={(e) => handleInputChange("empresa_telefone", formatarTelefone(e.target.value))}
+                  onChange={(value) => handleInputChange("empresa_telefone", value)}
                   placeholder="(11) 99999-9999"
-                  maxLength={15}
                   className="bg-background border-border text-foreground"
                 />
               </div>

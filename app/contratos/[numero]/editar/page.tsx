@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
@@ -394,10 +395,10 @@ export default function EditarContratoPage({
 
             <div>
               <Label htmlFor="cliente_telefone">Telefone</Label>
-              <Input
+              <PhoneInput
                 id="cliente_telefone"
                 value={contrato.cliente_telefone || ""}
-                onChange={(e) => updateCliente("cliente_telefone", e.target.value)}
+                onChange={(value) => updateCliente("cliente_telefone", value)}
                 placeholder="(11) 99999-9999"
               />
             </div>

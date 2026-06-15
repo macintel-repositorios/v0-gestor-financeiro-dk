@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { query } from "@/lib/db"
+import { normalizePhoneForStorage } from "@/lib/phone"
 
 export async function GET() {
   try {
@@ -34,6 +35,8 @@ export async function POST(request: Request) {
 
     // Verifica se já existe uma configuração
     const existing = await query(`SELECT id FROM timbrado_config WHERE ativo = 1 LIMIT 1`)
+
+    const empresaTelefoneNormalizado = normalizePhoneForStorage(data.empresa_telefone, "11")
 
     if (existing.length > 0) {
       // Atualiza configuração existente
@@ -75,7 +78,7 @@ export async function POST(request: Request) {
           data.empresa_bairro || null,
           data.empresa_cidade || null,
           data.empresa_uf || null,
-          data.empresa_telefone || null,
+          empresaTelefoneNormalizado || null,
           data.empresa_email || null,
           data.empresa_site || null,
           data.empresa_representante_legal || null,
@@ -144,7 +147,7 @@ export async function POST(request: Request) {
           data.empresa_bairro || null,
           data.empresa_cidade || null,
           data.empresa_uf || null,
-          data.empresa_telefone || null,
+          empresaTelefoneNormalizado || null,
           data.empresa_email || null,
           data.empresa_site || null,
           data.empresa_representante_legal || null,

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
@@ -352,10 +353,10 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
           </div>
           <div>
             <Label htmlFor="telefone">Telefone</Label>
-            <Input
+            <PhoneInput
               id="telefone"
               value={formData.telefone}
-              onChange={(e) => handleInputChange("telefone", e.target.value)}
+              onChange={(value) => handleInputChange("telefone", value)}
               placeholder="(00) 00000-0000"
             />
           </div>
@@ -526,10 +527,10 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="telefone_adm">Telefone</Label>
-            <Input
+            <PhoneInput
               id="telefone_adm"
               value={formData.telefone_adm}
-              onChange={(e) => handleInputChange("telefone_adm", e.target.value)}
+              onChange={(value) => handleInputChange("telefone_adm", value)}
               placeholder="(00) 00000-0000"
             />
           </div>

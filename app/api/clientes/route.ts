@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
+import { normalizePhoneForStorage } from "@/lib/phone"
 
 export async function GET(request: NextRequest) {
   try {
@@ -156,7 +157,7 @@ export async function POST(request: NextRequest) {
       data.cnpj?.toUpperCase() || null,
       data.cpf?.toUpperCase() || null,
       data.email?.toLowerCase() || null,
-      data.telefone || null,
+      normalizePhoneForStorage(data.telefone, "11"),
       data.endereco?.toUpperCase() || null,
       data.bairro?.toUpperCase() || null,
       data.cidade?.toUpperCase() || null,
@@ -173,7 +174,7 @@ export async function POST(request: NextRequest) {
       data.observacoes?.toUpperCase() || null,
       data.nome_adm?.toUpperCase() || null,
       data.contato_adm?.toUpperCase() || null,
-      data.telefone_adm || null,
+      normalizePhoneForStorage(data.telefone_adm, "11"),
       data.email_adm?.toLowerCase() || null,
       data.contribuinte_icms !== undefined ? Number(data.contribuinte_icms) : 0,
       data.inscricao_estadual?.replace(/[^\d]/g, "") || null,

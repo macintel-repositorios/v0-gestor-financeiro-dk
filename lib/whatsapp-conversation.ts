@@ -1,4 +1,5 @@
 import { query } from "./db"
+import { normalizePhoneForStorage } from "./phone"
 
 export enum ConversationStage {
   TIPO_CLIENTE = "tipo_cliente",
@@ -412,7 +413,7 @@ export async function createClient(data: {
         data.bairro?.toUpperCase() || null,
         data.cidade?.toUpperCase() || null,
         data.estado?.toUpperCase() || null,
-        data.telefone,
+        normalizePhoneForStorage(data.telefone),
         data.email?.toLowerCase() || null,
         data.sindico?.toUpperCase() || null,
         data.contato?.toUpperCase() || null,

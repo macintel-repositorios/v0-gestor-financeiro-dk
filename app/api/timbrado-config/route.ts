@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
+import { normalizePhoneForStorage } from "@/lib/phone"
 
 export async function GET() {
   try {
@@ -68,6 +69,8 @@ export async function POST(request: NextRequest) {
     await query("UPDATE timbrado_config SET ativo = 0")
 
     // Inserir nova configuração
+    const telefoneNormalizado = normalizePhoneForStorage(empresa_telefone, "11")
+
     const result = await query(
       `
       INSERT INTO timbrado_config (
@@ -81,7 +84,7 @@ export async function POST(request: NextRequest) {
         empresa_nome,
         empresa_cnpj,
         empresa_endereco,
-        empresa_telefone,
+        telefoneNormalizado || null,
         empresa_email,
         empresa_site,
         tamanho_papel,

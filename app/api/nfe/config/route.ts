@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { pool } from "@/lib/db"
+import { normalizePhoneForStorage } from "@/lib/phone"
 
 export async function GET() {
   try {
@@ -41,13 +42,14 @@ export async function POST(request: NextRequest) {
         "crt = ?", "serie_nfe = ?", "proximo_numero_nfe = ?", "ambiente = ?",
         "info_complementar = ?", "natureza_operacao = ?",
       ]
+      const telefoneNormalizado = normalizePhoneForStorage(telefone, "11")
       const setValues: any[] = [
         razao_social, nome_fantasia || null, (cnpj || "").replace(/\D/g, ""),
         (inscricao_estadual || "").replace(/\D/g, ""),
         endereco || null, numero_endereco || null, complemento || null,
         bairro || null, cidade || "Sao Paulo", uf || "SP",
         (cep || "").replace(/\D/g, "") || null, codigo_municipio || "3550308",
-        telefone || null, crt || 1, serie_nfe || 1,
+        telefoneNormalizado || null, crt || 1, serie_nfe || 1,
         proximo_numero_nfe || existingConfigs[0].proximo_numero_nfe || 1,
         ambiente || 2, info_complementar || null, natureza_operacao || "Venda",
       ]
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
           endereco || null, numero_endereco || null, complemento || null,
           bairro || null, cidade || "Sao Paulo", uf || "SP",
           (cep || "").replace(/\D/g, "") || null, codigo_municipio || "3550308",
-          telefone || null, crt || 1, serie_nfe || 1,
+          telefoneNormalizado || null, crt || 1, serie_nfe || 1,
           proximo_numero_nfe || 1, ambiente || 2,
           info_complementar || null, natureza_operacao || "Venda",
           certificado_base64 || null, certificado_senha || null, certificado_validade || null,

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -463,10 +464,10 @@ export default function NovoClientePage() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="telefone">Telefone</Label>
-                  <Input
+                  <PhoneInput
                     id="telefone"
                     value={formData.telefone}
-                    onChange={(e) => handleInputChange("telefone", e.target.value)}
+                    onChange={(value) => handleInputChange("telefone", value)}
                     placeholder="(11) 99999-9999"
                     className="h-9"
                   />
@@ -797,10 +798,10 @@ export default function NovoClientePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label htmlFor="telefone_adm">Telefone</Label>
-                  <Input
+                  <PhoneInput
                     id="telefone_adm"
                     value={formData.telefone_adm}
-                    onChange={(e) => handleInputChange("telefone_adm", e.target.value)}
+                    onChange={(value) => handleInputChange("telefone_adm", value)}
                     placeholder="(11) 99999-9999"
                     className="h-9"
                   />

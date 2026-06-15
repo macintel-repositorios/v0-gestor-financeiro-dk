@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
@@ -162,10 +163,10 @@ export function NovoUsuarioDialog({ onUsuarioCriado }: NovoUsuarioDialogProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="telefone" className="text-foreground font-medium">Telefone</Label>
-                <Input
+                <PhoneInput
                   id="telefone"
                   value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                  onChange={(value) => setFormData({ ...formData, telefone: value })}
                   placeholder="(00) 00000-0000"
                   className="bg-background border-border text-foreground focus:border-purple-500"
                 />
