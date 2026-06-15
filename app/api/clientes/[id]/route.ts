@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { pool } from "@/lib/database"
+import { normalizePhoneForStorage } from "@/lib/phone"
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
