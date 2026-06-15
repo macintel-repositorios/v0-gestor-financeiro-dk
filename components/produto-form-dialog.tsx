@@ -203,18 +203,26 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
     try {
       setGerandoCodigo(true)
 
-      const response = await fetch("/api/produtos/generate-code", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          categoria: categorias.find((c) => c.id.toString() === categoriaId)?.nome || "", // busca por nome (sem depender do ID)
-          marca: marca !== "Nenhuma marca" ? marca : null,
-        }),
-      })
+      let result: any
 
-      const result = await response.json()
+      if (isServicoCategory) {
+        // Serviço: segue a mesma lógica de código da página de produtos (015 + sequência)
+        const response = await fetch("/api/produtos/generate-service-code")
+        result = await response.json()
+      } else {
+        // Produto: código da categoria + sigla da marca + sequência da marca
+        const response = await fetch("/api/produtos/generate-code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            categoria: categorias.find((c) => c.id.toString() === categoriaId)?.nome || "", // busca por nome (sem depender do ID)
+            marca: marca !== "Nenhuma marca" ? marca : null,
+          }),
+        })
+        result = await response.json()
+      }
 
       if (result.success) {
         setCodigo(result.data.codigo)
@@ -235,7 +243,7 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
     } finally {
       setGerandoCodigo(false)
     }
-  }, [categoriaId, marca, toast])
+  }, [categoriaId, marca, isServicoCategory, categorias, toast])
 
   // Gerar código automaticamente apenas para novos produtos e quando necessário
   useEffect(() => {
@@ -308,7 +316,9 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
       const produtoData = {
         codigo: codigo.trim(),
         descricao: descricao.trim(),
-        tipo: categoria?.nome || "",
+        // Serviço grava o rótulo canônico "Serviços" (reconhecido na aba Serviços da página de produtos);
+        // produto grava o nome da categoria selecionada.
+        tipo: isServicoCategory ? "Serviços" : categoria?.nome || "",
         marca: isServicoCategory ? null : marca !== "Nenhuma marca" ? marca : null,
         ncm: ncm.trim() || null,
         valor_custo: valorCusto,
@@ -468,14 +478,23 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
 
         {/* Marca */}
         <div>
-          <Label htmlFor="marca">Marca {!isServicoCategory && "*"}</Label>
+          <Label htmlFor="marca">Marca {!isServicoCategory && categoriaId && "*"}</Label>
           <MarcaCombobox
             value={marca}
             onValueChange={setMarca}
-            placeholder={isServicoCategory ? "N/A para serviços" : "Selecione uma marca"}
-            disabled={isServicoCategory}
-            className={isServicoCategory ? "bg-gray-50 text-gray-400" : ""}
+            placeholder={
+              !categoriaId
+                ? "Selecione a categoria primeiro"
+                : isServicoCategory
+                  ? "N/A para serviços"
+                  : "Selecione uma marca"
+            }
+            disabled={!categoriaId || isServicoCategory}
+            className={!categoriaId || isServicoCategory ? "bg-gray-50 text-gray-400" : ""}
           />
+          {!categoriaId && (
+            <p className="text-xs text-gray-500 mt-1">Escolha a categoria para habilitar a marca</p>
+          )}
           {isServicoCategory && <p className="text-xs text-gray-500 mt-1">Marca não é aplicável para serviços</p>}
         </div>
       </div>
