@@ -81,7 +81,7 @@ export function EditarOrcamentoDialog({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
+      <SheetContent className="w-full sm:max-w-5xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
         <SheetHeader className="mb-4">
           <SheetTitle className="flex items-center gap-2">
             <Edit className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
