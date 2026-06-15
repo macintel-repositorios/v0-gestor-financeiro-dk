@@ -155,24 +155,30 @@ export async function POST(request: NextRequest) {
     if (!codigoFinal) {
       try {
         if (isServico) {
-          // Para serviços, usar código 015 + numeração sequencial
+          // Serviço: código canônico 015 + 3 dígitos (ignora legados malformados/com sigla)
           const [servicoRows] = await pool.execute(
-            `SELECT codigo FROM produtos 
-             WHERE codigo LIKE '015%' 
-             ORDER BY CAST(SUBSTRING(codigo, 4) AS UNSIGNED) DESC 
+            `SELECT CAST(SUBSTRING(codigo, 4) AS UNSIGNED) AS num
+             FROM produtos
+             WHERE codigo REGEXP '^015[0-9]{3}$'
+             ORDER BY num DESC
              LIMIT 1`,
           )
 
           let proximoNumero = 1
           if (Array.isArray(servicoRows) && servicoRows.length > 0) {
-            const ultimoCodigo = (servicoRows[0] as any).codigo
-            const numeroAtual = Number.parseInt(ultimoCodigo.substring(3), 10)
-            if (!isNaN(numeroAtual)) {
-              proximoNumero = numeroAtual + 1
-            }
+            const num = Number((servicoRows[0] as any).num)
+            if (!Number.isNaN(num)) proximoNumero = num + 1
           }
 
-          codigoFinal = `015${proximoNumero.toString().padStart(3, "0")}`
+          // Garante unicidade pulando códigos já existentes
+          for (let i = 0; i < 10000; i++) {
+            const candidato = `015${(proximoNumero + i).toString().padStart(3, "0")}`
+            const [existe] = await pool.execute("SELECT id FROM produtos WHERE codigo = ?", [candidato])
+            if (!Array.isArray(existe) || existe.length === 0) {
+              codigoFinal = candidato
+              break
+            }
+          }
         } else {
           // Para produtos, usar categoria + marca
           if (!marca || marca.trim() === "") {

@@ -1,46 +1,45 @@
 import { NextResponse } from "next/server"
 import { pool } from "@/lib/db"
 
+/**
+ * Gera o próximo código de serviço no padrão canônico: 015 + 3 dígitos (ex: 015014).
+ * Considera APENAS códigos no formato `015` + dígitos (ignora códigos legados com
+ * sigla de marca, ex: 015ITB075), pega o maior número e garante unicidade.
+ */
 export async function GET() {
   try {
-    // Buscar o último código de serviço (que começa com 015)
+    // Maior número entre os códigos no padrão canônico 015 + 3 dígitos
+    // (exclui legados malformados de 9 dígitos como 015002925 e códigos com sigla)
     const [rows] = await pool.execute(
-      `SELECT codigo FROM produtos 
-       WHERE codigo LIKE '015%' 
-       ORDER BY codigo DESC 
+      `SELECT CAST(SUBSTRING(codigo, 4) AS UNSIGNED) AS num
+       FROM produtos
+       WHERE codigo REGEXP '^015[0-9]{3}$'
+       ORDER BY num DESC
        LIMIT 1`,
     )
 
     let proximoNumero = 1
-
     if (Array.isArray(rows) && rows.length > 0) {
-      const ultimoCodigo = (rows as any[])[0].codigo
-      console.log("Último código encontrado:", ultimoCodigo)
+      const num = Number((rows as any[])[0].num)
+      if (!Number.isNaN(num)) proximoNumero = num + 1
+    }
 
-      // Extrair os últimos 3 dígitos do código
-      const numeroAtual = Number.parseInt(ultimoCodigo.substring(3))
-      if (!isNaN(numeroAtual)) {
-        proximoNumero = numeroAtual + 1
+    // Garante unicidade: pula qualquer código que já exista
+    let novoCodigo = ""
+    for (let i = 0; i < 10000; i++) {
+      const candidato = `015${(proximoNumero + i).toString().padStart(3, "0")}`
+      const [existe] = await pool.execute("SELECT id FROM produtos WHERE codigo = ?", [candidato])
+      if (!Array.isArray(existe) || existe.length === 0) {
+        novoCodigo = candidato
+        break
       }
     }
 
-    // Formatar o código com 3 dígitos
-    const novoCodigo = `015${proximoNumero.toString().padStart(3, "0")}`
-
-    console.log("Novo código gerado:", novoCodigo)
-
-    // Verificar se o código já existe (segurança extra)
-    const [existeRows] = await pool.execute("SELECT id FROM produtos WHERE codigo = ?", [novoCodigo])
-
-    if (Array.isArray(existeRows) && existeRows.length > 0) {
-      // Se existir, tentar o próximo
-      const codigoAlternativo = `015${(proximoNumero + 1).toString().padStart(3, "0")}`
-      console.log("Código já existe, usando alternativo:", codigoAlternativo)
-
-      return NextResponse.json({
-        success: true,
-        data: { codigo: codigoAlternativo },
-      })
+    if (!novoCodigo) {
+      return NextResponse.json(
+        { success: false, message: "Não foi possível gerar código de serviço único" },
+        { status: 500 },
+      )
     }
 
     return NextResponse.json({

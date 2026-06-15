@@ -54,22 +54,29 @@ export async function POST(request: NextRequest) {
       codigoCategoria.toLowerCase() === "servicos"
 
     if (isServico) {
-      // Para serviços: SERV + sequência (ex: SERV001, SERV002...)
-      let contador = 1
-      let codigoTentativa = ""
+      // Serviço: código canônico 015 + 3 dígitos (ex: 015014), ignorando legados malformados/com sigla
+      const [maxRows] = await pool.execute(
+        `SELECT CAST(SUBSTRING(codigo, 4) AS UNSIGNED) AS num
+         FROM produtos
+         WHERE codigo REGEXP '^015[0-9]{3}$'
+         ORDER BY num DESC
+         LIMIT 1`,
+      )
 
-      do {
-        codigoTentativa = `SERV${contador.toString().padStart(3, "0")}`
+      let proximoNumero = 1
+      if (Array.isArray(maxRows) && maxRows.length > 0) {
+        const num = Number((maxRows[0] as any).num)
+        if (!Number.isNaN(num)) proximoNumero = num + 1
+      }
 
+      for (let i = 0; i < 10000; i++) {
+        const codigoTentativa = `015${(proximoNumero + i).toString().padStart(3, "0")}`
         const [existeRows] = await pool.execute("SELECT id FROM produtos WHERE codigo = ?", [codigoTentativa])
-
         if (!Array.isArray(existeRows) || existeRows.length === 0) {
           codigoGerado = codigoTentativa
           break
         }
-
-        contador++
-      } while (contador <= 9999)
+      }
 
       if (!codigoGerado) {
         return NextResponse.json(
