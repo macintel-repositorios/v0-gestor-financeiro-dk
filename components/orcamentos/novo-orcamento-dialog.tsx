@@ -774,8 +774,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                     <>
                       <div className="flex flex-col sm:flex-row gap-2">
                         <div className="flex-1">
-                          <Label className="text-xs">Cliente *</Label>
+                          <Label htmlFor="cliente_combobox" className="text-xs">Cliente *</Label>
                           <ClienteCombobox
+                            id="cliente_combobox"
                             value={cliente}
                             onValueChange={(val) => {
                               setCliente(val)
@@ -832,8 +833,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                       <div className="space-y-4 mt-3">
                         <div className="grid grid-cols-3 gap-3">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Distância (Km)</Label>
+                            <Label htmlFor="distancia_km" className="text-[10px] text-muted-foreground">Distância (Km)</Label>
                             <Input
+                              id="distancia_km"
                               type="number"
                               value={distanciaKm}
                               onChange={(e) => setDistanciaKm(Number.parseFloat(e.target.value) || 0)}
@@ -841,8 +843,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                             />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Taxa Boleto (R$)</Label>
+                            <Label htmlFor="valor_boleto" className="text-[10px] text-muted-foreground">Taxa Boleto (R$)</Label>
                             <Input
+                              id="valor_boleto"
                               type="number"
                               value={valorBoleto}
                               onChange={(e) => setValorBoleto(Number.parseFloat(e.target.value) || 3.5)}
@@ -850,8 +853,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                             />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Prazo (dias)</Label>
+                            <Label htmlFor="prazo_dias" className="text-[10px] text-muted-foreground">Prazo (dias)</Label>
                             <Input
+                              id="prazo_dias"
                               type="number"
                               value={prazoDias}
                               onChange={(e) => setPrazoDias(Number.parseInt(e.target.value) || 5)}
@@ -862,8 +866,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
 
                         <div className="grid grid-cols-3 gap-3">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Data Início</Label>
+                            <Label htmlFor="data_inicio" className="text-[10px] text-muted-foreground">Data Início</Label>
                             <Input
+                              id="data_inicio"
                               type="date"
                               value={dataInicio}
                               onChange={(e) => setDataInicio(e.target.value)}
@@ -871,8 +876,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                             />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Juros (a.m.) %</Label>
+                            <Label htmlFor="juros_am" className="text-[10px] text-muted-foreground">Juros (a.m.) %</Label>
                             <Input
+                              id="juros_am"
                               type="number"
                               value={jurosAm}
                               onChange={(e) => setJurosAm(Number.parseFloat(e.target.value) || 2.0)}
@@ -880,8 +886,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                             />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Desconto MDO %</Label>
+                            <Label htmlFor="desconto_mdo_percent" className="text-[10px] text-muted-foreground">Desconto MDO %</Label>
                             <Input
+                              id="desconto_mdo_percent"
                               type="number"
                               value={descontoMdoPercent}
                               onChange={(e) => setDescontoMdoPercent(Number.parseFloat(e.target.value) || 0)}
@@ -892,8 +899,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Imp. Serviço %</Label>
+                            <Label htmlFor="imposto_servico" className="text-[10px] text-muted-foreground">Imp. Serviço %</Label>
                             <Input
+                              id="imposto_servico"
                               type="number"
                               value={impostoServico}
                               onChange={(e) => setImpostoServico(Number.parseFloat(e.target.value) || 10.9)}
@@ -901,8 +909,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                             />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Imp. Material %</Label>
+                            <Label htmlFor="imposto_material" className="text-[10px] text-muted-foreground">Imp. Material %</Label>
                             <Input
+                              id="imposto_material"
                               type="number"
                               value={impostoMaterial}
                               onChange={(e) => setImpostoMaterial(Number.parseFloat(e.target.value) || 12.7)}
@@ -942,8 +951,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                       <div className="space-y-4 mt-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <Label className="text-xs">Tipo de Serviço *</Label>
+                            <Label htmlFor="tipo_servico" className="text-xs">Tipo de Serviço *</Label>
                             <Input
+                              id="tipo_servico"
                               value={tipoServico}
                               onChange={(e) => setTipoServico(e.target.value)}
                               placeholder="Ex: Manutenção..."
@@ -952,8 +962,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Validade (dias)</Label>
+                            <Label htmlFor="validade_dias" className="text-xs">Validade (dias)</Label>
                             <Input
+                              id="validade_dias"
                               type="number"
                               value={validade}
                               onChange={(e) => setValidade(Number.parseInt(e.target.value) || 30)}
@@ -963,8 +974,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                         </div>
 
                         <div>
-                          <Label className="text-xs">Data do Orçamento</Label>
+                          <Label htmlFor="data_orcamento" className="text-xs">Data do Orçamento</Label>
                           <Input
+                            id="data_orcamento"
                             type="date"
                             value={dataOrcamento}
                             onChange={(e) => setDataOrcamento(e.target.value)}
@@ -973,8 +985,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                         </div>
 
                         <div className="space-y-1.5 mt-2">
-                          <Label className="text-xs">Descrição dos Detalhes</Label>
+                          <Label htmlFor="detalhes_servico" className="text-xs">Descrição dos Detalhes</Label>
                           <Textarea
+                            id="detalhes_servico"
                             ref={detailsTextareaRef}
                             value={detalhesServico}
                             onChange={(e) => setDetalhesServico(e.target.value)}
@@ -1138,8 +1151,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                               onClick={(e) => e.stopPropagation()}
                             >
                               <div className="space-y-0.5">
-                                <Label className="text-[9px] text-muted-foreground">Quantidade</Label>
+                                <Label htmlFor={`item_quantidade_${index}`} className="text-[9px] text-muted-foreground">Quantidade</Label>
                                 <Input
+                                  id={`item_quantidade_${index}`}
                                   type="number"
                                   min="1"
                                   step="1"
@@ -1151,8 +1165,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                                 />
                               </div>
                               <div className="space-y-0.5">
-                                <Label className="text-[9px] text-muted-foreground">Valor Unitário (R$)</Label>
+                                <Label htmlFor={`item_valor_unitario_${index}`} className="text-[9px] text-muted-foreground">Valor Unitário (R$)</Label>
                                 <Input
+                                  id={`item_valor_unitario_${index}`}
                                   type="number"
                                   step="0.01"
                                   min="0"
@@ -1164,8 +1179,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                                 />
                               </div>
                               <div className="space-y-0.5">
-                                <Label className="text-[9px] text-muted-foreground">Mão de Obra (R$)</Label>
+                                <Label htmlFor={`item_valor_mao_obra_${index}`} className="text-[9px] text-muted-foreground">Mão de Obra (R$)</Label>
                                 <Input
+                                  id={`item_valor_mao_obra_${index}`}
                                   type="number"
                                   step="0.01"
                                   min="0"
@@ -1304,11 +1320,12 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                   {expandResumo && (
                     <CardContent className="p-4 space-y-4 text-xs">
                     <div>
-                      <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Parcelas</Label>
+                      <div className="text-[10px] text-muted-foreground uppercase font-semibold">Parcelas</div>
                       <div className="grid grid-cols-2 gap-2 mt-1">
                         <div>
-                          <Label className="text-[9px]">MDO</Label>
+                          <Label htmlFor="parcelamento_mdo_dialog" className="text-[9px]">MDO</Label>
                           <Input
+                            id="parcelamento_mdo_dialog"
                             type="number"
                             min="0"
                             value={parcelamentoMdo}
@@ -1317,8 +1334,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                           />
                         </div>
                         <div>
-                          <Label className="text-[9px]">Material</Label>
+                          <Label htmlFor="parcelamento_material_dialog" className="text-[9px]">Material</Label>
                           <Input
+                            id="parcelamento_material_dialog"
                             type="number"
                             min="0"
                             value={parcelamentoMaterial}
@@ -1332,6 +1350,7 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                         <input
                           type="checkbox"
                           id="material_a_vista_dialog"
+                          aria-label="Material à vista"
                           checked={materialAVista}
                           onChange={(e) => {
                             setMaterialAVista(e.target.checked)

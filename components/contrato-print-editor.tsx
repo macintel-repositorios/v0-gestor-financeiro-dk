@@ -1633,6 +1633,8 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                     {paginasPreview.map((_, index) => (
                       <button
                         key={index}
+                        type="button"
+                        aria-label={`Ir para a página ${index + 1}`}
                         onClick={() => setPaginaAtual(index)}
                         className={`w-3 h-3 rounded-full ${index === paginaAtual ? "bg-blue-600" : "bg-gray-300"}`}
                       />

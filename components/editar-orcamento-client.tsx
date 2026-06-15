@@ -1030,6 +1030,7 @@ export function EditarOrcamentoClient({
                     <div>
                       <Label htmlFor="cliente">Cliente *</Label>
                       <ClienteCombobox
+                        id="cliente"
                         value={cliente}
                         onValueChange={(val) => {
                           setCliente(val)
@@ -1384,8 +1385,9 @@ export function EditarOrcamentoClient({
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <Label>Adicionar Produto/Serviço</Label>
+                    <Label htmlFor="produto_combobox">Adicionar Produto/Serviço</Label>
                     <ProdutoCombobox
+                      id="produto_combobox"
                       key={produtoComboboxKey}
                       onSelect={adicionarItem}
                       placeholder="Busque e selecione um produto..."
@@ -1533,8 +1535,9 @@ export function EditarOrcamentoClient({
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div className="space-y-1">
-                              <Label className="text-[10px] text-gray-500 dark:text-gray-400">Quantidade</Label>
+                              <Label htmlFor={`item_quantidade_${index}`} className="text-[10px] text-gray-500 dark:text-gray-400">Quantidade</Label>
                               <Input
+                                id={`item_quantidade_${index}`}
                                 type="number"
                                 min="1"
                                 step="1"
@@ -1546,8 +1549,9 @@ export function EditarOrcamentoClient({
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label className="text-[10px] text-gray-500 dark:text-gray-400">Valor Unitário (R$)</Label>
+                              <Label htmlFor={`item_valor_unitario_${index}`} className="text-[10px] text-gray-500 dark:text-gray-400">Valor Unitário (R$)</Label>
                               <Input
+                                id={`item_valor_unitario_${index}`}
                                 type="number"
                                 step="0.01"
                                 min="0"
@@ -1559,8 +1563,9 @@ export function EditarOrcamentoClient({
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label className="text-[10px] text-gray-500 dark:text-gray-400">Mão de Obra (R$)</Label>
+                              <Label htmlFor={`item_valor_mao_obra_${index}`} className="text-[10px] text-gray-500 dark:text-gray-400">Mão de Obra (R$)</Label>
                               <Input
+                                id={`item_valor_mao_obra_${index}`}
                                 type="number"
                                 step="0.01"
                                 min="0"
@@ -1763,6 +1768,7 @@ export function EditarOrcamentoClient({
                         <input
                           type="checkbox"
                           id="material_a_vista"
+                          aria-label="Material à vista"
                           checked={materialAVista}
                           onChange={(e) => {
                             setMaterialAVista(e.target.checked)

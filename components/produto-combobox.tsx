@@ -30,12 +30,14 @@ export interface Produto {
 }
 
 interface ProdutoComboboxProps {
+  id?: string
   onSelect: (produto: Produto) => void
   placeholder?: string
   showNewProductButton?: boolean
 }
 
 export function ProdutoCombobox({
+  id,
   onSelect,
   placeholder = "Selecione um produto...",
   showNewProductButton = true,
@@ -85,6 +87,7 @@ export function ProdutoCombobox({
       <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={id}
           variant="outline"
           role="combobox"
           aria-expanded={open}

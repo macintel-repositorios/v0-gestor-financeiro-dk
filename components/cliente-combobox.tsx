@@ -32,6 +32,7 @@ export interface Cliente {
 }
 
 interface ClienteComboboxProps {
+  id?: string
   value?: Cliente | null
   onValueChange?: (cliente: Cliente | null) => void
   onClienteSelect?: (cliente: Cliente | null) => void
@@ -41,6 +42,7 @@ interface ClienteComboboxProps {
 }
 
 export function ClienteCombobox({
+  id,
   value,
   onValueChange,
   onClienteSelect,
@@ -129,6 +131,7 @@ export function ClienteCombobox({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            id={id}
             variant="outline"
             role="combobox"
             aria-expanded={open}
