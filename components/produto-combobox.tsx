@@ -105,7 +105,10 @@ export function ProdutoCombobox({
             onValueChange={setSearchValue}
             className="h-9"
           />
-          <CommandList>
+          <CommandList
+            className="max-h-[50vh] sm:max-h-[300px] overflow-y-auto overscroll-contain"
+            onWheel={(event) => event.stopPropagation()}
+          >
             {loading ? (
               <div className="p-4 text-center text-sm text-gray-500">Carregando produtos...</div>
             ) : (

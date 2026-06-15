@@ -168,7 +168,10 @@ export function ClienteCombobox({
               onValueChange={setSearchTerm}
               className="h-9"
             />
-            <CommandList className="max-h-[50vh] sm:max-h-[300px] overflow-y-auto">
+            <CommandList
+              className="max-h-[50vh] sm:max-h-[300px] overflow-y-auto overscroll-contain"
+              onWheel={(event) => event.stopPropagation()}
+            >
               <CommandEmpty>
                 {loading ? (
                   <div className="flex items-center justify-center py-4">
