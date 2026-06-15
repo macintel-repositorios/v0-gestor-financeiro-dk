@@ -73,7 +73,16 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
   const isEdicao = !!produto?.id
   const isServicoCategory = useMemo(() => {
     const categoria = categorias.find((c) => c.id.toString() === categoriaId)
-    return categoria?.codigo?.toLowerCase() === "serv" || categoria?.codigo?.toLowerCase() === "servicos"
+    if (!categoria) return false
+    const codigo = categoria.codigo?.toLowerCase() || ""
+    const nome = categoria.nome?.toLowerCase() || ""
+    return (
+      codigo === "015" ||
+      codigo === "serv" ||
+      codigo === "servicos" ||
+      nome.includes("serviç") ||
+      nome.includes("servic")
+    )
   }, [categorias, categoriaId])
 
   // Carregar dados quando o modal abrir
@@ -435,7 +444,11 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
             )}
           </div>
           {!isEdicao ? (
-            <p className="text-xs text-gray-500 mt-1">Código gerado automaticamente baseado na categoria e marca</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {isServicoCategory
+                ? "Código de serviço gerado automaticamente"
+                : "Código gerado automaticamente baseado na categoria e marca"}
+            </p>
           ) : (
             <p className="text-xs text-gray-500 mt-1">O código não pode ser alterado após a criação</p>
           )}
@@ -448,7 +461,7 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
             id="descricao"
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
-            placeholder="Descrição do produto"
+            placeholder={isServicoCategory ? "Ex: Instalação de ar condicionado..." : "Descrição do produto"}
             required
           />
         </div>
@@ -476,105 +489,105 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
           </Select>
         </div>
 
-        {/* Marca */}
-        <div>
-          <Label htmlFor="marca">Marca {!isServicoCategory && categoriaId && "*"}</Label>
-          <MarcaCombobox
-            value={marca}
-            onValueChange={setMarca}
-            placeholder={
-              !categoriaId
-                ? "Selecione a categoria primeiro"
-                : isServicoCategory
-                  ? "N/A para serviços"
-                  : "Selecione uma marca"
-            }
-            disabled={!categoriaId || isServicoCategory}
-            className={!categoriaId || isServicoCategory ? "bg-gray-50 text-gray-400" : ""}
-          />
-          {!categoriaId && (
-            <p className="text-xs text-gray-500 mt-1">Escolha a categoria para habilitar a marca</p>
-          )}
-          {isServicoCategory && <p className="text-xs text-gray-500 mt-1">Marca não é aplicável para serviços</p>}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* NCM */}
-        <div>
-          <Label htmlFor="ncm">NCM</Label>
-          <Input id="ncm" value={ncm} onChange={(e) => setNcm(e.target.value)} placeholder="Código NCM" />
-        </div>
-
-        {/* Unidade */}
-        <div>
-          <Label htmlFor="unidade">Unidade</Label>
-          <Select value={unidade} onValueChange={setUnidade}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="UN">Unidade</SelectItem>
-              <SelectItem value="MT">Metro</SelectItem>
-              <SelectItem value="PC">Peça</SelectItem>
-              <SelectItem value="PCT">Pacote</SelectItem>
-              <SelectItem value="CJ">Conjunto</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Valor de Custo */}
-        <div>
-          <Label htmlFor="valor_custo">Valor de Custo (R$)</Label>
-          <Input
-            id="valor_custo"
-            type="number"
-            step="0.01"
-            min="0"
-            value={valorCusto}
-            onChange={(e) => setValorCusto(Number.parseFloat(e.target.value) || 0)}
-          />
-        </div>
-
-        {/* Margem de Lucro */}
-        <div>
-          <Label htmlFor="margem_lucro">Margem de Lucro (%)</Label>
-          <Input
-            id="margem_lucro"
-            type="number"
-            step="0.01"
-            min="0"
-            value={margemLucro}
-            onChange={(e) => setMargemLucro(Number.parseFloat(e.target.value) || 0)}
-          />
-          <p className="text-xs text-gray-500 mt-1">Usado para calcular valor unitário</p>
-        </div>
-
-        {/* Valor Unitário */}
-        <div>
-          <Label htmlFor="valor_unitario">Valor Unitário (R$)</Label>
-          <div className="relative">
-            <Input
-              id="valor_unitario"
-              type="number"
-              step="0.01"
-              min="0"
-              value={valorUnitario}
-              readOnly
-              className="bg-gray-50 text-gray-600 cursor-not-allowed"
+        {/* Marca — oculta para serviços (serviço não tem marca) */}
+        {!isServicoCategory && (
+          <div>
+            <Label htmlFor="marca">Marca {categoriaId && "*"}</Label>
+            <MarcaCombobox
+              value={marca}
+              onValueChange={setMarca}
+              placeholder={!categoriaId ? "Selecione a categoria primeiro" : "Selecione uma marca"}
+              disabled={!categoriaId}
+              className={!categoriaId ? "bg-gray-50 text-gray-400" : ""}
             />
-            <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            {!categoriaId && (
+              <p className="text-xs text-gray-500 mt-1">Escolha a categoria para habilitar a marca</p>
+            )}
           </div>
-          <p className="text-xs text-gray-500 mt-1">Calculado: Custo × ((Margem/100) + 1)</p>
-        </div>
+        )}
       </div>
 
+      {/* Campos exclusivos de PRODUTO (ocultos para serviços) */}
+      {!isServicoCategory && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* NCM */}
+            <div>
+              <Label htmlFor="ncm">NCM</Label>
+              <Input id="ncm" value={ncm} onChange={(e) => setNcm(e.target.value)} placeholder="Código NCM" />
+            </div>
+
+            {/* Unidade */}
+            <div>
+              <Label htmlFor="unidade">Unidade</Label>
+              <Select value={unidade} onValueChange={setUnidade}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UN">Unidade</SelectItem>
+                  <SelectItem value="MT">Metro</SelectItem>
+                  <SelectItem value="PC">Peça</SelectItem>
+                  <SelectItem value="PCT">Pacote</SelectItem>
+                  <SelectItem value="CJ">Conjunto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Valor de Custo */}
+            <div>
+              <Label htmlFor="valor_custo">Valor de Custo (R$)</Label>
+              <Input
+                id="valor_custo"
+                type="number"
+                step="0.01"
+                min="0"
+                value={valorCusto}
+                onChange={(e) => setValorCusto(Number.parseFloat(e.target.value) || 0)}
+              />
+            </div>
+
+            {/* Margem de Lucro */}
+            <div>
+              <Label htmlFor="margem_lucro">Margem de Lucro (%)</Label>
+              <Input
+                id="margem_lucro"
+                type="number"
+                step="0.01"
+                min="0"
+                value={margemLucro}
+                onChange={(e) => setMargemLucro(Number.parseFloat(e.target.value) || 0)}
+              />
+              <p className="text-xs text-gray-500 mt-1">Usado para calcular valor unitário</p>
+            </div>
+
+            {/* Valor Unitário */}
+            <div>
+              <Label htmlFor="valor_unitario">Valor Unitário (R$)</Label>
+              <div className="relative">
+                <Input
+                  id="valor_unitario"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={valorUnitario}
+                  readOnly
+                  className="bg-gray-50 text-gray-600 cursor-not-allowed"
+                />
+                <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Calculado: Custo × ((Margem/100) + 1)</p>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Valor Mão de Obra */}
+        {/* Valor Mão de Obra (também usado em serviços) */}
         <div>
-          <Label htmlFor="valor_mao_obra">Valor Mão de Obra (R$)</Label>
+          <Label htmlFor="valor_mao_obra">Valor Mão de Obra (R$){isServicoCategory && " *"}</Label>
           <Input
             id="valor_mao_obra"
             type="number"
@@ -586,30 +599,33 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
           <p className="text-xs text-gray-500 mt-1">Padrão: R$ 180,00</p>
         </div>
 
-        {/* Estoque Atual */}
-        <div>
-          <Label htmlFor="estoque_atual">Estoque Atual</Label>
-          <Input
-            id="estoque_atual"
-            type="number"
-            min="0"
-            value={estoqueAtual}
-            onChange={(e) => setEstoqueAtual(Number.parseInt(e.target.value) || 0)}
-          />
-        </div>
+        {/* Estoque — exclusivo de produto */}
+        {!isServicoCategory && (
+          <>
+            <div>
+              <Label htmlFor="estoque_atual">Estoque Atual</Label>
+              <Input
+                id="estoque_atual"
+                type="number"
+                min="0"
+                value={estoqueAtual}
+                onChange={(e) => setEstoqueAtual(Number.parseInt(e.target.value) || 0)}
+              />
+            </div>
 
-        {/* Estoque Mínimo */}
-        <div>
-          <Label htmlFor="estoque_minimo">Estoque Mínimo</Label>
-          <Input
-            id="estoque_minimo"
-            type="number"
-            min="0"
-            value={estoqueMinimo}
-            onChange={(e) => setEstoqueMinimo(Number.parseInt(e.target.value) || 1)}
-          />
-          <p className="text-xs text-gray-500 mt-1">Padrão: 1</p>
-        </div>
+            <div>
+              <Label htmlFor="estoque_minimo">Estoque Mínimo</Label>
+              <Input
+                id="estoque_minimo"
+                type="number"
+                min="0"
+                value={estoqueMinimo}
+                onChange={(e) => setEstoqueMinimo(Number.parseInt(e.target.value) || 1)}
+              />
+              <p className="text-xs text-gray-500 mt-1">Padrão: 1</p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Observações */}
@@ -628,7 +644,7 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
       {/* Ativo */}
       <div className="flex items-center space-x-2">
         <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
-        <Label htmlFor="ativo">Produto ativo</Label>
+        <Label htmlFor="ativo">{isServicoCategory ? "Serviço ativo" : "Produto ativo"}</Label>
       </div>
 
       <div className="flex justify-end gap-2 pt-4 border-t border-border mt-4">
@@ -637,7 +653,7 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
         </Button>
         <Button type="submit" disabled={loading}>
           <Save className="h-4 w-4 mr-2" />
-          {loading ? "Salvando..." : isEdicao ? "Atualizar" : "Criar Produto"}
+          {loading ? "Salvando..." : isEdicao ? "Atualizar" : isServicoCategory ? "Criar Serviço" : "Criar Produto"}
         </Button>
       </div>
     </form>
@@ -648,9 +664,23 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent className="w-full sm:max-w-2xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
           <SheetHeader className="mb-4">
-            <SheetTitle>{isEdicao ? "Editar Produto" : "Novo Produto"}</SheetTitle>
+            <SheetTitle>
+              {isEdicao
+                ? isServicoCategory
+                  ? "Editar Serviço"
+                  : "Editar Produto"
+                : isServicoCategory
+                  ? "Novo Serviço"
+                  : "Novo Produto"}
+            </SheetTitle>
             <SheetDescription>
-              {isEdicao ? "Edite as informações do produto" : "Preencha as informações do novo produto"}
+              {isEdicao
+                ? isServicoCategory
+                  ? "Edite as informações do serviço"
+                  : "Edite as informações do produto"
+                : isServicoCategory
+                  ? "Preencha as informações do novo serviço"
+                  : "Preencha as informações do novo produto"}
             </SheetDescription>
           </SheetHeader>
           {renderForm()}
@@ -663,9 +693,23 @@ export function ProdutoFormDialog({ open, onOpenChange, asDrawer = false, produt
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdicao ? "Editar Produto" : "Novo Produto"}</DialogTitle>
+          <DialogTitle>
+            {isEdicao
+              ? isServicoCategory
+                ? "Editar Serviço"
+                : "Editar Produto"
+              : isServicoCategory
+                ? "Novo Serviço"
+                : "Novo Produto"}
+          </DialogTitle>
           <DialogDescription>
-            {isEdicao ? "Edite as informações do produto" : "Preencha as informações do novo produto"}
+            {isEdicao
+              ? isServicoCategory
+                ? "Edite as informações do serviço"
+                : "Edite as informações do produto"
+              : isServicoCategory
+                ? "Preencha as informações do novo serviço"
+                : "Preencha as informações do novo produto"}
           </DialogDescription>
         </DialogHeader>
         {renderForm()}

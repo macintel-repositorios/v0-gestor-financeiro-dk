@@ -1050,7 +1050,7 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                       className="h-9 border-border text-xs shrink-0"
                     >
                       <Plus className="h-4 w-4 mr-1" />
-                      Novo
+                      Novo Item
                     </Button>
                   </div>
 

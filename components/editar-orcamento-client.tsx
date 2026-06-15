@@ -1402,7 +1402,7 @@ export function EditarOrcamentoClient({
                       title="Adicionar novo produto"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Novo Produto
+                      Novo Item
                     </Button>
                   </div>
                 </div>
