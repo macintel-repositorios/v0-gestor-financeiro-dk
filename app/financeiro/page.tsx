@@ -39,6 +39,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PDFViewer } from "@/components/pdf-viewer"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1606,7 +1607,11 @@ export default function FinanceiroPage() {
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 bg-white">
-            <iframe src={previewBoletoUrl!} className="w-full h-full border-0" title="PDF Preview" />
+            <PDFViewer
+              src={previewBoletoUrl!}
+              className="w-full h-full border-0"
+              title="Boleto"
+            />
           </div>
         </SheetContent>
       </Sheet>

@@ -33,6 +33,8 @@ export async function POST(request: NextRequest) {
     const [existing] = await pool.execute("SELECT id FROM nfe_config WHERE ativo = 1 LIMIT 1")
     const existingConfigs = existing as any[]
 
+    const telefoneNormalizado = normalizePhoneForStorage(telefone, "11")
+
     if (existingConfigs.length > 0) {
       // Update - build dynamic SET clause to only update cert fields when provided
       const setClauses = [
@@ -42,7 +44,6 @@ export async function POST(request: NextRequest) {
         "crt = ?", "serie_nfe = ?", "proximo_numero_nfe = ?", "ambiente = ?",
         "info_complementar = ?", "natureza_operacao = ?",
       ]
-      const telefoneNormalizado = normalizePhoneForStorage(telefone, "11")
       const setValues: any[] = [
         razao_social, nome_fantasia || null, (cnpj || "").replace(/\D/g, ""),
         (inscricao_estadual || "").replace(/\D/g, ""),

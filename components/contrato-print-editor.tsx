@@ -32,6 +32,7 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { ContratoPrintView } from "./contrato-print-view"
 import { savePdfUrl } from "@/lib/pdf-utils"
+import { PDFViewer } from "@/components/pdf-viewer"
 
 interface ContratoPrintEditorProps {
   contrato: any
@@ -1715,10 +1716,10 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                 <p className="text-sm text-muted-foreground">Gerando visualização em PDF...</p>
               </div>
             ) : pdfUrl ? (
-              <iframe
+              <PDFViewer
                 src={pdfUrl}
                 className="w-full h-full border-0"
-                title="PDF Preview"
+                title={`Contrato_${contrato.numero || contrato.id}`}
               />
             ) : (
               <div className="p-8 text-center text-muted-foreground">Nenhuma visualização gerada</div>

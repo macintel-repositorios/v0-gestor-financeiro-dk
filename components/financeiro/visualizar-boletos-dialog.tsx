@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { PDFViewer } from "@/components/pdf-viewer"
 import {
   Eye,
   Calendar,
@@ -558,7 +559,11 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 bg-white">
-            <iframe src={previewUrl!} className="w-full h-full border-0" title="PDF Preview" />
+            <PDFViewer
+              src={previewUrl!}
+              className="w-full h-full border-0"
+              title={`Boleto_${numeroBaseLimpo}`}
+            />
           </div>
         </SheetContent>
       </Sheet>

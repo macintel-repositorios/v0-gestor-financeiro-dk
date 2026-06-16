@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Printer, X, Loader2, ExternalLink, Download } from "lucide-react"
 import { savePdfUrl } from "@/lib/pdf-utils"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { PDFViewer } from "@/components/pdf-viewer"
 
 interface PropostaDetalhes {
   numero: string
@@ -709,10 +710,10 @@ export function PropostaPrint({ proposta, isOpen, onClose }: PropostaPrintProps)
             </div>
           ) : pdfUrl ? (
             <div className="flex-1 bg-white">
-              <iframe
+              <PDFViewer
                 src={pdfUrl}
                 className="w-full h-full border-0"
-                title="Proposta PDF Preview"
+                title={`Proposta_${proposta?.numero}`}
               />
             </div>
           ) : (

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Printer, Package, ExternalLink, Download } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { savePdfUrl } from "@/lib/pdf-utils"
+import { PDFViewer } from "@/components/pdf-viewer"
 
 interface DanfeDialogProps {
   open: boolean
@@ -224,10 +225,10 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
           </div>
         ) : pdfUrl ? (
           <div className="flex-1 bg-white">
-            <iframe
+            <PDFViewer
               src={pdfUrl}
               className="w-full h-full border-0"
-              title="DANFE PDF Preview"
+              title={`NF-e_${data?.nfe?.numero_nfe || nfeId}`}
             />
           </div>
         ) : (

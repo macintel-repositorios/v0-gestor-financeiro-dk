@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Printer, ExternalLink, Download } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { savePdfUrl } from "@/lib/pdf-utils"
+import { PDFViewer } from "@/components/pdf-viewer"
 
 interface ImprimirNfseDialogProps {
   open: boolean
@@ -222,10 +223,10 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
           </div>
         ) : pdfUrl ? (
           <div className="flex-1 bg-white">
-            <iframe
+            <PDFViewer
               src={pdfUrl}
               className="w-full h-full border-0"
-              title="NFS-e PDF Preview"
+              title={`NFS-e_${dados?.nota?.numero_nfse || notaId}`}
             />
           </div>
         ) : (

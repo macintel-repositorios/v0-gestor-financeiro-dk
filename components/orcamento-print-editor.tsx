@@ -31,6 +31,7 @@ import { formatCurrency } from "@/lib/utils"
 import { OrcamentoPrintView } from "@/components/orcamento-print-view"
 import { createRoot } from "react-dom/client"
 import { savePdfUrl } from "@/lib/pdf-utils"
+import { PDFViewer } from "@/components/pdf-viewer"
 
 interface OrcamentoPrintEditorProps {
   open: boolean
@@ -2098,10 +2099,10 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
                 <p className="text-sm text-muted-foreground">Gerando visualização em PDF...</p>
               </div>
             ) : pdfUrl ? (
-              <iframe
+              <PDFViewer
                 src={pdfUrl}
                 className="w-full h-full border-0"
-                title="PDF Preview"
+                title={`Orçamento ${orcamento.numero}`}
               />
             ) : (
               <div className="p-8 text-center text-muted-foreground">Nenhuma visualização gerada</div>

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageIcon, MapPin, Printer, Eye, Loader2, ExternalLink } from "lucide-react"
+import { PDFViewer } from "@/components/pdf-viewer"
 import { toast } from "sonner"
 import { useCep } from "@/hooks/use-cep"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -1043,7 +1044,11 @@ export function LayoutTab() {
             </div>
           ) : previewMode === "imprimir" && pdfUrl ? (
             <div className="flex-1 bg-white">
-              <iframe src={pdfUrl} className="w-full h-full border-0" title="PDF Preview" />
+              <PDFViewer
+                src={pdfUrl}
+                className="w-full h-full border-0"
+                title={`Papel_Timbrado_${config.empresa_nome || "Empresa"}`}
+              />
             </div>
           ) : (
             <div className="flex-1 flex flex-col min-h-0 bg-white overflow-hidden">

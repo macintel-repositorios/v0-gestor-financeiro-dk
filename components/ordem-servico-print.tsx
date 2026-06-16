@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Button } from "@/components/ui/button"
 import { Printer, Eye, ExternalLink, Loader2, Download } from "lucide-react"
 import { savePdfUrl } from "@/lib/pdf-utils"
+import { PDFViewer } from "@/components/pdf-viewer"
 
 interface OrdemServicoPrintProps {
   ordemServico: any
@@ -762,10 +763,10 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
           </div>
         ) : (
           <div className="flex-1 bg-white">
-            <iframe
+            <PDFViewer
               src={pdfUrl}
               className="w-full h-full border-0"
-              title="Ordem de Serviço PDF Preview"
+              title={`OS_${ordemServico.numero}`}
             />
           </div>
         )}

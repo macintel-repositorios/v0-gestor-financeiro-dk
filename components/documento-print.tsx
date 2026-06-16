@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button"
 import { Printer, X, FileText, Loader2, ExternalLink, Download } from "lucide-react"
 import { savePdfUrl } from "@/lib/pdf-utils"
+import { PDFViewer } from "@/components/pdf-viewer"
 
 interface Documento {
   id: number
@@ -734,7 +735,11 @@ export function DocumentoPrint({ documento, isOpen, mode = "visualizar", onClose
             </div>
           ) : mode === "imprimir" && pdfUrl ? (
             <div className="flex-1 bg-white">
-              <iframe src={pdfUrl} className="w-full h-full border-0" title="PDF Preview" />
+              <PDFViewer
+                src={pdfUrl}
+                className="w-full h-full border-0"
+                title={`Documento_${documento.codigo}`}
+              />
             </div>
           ) : (
             <div className="flex-1 flex flex-col min-h-0">
