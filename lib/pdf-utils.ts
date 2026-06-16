@@ -30,27 +30,57 @@ export function sanitizePdfFileName(base: string): string {
 }
 
 /**
- * Dispara o download de uma blob URL com o nome correto, via ancora <a download>.
- * Funciona em qualquer navegador (blob URLs sao same-origin, entao o atributo
- * download e respeitado).
+ * Auxiliar para disparar o download de um Blob com nome de arquivo limpo,
+ * usando uma blob URL temporaria isolada (nao carregada em nenhum iframe)
+ * para evitar que o visualizador interno do Firefox/Chrome sobrescreva o nome.
  */
-export function downloadPdfUrl(url: string, base: string): void {
+function triggerAnchorDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
+  a.style.display = "none"
   a.href = url
-  a.download = sanitizePdfFileName(base)
+  a.download = filename
   document.body.appendChild(a)
   a.click()
-  a.remove()
+  
+  // Delay na remocao e revogacao para garantir que o Firefox capture o download
+  setTimeout(() => {
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, 250)
+}
+
+/**
+ * Dispara o download de uma blob URL com o nome correto, via ancora <a download>.
+ * Cria uma URL isolada para evitar conflitos com iframes no Firefox.
+ */
+export async function downloadPdfUrl(url: string, base: string): Promise<void> {
+  const filename = sanitizePdfFileName(base)
+  try {
+    const blob = await fetch(url).then((r) => r.blob())
+    triggerAnchorDownload(blob, filename)
+  } catch (error) {
+    // Fallback caso o fetch falhe (ex: restricoes de CSP ou CORS)
+    const a = document.createElement("a")
+    a.style.display = "none"
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    setTimeout(() => {
+      document.body.removeChild(a)
+    }, 250)
+  }
 }
 
 /**
  * Cria a blob URL e dispara o download com o nome correto.
- * Retorna a URL criada (lembre de revogar com URL.revokeObjectURL quando nao precisar mais).
+ * Retorna a URL criada.
  */
 export function downloadPdfBlob(blob: Blob, base: string): string {
-  const url = URL.createObjectURL(blob)
-  downloadPdfUrl(url, base)
-  return url
+  const filename = sanitizePdfFileName(base)
+  triggerAnchorDownload(blob, filename)
+  return URL.createObjectURL(blob)
 }
 
 /**
@@ -88,5 +118,5 @@ export async function savePdfUrl(url: string, base: string): Promise<void> {
   }
 
   // Fallback: download via ancora (nome correto, pasta de downloads padrao)
-  downloadPdfUrl(url, base)
+  await downloadPdfUrl(url, base)
 }
