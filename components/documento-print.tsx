@@ -705,14 +705,6 @@ export function DocumentoPrint({ documento, isOpen, mode = "visualizar", onClose
                 <div className="flex gap-2 mr-6">
                   <Button
                     size="sm"
-                    variant="outline"
-                    onClick={() => savePdfUrl(pdfUrl, `Documento_${documento.codigo}`)}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Baixar PDF
-                  </Button>
-                  <Button
-                    size="sm"
                     onClick={() => window.open(pdfUrl, "_blank")}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white"
                   >
