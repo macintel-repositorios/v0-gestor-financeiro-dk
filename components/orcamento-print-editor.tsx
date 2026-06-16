@@ -24,11 +24,13 @@ import {
   Save,
   Trash2,
   ExternalLink,
+  Download,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
 import { OrcamentoPrintView } from "@/components/orcamento-print-view"
 import { createRoot } from "react-dom/client"
+import { downloadPdfUrl } from "@/lib/pdf-utils"
 
 interface OrcamentoPrintEditorProps {
   open: boolean
@@ -942,7 +944,7 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Orçamento ${orcamento.numero}</title>
+        <title>Orcamento_${orcamento.numero}</title>
         <style>
           body { margin: 0; padding: 0; }
         </style>
@@ -1009,11 +1011,10 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
           }
 
           pdf.setProperties({
-            title: `Orçamento ${orcamento.numero}`
+            title: `Orcamento_${orcamento.numero}`
           })
           const pdfBlob = pdf.output("blob")
-          const namedFile = new File([pdfBlob], `Orçamento_${orcamento.numero}.pdf`, { type: "application/pdf" })
-          const url = URL.createObjectURL(namedFile) + `#filename=Orçamento_${orcamento.numero}.pdf`
+          const url = URL.createObjectURL(pdfBlob)
           setPdfUrl(url)
         } catch (error) {
           console.error("Erro ao gerar PDF do orçamento:", error)
@@ -2068,14 +2069,24 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
               </span>
               <div className="flex gap-2 mr-6">
                 {pdfUrl && (
-                  <Button
-                    size="sm"
-                    onClick={() => window.open(pdfUrl, "_blank")}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Abrir em Nova Aba
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => downloadPdfUrl(pdfUrl, `Orcamento_${orcamento.numero}`)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar PDF
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => window.open(pdfUrl, "_blank")}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Abrir em Nova Aba
+                    </Button>
+                  </>
                 )}
               </div>
             </SheetTitle>

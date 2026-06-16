@@ -9,8 +9,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Loader2, Printer, Package, ExternalLink } from "lucide-react"
+import { Loader2, Printer, Package, ExternalLink, Download } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
+import { downloadPdfUrl, sanitizePdfFileName } from "@/lib/pdf-utils"
 
 interface DanfeDialogProps {
   open: boolean
@@ -165,6 +166,9 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
             heightLeft -= pageHeight
           }
 
+          // Define o titulo nos metadados -> a aba/visualizador mostra o nome correto
+          pdf.setProperties({ title: `NF-e_${data?.nfe?.numero_nfe || nfeId}` })
+
           const pdfBlob = pdf.output("blob")
           const url = URL.createObjectURL(pdfBlob)
           setPdfUrl(url)
@@ -188,14 +192,24 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
             </span>
             <div className="flex gap-2 mr-6">
               {pdfUrl && (
-                <Button
-                  size="sm"
-                  onClick={() => window.open(pdfUrl, "_blank")}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Abrir em Nova Aba
-                </Button>
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => downloadPdfUrl(pdfUrl, `NF-e_${data?.nfe?.numero_nfe || nfeId}`)}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar PDF
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => window.open(pdfUrl, "_blank")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Abrir em Nova Aba
+                  </Button>
+                </>
               )}
             </div>
           </SheetTitle>
