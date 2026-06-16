@@ -5,7 +5,8 @@ import type React from "react"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Printer, X, FileText, Loader2, ExternalLink } from "lucide-react"
+import { Printer, X, FileText, Loader2, ExternalLink, Download } from "lucide-react"
+import { savePdfUrl } from "@/lib/pdf-utils"
 
 interface Documento {
   id: number
@@ -168,6 +169,8 @@ export function DocumentoPrint({ documento, isOpen, mode = "visualizar", onClose
             heightLeft -= pageHeight
           }
 
+          pdf.setProperties({ title: `Documento_${documento.codigo}` })
+
           const pdfBlob = pdf.output("blob")
           const url = URL.createObjectURL(pdfBlob)
           setPdfUrl(url)
@@ -298,7 +301,7 @@ export function DocumentoPrint({ documento, isOpen, mode = "visualizar", onClose
       <html>
         <head>
           <meta charset="utf-8">
-          <title>${documento.titulo}</title>
+          <title>Documento_${documento.codigo}</title>
           <style>
             * {
               margin: 0;
@@ -699,6 +702,14 @@ export function DocumentoPrint({ documento, isOpen, mode = "visualizar", onClose
               </span>
               {mode === "imprimir" && pdfUrl && (
                 <div className="flex gap-2 mr-6">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => savePdfUrl(pdfUrl, `Documento_${documento.codigo}`)}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar PDF
+                  </Button>
                   <Button
                     size="sm"
                     onClick={() => window.open(pdfUrl, "_blank")}

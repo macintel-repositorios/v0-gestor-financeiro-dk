@@ -52,3 +52,41 @@ export function downloadPdfBlob(blob: Blob, base: string): string {
   downloadPdfUrl(url, base)
   return url
 }
+
+/**
+ * Salva o PDF abrindo o dialogo nativo "Salvar como" (o usuario escolhe a pasta),
+ * SEM abrir nova aba.
+ *
+ * Usa a File System Access API (window.showSaveFilePicker), suportada em
+ * navegadores Chromium (Chrome, Edge, Opera, Brave). Em navegadores sem suporte
+ * (Firefox, Safari) faz fallback para o download via ancora — nesse caso o arquivo
+ * vai para a pasta de downloads padrao com o nome correto (para escolher a pasta no
+ * Firefox, ative "Sempre perguntar onde salvar os arquivos" nas configuracoes).
+ *
+ * Deve ser chamada dentro de um gesto do usuario (ex.: onClick).
+ */
+export async function savePdfUrl(url: string, base: string): Promise<void> {
+  const filename = sanitizePdfFileName(base)
+  const w = window as any
+
+  if (typeof w.showSaveFilePicker === "function") {
+    try {
+      const blob = await fetch(url).then((r) => r.blob())
+      const handle = await w.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: "Documento PDF", accept: { "application/pdf": [".pdf"] } }],
+      })
+      const writable = await handle.createWritable()
+      await writable.write(blob)
+      await writable.close()
+      return
+    } catch (err: any) {
+      // Usuario cancelou o dialogo -> nao faz nada (nao baixa para a pasta padrao)
+      if (err?.name === "AbortError") return
+      // Qualquer outro erro -> cai no fallback abaixo
+    }
+  }
+
+  // Fallback: download via ancora (nome correto, pasta de downloads padrao)
+  downloadPdfUrl(url, base)
+}

@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Loader2, Printer, ExternalLink, Download } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
-import { downloadPdfUrl } from "@/lib/pdf-utils"
+import { savePdfUrl } from "@/lib/pdf-utils"
 
 interface ImprimirNfseDialogProps {
   open: boolean
@@ -194,7 +194,7 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => downloadPdfUrl(pdfUrl, `NFS-e_${dados?.nota?.numero_nfse || notaId}`)}
+                    onClick={() => savePdfUrl(pdfUrl, `NFS-e_${dados?.nota?.numero_nfse || notaId}`)}
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Baixar PDF

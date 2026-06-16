@@ -30,7 +30,7 @@ import { toast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
 import { OrcamentoPrintView } from "@/components/orcamento-print-view"
 import { createRoot } from "react-dom/client"
-import { downloadPdfUrl } from "@/lib/pdf-utils"
+import { savePdfUrl } from "@/lib/pdf-utils"
 
 interface OrcamentoPrintEditorProps {
   open: boolean
@@ -2073,7 +2073,7 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => downloadPdfUrl(pdfUrl, `Orcamento_${orcamento.numero}`)}
+                      onClick={() => savePdfUrl(pdfUrl, `Orcamento_${orcamento.numero}`)}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Baixar PDF

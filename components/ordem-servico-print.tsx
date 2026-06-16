@@ -4,7 +4,8 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Printer, Eye, ExternalLink, Loader2 } from "lucide-react"
+import { Printer, Eye, ExternalLink, Loader2, Download } from "lucide-react"
+import { savePdfUrl } from "@/lib/pdf-utils"
 
 interface OrdemServicoPrintProps {
   ordemServico: any
@@ -120,6 +121,7 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
           const imgData = canvas.toDataURL("image/png")
           const pdf = new jsPDF("p", "mm", "a4")
           pdf.addImage(imgData, "PNG", 0, 0, 210, 297)
+          pdf.setProperties({ title: `OS_${ordemServico.numero}` })
 
           const pdfBlob = pdf.output("blob")
           const url = URL.createObjectURL(pdfBlob)
@@ -239,7 +241,7 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ordem de Serviço ${ordemServico.numero}</title>
+    <title>OS_${ordemServico.numero}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -725,14 +727,24 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
             </span>
             <div className="flex gap-2 mr-10">
               {pdfUrl && (
-                <Button
-                  size="sm"
-                  onClick={() => window.open(pdfUrl, "_blank")}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Abrir em Nova Aba
-                </Button>
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => savePdfUrl(pdfUrl, `OS_${ordemServico.numero}`)}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar PDF
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => window.open(pdfUrl, "_blank")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Abrir em Nova Aba
+                  </Button>
+                </>
               )}
             </div>
           </SheetTitle>

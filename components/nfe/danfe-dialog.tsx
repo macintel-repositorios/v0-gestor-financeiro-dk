@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Loader2, Printer, Package, ExternalLink, Download } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
-import { downloadPdfUrl, sanitizePdfFileName } from "@/lib/pdf-utils"
+import { savePdfUrl } from "@/lib/pdf-utils"
 
 interface DanfeDialogProps {
   open: boolean
@@ -196,7 +196,7 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => downloadPdfUrl(pdfUrl, `NF-e_${data?.nfe?.numero_nfe || nfeId}`)}
+                    onClick={() => savePdfUrl(pdfUrl, `NF-e_${data?.nfe?.numero_nfe || nfeId}`)}
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Baixar PDF

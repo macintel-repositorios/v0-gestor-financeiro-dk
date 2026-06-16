@@ -27,9 +27,11 @@ import {
   Printer,
   Eye,
   ExternalLink,
+  Download,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { ContratoPrintView } from "./contrato-print-view"
+import { savePdfUrl } from "@/lib/pdf-utils"
 
 interface ContratoPrintEditorProps {
   contrato: any
@@ -1684,14 +1686,24 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
               </span>
               <div className="flex gap-2 mr-6">
                 {pdfUrl && (
-                  <Button
-                    size="sm"
-                    onClick={() => window.open(pdfUrl, "_blank")}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Abrir em Nova Aba
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => savePdfUrl(pdfUrl, `Contrato_${contrato.numero}`)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar PDF
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => window.open(pdfUrl, "_blank")}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Abrir em Nova Aba
+                    </Button>
+                  </>
                 )}
               </div>
             </SheetTitle>

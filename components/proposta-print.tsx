@@ -5,7 +5,8 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Printer, X, Loader2, ExternalLink } from "lucide-react"
+import { Printer, X, Loader2, ExternalLink, Download } from "lucide-react"
+import { savePdfUrl } from "@/lib/pdf-utils"
 import { formatCurrency, formatDate } from "@/lib/utils"
 
 interface PropostaDetalhes {
@@ -142,6 +143,8 @@ export function PropostaPrint({ proposta, isOpen, onClose }: PropostaPrintProps)
             heightLeft -= pageHeight
           }
 
+          pdf.setProperties({ title: `Proposta_${proposta?.numero}` })
+
           const pdfBlob = pdf.output("blob")
           const url = URL.createObjectURL(pdfBlob)
           setPdfUrl(url)
@@ -266,7 +269,7 @@ export function PropostaPrint({ proposta, isOpen, onClose }: PropostaPrintProps)
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Proposta ${proposta?.numero}</title>
+          <title>Proposta_${proposta?.numero}</title>
           <style>
             * {
               margin: 0;
@@ -674,14 +677,24 @@ export function PropostaPrint({ proposta, isOpen, onClose }: PropostaPrintProps)
               </span>
               <div className="flex gap-2 mr-6">
                 {pdfUrl && (
-                  <Button
-                    size="sm"
-                    onClick={() => window.open(pdfUrl, "_blank")}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Abrir em Nova Aba
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => savePdfUrl(pdfUrl, `Proposta_${proposta?.numero}`)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar PDF
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => window.open(pdfUrl, "_blank")}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Abrir em Nova Aba
+                    </Button>
+                  </>
                 )}
               </div>
             </SheetTitle>
