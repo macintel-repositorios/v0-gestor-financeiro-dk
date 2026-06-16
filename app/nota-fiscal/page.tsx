@@ -491,7 +491,18 @@ export default function NotaFiscalPage() {
           toast({ title: "Erro", description: result.message, variant: "destructive" })
         }
       } else {
-        toast({ title: "Info", description: "Cancelamento de NF-e sera implementado em breve." })
+        const response = await fetch(`/api/nfe/${notaCancelar.id}/cancelar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ motivo: motivoCancelamento }),
+        })
+        const result = await response.json()
+        if (result.success) {
+          toast({ title: "NF-e cancelada", description: result.message || "Nota fiscal eletronica cancelada com sucesso" })
+          fetchTodasNotas()
+        } else {
+          toast({ title: "Erro", description: result.message, variant: "destructive" })
+        }
       }
     } catch {
       toast({ title: "Erro", description: "Erro ao cancelar nota fiscal", variant: "destructive" })
@@ -1640,13 +1651,22 @@ export default function NotaFiscalPage() {
               onChange={(e) => setMotivoCancelamento(e.target.value)}
               placeholder="Informe o motivo do cancelamento"
               rows={3}
+              maxLength={255}
             />
+            {notaCancelar?.tipo === "nfe" && (
+              <p className={cn(
+                "text-xs",
+                motivoCancelamento.trim().length < 15 ? "text-red-400" : "text-muted-foreground"
+              )}>
+                A SEFAZ exige uma justificativa de 15 a 255 caracteres ({motivoCancelamento.trim().length}/255).
+              </p>
+            )}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={cancelando}>Voltar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancelar}
-              disabled={cancelando || !motivoCancelamento}
+              disabled={cancelando || !motivoCancelamento || (notaCancelar?.tipo === "nfe" && motivoCancelamento.trim().length < 15)}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               {cancelando ? (
