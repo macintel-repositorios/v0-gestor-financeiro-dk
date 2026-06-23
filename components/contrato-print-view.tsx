@@ -152,6 +152,7 @@ export function ContratoPrintView({
                 {(contrato.cliente_sindico || clienteCompleto?.sindico) && (
                   <>
                     <p className="representante">{contrato.cliente_sindico || clienteCompleto?.sindico}</p>
+                    <p className="info-empresa">Representante Legal (Síndico)</p>
                     <p className="info-empresa">
                       RG: {formatRG(contrato.cliente_rg_sindico || clienteCompleto?.rg_sindico || "")}
                     </p>

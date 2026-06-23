@@ -1006,7 +1006,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
     <>
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent
-        className="overflow-hidden p-0 border-4 border-blue-500"
+        className="overflow-hidden p-0 border-4 border-blue-500 bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100"
         style={{
           width: `${modalSize.width}vw`,
           height: `${modalSize.height}vh`,
@@ -1291,7 +1291,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                 </div>
 
                 <div>
-                  <Label className="text-blue-600 font-medium">
+                  <Label className="text-blue-400 font-medium">
                     🔝 Margem superior (Logo/Cabeçalho): {layoutConfig.marginTop}mm
                   </Label>
                   <div className="flex items-center gap-2 mt-1">
@@ -1322,7 +1322,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                 </div>
 
                 <div>
-                  <Label className="text-green-600 font-medium">
+                  <Label className="text-green-400 font-medium">
                     🔽 Margem inferior (Rodapé): {layoutConfig.marginBottom}mm
                   </Label>
                   <div className="flex items-center gap-2 mt-1">
@@ -1353,7 +1353,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                 </div>
 
                 <div>
-                  <Label className="text-purple-600 font-medium">
+                  <Label className="text-purple-400 font-medium">
                     📄 Margem superior do conteúdo (após cabeçalho): {layoutConfig.contentMarginTop}mm
                   </Label>
                   <div className="flex items-center gap-2 mt-1">
@@ -1388,7 +1388,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                 </div>
 
                 <div>
-                  <Label className="text-orange-600 font-medium">
+                  <Label className="text-orange-400 font-medium">
                     📄 Margem inferior do conteúdo (antes do rodapé): {layoutConfig.contentMarginBottom}mm
                   </Label>
                   <div className="flex items-center gap-2 mt-1">
@@ -1476,7 +1476,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                   rows={6}
                   className="font-mono text-sm"
                 />
-                <div className="text-center text-sm font-medium text-blue-600">
+                <div className="text-center text-sm font-medium text-blue-400">
                   📄 {paginasPreview.length}{" "}
                   {paginasPreview.length === 1 ? "página será gerada" : "páginas serão geradas"}
                 </div>
@@ -1518,7 +1518,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
               <div className="bg-gray-100 rounded-lg p-4 overflow-auto" style={{ maxHeight: "75vh" }}>
                 {/* Página A4 simulada com escala */}
                 <div
-                  className="mx-auto bg-white shadow-lg"
+                  className="mx-auto bg-white text-slate-950 shadow-lg"
                   style={{
                     width: "210mm",
                     minHeight: "297mm",
@@ -1611,6 +1611,20 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                                       "",
                                   )}
                                 </p>
+                                {(contrato.cliente_sindico || clienteCompleto?.sindico) && (
+                                  <>
+                                    <p className="representante font-medium" style={{ fontSize: `${layoutConfig.signatureFontSize - 1}px`, marginTop: "8px" }}>
+                                      {contrato.cliente_sindico || clienteCompleto?.sindico}
+                                    </p>
+                                    <p style={{ fontSize: `${layoutConfig.signatureFontSize - 1}px` }}>Representante Legal (Síndico)</p>
+                                    <p style={{ fontSize: `${layoutConfig.signatureFontSize - 1}px` }}>
+                                      RG: {formatRG(contrato.cliente_rg_sindico || clienteCompleto?.rg_sindico || "")}
+                                    </p>
+                                    <p style={{ fontSize: `${layoutConfig.signatureFontSize - 1}px` }}>
+                                      CPF: {formatCPF(contrato.cliente_cpf_sindico || clienteCompleto?.cpf_sindico || "")}
+                                    </p>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
