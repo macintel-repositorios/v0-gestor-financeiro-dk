@@ -59,6 +59,10 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
     estado: "",
     distancia_km: 0,
     sindico: "",
+    rg_sindico: "",
+    cpf_sindico: "",
+    zelador: "",
+    contato: "",
     nome_adm: "",
     contato_adm: "",
     telefone_adm: "",
@@ -89,6 +93,10 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
         estado: cliente.estado || "",
         distancia_km: cliente.distancia_km || 0,
         sindico: cliente.sindico || "",
+        rg_sindico: cliente.rg_sindico || "",
+        cpf_sindico: cliente.cpf_sindico || "",
+        zelador: cliente.zelador || "",
+        contato: cliente.contato || "",
         nome_adm: cliente.nome_adm || "",
         contato_adm: cliente.contato_adm || "",
         telefone_adm: cliente.telefone_adm || "",
@@ -184,6 +192,10 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
       estado: "",
       distancia_km: 0,
       sindico: "",
+      rg_sindico: "",
+      cpf_sindico: "",
+      zelador: "",
+      contato: "",
       nome_adm: "",
       contato_adm: "",
       telefone_adm: "",
@@ -340,7 +352,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
       {/* Contato */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Contato</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <Label htmlFor="email">Email</Label>
             <Input
@@ -358,6 +370,15 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
               value={formData.telefone}
               onChange={(value) => handleInputChange("telefone", value)}
               placeholder="(00) 00000-0000"
+            />
+          </div>
+          <div>
+            <Label htmlFor="contato">Pessoa de Contato</Label>
+            <Input
+              id="contato"
+              value={formData.contato}
+              onChange={(e) => handleInputChange("contato", e.target.value)}
+              placeholder="Nome do contato principal"
             />
           </div>
         </div>
@@ -446,13 +467,42 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
       {/* Informações do Síndico */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Informações do Síndico (Opcional)</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <Label htmlFor="sindico">Nome do Síndico</Label>
+            <Input
+              id="sindico"
+              value={formData.sindico}
+              onChange={(e) => handleInputChange("sindico", e.target.value)}
+              placeholder="Nome completo do síndico"
+            />
+          </div>
+          <div>
+            <Label htmlFor="rg_sindico">RG do Síndico</Label>
+            <Input
+              id="rg_sindico"
+              value={formData.rg_sindico}
+              onChange={(e) => handleInputChange("rg_sindico", e.target.value)}
+              placeholder="00.000.000-0"
+            />
+          </div>
+          <div>
+            <Label htmlFor="cpf_sindico">CPF do Síndico</Label>
+            <Input
+              id="cpf_sindico"
+              value={formData.cpf_sindico}
+              onChange={(e) => handleInputChange("cpf_sindico", e.target.value)}
+              placeholder="000.000.000-00"
+            />
+          </div>
+        </div>
         <div>
-          <Label htmlFor="sindico">Nome do Síndico</Label>
+          <Label htmlFor="zelador">Zelador</Label>
           <Input
-            id="sindico"
-            value={formData.sindico}
-            onChange={(e) => handleInputChange("sindico", e.target.value)}
-            placeholder="Nome completo do síndico"
+            id="zelador"
+            value={formData.zelador}
+            onChange={(e) => handleInputChange("zelador", e.target.value)}
+            placeholder="Nome do zelador"
           />
         </div>
       </div>
