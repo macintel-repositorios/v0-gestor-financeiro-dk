@@ -2102,8 +2102,8 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
       </Sheet>
 
       {/* Container invisível para renderização do PDF */}
-      <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
-        <div ref={hiddenDivRef}>
+      <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "800px" }}>
+        <div ref={hiddenDivRef} className="bg-white text-black" style={{ width: "210mm" }}>
           <OrcamentoPrintView
             orcamento={orcamento}
             timbradoConfig={timbradoConfig}

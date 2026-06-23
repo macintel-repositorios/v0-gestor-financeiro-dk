@@ -172,7 +172,7 @@ export function ContratoPrintView({
   }
 
   return (
-    <>
+    <div className="print-container">
       <style>{`
         * {
           margin: 0;
@@ -188,9 +188,22 @@ export function ContratoPrintView({
           line-height: ${layoutConfig.lineHeight};
         }
 
+        .print-container {
+          font-family: Arial, sans-serif;
+          background: white;
+          color: black !important;
+          font-size: ${layoutConfig.fontSize}px;
+          line-height: ${layoutConfig.lineHeight};
+        }
+
+        .print-container .page,
+        .print-container .page * {
+          color: black !important;
+        }
+
         .page {
           width: 210mm;
-          height: 297mm;
+          min-height: 297mm;
           padding: ${layoutConfig.marginTop}mm ${layoutConfig.pageMargin}mm ${layoutConfig.marginBottom}mm ${layoutConfig.pageMargin}mm;
           margin: 0 auto;
           background: white;
@@ -207,12 +220,14 @@ export function ContratoPrintView({
         .page-header {
           text-align: center;
           border-bottom: 1px solid #ccc;
-          padding-bottom: 15px;
-          margin-bottom: 20px;
+          padding-bottom: 10px;
+          margin-bottom: 15px;
           flex-shrink: 0;
         }
 
         .logo img {
+          display: block;
+          margin: 0 auto;
           width: auto;
           max-height: ${layoutConfig.logoSize}px;
         }
@@ -227,7 +242,7 @@ export function ContratoPrintView({
           flex: 1;
           display: flex;
           flex-direction: column;
-          overflow: hidden;
+          overflow: visible;
         }
 
         .titulo {
@@ -298,8 +313,8 @@ export function ContratoPrintView({
           text-align: center;
           font-size: ${layoutConfig.footerFontSize}px;
           border-top: 1px solid #ccc;
-          padding-top: 10px;
-          margin-top: 20px;
+          padding-top: 8px;
+          margin-top: 15px;
           line-height: 1.3;
           flex-shrink: 0;
         }
@@ -336,6 +351,6 @@ export function ContratoPrintView({
       {renderPrimeiraPagina()}
       {renderPaginasIntermediarias()}
       {renderUltimaPagina()}
-    </>
+    </div>
   )
 }
