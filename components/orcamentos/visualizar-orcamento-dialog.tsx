@@ -242,8 +242,12 @@ export function VisualizarOrcamentoDialog({
 
   const calcularValorJuros = () => {
     if (!orcamento) return 0
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) ?? 1
-    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material) ?? 1
+    const parcelamentoMdo = orcamento.parcelamento_mdo !== undefined && orcamento.parcelamento_mdo !== null
+      ? safeNumber(orcamento.parcelamento_mdo)
+      : 1
+    const parcelamentoMaterial = orcamento.parcelamento_material !== undefined && orcamento.parcelamento_material !== null
+      ? safeNumber(orcamento.parcelamento_material)
+      : 1
     if (parcelamentoMaterial === 0) return 0
     const jurosAm = safeNumber(orcamento.juros_am)
     const valorMaterial = safeNumber(orcamento.valor_material)
@@ -252,14 +256,18 @@ export function VisualizarOrcamentoDialog({
 
   const calcularTaxaBoletoMdo = () => {
     if (!orcamento) return 0
-    const parcelamento = safeNumber(orcamento.parcelamento_mdo)
+    const parcelamento = orcamento.parcelamento_mdo !== undefined && orcamento.parcelamento_mdo !== null
+      ? safeNumber(orcamento.parcelamento_mdo)
+      : 1
     const valorBoleto = safeNumber(orcamento.valor_boleto)
     return parcelamento * valorBoleto
   }
 
   const calcularTaxaBoletoMaterial = () => {
     if (!orcamento) return 0
-    const parcelamento = safeNumber(orcamento.parcelamento_material)
+    const parcelamento = orcamento.parcelamento_material !== undefined && orcamento.parcelamento_material !== null
+      ? safeNumber(orcamento.parcelamento_material)
+      : 1
     if (parcelamento === 0) return 0
     const valorBoleto = safeNumber(orcamento.valor_boleto)
     return parcelamento * valorBoleto
@@ -267,7 +275,9 @@ export function VisualizarOrcamentoDialog({
 
   const calcularImpostoServicoValor = () => {
     if (!orcamento) return 0
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
+    const parcelamentoMdo = orcamento.parcelamento_mdo !== undefined && orcamento.parcelamento_mdo !== null
+      ? safeNumber(orcamento.parcelamento_mdo)
+      : 1
     if (parcelamentoMdo === 0) return 0
     const valorMaoObra = safeNumber(orcamento.valor_mao_obra)
     const descontoMdoValor = safeNumber(orcamento.desconto_mdo_valor)
@@ -281,7 +291,9 @@ export function VisualizarOrcamentoDialog({
 
   const calcularImpostoMaterialValor = () => {
     if (!orcamento) return 0
-    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
+    const parcelamentoMaterial = orcamento.parcelamento_material !== undefined && orcamento.parcelamento_material !== null
+      ? safeNumber(orcamento.parcelamento_material)
+      : 1
     if (parcelamentoMaterial === 0) return 0
     const valorMaterial = safeNumber(orcamento.valor_material)
     const valorJuros = calcularValorJuros()
@@ -294,7 +306,9 @@ export function VisualizarOrcamentoDialog({
 
   const calcularSubtotalMdo = () => {
     if (!orcamento) return 0
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
+    const parcelamentoMdo = orcamento.parcelamento_mdo !== undefined && orcamento.parcelamento_mdo !== null
+      ? safeNumber(orcamento.parcelamento_mdo)
+      : 1
     if (parcelamentoMdo === 0) return 0
 
     const valorMaoObra = safeNumber(orcamento.valor_mao_obra)
@@ -308,7 +322,9 @@ export function VisualizarOrcamentoDialog({
 
   const calcularSubtotalMaterial = () => {
     if (!orcamento) return 0
-    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material)
+    const parcelamentoMaterial = orcamento.parcelamento_material !== undefined && orcamento.parcelamento_material !== null
+      ? safeNumber(orcamento.parcelamento_material)
+      : 1
     if (parcelamentoMaterial === 0) return 0
 
     const valorMaterial = safeNumber(orcamento.valor_material)
@@ -316,7 +332,9 @@ export function VisualizarOrcamentoDialog({
     const taxaBoletoMaterial = calcularTaxaBoletoMaterial()
     const impostoMaterialValor = calcularImpostoMaterialValor()
 
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo)
+    const parcelamentoMdo = orcamento.parcelamento_mdo !== undefined && orcamento.parcelamento_mdo !== null
+      ? safeNumber(orcamento.parcelamento_mdo)
+      : 1
     const custoDeslocamentoExtra = parcelamentoMdo === 0 ? calcularCustoDeslocamento() : 0
 
     return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor + custoDeslocamentoExtra

@@ -197,11 +197,13 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
   const calcularSubtotalMdo = () => {
     if (!orcamento) return 0
 
-    if (orcamento.subtotal_mdo) {
+    if (orcamento.subtotal_mdo !== undefined && orcamento.subtotal_mdo !== null) {
       return safeNumber(orcamento.subtotal_mdo)
     }
 
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    const parcelamentoMdo = orcamento.parcelamento_mdo !== undefined && orcamento.parcelamento_mdo !== null
+      ? safeNumber(orcamento.parcelamento_mdo)
+      : 1
     if (parcelamentoMdo === 0) {
       return 0
     }
@@ -218,7 +220,7 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
   const calcularSubtotalMaterial = () => {
     if (!orcamento) return 0
 
-    if (orcamento.subtotal_material) {
+    if (orcamento.subtotal_material !== undefined && orcamento.subtotal_material !== null) {
       return safeNumber(orcamento.subtotal_material)
     }
 
@@ -227,7 +229,9 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
     const taxaBoletoMaterial = safeNumber(orcamento.taxa_boleto_material)
     const impostoMaterialValor = safeNumber(orcamento.imposto_material)
 
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    const parcelamentoMdo = orcamento.parcelamento_mdo !== undefined && orcamento.parcelamento_mdo !== null
+      ? safeNumber(orcamento.parcelamento_mdo)
+      : 1
     const custoDeslocamentoExtra = parcelamentoMdo === 0 ? safeNumber(orcamento.custo_deslocamento) : 0
 
     return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor + custoDeslocamentoExtra

@@ -68,6 +68,7 @@ interface Orcamento {
   valor_mao_obra?: number
   valor_material?: number
   subtotal_mdo?: number
+  subtotal_material?: number
   situacao: string
   tipo_servico: string
   distancia_km?: number
@@ -250,7 +251,13 @@ export default function OrcamentosPage({
 
   // Calcula o Subtotal MDO (valor da nota de servico NFS-e) para um orcamento
   const calcularSubtotalMdoOrcamento = (orc: Orcamento): number => {
-    const parcelamentoMdo = safeNumber(orc.parcelamento_mdo) || 1
+    if (orc.subtotal_mdo !== undefined && orc.subtotal_mdo !== null) {
+      return safeNumber(orc.subtotal_mdo)
+    }
+
+    const parcelamentoMdo = orc.parcelamento_mdo !== undefined && orc.parcelamento_mdo !== null
+      ? safeNumber(orc.parcelamento_mdo)
+      : 1
     if (parcelamentoMdo === 0) return 0
 
     const valorMaoObra = safeNumber(orc.valor_mao_obra)
@@ -440,11 +447,19 @@ export default function OrcamentosPage({
 
   // Calcular Subtotal Material para um orçamento (valor da NF-e)
   const calcularSubtotalMaterialOrcamento = (orc: Orcamento): number => {
-    const parcelamentoMaterial = safeNumber(orc.parcelamento_material) || 1
+    if (orc.subtotal_material !== undefined && orc.subtotal_material !== null) {
+      return safeNumber(orc.subtotal_material)
+    }
+
+    const parcelamentoMaterial = orc.parcelamento_material !== undefined && orc.parcelamento_material !== null
+      ? safeNumber(orc.parcelamento_material)
+      : 1
     if (parcelamentoMaterial === 0) return 0
 
     const valorMaterial = safeNumber(orc.valor_material)
-    const parcelamentoMdo = safeNumber(orc.parcelamento_mdo) || 1
+    const parcelamentoMdo = orc.parcelamento_mdo !== undefined && orc.parcelamento_mdo !== null
+      ? safeNumber(orc.parcelamento_mdo)
+      : 1
     const distancia = safeNumber(orc.distancia_km)
     const prazo = safeNumber(orc.prazo_dias)
     const valorBoleto = safeNumber(orc.valor_boleto)
