@@ -41,12 +41,14 @@ export async function POST(request: NextRequest) {
       aliquota_iss: aliquotaOverride,
     } = body
 
-    // Buscar configuração NFS-e
-    const [configRows] = await connection.execute(
-      "SELECT * FROM nfse_config WHERE ativo = 1 LIMIT 1"
+    // Buscar e reservar próximo número RPS atomicamente
+    await connection.query("START TRANSACTION")
+    const [configRows] = await connection.query(
+      "SELECT * FROM nfse_config WHERE ativo = 1 FOR UPDATE"
     )
     const configs = configRows as any[]
     if (configs.length === 0) {
+      await connection.query("ROLLBACK")
       return NextResponse.json(
         { success: false, message: "Configuracao NFS-e nao encontrada. Configure em Configuracoes > NFS-e." },
         { status: 400 },
@@ -55,15 +57,22 @@ export async function POST(request: NextRequest) {
     const config = configs[0]
 
     if (!config.certificado_base64) {
+      await connection.query("ROLLBACK")
       return NextResponse.json(
         { success: false, message: "Certificado digital nao configurado." },
         { status: 400 },
       )
     }
 
-    // Obter próximo número RPS
+    // Obter próximo número RPS e incrementar IMEDIATAMENTE no banco
     const numeroRps = config.proximo_numero_rps || 1
-    console.log("[v0] Proximo numero RPS:", numeroRps, "Serie:", config.serie_rps, "Ambiente:", config.ambiente)
+    await connection.query(
+      "UPDATE nfse_config SET proximo_numero_rps = proximo_numero_rps + 1 WHERE id = ?",
+      [config.id]
+    )
+    await connection.query("COMMIT")
+
+    console.log("[v0] Numero RPS reservado:", numeroRps, "Serie:", config.serie_rps, "Ambiente:", config.ambiente)
 
     // Calcular valores
     const valorServicos = Number(valor_servicos)
@@ -336,11 +345,6 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Incrementar numero RPS
-        await connection.execute(
-          "UPDATE nfse_config SET proximo_numero_rps = proximo_numero_rps + 1 WHERE ativo = 1"
-        )
-
         const mensagem = dadosRetorno.numeroNfse
           ? (config.ambiente === 2
             ? `NFS-e enviada em HOMOLOGACAO com sucesso! NFS-e: ${dadosRetorno.numeroNfse}`
@@ -366,11 +370,6 @@ export async function POST(request: NextRequest) {
         await connection.execute(
           `UPDATE notas_fiscais SET status = 'erro', mensagem_erro = ?, xml_retorno = ? WHERE id = ?`,
           [dadosRetorno.erros.join("; "), soapResponse.xml, notaId],
-        )
-
-        // Incrementar RPS mesmo com erro (para evitar conflito)
-        await connection.execute(
-          "UPDATE nfse_config SET proximo_numero_rps = proximo_numero_rps + 1 WHERE ativo = 1"
         )
 
         return NextResponse.json({
@@ -402,10 +401,6 @@ export async function POST(request: NextRequest) {
           [Number(dadosRecuperacao.numeroNfse)]
         )
 
-        await connection.execute(
-          "UPDATE nfse_config SET proximo_numero_rps = proximo_numero_rps + 1 WHERE ativo = 1"
-        )
-
         // Verificar se o orcamento pode ser concluido
         if (origem === "orcamento" && origem_numero) {
           await verificarEConcluirOrcamento(connection, origem_numero)
@@ -435,10 +430,6 @@ export async function POST(request: NextRequest) {
           [soapResponse.xml, notaId],
         )
 
-        await connection.execute(
-          "UPDATE nfse_config SET proximo_numero_rps = proximo_numero_rps + 1 WHERE ativo = 1"
-        )
-
         return NextResponse.json({
           success: true,
           message: "RPS enviado com sucesso! Clique em 'Consultar na prefeitura' para obter o numero da NFS-e.",
@@ -455,11 +446,6 @@ export async function POST(request: NextRequest) {
       await connection.execute(
         `UPDATE notas_fiscais SET status = 'erro', mensagem_erro = ?, xml_retorno = ? WHERE id = ?`,
         [soapResponse.erro || dadosRecuperacao.erros.join("; "), soapResponse.xml, notaId],
-      )
-
-      // Incrementar RPS
-      await connection.execute(
-        "UPDATE nfse_config SET proximo_numero_rps = proximo_numero_rps + 1 WHERE ativo = 1"
       )
 
       return NextResponse.json({

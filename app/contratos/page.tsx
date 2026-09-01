@@ -239,7 +239,7 @@ export default function ContratosPage() {
   const [nfseContrato, setNfseContrato] = useState<Contrato | null>(null)
   const [nfseMesReferencia, setNfseMesReferencia] = useState("")
   const [nfseMesPreventivaRef, setNfseMesPreventivaRef] = useState("")
-  const [notasEmitidasContrato, setNotasEmitidasContrato] = useState<Record<string, { temNfse: boolean; numero_nfse?: string; data_emissao?: string }>>({})
+  const [notasEmitidasContrato, setNotasEmitidasContrato] = useState<Record<string, { temNfse: boolean; emProcessamento?: boolean; numero_nfse?: string; data_emissao?: string }>>({})
   const [allBoletos, setAllBoletos] = useState<any[]>([])
   const [feriados, setFeriados] = useState<any[]>([])
   
@@ -440,7 +440,7 @@ export default function ContratosPage() {
   const fetchNotasEmitidasPorContrato = async () => {
     try {
       const nfseRes = await fetch("/api/nfse").catch(() => null)
-      const mapa: Record<string, { temNfse: boolean; numero_nfse?: string; data_emissao?: string }> = {}
+      const mapa: Record<string, { temNfse: boolean; emProcessamento?: boolean; numero_nfse?: string; data_emissao?: string }> = {}
 
       if (nfseRes?.ok) {
         const nfseData = await nfseRes.json()
@@ -451,13 +451,19 @@ export default function ContratosPage() {
               // Track per month: key = "contrato_numero|mes_referencia"
               const mesRef = nf.descricao_servico?.match(/(?:Ref\.|realizada em|em)\s*(\d{2}\/\d{4})/i)?.[1] || nf.descricao_servico?.match(/(\d{2}\/\d{4})/)?.[1] || ""
               const chave = mesRef ? `${num}|${mesRef}` : num
-              if (!mapa[chave]) mapa[chave] = { temNfse: false }
-              mapa[chave].temNfse = true
+              const isEmitida = nf.status === "emitida" && !!(nf.numero_nfse || nf.numero)
+              const isProcessando = nf.status === "processando"
+
+              if (!mapa[chave]) mapa[chave] = { temNfse: false, emProcessamento: false }
+              if (isEmitida) mapa[chave].temNfse = true
+              if (isProcessando) mapa[chave].emProcessamento = true
               mapa[chave].numero_nfse = nf.numero_nfse || nf.numero || ""
               mapa[chave].data_emissao = nf.data_emissao || nf.created_at || ""
+
               // Also mark general
-              if (!mapa[num]) mapa[num] = { temNfse: false }
-              mapa[num].temNfse = true
+              if (!mapa[num]) mapa[num] = { temNfse: false, emProcessamento: false }
+              if (isEmitida) mapa[num].temNfse = true
+              if (isProcessando) mapa[num].emProcessamento = true
             }
           }
         }
@@ -560,7 +566,8 @@ export default function ContratosPage() {
     // NFS-e selecionados
     const elegiveisNfse = contratosAtivos.filter((c) => {
       const chave = `${c.numero}|${mesRef}`
-      return !notasEmitidasContrato[chave]?.temNfse
+      const info = notasEmitidasContrato[chave]
+      return !info?.temNfse && !info?.emProcessamento
     }).map((c) => c.numero)
     setBatchSelecionados(elegiveisNfse)
 
@@ -2180,7 +2187,12 @@ export default function ContratosPage() {
                     if (batchTab === "nfse") {
                       const elegiveis = contratosAtivos.filter((c) => {
                         const chave = `${c.numero}|${mesRef}`
-                        return !notasEmitidasContrato[chave]?.temNfse
+                        const info = notasEmitidasContrato[chave]
+                        return !info?.temNfse && !info?.emProcessamento
+                      })
+                      const emProcessamento = contratosAtivos.filter((c) => {
+                        const chave = `${c.numero}|${mesRef}`
+                        return notasEmitidasContrato[chave]?.emProcessamento && !notasEmitidasContrato[chave]?.temNfse
                       })
                       const jaFaturados = contratosAtivos.filter((c) => {
                         const chave = `${c.numero}|${mesRef}`
@@ -2242,11 +2254,11 @@ export default function ContratosPage() {
                             </div>
                           )}
 
-                          {jaFaturados.length > 0 && (
+                          {emProcessamento.length > 0 && (
                             <div className="space-y-2 pt-2">
-                              <Label className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">Já Faturados neste Mês ({jaFaturados.length})</Label>
+                              <Label className="text-xs font-semibold text-blue-600 dark:text-blue-400">Em Processamento na Prefeitura ({emProcessamento.length})</Label>
                               <div className="border border-border rounded-xl divide-y divide-border/50 bg-muted/10 max-h-[180px] overflow-y-auto">
-                                {jaFaturados.map((c) => (
+                                {emProcessamento.map((c) => (
                                   <div key={c.id} className="p-3 text-xs flex items-center justify-between opacity-80">
                                     <div className="min-w-0 flex-1">
                                       <p className="font-semibold text-foreground truncate">{c.cliente_nome}</p>
@@ -2254,9 +2266,34 @@ export default function ContratosPage() {
                                         Contrato: {c.numero} | Valor: {formatCurrency(c.valor_mensal)}
                                       </p>
                                     </div>
-                                    <Badge className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-0 text-[10px] font-bold">NFS-e Emitida</Badge>
+                                    <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-0 text-[10px] font-bold">Processando</Badge>
                                   </div>
                                 ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {jaFaturados.length > 0 && (
+                            <div className="space-y-2 pt-2">
+                              <Label className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Já Faturados neste Mês ({jaFaturados.length})</Label>
+                              <div className="border border-border rounded-xl divide-y divide-border/50 bg-muted/10 max-h-[180px] overflow-y-auto">
+                                {jaFaturados.map((c) => {
+                                  const chave = `${c.numero}|${mesRef}`
+                                  const info = notasEmitidasContrato[chave]
+                                  return (
+                                    <div key={c.id} className="p-3 text-xs flex items-center justify-between opacity-80">
+                                      <div className="min-w-0 flex-1">
+                                        <p className="font-semibold text-foreground truncate">{c.cliente_nome}</p>
+                                        <p className="text-muted-foreground font-mono text-[10px] mt-0.5">
+                                          Contrato: {c.numero} | Valor: {formatCurrency(c.valor_mensal)}
+                                        </p>
+                                      </div>
+                                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 text-[10px] font-bold">
+                                        NFS-e {info?.numero_nfse ? `#${info.numero_nfse}` : "Emitida"}
+                                      </Badge>
+                                    </div>
+                                  )
+                                })}
                               </div>
                             </div>
                           )}
