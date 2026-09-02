@@ -15,7 +15,7 @@ const pool = mysql.createPool({
   ssl:
     process.env.DB_SSL === "true"
       ? {
-          rejectUnauthorized: process.env.NODE_ENV === "production",
+          rejectUnauthorized: process.env.DB_REJECT_UNAUTHORIZED === "true",
         }
       : undefined,
   // Configurações de retry com timeout maior
