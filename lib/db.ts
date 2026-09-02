@@ -12,12 +12,7 @@ const pool = mysql.createPool({
   maxIdle: 10,
   idleTimeout: 30000,
   queueLimit: 0,
-  ssl:
-    process.env.DB_SSL === "true"
-      ? {
-          rejectUnauthorized: process.env.DB_REJECT_UNAUTHORIZED === "true",
-        }
-      : undefined,
+  ssl: process.env.DB_SSL === "false" ? undefined : { rejectUnauthorized: false },
   // Configurações de retry com timeout maior
   connectTimeout: 60000,
   waitForConnections: true,
