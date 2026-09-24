@@ -324,7 +324,7 @@ export class BancoInterAPI {
 
     // 1. Post para registrar a solicitação de emissão
     const resSolicitacao = await this.request<{ codigoSolicitacao: string }>(
-      "/cobranca/v3/boletos",
+      "/cobranca/v3/cobrancas",
       "POST",
       payload
     )
@@ -341,7 +341,7 @@ export class BancoInterAPI {
    * 2. Consulta Detalhes de um Boleto pelo Código de Solicitação
    */
   async consultarCobranca(codigoSolicitacao: string): Promise<InterBoletoResponse> {
-    const data = await this.request<any>(`/cobranca/v3/boletos/${codigoSolicitacao}`, "GET")
+    const data = await this.request<any>(`/cobranca/v3/cobrancas/${codigoSolicitacao}`, "GET")
 
     const boleto = data.boleto || data
     const pix = data.pix || {}
@@ -364,8 +364,9 @@ export class BancoInterAPI {
    * 3. Download do PDF do Boleto do Banco Inter
    */
   async obterPdfBoleto(codigoSolicitacao: string): Promise<string> {
+    // PDF do boleto Inter v3: /cobranca/v3/cobrancas/{id}/boleto/pdf
     const res = await this.request<{ pdf: string }>(
-      `/cobranca/v3/boletos/${codigoSolicitacao}/pdf`,
+      `/cobranca/v3/cobrancas/${codigoSolicitacao}/boleto/pdf`,
       "GET"
     )
     return res.pdf // string em Base64
@@ -375,7 +376,7 @@ export class BancoInterAPI {
    * 4. Cancelar / Baixar Boleto
    */
   async cancelarCobranca(codigoSolicitacao: string, motivo: string = "ACERTOS"): Promise<boolean> {
-    await this.request(`/cobranca/v3/boletos/${codigoSolicitacao}/cancelar`, "POST", {
+    await this.request(`/cobranca/v3/cobrancas/${codigoSolicitacao}/cancelar`, "POST", {
       motivoCancelamento: motivo,
     })
     return true
@@ -386,7 +387,7 @@ export class BancoInterAPI {
    */
   async cadastrarWebhook(webhookUrl: string): Promise<boolean> {
     console.log(`[Banco Inter] Registrando Webhook na URL: ${webhookUrl}`)
-    await this.request(`/cobranca/v3/boletos/webhook`, "PUT", { webhookUrl })
+    await this.request(`/cobranca/v3/cobrancas/webhook`, "PUT", { webhookUrl })
     return true
   }
 
@@ -395,7 +396,7 @@ export class BancoInterAPI {
    */
   async obterWebhook(): Promise<{ webhookUrl?: string; dataCriacao?: string }> {
     return await this.request<{ webhookUrl?: string; dataCriacao?: string }>(
-      `/cobranca/v3/boletos/webhook`,
+      `/cobranca/v3/cobrancas/webhook`,
       "GET"
     )
   }
@@ -404,7 +405,7 @@ export class BancoInterAPI {
    * 7. Excluir Webhook cadastrado
    */
   async excluirWebhook(): Promise<boolean> {
-    await this.request(`/cobranca/v3/boletos/webhook`, "DELETE")
+    await this.request(`/cobranca/v3/cobrancas/webhook`, "DELETE")
     return true
   }
 }
