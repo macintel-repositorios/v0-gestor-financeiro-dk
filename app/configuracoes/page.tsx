@@ -17,6 +17,7 @@ import {
   CreditCard,
   FileCheck,
   Package,
+  Building2,
 } from "lucide-react"
 import { LogosTab } from "@/components/configuracoes/logos-tab"
 import { LayoutTab } from "@/components/configuracoes/layout-tab"
@@ -27,6 +28,7 @@ import { ValorKmTab } from "@/components/configuracoes/valor-km-tab"
 import { TermosTab } from "@/components/configuracoes/termos-tab"
 import { BackupTab } from "@/components/configuracoes/backup-tab"
 import { AsaasTab } from "@/components/configuracoes/asaas-tab"
+import { InterTab } from "@/components/configuracoes/inter-tab"
 import { NfseTab } from "@/components/configuracoes/nfse-tab"
 import { NfeTab } from "@/components/configuracoes/nfe-tab"
 import { useEffect } from "react"
@@ -160,6 +162,13 @@ export default function ConfiguracoesPage() {
                     Asaas
                   </TabsTrigger>
                   <TabsTrigger
+                    value="inter"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-orange-500/15 data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-orange-500/30"
+                  >
+                    <Building2 className="h-4 w-4" />
+                    Banco Inter
+                  </TabsTrigger>
+                  <TabsTrigger
                     value="nfse"
                     className="flex items-center gap-2 px-4 py-2 text-xs font-semibold data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-400 text-muted-foreground hover:text-foreground transition-all rounded-lg border border-border/40 data-[state=active]:border-emerald-500/30"
                   >
@@ -243,6 +252,13 @@ export default function ConfiguracoesPage() {
                     <span>Asaas</span>
                   </TabsTrigger>
                   <TabsTrigger
+                    value="inter"
+                    className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-orange-500/15 data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground rounded-lg"
+                  >
+                    <Building2 className="h-4 w-4" />
+                    <span>Inter</span>
+                  </TabsTrigger>
+                  <TabsTrigger
                     value="nfse"
                     className="flex flex-col items-center gap-1 py-2 text-[9px] data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-400 text-muted-foreground hover:text-foreground rounded-lg"
                   >
@@ -294,6 +310,10 @@ export default function ConfiguracoesPage() {
 
                 <TabsContent value="asaas" className="mt-0">
                   <AsaasTab />
+                </TabsContent>
+
+                <TabsContent value="inter" className="mt-0">
+                  <InterTab />
                 </TabsContent>
 
                 <TabsContent value="nfse" className="mt-0">

@@ -24,6 +24,7 @@ import {
   ExternalLink,
   Send,
   Loader2,
+  Building2,
 } from "lucide-react"
 
 interface Boleto {
@@ -61,6 +62,7 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
   const [loading, setLoading] = useState(false)
   const [printingAll, setPrintingAll] = useState(false)
   const [enviandoAsaasId, setEnviandoAsaasId] = useState<number | null>(null)
+  const [enviandoInterId, setEnviandoInterId] = useState<number | null>(null)
   const { toast } = useToast()
 
   const extrairNumeroBase = (numero: string | number): string => {
@@ -102,6 +104,43 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
       })
     } finally {
       setEnviandoAsaasId(null)
+    }
+  }
+
+  const handleEnviarInter = async (boleto: Boleto) => {
+    if (!confirm(`Emitir boleto ${boleto.numero} diretamente no Banco Inter (PJ)?\n\nIsso irá gerar a cobrança direta na sua conta do Banco Inter.`)) {
+      return
+    }
+
+    try {
+      setEnviandoInterId(boleto.id)
+      const response = await fetch(`/api/boletos/${boleto.id}/enviar-inter`, {
+        method: "POST",
+      })
+      const result = await response.json()
+
+      if (result.success) {
+        toast({
+          title: "Boleto emitido no Inter",
+          description: `Boleto ${boleto.numero} registrado no Banco Inter com sucesso!`,
+        })
+        loadBoletos()
+      } else {
+        toast({
+          title: "Erro ao emitir no Inter",
+          description: result.message || "Erro ao emitir boleto no Banco Inter",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Erro ao emitir boleto no Banco Inter:", error)
+      toast({
+        title: "Erro",
+        description: "Erro ao comunicar com o Banco Inter",
+        variant: "destructive",
+      })
+    } finally {
+      setEnviandoInterId(null)
     }
   }
 
@@ -518,6 +557,20 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
                                           <Send className="h-3.5 w-3.5 mr-1.5" />
                                         )}
                                         Enviar para Asaas
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={enviandoInterId === boleto.id || enviandoAsaasId === boleto.id}
+                                        onClick={() => handleEnviarInter(boleto)}
+                                        className="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950/30 border-orange-200 dark:border-orange-900/50 bg-card w-full justify-start h-8"
+                                      >
+                                        {enviandoInterId === boleto.id ? (
+                                          <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                        ) : (
+                                          <Building2 className="h-3.5 w-3.5 mr-1.5" />
+                                        )}
+                                        Enviar para Banco Inter
                                       </Button>
                                     </div>
                                   )}

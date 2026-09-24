@@ -3,7 +3,7 @@ interface AsaasConfig {
   environment: "sandbox" | "production"
 }
 
-interface AsaasCustomer {
+export interface AsaasCustomer {
   name: string
   cpfCnpj: string
   email?: string
@@ -18,7 +18,7 @@ interface AsaasCustomer {
   notificationDisabled?: boolean
 }
 
-interface AsaasPayment {
+export interface AsaasPayment {
   customer: string // ID do cliente no Asaas (cus_xxxx)
   billingType: "BOLETO" | "PIX" | "CREDIT_CARD"
   value: number

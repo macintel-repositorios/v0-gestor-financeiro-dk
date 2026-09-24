@@ -35,6 +35,7 @@ import {
   TrendingUp,
   ExternalLink,
   MoreHorizontal,
+  Building2,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -84,6 +85,7 @@ interface Boleto {
   asaas_linha_digitavel?: string | null
   asaas_barcode?: string | null
   asaas_nosso_numero?: string | null
+  pdf_url?: string | null
   gateway?: string | null
 }
 
@@ -131,6 +133,7 @@ export default function FinanceiroPage() {
   const [boletoParaExcluir, setBoletoParaExcluir] = useState<Boleto | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [enviandoParaAsaas, setEnviandoParaAsaas] = useState<number | null>(null)
+  const [enviandoParaInter, setEnviandoParaInter] = useState<number | null>(null)
   const [valoresOcultos, setValoresOcultos] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [expandedBoletoId, setExpandedBoletoId] = useState<number | null>(null)
@@ -232,16 +235,56 @@ export default function FinanceiroPage() {
   }
 
   const handleImprimirBoleto = async (boleto: Boleto) => {
-    if (boleto.asaas_bankslip_url) {
-      setPreviewBoletoUrl(boleto.asaas_bankslip_url)
-    } else if (boleto.asaas_invoice_url) {
-      setPreviewBoletoUrl(boleto.asaas_invoice_url)
+    const url = boleto.pdf_url || boleto.asaas_bankslip_url || boleto.asaas_invoice_url
+    if (url) {
+      setPreviewBoletoUrl(url)
     } else {
       toast({
         title: "PDF não disponível",
-        description: "Este boleto ainda não foi enviado ao Asaas.",
+        description: "Este boleto ainda não foi emitido no Asaas nem no Banco Inter.",
         variant: "destructive",
       })
+    }
+  }
+
+  const handleEnviarInter = async (boleto: Boleto) => {
+    if (
+      !confirm(`Emitir boleto ${boleto.numero} diretamente no Banco Inter (PJ)?\n\nIsso irá gerar a cobrança direta na sua conta corrente do Banco Inter.`)
+    ) {
+      return
+    }
+
+    try {
+      setEnviandoParaInter(boleto.id)
+
+      const response = await fetch(`/api/boletos/${boleto.id}/enviar-inter`, {
+        method: "POST",
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast({
+          title: "Sucesso!",
+          description: `Boleto ${boleto.numero} registrado no Banco Inter com sucesso!`,
+        })
+        await loadData()
+      } else {
+        toast({
+          title: "Erro ao emitir no Inter",
+          description: result.message || "Erro ao emitir boleto no Banco Inter",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Erro ao emitir boleto no Banco Inter:", error)
+      toast({
+        title: "Erro",
+        description: "Erro ao comunicar com o Banco Inter",
+        variant: "destructive",
+      })
+    } finally {
+      setEnviandoParaInter(null)
     }
   }
 
@@ -966,16 +1009,23 @@ export default function FinanceiroPage() {
                                     </Button>
                                     {!(boleto.status === "pago" && boleto.data_pagamento) && (
                                       <>
-                                        {!boleto.asaas_id && (
-                                          <Button variant="outline" size="sm" onClick={handleEnviarAsaasClick}
-                                            disabled={enviandoParaAsaas === boleto.id}
-                                            className="border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 h-8 w-8 p-0" title="Enviar Asaas">
-                                            {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                          </Button>
+                                        {!boleto.asaas_id && !boleto.pdf_url && (
+                                          <>
+                                            <Button variant="outline" size="sm" onClick={handleEnviarAsaasClick}
+                                              disabled={enviandoParaAsaas === boleto.id || enviandoParaInter === boleto.id}
+                                              className="border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 h-8 w-8 p-0" title="Enviar para Asaas">
+                                              {enviandoParaAsaas === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                            </Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleEnviarInter(boleto)}
+                                              disabled={enviandoParaInter === boleto.id || enviandoParaAsaas === boleto.id}
+                                              className="border-orange-500 dark:border-orange-700 text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 h-8 w-8 p-0" title="Enviar para Banco Inter">
+                                              {enviandoParaInter === boleto.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Building2 className="h-4 w-4" />}
+                                            </Button>
+                                          </>
                                         )}
-                                        {boleto.asaas_bankslip_url && (
+                                        {(boleto.asaas_bankslip_url || boleto.pdf_url) && (
                                           <Button variant="outline" size="sm" onClick={handleImprimirBoletoClick}
-                                            className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir">
+                                            className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir Boleto">
                                             <Printer className="h-4 w-4" />
                                           </Button>
                                         )}
@@ -1010,12 +1060,17 @@ export default function FinanceiroPage() {
                                         </DropdownMenuItem>
                                         {!(boleto.status === "pago" && boleto.data_pagamento) && (
                                           <>
-                                            {!boleto.asaas_id && (
-                                              <DropdownMenuItem onClick={handleEnviarAsaasClick} disabled={enviandoParaAsaas === boleto.id}>
-                                                <Send className="h-4 w-4 mr-2" />Enviar Asaas
-                                              </DropdownMenuItem>
+                                            {!boleto.asaas_id && !boleto.pdf_url && (
+                                              <>
+                                                <DropdownMenuItem onClick={handleEnviarAsaasClick} disabled={enviandoParaAsaas === boleto.id || enviandoParaInter === boleto.id}>
+                                                  <Send className="h-4 w-4 mr-2" />Enviar Asaas
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleEnviarInter(boleto)} disabled={enviandoParaInter === boleto.id || enviandoParaAsaas === boleto.id}>
+                                                  <Building2 className="h-4 w-4 mr-2 text-orange-500" />Enviar Inter
+                                                </DropdownMenuItem>
+                                              </>
                                             )}
-                                            {boleto.asaas_bankslip_url && (
+                                            {(boleto.asaas_bankslip_url || boleto.pdf_url) && (
                                               <DropdownMenuItem onClick={handleImprimirBoletoClick}>
                                                 <Printer className="h-4 w-4 mr-2" />Imprimir
                                               </DropdownMenuItem>
