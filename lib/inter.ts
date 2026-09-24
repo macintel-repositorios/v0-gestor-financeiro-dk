@@ -300,21 +300,29 @@ export class BancoInterAPI {
       payload.mensagem = dados.mensagem
     }
 
-    if (dados.multa && (dados.multa.taxa || dados.multa.valor)) {
+    if (dados.multa?.taxa) {
       payload.multa = {
-        codigoMulta: dados.multa.taxa ? "PERCENTUAL" : "VALORFIXO",
-        valor: dados.multa.valor || 0,
-        taxa: dados.multa.taxa || 0,
+        codigoMulta: "PERCENTUAL",
+        percentual: dados.multa.taxa,
+      }
+    } else if (dados.multa?.valor) {
+      payload.multa = {
+        codigoMulta: "VALORFIXO",
+        valor: dados.multa.valor,
       }
     } else {
       payload.multa = { codigoMulta: "NAOTEMMULTA" }
     }
 
-    if (dados.juros && (dados.juros.taxa || dados.juros.valor)) {
+    if (dados.juros?.taxa) {
       payload.juros = {
-        codigoJuros: dados.juros.taxa ? "TAXAMENSAL" : "VALORPORDIA",
-        valor: dados.juros.valor || 0,
-        taxa: dados.juros.taxa || 0,
+        codigoJuros: "TAXAMENSAL",
+        percentual: dados.juros.taxa,
+      }
+    } else if (dados.juros?.valor) {
+      payload.juros = {
+        codigoJuros: "VALORPORDIA",
+        valor: dados.juros.valor,
       }
     } else {
       payload.juros = { codigoJuros: "ISENTO" }
