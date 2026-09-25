@@ -101,37 +101,48 @@ export class BancoInterAPI {
     let cert: Buffer | string
     let key: Buffer | string
 
-    if (this.config.certContent && this.config.keyContent) {
-      cert = this.config.certContent.includes("-----BEGIN CERTIFICATE-----")
-        ? this.config.certContent
-        : Buffer.from(this.config.certContent, "base64").toString("utf-8")
+    const certInput =
+      this.config.certContent || process.env.INTER_CERT_CONTENT || this.config.certPath || process.env.INTER_CERT_PATH
+    const keyInput =
+      this.config.keyContent || process.env.INTER_KEY_CONTENT || this.config.keyPath || process.env.INTER_KEY_PATH
 
-      key =
-        this.config.keyContent.includes("-----BEGIN PRIVATE KEY-----") ||
-        this.config.keyContent.includes("-----BEGIN RSA PRIVATE KEY-----")
-          ? this.config.keyContent
-          : Buffer.from(this.config.keyContent, "base64").toString("utf-8")
+    const normalizedCert = certInput?.replace(/\\n/g, "\n").trim()
+    const normalizedKey = keyInput?.replace(/\\n/g, "\n").trim()
+    const certIsPem = normalizedCert?.includes("-----BEGIN CERTIFICATE-----")
+    const keyIsPem = normalizedKey?.includes("-----BEGIN ") && normalizedKey?.includes(" PRIVATE KEY-----")
+
+    if (certIsPem && keyIsPem) {
+      cert = normalizedCert!
+      key = normalizedKey!
     } else {
-      const certPath =
-        this.config.certPath || process.env.INTER_CERT_PATH || "./certs/inter.crt"
-      const keyPath =
-        this.config.keyPath || process.env.INTER_KEY_PATH || "./certs/inter.key"
-
-      const absoluteCertPath = path.isAbsolute(certPath)
-        ? certPath
-        : path.join(process.cwd(), certPath)
-      const absoluteKeyPath = path.isAbsolute(keyPath)
-        ? keyPath
-        : path.join(process.cwd(), keyPath)
+      const certPath = certInput || "./certs/inter.crt"
+      const keyPath = keyInput || "./certs/inter.key"
+      const absoluteCertPath = path.isAbsolute(certPath) ? certPath : path.join(process.cwd(), certPath)
+      const absoluteKeyPath = path.isAbsolute(keyPath) ? keyPath : path.join(process.cwd(), keyPath)
 
       if (!fs.existsSync(absoluteCertPath) || !fs.existsSync(absoluteKeyPath)) {
         throw new Error(
-          `Certificados do Banco Inter não encontrados.\nCert: ${absoluteCertPath}\nKey: ${absoluteKeyPath}`
+          `Certificados do Banco Inter não encontrados. Configure INTER_CERT_CONTENT e INTER_KEY_CONTENT com o conteúdo PEM completo, ou informe caminhos de arquivos válidos.`
         )
       }
 
       cert = fs.readFileSync(absoluteCertPath)
       key = fs.readFileSync(absoluteKeyPath)
+
+      // Arquivos exportados/colados podem conter quebras escapadas; normalize antes do TLS.
+      cert = Buffer.from(cert.toString("utf8").replace(/\\n/g, "\n").trim())
+      key = Buffer.from(key.toString("utf8").replace(/\\n/g, "\n").trim())
+    }
+
+    const certText = Buffer.isBuffer(cert) ? cert.toString("utf8") : cert
+    const keyText = Buffer.isBuffer(key) ? key.toString("utf8") : key
+    const hasCertificatePem = certText.includes("-----BEGIN CERTIFICATE-----")
+    const hasPrivateKeyPem = keyText.includes("-----BEGIN ") && keyText.includes(" PRIVATE KEY-----")
+
+    if (!hasCertificatePem || !hasPrivateKeyPem) {
+      throw new Error(
+        "Certificado ou chave do Banco Inter inválido. O certificado deve conter BEGIN CERTIFICATE e a chave deve conter BEGIN ... PRIVATE KEY."
+      )
     }
 
     this._certBuffer = typeof cert === "string" ? Buffer.from(cert) : cert
