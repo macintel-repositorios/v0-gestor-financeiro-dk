@@ -192,7 +192,7 @@ export class BancoInterAPI {
     this._certBuffer = certBuffer
     this._keyBuffer = keyBuffer
 
-    return { cert, key }
+    return { cert: certBuffer, key: keyBuffer }
   }
 
   /**
