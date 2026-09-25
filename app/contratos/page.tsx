@@ -34,6 +34,7 @@ import {
   Calendar,
   DollarSign,
   TrendingUp,
+  Building2,
   CheckCircle,
   MoreHorizontal,
   FileCheck,
@@ -773,11 +774,13 @@ export default function ContratosPage() {
         description: "O processo de geração sequencial dos boletos locais terminou."
       })
       loadContratos()
-    } else if (batchTab === "asaas") {
+    } else if (batchTab === "inter" || batchTab === "asaas") {
+      // Inter e Asaas compartilham a mesma lógica: boleto local sem asaas_id (evita duplicidade entre gateways)
+      const gatewayNome = batchTab === "inter" ? "Banco Inter" : "Asaas"
       if (batchAsaasSelecionados.length === 0) {
         toast({
           title: "Atenção",
-          description: "Selecione pelo menos um boleto para enviar ao Asaas.",
+          description: `Selecione pelo menos um boleto para enviar ao ${gatewayNome}.`,
           variant: "destructive"
         })
         return
@@ -815,7 +818,7 @@ export default function ContratosPage() {
             continue
           }
 
-          const response = await fetch(`/api/boletos/${boleto.id}/enviar-asaas`, {
+          const response = await fetch(`/api/boletos/${boleto.id}/${batchTab === "inter" ? "enviar-inter" : "enviar-asaas"}`, {
             method: "POST"
           })
 
@@ -823,7 +826,7 @@ export default function ContratosPage() {
           if (result.success) {
             setBatchProgress((prev) => ({ ...prev, [num]: "success" }))
           } else {
-            console.error(`Erro ao enviar boleto ao Asaas para contrato ${num}:`, result.message)
+            console.error(`Erro ao enviar boleto ao ${gatewayNome} para contrato ${num}:`, result.message)
             setBatchProgress((prev) => ({ ...prev, [num]: "error" }))
           }
         } catch (error) {
@@ -833,9 +836,11 @@ export default function ContratosPage() {
       }
 
       setBatchRunning(false)
+      // Limpa seleção para não reaproveitar os já enviados na outra aba
+      setBatchAsaasSelecionados([])
       toast({
-        title: "Envio ao Asaas Concluído",
-        description: "O processo de envio sequencial dos boletos ao Asaas terminou."
+        title: `Envio ao ${gatewayNome} Concluído`,
+        description: `O processo de envio sequencial dos boletos ao ${gatewayNome} terminou.`
       })
       loadContratos()
     }
@@ -2034,10 +2039,10 @@ export default function ContratosPage() {
           <SheetHeader className="p-6 border-b border-border bg-muted/20">
             <SheetTitle className="flex items-center gap-2">
               <FileCheck className="h-5 w-5 text-emerald-600" />
-              Lote Financeiro (NFS-e, Boletos e Asaas)
+              Lote Financeiro (NFS-e, Boletos, Inter e Asaas)
             </SheetTitle>
             <SheetDescription>
-              Gerencie a emissão de notas, geração de boletos locais e sincronização com o Asaas em lote para os contratos ativos.
+              Gerencie a emissão de notas, geração de boletos locais e registro no Banco Inter ou Asaas em lote para os contratos ativos.
             </SheetDescription>
           </SheetHeader>
 
@@ -2049,6 +2054,7 @@ export default function ContratosPage() {
                   <h3 className="font-semibold text-lg">
                     {batchTab === "nfse" && "Emitindo NFS-e em Lote..."}
                     {batchTab === "boletos" && "Gerando Boletos em Lote..."}
+                    {batchTab === "inter" && "Enviando ao Banco Inter..."}
                     {batchTab === "asaas" && "Sincronizando com Asaas..."}
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">Por favor, não feche este painel enquanto a operação é executada.</p>
@@ -2073,7 +2079,7 @@ export default function ContratosPage() {
                             <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
                             {batchTab === "nfse" && "Emitindo..."}
                             {batchTab === "boletos" && "Gerando..."}
-                            {batchTab === "asaas" && "Enviando..."}
+                            {(batchTab === "inter" || batchTab === "asaas") && "Enviando..."}
                           </span>
                         )}
                         {prog === 'success' && <span className="text-green-500 font-semibold flex items-center"><CheckCircle className="h-3.5 w-3.5 mr-1" /> Sucesso</span>}
@@ -2172,10 +2178,11 @@ export default function ContratosPage() {
               {/* TABS CONTAINER */}
               <Tabs value={batchTab} onValueChange={(v) => setBatchTab(v)} className="flex-1 flex flex-col overflow-hidden">
                 <div className="px-6 pt-3 border-b border-border bg-muted/10">
-                  <TabsList className="grid grid-cols-3 bg-muted/40 p-1 h-9 rounded-lg">
+                  <TabsList className="grid grid-cols-4 bg-muted/40 p-1 h-9 rounded-lg">
                     <TabsTrigger value="nfse" className="text-xs rounded-md">1. NFS-e</TabsTrigger>
                     <TabsTrigger value="boletos" className="text-xs rounded-md">2. Boletos</TabsTrigger>
-                    <TabsTrigger value="asaas" className="text-xs rounded-md">3. Asaas</TabsTrigger>
+                    <TabsTrigger value="inter" className="text-xs rounded-md">3. Inter</TabsTrigger>
+                    <TabsTrigger value="asaas" className="text-xs rounded-md">4. Asaas</TabsTrigger>
                   </TabsList>
                 </div>
 
@@ -2440,8 +2447,9 @@ export default function ContratosPage() {
                       )
                     }
 
-                    if (batchTab === "asaas") {
-                      // Elegíveis: boleto existe mas sem asaas_id
+                    if (batchTab === "inter" || batchTab === "asaas") {
+                      const gatewayNome = batchTab === "inter" ? "Banco Inter" : "Asaas"
+                      // Elegíveis: boleto existe mas sem asaas_id (não enviado a nenhum gateway)
                       const elegiveis = contratosAtivos.filter((c) => {
                         const chave = `${c.numero}|${mesRef}`
                         const nota = notasEmitidasContrato[chave]
@@ -2475,7 +2483,7 @@ export default function ContratosPage() {
                       return (
                         <div className="space-y-4">
                           <div className="flex justify-between items-center">
-                            <Label className="text-sm font-semibold text-foreground">Enviar ao Asaas ({elegiveis.length})</Label>
+                            <Label className="text-sm font-semibold text-foreground">Enviar ao {gatewayNome} ({elegiveis.length})</Label>
                             {elegiveis.length > 0 && (
                               <button
                                 type="button"
@@ -2495,7 +2503,7 @@ export default function ContratosPage() {
 
                           {elegiveis.length === 0 ? (
                             <div className="p-6 text-center border border-dashed border-border rounded-xl text-xs text-muted-foreground bg-muted/5">
-                              Nenhum boleto local pendente de sincronização com o Asaas.
+                              Nenhum boleto local pendente de envio ao {gatewayNome}.
                             </div>
                           ) : (
                             <div className="border border-border rounded-xl divide-y divide-border/50 max-h-[200px] overflow-y-auto bg-background">
@@ -2557,19 +2565,30 @@ export default function ContratosPage() {
 
                           {jaSincronizados.length > 0 && (
                             <div className="space-y-2 pt-2">
-                              <Label className="text-xs font-semibold text-green-600 dark:text-green-400">Já Enviados ao Asaas ({jaSincronizados.length})</Label>
+                              <Label className="text-xs font-semibold text-green-600 dark:text-green-400">Já Enviados ao Inter/Asaas ({jaSincronizados.length})</Label>
                               <div className="border border-border rounded-xl divide-y divide-border/50 bg-muted/10 max-h-[140px] overflow-y-auto">
-                                {jaSincronizados.map((c) => (
-                                  <div key={c.id} className="p-3 text-xs flex items-center justify-between opacity-80">
-                                    <div className="min-w-0 flex-1">
-                                      <p className="font-semibold text-foreground truncate">{c.cliente_nome}</p>
-                                      <p className="text-muted-foreground font-mono text-[10px] mt-0.5">
-                                        Contrato: {c.numero} | Valor: {formatCurrency(c.valor_mensal)}
-                                      </p>
+                                {jaSincronizados.map((c) => {
+                                  const nota = notasEmitidasContrato[`${c.numero}|${mesRef}`]
+                                  const boleto = allBoletos.find(
+                                    (b) => String(b.cliente_id) === String(c.cliente_id) && String(b.numero_nota) === String(nota?.numero_nfse)
+                                  )
+                                  const isInter = String(boleto?.gateway).toLowerCase() === "inter"
+                                  return (
+                                    <div key={c.id} className="p-3 text-xs flex items-center justify-between opacity-80">
+                                      <div className="min-w-0 flex-1">
+                                        <p className="font-semibold text-foreground truncate">{c.cliente_nome}</p>
+                                        <p className="text-muted-foreground font-mono text-[10px] mt-0.5">
+                                          Contrato: {c.numero} | Valor: {formatCurrency(c.valor_mensal)}
+                                        </p>
+                                      </div>
+                                      {isInter ? (
+                                        <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-0 text-[10px] font-bold">Inter Ok</Badge>
+                                      ) : (
+                                        <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-0 text-[10px] font-bold">Asaas Ok</Badge>
+                                      )}
                                     </div>
-                                    <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-0 text-[10px] font-bold">Asaas Ok</Badge>
-                                  </div>
-                                ))}
+                                  )
+                                })}
                               </div>
                             </div>
                           )}
@@ -2611,6 +2630,17 @@ export default function ContratosPage() {
                   >
                     <Calendar className="h-4 w-4 mr-2" />
                     Gerar {batchBoletosSelecionados.length} Boletos
+                  </Button>
+                )}
+
+                {batchTab === "inter" && (
+                  <Button
+                    onClick={handleExecutarBatch}
+                    disabled={batchAsaasSelecionados.length === 0}
+                    className="bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl"
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Enviar {batchAsaasSelecionados.length} ao Inter
                   </Button>
                 )}
 

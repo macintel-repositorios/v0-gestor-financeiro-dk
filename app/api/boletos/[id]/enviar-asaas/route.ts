@@ -40,7 +40,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json(
         {
           success: false,
-          message: "Este boleto já foi enviado ao Asaas",
+          message:
+            String(boleto.gateway).toLowerCase() === "inter"
+              ? "Este boleto já foi registrado no Banco Inter"
+              : "Este boleto já foi enviado ao Asaas",
         },
         { status: 400 },
       )
