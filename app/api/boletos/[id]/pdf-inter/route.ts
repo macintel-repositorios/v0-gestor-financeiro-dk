@@ -56,7 +56,12 @@ const FUNDO = rgb(0.97, 0.975, 0.98)
 async function montarPdfPersonalizado(boleto: any, interPdf: Buffer): Promise<Uint8Array> {
   const [empresaRows, logoRows]: any = await Promise.all([
     query("SELECT * FROM timbrado_config WHERE ativo = 1 ORDER BY created_at DESC LIMIT 1"),
-    query("SELECT dados, formato FROM logos_sistema WHERE tipo = 'impressao' AND ativo = 1 LIMIT 1"),
+    // Logo quadrado (tipo 'sistema'), igual ao usado no boleto Asaas; fallback para o de impressão
+    query(
+      `SELECT dados, formato FROM logos_sistema
+       WHERE tipo IN ('sistema', 'impressao') AND ativo = 1
+       ORDER BY tipo = 'sistema' DESC LIMIT 1`
+    ),
   ])
   const empresa = empresaRows[0] || {}
 
