@@ -134,7 +134,6 @@ export default function FinanceiroPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [enviandoParaAsaas, setEnviandoParaAsaas] = useState<number | null>(null)
   const [enviandoParaInter, setEnviandoParaInter] = useState<number | null>(null)
-  const [sincronizandoInter, setSincronizandoInter] = useState(false)
   const [valoresOcultos, setValoresOcultos] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [expandedBoletoId, setExpandedBoletoId] = useState<number | null>(null)
@@ -245,24 +244,6 @@ export default function FinanceiroPage() {
         description: "Este boleto ainda não foi emitido no Asaas nem no Banco Inter.",
         variant: "destructive",
       })
-    }
-  }
-
-  const handleSincronizarInter = async () => {
-    try {
-      setSincronizandoInter(true)
-      const response = await fetch("/api/inter/sincronizar", { method: "POST" })
-      const result = await response.json()
-      toast({
-        title: result.success ? "Sincronização concluída" : "Erro ao sincronizar",
-        description: result.message,
-        variant: result.success ? "default" : "destructive",
-      })
-      if (result.success && result.atualizados > 0) await loadData()
-    } catch (error) {
-      toast({ title: "Erro ao sincronizar", description: "Falha ao consultar o Banco Inter", variant: "destructive" })
-    } finally {
-      setSincronizandoInter(false)
     }
   }
 
@@ -947,11 +928,6 @@ export default function FinanceiroPage() {
                         {filteredBoletos.length} boleto{filteredBoletos.length !== 1 ? "s" : ""} encontrado{filteredBoletos.length !== 1 ? "s" : ""}
                       </CardDescription>
                     </div>
-                    <Button size="sm" variant="outline" onClick={handleSincronizarInter} disabled={sincronizandoInter}
-                      className="bg-white/10 border-white/30 text-white hover:bg-white/20">
-                      {sincronizandoInter ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-                      Sincronizar Inter
-                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
