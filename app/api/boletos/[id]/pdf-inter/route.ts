@@ -15,13 +15,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
        WHERE b.id = ?`,
       [id]
     )
-    if (boletos.length === 0 || !boletos[0].asaas_id) {
+    if (boletos.length === 0 || !boletos[0].inter_codigo_solicitacao) {
       return NextResponse.json({ success: false, message: "Boleto não emitido no Banco Inter" }, { status: 404 })
     }
     const boleto = boletos[0]
 
     const inter = getInterAPI()
-    const pdfBase64 = await inter.obterPdfBoleto(boleto.asaas_id)
+    const pdfBase64 = await inter.obterPdfBoleto(boleto.inter_codigo_solicitacao)
     const interPdf = Buffer.from(pdfBase64, "base64")
 
     let pdf: Uint8Array | Buffer = interPdf
@@ -65,14 +65,24 @@ async function montarPdfPersonalizado(boleto: any, interPdf: Buffer): Promise<Ui
   ])
   const empresa = empresaRows[0] || {}
 
-  // Pix copia e cola vem da consulta da cobrança
-  let pixCopiaECola = ""
-  let linhaDigitavel = boleto.asaas_linha_digitavel || ""
-  try {
-    const cob = await getInterAPI().consultarCobranca(boleto.asaas_id)
-    pixCopiaECola = cob.pixCopiaECola || ""
-    linhaDigitavel = linhaDigitavel || cob.linhaDigitavel || ""
-  } catch {}
+  // Pix copia e cola: usa o salvo no banco; se faltar, consulta o Inter e guarda
+  let pixCopiaECola = boleto.inter_pix_copia_cola || ""
+  let linhaDigitavel = boleto.inter_linha_digitavel || ""
+  if (!pixCopiaECola || !linhaDigitavel) {
+    try {
+      const cob = await getInterAPI().consultarCobranca(boleto.inter_codigo_solicitacao)
+      pixCopiaECola = pixCopiaECola || cob.pixCopiaECola || ""
+      linhaDigitavel = linhaDigitavel || cob.linhaDigitavel || ""
+      await query(
+        `UPDATE boletos SET inter_pix_copia_cola = COALESCE(inter_pix_copia_cola, ?),
+           inter_linha_digitavel = COALESCE(inter_linha_digitavel, ?),
+           inter_nosso_numero = COALESCE(inter_nosso_numero, ?),
+           inter_barcode = COALESCE(inter_barcode, ?)
+         WHERE id = ?`,
+        [pixCopiaECola || null, linhaDigitavel || null, cob.nossoNumero || null, cob.codigoBarras || null, boleto.id]
+      )
+    } catch {}
+  }
 
   const doc = await PDFDocument.create()
   const page = doc.addPage([595.28, 841.89])

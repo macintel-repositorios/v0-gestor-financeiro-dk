@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
         situacao: evento.situacao,
         valorRecebido: evento.valorTotalRecebido ?? evento.valorPago,
         dataSituacao: evento.dataHoraSituacao || evento.dataSituacao,
+        origem: "webhook",
+        payload: evento,
       })
     }
 

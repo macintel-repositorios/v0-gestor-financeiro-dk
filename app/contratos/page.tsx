@@ -50,6 +50,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import { boletoEnviado, boletoNoInter } from "@/lib/boleto-gateway"
 import { formatCurrency } from "@/lib/utils"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
 import { NovoContratoDialog } from "@/components/contratos/novo-contrato-dialog"
@@ -592,7 +593,7 @@ export default function ContratosPage() {
       const boleto = allBoletos.find(
         (b) => String(b.cliente_id) === String(c.cliente_id) && String(b.numero_nota) === String(nota.numero_nfse)
       )
-      return boleto && !boleto.asaas_id
+      return boleto && !boletoEnviado(boleto)
     }).map((c) => c.numero)
     setBatchAsaasSelecionados(elegiveisAsaas)
   }
@@ -775,7 +776,7 @@ export default function ContratosPage() {
       })
       loadContratos()
     } else if (batchTab === "inter" || batchTab === "asaas") {
-      // Inter e Asaas compartilham a mesma lógica: boleto local sem asaas_id (evita duplicidade entre gateways)
+      // Inter e Asaas compartilham a mesma lógica: boleto local ainda não enviado a nenhum gateway (evita duplicidade entre gateways)
       const gatewayNome = batchTab === "inter" ? "Banco Inter" : "Asaas"
       if (batchAsaasSelecionados.length === 0) {
         toast({
@@ -813,7 +814,7 @@ export default function ContratosPage() {
             (b) => String(b.cliente_id) === String(contrato.cliente_id) && String(b.numero_nota) === String(nota.numero_nfse)
           )
 
-          if (!boleto || boleto.asaas_id) {
+          if (!boleto || boletoEnviado(boleto)) {
             setBatchProgress((prev) => ({ ...prev, [num]: "error" }))
             continue
           }
@@ -2449,7 +2450,7 @@ export default function ContratosPage() {
 
                     if (batchTab === "inter" || batchTab === "asaas") {
                       const gatewayNome = batchTab === "inter" ? "Banco Inter" : "Asaas"
-                      // Elegíveis: boleto existe mas sem asaas_id (não enviado a nenhum gateway)
+                      // Elegíveis: boleto existe e ainda não foi enviado a nenhum gateway
                       const elegiveis = contratosAtivos.filter((c) => {
                         const chave = `${c.numero}|${mesRef}`
                         const nota = notasEmitidasContrato[chave]
@@ -2457,7 +2458,7 @@ export default function ContratosPage() {
                         const boleto = allBoletos.find(
                           (b) => String(b.cliente_id) === String(c.cliente_id) && String(b.numero_nota) === String(nota.numero_nfse)
                         )
-                        return boleto && !boleto.asaas_id
+                        return boleto && !boletoEnviado(boleto)
                       })
 
                       const jaSincronizados = contratosAtivos.filter((c) => {
@@ -2467,7 +2468,7 @@ export default function ContratosPage() {
                         const boleto = allBoletos.find(
                           (b) => String(b.cliente_id) === String(c.cliente_id) && String(b.numero_nota) === String(nota.numero_nfse)
                         )
-                        return boleto && boleto.asaas_id
+                        return boleto && boletoEnviado(boleto)
                       })
 
                       const semBoleto = contratosAtivos.filter((c) => {
@@ -2572,7 +2573,7 @@ export default function ContratosPage() {
                                   const boleto = allBoletos.find(
                                     (b) => String(b.cliente_id) === String(c.cliente_id) && String(b.numero_nota) === String(nota?.numero_nfse)
                                   )
-                                  const isInter = String(boleto?.gateway).toLowerCase() === "inter"
+                                  const isInter = boletoNoInter(boleto)
                                   return (
                                     <div key={c.id} className="p-3 text-xs flex items-center justify-between opacity-80">
                                       <div className="min-w-0 flex-1">

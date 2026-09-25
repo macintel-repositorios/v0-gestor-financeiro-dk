@@ -10,8 +10,8 @@ import { aplicarSituacaoInter } from "@/lib/inter-status"
 export async function POST() {
   try {
     const boletos: any = await query(
-      `SELECT id, asaas_id FROM boletos
-       WHERE gateway = 'inter' AND asaas_id IS NOT NULL
+      `SELECT id, inter_codigo_solicitacao FROM boletos
+       WHERE inter_codigo_solicitacao IS NOT NULL
          AND status NOT IN ('pago', 'cancelado')`
     )
 
@@ -21,12 +21,14 @@ export async function POST() {
 
     for (const b of boletos) {
       try {
-        const cob = await inter.consultarCobranca(b.asaas_id)
+        const cob = await inter.consultarCobranca(b.inter_codigo_solicitacao)
         const r = await aplicarSituacaoInter({
-          codigoSolicitacao: b.asaas_id,
+          codigoSolicitacao: b.inter_codigo_solicitacao,
           situacao: cob.status,
           valorRecebido: cob.valorTotalRecebido,
           dataSituacao: cob.dataSituacao,
+          origem: "sincronizacao",
+          payload: cob,
         })
         if (r.atualizado) atualizados++
       } catch (e: any) {

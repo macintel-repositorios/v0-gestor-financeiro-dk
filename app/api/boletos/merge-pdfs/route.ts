@@ -52,7 +52,10 @@ export async function POST(request: NextRequest) {
     console.log(`[merge-pdfs] Starting merge of ${urls.length} PDFs`)
 
     // Fetch PDFs in batches of 3 to avoid overwhelming the Asaas server
-    const validUrls = urls.filter((u: string) => u && u.startsWith("http"))
+    // URLs relativas (ex.: /api/boletos/{id}/pdf-inter) são resolvidas na própria origem
+    const validUrls = urls
+      .filter((u: string) => u && (u.startsWith("http") || u.startsWith("/api/boletos/")))
+      .map((u: string) => (u.startsWith("/") ? new URL(u, request.nextUrl.origin).toString() : u))
     const BATCH_SIZE = 3
     const pdfResults: (ArrayBuffer | null)[] = []
     

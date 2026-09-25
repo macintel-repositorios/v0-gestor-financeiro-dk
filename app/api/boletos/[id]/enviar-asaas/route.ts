@@ -36,12 +36,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const boleto = boletos[0]
 
     // Verificar se já foi enviado ao Asaas
-    if (boleto.asaas_id) {
+    if (boleto.asaas_id || boleto.inter_codigo_solicitacao) {
       return NextResponse.json(
         {
           success: false,
           message:
-            String(boleto.gateway).toLowerCase() === "inter"
+            boleto.inter_codigo_solicitacao
               ? "Este boleto já foi registrado no Banco Inter"
               : "Este boleto já foi enviado ao Asaas",
         },

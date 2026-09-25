@@ -57,6 +57,7 @@ import { EditarBoletoDialog } from "@/components/financeiro/editar-boleto-dialog
 import { VisualizarBoletosDialog } from "@/components/financeiro/visualizar-boletos-dialog"
 import { FluxoCaixaTab } from "@/components/financeiro/fluxo-caixa-tab"
 import Link from "next/link"
+import { boletoEnviado, urlPdfBoleto } from "@/lib/boleto-gateway"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,6 +88,10 @@ interface Boleto {
   asaas_nosso_numero?: string | null
   pdf_url?: string | null
   gateway?: string | null
+  // Campos do Banco Inter
+  inter_codigo_solicitacao?: string | null
+  inter_linha_digitavel?: string | null
+  inter_situacao?: string | null
 }
 
 interface Recibo {
@@ -235,7 +240,7 @@ export default function FinanceiroPage() {
   }
 
   const handleImprimirBoleto = async (boleto: Boleto) => {
-    const url = boleto.pdf_url || boleto.asaas_bankslip_url || boleto.asaas_invoice_url
+    const url = urlPdfBoleto(boleto)
     if (url) {
       setPreviewBoletoUrl(url)
     } else {
@@ -1009,7 +1014,7 @@ export default function FinanceiroPage() {
                                     </Button>
                                     {!(boleto.status === "pago" && boleto.data_pagamento) && (
                                       <>
-                                        {!boleto.asaas_id && !boleto.pdf_url && (
+                                        {!boletoEnviado(boleto) && !boleto.pdf_url && (
                                           <>
                                             <Button variant="outline" size="sm" onClick={handleEnviarAsaasClick}
                                               disabled={enviandoParaAsaas === boleto.id || enviandoParaInter === boleto.id}
@@ -1023,7 +1028,7 @@ export default function FinanceiroPage() {
                                             </Button>
                                           </>
                                         )}
-                                        {(boleto.asaas_bankslip_url || boleto.pdf_url) && (
+                                        {urlPdfBoleto(boleto) && (
                                           <Button variant="outline" size="sm" onClick={handleImprimirBoletoClick}
                                             className="border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 h-8 w-8 p-0" title="Imprimir Boleto">
                                             <Printer className="h-4 w-4" />
@@ -1060,7 +1065,7 @@ export default function FinanceiroPage() {
                                         </DropdownMenuItem>
                                         {!(boleto.status === "pago" && boleto.data_pagamento) && (
                                           <>
-                                            {!boleto.asaas_id && !boleto.pdf_url && (
+                                            {!boletoEnviado(boleto) && !boleto.pdf_url && (
                                               <>
                                                 <DropdownMenuItem onClick={handleEnviarAsaasClick} disabled={enviandoParaAsaas === boleto.id || enviandoParaInter === boleto.id}>
                                                   <Send className="h-4 w-4 mr-2" />Enviar Asaas
@@ -1070,7 +1075,7 @@ export default function FinanceiroPage() {
                                                 </DropdownMenuItem>
                                               </>
                                             )}
-                                            {(boleto.asaas_bankslip_url || boleto.pdf_url) && (
+                                            {urlPdfBoleto(boleto) && (
                                               <DropdownMenuItem onClick={handleImprimirBoletoClick}>
                                                 <Printer className="h-4 w-4 mr-2" />Imprimir
                                               </DropdownMenuItem>
@@ -1236,7 +1241,7 @@ export default function FinanceiroPage() {
                               </Button>
                               {!(boleto.status === "pago" && boleto.data_pagamento) && (
                                 <>
-                                  {!boleto.asaas_id && (
+                                  {!boletoEnviado(boleto) && (
                                     <Button variant="outline" size="sm" onClick={() => handleEnviarAsaas(boleto)}
                                       disabled={enviandoParaAsaas === boleto.id}
                                       className="flex-1 text-xs border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 bg-card">
@@ -1244,7 +1249,7 @@ export default function FinanceiroPage() {
                                       Asaas
                                     </Button>
                                   )}
-                                  {boleto.asaas_bankslip_url && (
+                                  {urlPdfBoleto(boleto) && (
                                     <Button variant="outline" size="sm" onClick={() => handleImprimirBoleto(boleto)}
                                       className="flex-1 text-xs border-purple-500 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 bg-card">
                                       <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir

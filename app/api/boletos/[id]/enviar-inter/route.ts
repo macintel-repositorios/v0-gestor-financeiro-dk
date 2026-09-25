@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { getInterAPI } from "@/lib/inter"
+import { registrarEventoBoleto } from "@/lib/boletos-eventos"
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -35,16 +36,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const boleto = boletos[0]
 
-    // Verificar se já foi enviado ao Banco Inter
     // Evita duplicidade: boleto já registrado em qualquer gateway (Inter ou Asaas)
-    if (boleto.asaas_id) {
+    if (boleto.inter_codigo_solicitacao || boleto.asaas_id) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            String(boleto.gateway).toLowerCase() === "inter"
-              ? "Este boleto já foi registrado no Banco Inter"
-              : "Este boleto já foi enviado ao Asaas",
+          message: boleto.inter_codigo_solicitacao
+            ? "Este boleto já foi registrado no Banco Inter"
+            : "Este boleto já foi enviado ao Asaas",
         },
         { status: 400 }
       )
@@ -111,12 +110,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await query(
       `
       UPDATE boletos
-      SET 
-        asaas_id = ?,
-        asaas_nosso_numero = ?,
-        asaas_linha_digitavel = ?,
-        asaas_barcode = ?,
-        asaas_bankslip_url = ?,
+      SET
+        inter_codigo_solicitacao = ?,
+        inter_nosso_numero = ?,
+        inter_linha_digitavel = ?,
+        inter_barcode = ?,
+        inter_pix_copia_cola = ?,
+        inter_situacao = ?,
+        inter_atualizado_em = NOW(),
         gateway = 'inter',
         status = 'aguardando_pagamento',
         updated_at = CURRENT_TIMESTAMP
@@ -127,10 +128,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         resInter.nossoNumero || null,
         resInter.linhaDigitavel || null,
         resInter.codigoBarras || null,
-        `/api/boletos/${id}/pdf-inter`,
+        resInter.pixCopiaECola || null,
+        resInter.status || null,
         id,
       ]
     )
+
+    await registrarEventoBoleto({
+      boletoId: id,
+      gateway: "inter",
+      origem: "emissao",
+      referencia: resInter.codigoSolicitacao,
+      evento: "EMITIDO",
+      situacao: resInter.status,
+      payload: resInter,
+      processado: true,
+    })
 
     return NextResponse.json({
       success: true,

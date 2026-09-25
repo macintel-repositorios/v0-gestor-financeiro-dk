@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { boletoEnviado, boletoNoInter, urlPdfBoleto } from "@/lib/boleto-gateway"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -49,6 +50,8 @@ interface Boleto {
   asaas_linha_digitavel?: string
   asaas_nosso_numero?: string
   gateway?: string
+  inter_codigo_solicitacao?: string
+  inter_linha_digitavel?: string
 }
 
 interface VisualizarBoletosDialogProps {
@@ -282,7 +285,7 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
   const imprimirTodosBoletos = async () => {
     setPrintingAll(true)
 
-    const boletosComPDF = boletos.filter((b) => b.asaas_bankslip_url || b.asaas_invoice_url)
+    const boletosComPDF = boletos.filter((b) => urlPdfBoleto(b))
 
     if (boletosComPDF.length === 0) {
       alert("Nenhum boleto disponivel para impressao.")
@@ -292,7 +295,7 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
 
     try {
       // Collect all PDF URLs
-      const urls = boletosComPDF.map((b) => b.asaas_bankslip_url || b.asaas_invoice_url).filter(Boolean)
+      const urls = boletosComPDF.map((b) => urlPdfBoleto(b)).filter(Boolean)
 
       // Call server-side API to merge all PDFs into one
       const response = await fetch("/api/boletos/merge-pdfs", {
@@ -328,7 +331,7 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
       if (fallback) {
         boletosComPDF.forEach((boleto, index) => {
           setTimeout(() => {
-            const url = boleto.asaas_bankslip_url || boleto.asaas_invoice_url
+            const url = urlPdfBoleto(boleto)
             if (url) window.open(url, "_blank")
           }, index * 500)
         })
@@ -419,7 +422,7 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
                 </Card>
               </div>
 
-              {boletos.some((b) => b.asaas_bankslip_url || b.asaas_invoice_url) && boletos.length > 1 && (
+              {boletos.some((b) => urlPdfBoleto(b)) && boletos.length > 1 && (
                 <div className="flex gap-3 justify-end bg-muted/30 p-4 rounded-lg border border-border">
                   <Button
                     onClick={imprimirTodosBoletos}
@@ -434,7 +437,7 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
                     ) : (
                       <>
                         <Printer className="h-4 w-4 mr-2" />
-                        Visualizar / Imprimir Todos ({boletos.filter((b) => b.asaas_bankslip_url || b.asaas_invoice_url).length} parcelas)
+                        Visualizar / Imprimir Todos ({boletos.filter((b) => urlPdfBoleto(b)).length} parcelas)
                       </>
                     )}
                   </Button>
@@ -475,12 +478,17 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
                                 <Badge variant="outline" className="font-mono text-xs bg-background text-foreground border-border">
                                   {boleto.numero}
                                 </Badge>
-                                {boleto.asaas_id && (
+                                {boletoNoInter(boleto) ? (
+                                  <Badge variant="secondary" className="ml-2 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50">
+                                    <CreditCard className="h-3 w-3 mr-1" />
+                                    Inter
+                                  </Badge>
+                                ) : boleto.asaas_id ? (
                                   <Badge variant="secondary" className="ml-2 bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 border border-teal-100 dark:border-teal-900/50">
                                     <CreditCard className="h-3 w-3 mr-1" />
                                     Asaas
                                   </Badge>
-                                )}
+                                ) : null}
                               </TableCell>
                               <TableCell>
                                 <Badge variant="secondary" className="font-mono text-xs text-foreground bg-muted border-border">
@@ -509,22 +517,22 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
                               </TableCell>
                               <TableCell>
                                 <div className="flex flex-col gap-1.5 py-1">
-                                  {boleto.asaas_linha_digitavel && (
+                                  {(boleto.inter_linha_digitavel || boleto.asaas_linha_digitavel) && (
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => copiarLinhaDigitavel(boleto.asaas_linha_digitavel!)}
+                                      onClick={() => copiarLinhaDigitavel((boleto.inter_linha_digitavel || boleto.asaas_linha_digitavel)!)}
                                       className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 border-border bg-card w-full justify-start h-8"
                                     >
                                       <CreditCard className="h-3.5 w-3.5 mr-1.5" />
                                       Copiar Linha Digitável
                                     </Button>
                                   )}
-                                  {boleto.asaas_bankslip_url && (
+                                  {(boletoNoInter(boleto) || boleto.asaas_bankslip_url) && (
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => abrirPDF(boleto.asaas_bankslip_url!)}
+                                      onClick={() => abrirPDF(urlPdfBoleto(boleto)!)}
                                       className="text-xs text-foreground hover:bg-muted border-border bg-card w-full justify-start h-8"
                                     >
                                       <Download className="h-3.5 w-3.5 mr-1.5" />
@@ -542,7 +550,7 @@ export function VisualizarBoletosDialog({ open, onOpenChange, numeroBase }: Visu
                                       Ver Fatura
                                     </Button>
                                   )}
-                                  {!boleto.asaas_id && (
+                                  {!boletoEnviado(boleto) && (
                                     <div className="space-y-1">
                                       <Button
                                         size="sm"
