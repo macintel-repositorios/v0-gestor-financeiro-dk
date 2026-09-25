@@ -1,6 +1,7 @@
 import fs from "fs"
 import https from "https"
 import path from "path"
+import tls from "tls"
 
 export interface InterConfig {
   clientId: string
@@ -167,12 +168,24 @@ export class BancoInterAPI {
 
     if (!hasCertificatePem || !hasPrivateKeyPem) {
       throw new Error(
-        "Certificado ou chave do Banco Inter inválido. O certificado deve conter BEGIN CERTIFICATE e a chave deve conter BEGIN ... PRIVATE KEY."
+        `Certificado ou chave do Banco Inter inválido. cert=${hasCertificatePem ? "ok" : "inválido"}, key=${hasPrivateKeyPem ? "ok" : "inválido"}.`
       )
     }
 
-    this._certBuffer = typeof cert === "string" ? Buffer.from(cert) : cert
-    this._keyBuffer = typeof key === "string" ? Buffer.from(key) : key
+    const certBuffer = Buffer.isBuffer(cert) ? cert : Buffer.from(cert)
+    const keyBuffer = Buffer.isBuffer(key) ? key : Buffer.from(key)
+
+    try {
+      tls.createSecureContext({ cert: certBuffer, key: keyBuffer })
+    } catch (error) {
+      throw new Error(
+        `Certificado/chave do Banco Inter rejeitado pelo OpenSSL: ${error instanceof Error ? error.message : String(error)} ` +
+          `(cert=${certBuffer.length} bytes, key=${keyBuffer.length} bytes)`
+      )
+    }
+
+    this._certBuffer = certBuffer
+    this._keyBuffer = keyBuffer
 
     return { cert, key }
   }
