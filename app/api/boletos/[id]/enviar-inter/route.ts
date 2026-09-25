@@ -95,9 +95,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       mensagem: {
         linha1: descricao.substring(0, 78),
       },
-      multa: {
-        taxa: Number(boleto.multa) || 2.0,
-      },
+      ...(boleto.multa != null && Number(boleto.multa) > 0
+        ? { multa: { taxa: Number(boleto.multa) } }
+        : {}),
+      ...(boleto.juros != null && Number(boleto.juros) > 0
+        ? { juros: { taxa: Number(boleto.juros) } }
+        : {}),
       juros: {
         taxa: Number(boleto.juros) || 2.0,
       },

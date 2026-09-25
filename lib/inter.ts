@@ -310,8 +310,6 @@ export class BancoInterAPI {
         codigoMulta: "VALORFIXO",
         valor: dados.multa.valor,
       }
-    } else {
-      payload.multa = { codigoMulta: "NAOTEMMULTA" }
     }
 
     if (dados.juros?.taxa) {
@@ -324,8 +322,6 @@ export class BancoInterAPI {
         codigoJuros: "VALORPORDIA",
         valor: dados.juros.valor,
       }
-    } else {
-      payload.juros = { codigoJuros: "ISENTO" }
     }
 
     console.log("[Banco Inter] Emitindo boleto v3:", JSON.stringify(payload, null, 2))
