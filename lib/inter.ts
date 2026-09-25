@@ -168,8 +168,19 @@ export class BancoInterAPI {
       key = Buffer.from(key.toString("utf8").replace(/\\n/g, "\n").trim())
     }
 
-    const certText = Buffer.isBuffer(cert) ? cert.toString("utf8") : cert
-    const keyText = Buffer.isBuffer(key) ? key.toString("utf8") : key
+    // Variáveis de ambiente (ex.: Vercel) podem perder as quebras de linha ou trocá-las por espaços.
+    // Remonta cada bloco PEM: cabeçalho, base64 em linhas de 64 caracteres, rodapé.
+    const rebuildPem = (text: string) =>
+      text.replace(/-----BEGIN ([A-Z ]+)-----([\s\S]*?)-----END \1-----/g, (_m, label: string, body: string) => {
+        const b64 = body.replace(/[^A-Za-z0-9+/=]/g, "")
+        return `-----BEGIN ${label}-----\n${b64.match(/.{1,64}/g)?.join("\n") ?? ""}\n-----END ${label}-----\n`
+      })
+
+    cert = rebuildPem(Buffer.isBuffer(cert) ? cert.toString("utf8") : cert)
+    key = rebuildPem(Buffer.isBuffer(key) ? key.toString("utf8") : key)
+
+    const certText = cert
+    const keyText = key
     const hasCertificatePem = certText.includes("-----BEGIN CERTIFICATE-----")
     const hasPrivateKeyPem = keyText.includes("-----BEGIN ") && keyText.includes(" PRIVATE KEY-----")
 
