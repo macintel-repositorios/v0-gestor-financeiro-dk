@@ -128,6 +128,21 @@ export class BancoInterAPI {
 
       cert = fs.readFileSync(absoluteCertPath)
       key = fs.readFileSync(absoluteKeyPath)
+
+      // Arquivos exportados/colados podem conter quebras escapadas; normalize antes do TLS.
+      cert = Buffer.from(cert.toString("utf8").replace(/\\n/g, "\n").trim())
+      key = Buffer.from(key.toString("utf8").replace(/\\n/g, "\n").trim())
+    }
+
+    const certText = Buffer.isBuffer(cert) ? cert.toString("utf8") : cert
+    const keyText = Buffer.isBuffer(key) ? key.toString("utf8") : key
+    const hasCertificatePem = certText.includes("-----BEGIN CERTIFICATE-----")
+    const hasPrivateKeyPem = keyText.includes("-----BEGIN ") && keyText.includes(" PRIVATE KEY-----")
+
+    if (!hasCertificatePem || !hasPrivateKeyPem) {
+      throw new Error(
+        "Certificado ou chave do Banco Inter inválido. O certificado deve conter BEGIN CERTIFICATE e a chave deve conter BEGIN ... PRIVATE KEY."
+      )
     }
 
     this._certBuffer = typeof cert === "string" ? Buffer.from(cert) : cert
