@@ -106,14 +106,40 @@ export class BancoInterAPI {
     const keyInput =
       this.config.keyContent || process.env.INTER_KEY_CONTENT || this.config.keyPath || process.env.INTER_KEY_PATH
 
-    const normalizedCert = certInput?.replace(/\\n/g, "\n").trim()
-    const normalizedKey = keyInput?.replace(/\\n/g, "\n").trim()
-    const certIsPem = normalizedCert?.includes("-----BEGIN CERTIFICATE-----")
-    const keyIsPem = normalizedKey?.includes("-----BEGIN ") && normalizedKey?.includes(" PRIVATE KEY-----")
+    const normalizePem = (value?: string) =>
+      value
+        ?.replace(/^\uFEFF/, "")
+        .replace(/\\n/g, "\n")
+        .trim()
+        .replace(/^['\"]|['\"]$/g, "")
+        .trim()
 
-    if (certIsPem && keyIsPem) {
-      cert = normalizedCert!
-      key = normalizedKey!
+    const normalizedCert = normalizePem(certInput)
+    const normalizedKey = normalizePem(keyInput)
+    const certPemMatch = normalizedCert?.match(
+      /-----BEGIN CERTIFICATE-----[\\s\\S]*?-----END CERTIFICATE-----/
+    )
+    const keyPemMatch = normalizedKey?.match(
+      /-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----/
+    )
+
+    if (certPemMatch && keyPemMatch) {
+      cert = certPemMatch[0]
+      key = keyPemMatch[0]
+    } else if (certInput && keyInput && !certInput.includes("/") && !keyInput.includes("/")) {
+      const decodedCert = Buffer.from(certInput, "base64").toString("utf8")
+      const decodedKey = Buffer.from(keyInput, "base64").toString("utf8")
+      const decodedCertMatch = decodedCert.match(
+        /-----BEGIN CERTIFICATE-----[\\s\\S]*?-----END CERTIFICATE-----/
+      )
+      const decodedKeyMatch = decodedKey.match(
+        /-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----/
+      )
+      if (!decodedCertMatch || !decodedKeyMatch) {
+        throw new Error("Certificado ou chave do Banco Inter não contém um bloco PEM válido.")
+      }
+      cert = decodedCertMatch[0]
+      key = decodedKeyMatch[0]
     } else {
       const certPath = certInput || "./certs/inter.crt"
       const keyPath = keyInput || "./certs/inter.key"
