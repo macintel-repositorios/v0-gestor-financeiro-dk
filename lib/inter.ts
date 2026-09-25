@@ -64,6 +64,8 @@ export interface InterBoletoResponse {
   dataEmissao?: string
   dataVencimento?: string
   valorNominal?: number
+  valorTotalRecebido?: number
+  dataSituacao?: string
   pdfUrl?: string
 }
 
@@ -384,24 +386,25 @@ export class BancoInterAPI {
 
     if (dados.multa?.taxa) {
       payload.multa = {
-        codigoMulta: "PERCENTUAL",
-        percentual: dados.multa.taxa,
+        codigo: "PERCENTUAL",
+        taxa: dados.multa.taxa,
       }
     } else if (dados.multa?.valor) {
       payload.multa = {
-        codigoMulta: "VALORFIXO",
+        codigo: "VALORFIXO",
         valor: dados.multa.valor,
       }
     }
 
+    // API v3: juros vai no campo "mora"
     if (dados.juros?.taxa) {
-      payload.juros = {
-        codigoJuros: "TAXAMENSAL",
-        percentual: dados.juros.taxa,
+      payload.mora = {
+        codigo: "TAXAMENSAL",
+        taxa: dados.juros.taxa,
       }
     } else if (dados.juros?.valor) {
-      payload.juros = {
-        codigoJuros: "VALORPORDIA",
+      payload.mora = {
+        codigo: "VALORDIA",
         valor: dados.juros.valor,
       }
     }
@@ -429,20 +432,24 @@ export class BancoInterAPI {
   async consultarCobranca(codigoSolicitacao: string): Promise<InterBoletoResponse> {
     const data = await this.request<any>(`/cobranca/v3/cobrancas/${codigoSolicitacao}`, "GET")
 
+    // v3 retorna { cobranca: {...situacao}, boleto: {...}, pix: {...} }
+    const cobranca = data.cobranca || data
     const boleto = data.boleto || data
     const pix = data.pix || {}
 
     return {
       codigoSolicitacao,
-      seuNumero: boleto.seuNumero,
+      seuNumero: cobranca.seuNumero || boleto.seuNumero,
       nossoNumero: boleto.nossoNumero,
       codigoBarras: boleto.codigoBarras,
       linhaDigitavel: boleto.linhaDigitavel,
       pixCopiaECola: pix.pixCopiaECola || data.pixCopiaECola,
-      status: data.situacao || boleto.status || "EMABERTO",
-      dataEmissao: boleto.dataEmissao,
-      dataVencimento: boleto.dataVencimento,
-      valorNominal: boleto.valorNominal,
+      status: cobranca.situacao || boleto.status || "EMABERTO",
+      dataEmissao: cobranca.dataEmissao || boleto.dataEmissao,
+      dataVencimento: cobranca.dataVencimento || boleto.dataVencimento,
+      valorNominal: cobranca.valorNominal ?? boleto.valorNominal,
+      valorTotalRecebido: cobranca.valorTotalRecebido != null ? Number(cobranca.valorTotalRecebido) : undefined,
+      dataSituacao: cobranca.dataSituacao,
     }
   }
 
@@ -450,9 +457,9 @@ export class BancoInterAPI {
    * 3. Download do PDF do Boleto do Banco Inter
    */
   async obterPdfBoleto(codigoSolicitacao: string): Promise<string> {
-    // PDF do boleto Inter v3: /cobranca/v3/cobrancas/{id}/boleto/pdf
+    // PDF do boleto Inter v3: /cobranca/v3/cobrancas/{id}/pdf
     const res = await this.request<{ pdf: string }>(
-      `/cobranca/v3/cobrancas/${codigoSolicitacao}/boleto/pdf`,
+      `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
       "GET"
     )
     return res.pdf // string em Base64

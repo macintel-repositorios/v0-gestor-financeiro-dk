@@ -1,8 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { query } from "@/lib/db"
+import { aplicarSituacaoInter } from "@/lib/inter-status"
 
 /**
- * Webhook do Banco Inter para Recebimento de Notificações de Cobrança
+ * Webhook do Banco Inter para Recebimento de Notificações de Cobrança (v3)
+ * O Inter envia um array de cobranças com codigoSolicitacao, seuNumero, situacao, valorTotalRecebido, dataHoraSituacao
  */
 export async function POST(req: NextRequest) {
   try {
@@ -12,34 +13,13 @@ export async function POST(req: NextRequest) {
     const eventos = Array.isArray(payload) ? payload : [payload]
 
     for (const evento of eventos) {
-      const codigoSolicitacao = evento.codigoSolicitacao || evento.seuNumero
-      const situacao = evento.situacao
-      const valorPago = evento.valorTotalRecebido || evento.valorPago
-
-      if (!codigoSolicitacao) continue
-
-      console.log(`[Webhook Banco Inter] Atualizando boleto ${codigoSolicitacao} para status: ${situacao}`)
-
-      // Mapear situação do Inter para o banco de dados
-      let statusBanco = "PENDENTE"
-      if (situacao === "PAGO" || situacao === "LIQUIDADO") {
-        statusBanco = "PAGO"
-      } else if (situacao === "CANCELADO" || situacao === "BAIXADO") {
-        statusBanco = "CANCELADO"
-      } else if (situacao === "VENCIDO") {
-        statusBanco = "VENCIDO"
-      }
-
-      // Atualiza o boleto no banco de dados local
-      await query(
-        `UPDATE boletos 
-         SET status = ?, 
-             valor_pago = COALESCE(?, valor), 
-             data_pagamento = CASE WHEN ? = 'PAGO' THEN CURRENT_TIMESTAMP ELSE data_pagamento END,
-             updated_at = CURRENT_TIMESTAMP 
-         WHERE asaas_id = ? OR numero_boleto = ?`,
-        [statusBanco, valorPago, statusBanco, codigoSolicitacao, evento.seuNumero]
-      )
+      await aplicarSituacaoInter({
+        codigoSolicitacao: evento.codigoSolicitacao,
+        seuNumero: evento.seuNumero,
+        situacao: evento.situacao,
+        valorRecebido: evento.valorTotalRecebido ?? evento.valorPago,
+        dataSituacao: evento.dataHoraSituacao || evento.dataSituacao,
+      })
     }
 
     return NextResponse.json({ status: "success", received: true })

@@ -36,7 +36,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const boleto = boletos[0]
 
     // Verificar se já foi enviado ao Banco Inter
-    if (boleto.asaas_id && boleto.gateway === "INTER") {
+    if (boleto.asaas_id && String(boleto.gateway).toLowerCase() === "inter") {
       return NextResponse.json(
         {
           success: false,
@@ -103,26 +103,18 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         : {}),
     })
 
-    // Obter URL do PDF / Base64 se disponível
-    let pdfUrl = null
-    try {
-      const pdfBase64 = await inter.obterPdfBoleto(resInter.codigoSolicitacao)
-      pdfUrl = `data:application/pdf;base64,${pdfBase64}`
-    } catch (e) {
-      console.warn("Não foi possível gerar PDF imediato no Inter:", e)
-    }
-
     // Atualizar banco de dados local com o código do boleto do Banco Inter
     await query(
       `
       UPDATE boletos
       SET 
         asaas_id = ?,
-        nosso_numero = ?,
-        linha_digitavel = ?,
-        codigo_barras = ?,
-        pdf_url = COALESCE(?, pdf_url),
-        forma_pagamento = 'inter',
+        asaas_nosso_numero = ?,
+        asaas_linha_digitavel = ?,
+        asaas_barcode = ?,
+        asaas_bankslip_url = ?,
+        gateway = 'inter',
+        status = 'aguardando_pagamento',
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
@@ -131,7 +123,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         resInter.nossoNumero || null,
         resInter.linhaDigitavel || null,
         resInter.codigoBarras || null,
-        pdfUrl,
+        `/api/boletos/${id}/pdf-inter`,
         id,
       ]
     )
