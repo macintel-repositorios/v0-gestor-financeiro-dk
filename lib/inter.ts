@@ -110,6 +110,7 @@ export class BancoInterAPI {
     const normalizePem = (value?: string) =>
       value
         ?.replace(/^\uFEFF/, "")
+        .replace(/\\r/g, "\r")
         .replace(/\\n/g, "\n")
         .trim()
         .replace(/^['\"]|['\"]$/g, "")
@@ -127,9 +128,13 @@ export class BancoInterAPI {
     if (certPemMatch && keyPemMatch) {
       cert = certPemMatch[0]
       key = keyPemMatch[0]
-    } else if (certInput && keyInput && !certInput.includes("/") && !keyInput.includes("/")) {
-      const decodedCert = Buffer.from(certInput, "base64").toString("utf8")
-      const decodedKey = Buffer.from(keyInput, "base64").toString("utf8")
+    } else if (
+      certInput &&
+      keyInput &&
+      !(fs.existsSync(certInput) && fs.existsSync(keyInput))
+    ) {
+      const decodedCert = Buffer.from(certInput.replace(/\s/g, ""), "base64").toString("utf8")
+      const decodedKey = Buffer.from(keyInput.replace(/\s/g, ""), "base64").toString("utf8")
       const decodedCertMatch = decodedCert.match(
         /-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/
       )
