@@ -56,10 +56,10 @@ const FUNDO = rgb(0.97, 0.975, 0.98)
 async function montarPdfPersonalizado(boleto: any, interPdf: Buffer): Promise<Uint8Array> {
   const [empresaRows, logoRows]: any = await Promise.all([
     query("SELECT * FROM timbrado_config WHERE ativo = 1 ORDER BY created_at DESC LIMIT 1"),
-    // Logo quadrado (tipo 'sistema'), igual ao usado no boleto Asaas; fallback para o de impressão
+    // Logo do Sistema (quadrado, igual ao do boleto Asaas); fallback para o logo do menu
     query(
       `SELECT dados, formato FROM logos_sistema
-       WHERE tipo IN ('sistema', 'impressao') AND ativo = 1
+       WHERE tipo IN ('sistema', 'menu') AND ativo = 1
        ORDER BY tipo = 'sistema' DESC LIMIT 1`
     ),
   ])
@@ -94,8 +94,18 @@ async function montarPdfPersonalizado(boleto: any, interPdf: Buffer): Promise<Ui
       const bytes = Buffer.from(raw, "base64")
       const isPng = bytes[0] === 0x89 && bytes[1] === 0x50
       const img = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes)
-      const s = img.scaleToFit(90, 90)
-      page.drawImage(img, { x: M, y: topoEmpresa - s.height, width: s.width, height: s.height })
+      // Quadrado azul de fundo com o logo centralizado
+      const lado = 90
+      page.drawRectangle({ x: M, y: topoEmpresa - lado, width: lado, height: lado, color: rgb(0.11, 0.16, 0.51) })
+      // Logo já quadrado ocupa todo o fundo; logos menores ficam centralizados
+      const quadrado = Math.abs(img.width - img.height) < 2 && img.width >= 200
+      const s = img.scaleToFit(quadrado ? lado : lado * 0.7, quadrado ? lado : lado * 0.7)
+      page.drawImage(img, {
+        x: M + (lado - s.width) / 2,
+        y: topoEmpresa - lado + (lado - s.height) / 2,
+        width: s.width,
+        height: s.height,
+      })
       xTexto = M + 105
     } catch (e) {
       console.warn("[Banco Inter] Logo não pôde ser incorporado:", e)
