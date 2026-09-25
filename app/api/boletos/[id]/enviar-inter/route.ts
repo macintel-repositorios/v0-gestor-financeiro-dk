@@ -101,9 +101,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       ...(boleto.juros != null && Number(boleto.juros) > 0
         ? { juros: { taxa: Number(boleto.juros) } }
         : {}),
-      juros: {
-        taxa: Number(boleto.juros) || 2.0,
-      },
     })
 
     // Obter URL do PDF / Base64 se disponível
