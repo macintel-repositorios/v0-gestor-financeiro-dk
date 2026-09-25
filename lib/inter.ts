@@ -117,10 +117,10 @@ export class BancoInterAPI {
     const normalizedCert = normalizePem(certInput)
     const normalizedKey = normalizePem(keyInput)
     const certPemMatch = normalizedCert?.match(
-      /-----BEGIN CERTIFICATE-----[\\s\\S]*?-----END CERTIFICATE-----/
+      /-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/
     )
     const keyPemMatch = normalizedKey?.match(
-      /-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----/
+      /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/
     )
 
     if (certPemMatch && keyPemMatch) {
@@ -130,10 +130,10 @@ export class BancoInterAPI {
       const decodedCert = Buffer.from(certInput, "base64").toString("utf8")
       const decodedKey = Buffer.from(keyInput, "base64").toString("utf8")
       const decodedCertMatch = decodedCert.match(
-        /-----BEGIN CERTIFICATE-----[\\s\\S]*?-----END CERTIFICATE-----/
+        /-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/
       )
       const decodedKeyMatch = decodedKey.match(
-        /-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----/
+        /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/
       )
       if (!decodedCertMatch || !decodedKeyMatch) {
         throw new Error("Certificado ou chave do Banco Inter não contém um bloco PEM válido.")
