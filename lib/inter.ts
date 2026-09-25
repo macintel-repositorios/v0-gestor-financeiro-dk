@@ -180,11 +180,38 @@ export class BancoInterAPI {
     const certBuffer = Buffer.isBuffer(cert) ? cert : Buffer.from(cert)
     const keyBuffer = Buffer.isBuffer(key) ? key : Buffer.from(key)
 
+    const describePem = (buffer: Buffer) => {
+      const text = buffer.toString("utf8")
+      return {
+        bytes: buffer.length,
+        startsWith: text.slice(0, 32).replace(/\\r/g, "\\\\r").replace(/\\n/g, "\\\\n"),
+        hasBegin: text.includes("-----BEGIN"),
+      }
+    }
+
+    try {
+      tls.createSecureContext({ cert: certBuffer })
+    } catch (error) {
+      throw new Error(
+        `Certificado do Banco Inter rejeitado pelo OpenSSL: ${error instanceof Error ? error.message : String(error)} ` +
+          JSON.stringify(describePem(certBuffer))
+      )
+    }
+
+    try {
+      tls.createSecureContext({ key: keyBuffer })
+    } catch (error) {
+      throw new Error(
+        `Chave privada do Banco Inter rejeitada pelo OpenSSL: ${error instanceof Error ? error.message : String(error)} ` +
+          JSON.stringify(describePem(keyBuffer))
+      )
+    }
+
     try {
       tls.createSecureContext({ cert: certBuffer, key: keyBuffer })
     } catch (error) {
       throw new Error(
-        `Certificado/chave do Banco Inter rejeitado pelo OpenSSL: ${error instanceof Error ? error.message : String(error)} ` +
+        `Par certificado/chave do Banco Inter rejeitado pelo OpenSSL: ${error instanceof Error ? error.message : String(error)} ` +
           `(cert=${certBuffer.length} bytes, key=${keyBuffer.length} bytes)`
       )
     }
