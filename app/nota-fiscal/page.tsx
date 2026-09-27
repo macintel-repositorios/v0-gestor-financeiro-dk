@@ -35,6 +35,7 @@ import {
   Printer,
   Receipt,
   Building2,
+  Files,
   Package,
   Wrench,
   Download,
@@ -124,6 +125,8 @@ export default function NotaFiscalPage() {
   const [detalheNfseOpen, setDetalheNfseOpen] = useState(false)
   const [nfseSelecionada, setNfseSelecionada] = useState<number | null>(null)
   const [imprimirNfseOpen, setImprimirNfseOpen] = useState(false)
+  const [imprimirComBoleto, setImprimirComBoleto] = useState(false)
+  const [numeroNotaBoleto, setNumeroNotaBoleto] = useState("")
   const [notaImprimirNfse, setNotaImprimirNfse] = useState<number | null>(null)
 
   // NF-e states
@@ -867,7 +870,21 @@ export default function NotaFiscalPage() {
     }
   }
 
+  // Nota fiscal + boleto(s) em um único PDF
+  const handleImprimirComBoleto = (nota: NotaUnificada, notaNum: string) => {
+    setImprimirComBoleto(true)
+    setNumeroNotaBoleto(notaNum)
+    if (nota.tipo === "nfse") {
+      setNotaImprimirNfse(nota.id)
+      setImprimirNfseOpen(true)
+    } else {
+      setDanfeNfeId(nota.id)
+      setDanfeOpen(true)
+    }
+  }
+
   const handleImprimir = (nota: NotaUnificada) => {
+    setImprimirComBoleto(false)
     if (nota.tipo === "nfse") {
       setNotaImprimirNfse(nota.id)
       setImprimirNfseOpen(true)
@@ -1314,7 +1331,12 @@ export default function NotaFiscalPage() {
                                   </>
                                 )
                               }
-                              return <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:bg-indigo-955/20" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
+                              return (
+                                <>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:bg-indigo-955/20" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-fuchsia-400 hover:bg-fuchsia-955/20" onClick={() => handleImprimirComBoleto(nota, notaNum)} title="Nota + Boleto + OS preventiva em um PDF"><Files className="h-4 w-4" /></Button>
+                                </>
+                              )
                             }
 
                             const renderCancelarBtn = () => {
@@ -1378,7 +1400,12 @@ export default function NotaFiscalPage() {
                                             </>
                                           )
                                         }
-                                        return <DropdownMenuItem onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-4 w-4 mr-2" />Imprimir Boleto</DropdownMenuItem>
+                                        return (
+                                          <>
+                                            <DropdownMenuItem onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-4 w-4 mr-2" />Imprimir Boleto</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleImprimirComBoleto(nota, notaNum)}><Files className="h-4 w-4 mr-2" />Nota + Boleto + OS (PDF)</DropdownMenuItem>
+                                          </>
+                                        )
                                       })()}
                                       {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
                                         <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }}>
@@ -1534,7 +1561,12 @@ export default function NotaFiscalPage() {
                                          </>
                                        )
                                      }
-                                     return <Button variant="outline" size="sm" className="flex-1 text-xs text-indigo-400 hover:bg-indigo-950/20 border-indigo-900/50" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
+                                     return (
+                                       <>
+                                         <Button variant="outline" size="sm" className="flex-1 text-xs text-indigo-400 hover:bg-indigo-950/20 border-indigo-900/50" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
+                                         <Button variant="outline" size="sm" className="flex-1 text-xs text-fuchsia-400 hover:bg-fuchsia-950/20 border-fuchsia-900/50" onClick={() => handleImprimirComBoleto(nota, notaNum)}><Files className="h-3.5 w-3.5 mr-1" /> Nota + Boleto</Button>
+                                       </>
+                                     )
                                    })()}
                                   {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
                                     <Button variant="outline" size="sm" className="flex-1 text-xs text-red-400 hover:bg-red-950/20 border-red-900/50" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }}>
@@ -1612,6 +1644,7 @@ export default function NotaFiscalPage() {
         open={imprimirNfseOpen}
         onOpenChange={setImprimirNfseOpen}
         notaId={notaImprimirNfse}
+        comBoleto={imprimirComBoleto}
       />
 
       {/* Dialogs NF-e */}
@@ -1637,6 +1670,8 @@ export default function NotaFiscalPage() {
         open={danfeOpen}
         onOpenChange={setDanfeOpen}
         nfeId={danfeNfeId}
+        comBoleto={imprimirComBoleto}
+        numeroNotaBoleto={imprimirComBoleto ? numeroNotaBoleto : undefined}
       />
 
       {/* Boletos */}

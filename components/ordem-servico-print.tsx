@@ -14,6 +14,8 @@ interface OrdemServicoPrintProps {
   fotos: any[]
   assinaturas: any[]
   onClose: () => void
+  /** Modo sem tela: gera o PDF e entrega o arquivo (null em caso de erro), sem abrir o painel */
+  onPdfReady?: (pdf: Blob | null) => void
 }
 
 interface TimbradoConfig {
@@ -54,7 +56,7 @@ interface LogoConfig {
   ativo: boolean
 }
 
-export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onClose }: OrdemServicoPrintProps) {
+export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onClose, onPdfReady }: OrdemServicoPrintProps) {
   const [timbradoConfig, setTimbradoConfig] = useState<TimbradoConfig | null>(null)
   const [logoImpressao, setLogoImpressao] = useState<LogoConfig | null>(null)
   const [loading, setLoading] = useState(true)
@@ -101,7 +103,8 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
   }, [pdfUrl])
 
   useEffect(() => {
-    if (!loading && timbradoConfig && !generatingPdf && !pdfUrl) {
+    // No modo sem tela gera mesmo sem timbrado, para nunca travar quem espera o PDF
+    if (!loading && (timbradoConfig || onPdfReady) && !generatingPdf && !pdfUrl) {
       setGeneratingPdf(true)
       // Aguardar renderização off-screen
       setTimeout(async () => {
@@ -127,8 +130,10 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
           const pdfBlob = pdf.output("blob")
           const url = URL.createObjectURL(pdfBlob)
           setPdfUrl(url)
+          onPdfReady?.(pdfBlob)
         } catch (error) {
           console.error("Erro ao gerar PDF da OS:", error)
+          onPdfReady?.(null)
         } finally {
           setGeneratingPdf(false)
         }
@@ -699,6 +704,7 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
   }
 
   if (loading) {
+    if (onPdfReady) return null
     return (
       <Sheet open={true} onOpenChange={(open) => { if (!open) onClose() }}>
         <SheetContent className="w-full sm:max-w-4xl h-full flex flex-col p-6 overflow-y-auto border-l border-border shadow-2xl bg-card text-foreground">
@@ -716,6 +722,221 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
   }
 
   const assinaturaResponsavel = getAssinaturaResponsavel()
+
+  // Conteúdo da OS renderizado fora da tela e capturado para o PDF
+  const conteudoOculto = (
+    <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "794px" }}>
+      <div
+        ref={hiddenDivRef}
+        style={{
+          width: "794px",
+          height: "1122px",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          paddingTop: `${timbradoConfig?.margem_superior !== undefined ? timbradoConfig.margem_superior : 10}mm`,
+          paddingRight: `${timbradoConfig?.margem_direita !== undefined ? timbradoConfig.margem_direita : 8}mm`,
+          paddingBottom: `${timbradoConfig?.margem_inferior !== undefined ? timbradoConfig.margem_inferior : 10}mm`,
+          paddingLeft: `${timbradoConfig?.margem_esquerda !== undefined ? timbradoConfig.margem_esquerda : 8}mm`,
+        }}
+        className="bg-white text-black text-[13px] leading-normal"
+      >
+        {/* Cabeçalho fixo no topo */}
+        <div className="flex-shrink-0">
+          {(logoImpressao?.dados || logoImpressao?.caminho || timbradoConfig?.logo_url) && (
+            <div className="text-center mb-2 pb-1.5 border-b border-gray-600">
+              <img
+                src={
+                  logoImpressao?.dados || logoImpressao?.caminho || timbradoConfig?.logo_url || "/placeholder.svg"
+                }
+                alt="Logo da Empresa"
+                className="mx-auto h-14 object-contain"
+              />
+            </div>
+          )}
+
+          {timbradoConfig?.cabecalho && (
+            <div
+              className="text-center mb-2 text-[10px] border-b border-gray-600 pb-2"
+              dangerouslySetInnerHTML={{ __html: timbradoConfig.cabecalho }}
+            />
+          )}
+
+          <div className="text-center mb-3 pb-2 border-b border-gray-600">
+            <h1 className="text-lg font-bold mb-1">ORDEM DE SERVIÇO Nº {ordemServico.numero}</h1>
+            <p className="text-[12px]">
+              Status: <strong>{getStatusLabel(ordemServico.situacao)}</strong>
+            </p>
+          </div>
+        </div>
+
+        {/* Corpo da Ordem de Serviço */}
+        <div className="flex-grow flex flex-col gap-3 overflow-hidden">
+          <div className="grid grid-cols-2 gap-4 pb-2 border-b border-gray-300">
+            <div>
+              <h3 className="font-bold mb-1 underline text-[12px]">Dados do Cliente</h3>
+              <div className="space-y-1">
+                <p>
+                  <strong>Nome:</strong> {getClienteNome()}
+                </p>
+                {getClienteTelefone() && (
+                  <p>
+                    <strong>Telefone:</strong> {getClienteTelefone()}
+                  </p>
+                )}
+                {getClienteEmail() && (
+                  <p>
+                    <strong>E-mail:</strong> {getClienteEmail()}
+                  </p>
+                )}
+                {getClienteEndereco() && (
+                  <p>
+                    <strong>Endereço:</strong> {getClienteEndereco()}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-bold mb-1 underline text-[12px]">Dados da Ordem de Serviço</h3>
+              <div className="space-y-1">
+                <p>
+                  <strong>Data:</strong> {formatDate(ordemServico.data_atual)}
+                </p>
+                <p>
+                  <strong>Tipo de Serviço:</strong> {getTipoServicoLabel(ordemServico.tipo_servico)}
+                </p>
+                <p>
+                  <strong>Técnico:</strong> {ordemServico.tecnico_name || "Não informado"}
+                </p>
+                {ordemServico.data_agendamento && (
+                  <p>
+                    <strong>Data Agendamento:</strong> {formatDate(ordemServico.data_agendamento)}
+                    {ordemServico.periodo_agendamento && (
+                      <span className="ml-1 text-cyan-600 font-semibold">
+                        ({ordemServico.periodo_agendamento === "manha" ? "Manhã" : "Tarde"})
+                      </span>
+                    )}
+                  </p>
+                )}
+                {ordemServico.horario_entrada && (
+                  <p>
+                    <strong>Horário Entrada:</strong> {formatTime(ordemServico.horario_entrada)}
+                  </p>
+                )}
+                {ordemServico.horario_saida && (
+                  <p>
+                    <strong>Horário Saída:</strong> {formatTime(ordemServico.horario_saida)}
+                  </p>
+                )}
+                {ordemServico.solicitado_por && (
+                  <p>
+                    <strong>Solicitado por:</strong> {ordemServico.solicitado_por}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {ordemServico.descricao_defeito && ordemServico.tipo_servico !== "preventiva" && (
+            <div className="p-2 bg-gray-50 rounded border border-gray-200">
+              <h3 className="font-bold mb-0.5 text-[11px]">Descrição do Defeito</h3>
+              <p className="text-[12px] whitespace-pre-wrap leading-tight">{ordemServico.descricao_defeito}</p>
+            </div>
+          )}
+
+          {ordemServico.necessidades_cliente && ordemServico.tipo_servico === "preventiva" && (
+            <div className="p-2 bg-gray-50 rounded border border-gray-200">
+              <h3 className="font-bold mb-0.5 text-[11px]">Necessidades do Cliente</h3>
+              <p className="text-[12px] whitespace-pre-wrap leading-tight">{ordemServico.necessidades_cliente}</p>
+            </div>
+          )}
+
+          {ordemServico.servico_realizado && ordemServico.tipo_servico !== "preventiva" && (
+            <div className="p-2 bg-gray-50 rounded border border-gray-200">
+              <h3 className="font-bold mb-0.5 text-[11px]">Serviço Realizado</h3>
+              <p className="text-[12px] whitespace-pre-wrap leading-tight">{ordemServico.servico_realizado}</p>
+            </div>
+          )}
+
+          {ordemServico.relatorio_visita && (
+            <div className="p-2 bg-gray-50 rounded border border-gray-200">
+              <h3 className="font-bold mb-0.5 text-[11px]">Relatório da Visita</h3>
+              <p className="text-[12px] whitespace-pre-wrap leading-tight">{ordemServico.relatorio_visita}</p>
+            </div>
+          )}
+
+          {itens.length > 0 && (
+            <div className="pb-1 border-b border-gray-300">
+              <h3 className="font-bold mb-1 text-[12px] underline">Equipamentos</h3>
+              <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                {itens.map((item, index) => (
+                  <div key={index} className="text-[12px] py-0.5 leading-tight">
+                    • {item.equipamento_nome_atual || item.equipamento_nome}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {fotos.length > 0 && (
+            <div className="pb-2 border-b border-gray-300">
+              <h3 className="font-bold mb-1 text-[12px] underline">Fotos do Serviço</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {fotos.slice(0, 3).map((foto, index) => (
+                  <div key={index} className="text-center">
+                    <img
+                      src={getFotoCaminho(foto) || "/placeholder.svg"}
+                      alt={foto.nome_arquivo}
+                      className="w-full h-20 object-cover border rounded"
+                    />
+                    <p className="text-[11px] mt-0.5 truncate">{foto.nome_arquivo}</p>
+                  </div>
+                ))}
+              </div>
+              {fotos.length > 3 && (
+                <p className="text-[11px] text-center mt-1">E mais {fotos.length - 3} foto(s)...</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Assinatura e Rodapé fixados no final */}
+        <div className="flex-shrink-0 mt-auto pt-4 border-t border-gray-300">
+          <div className="text-center">
+            <h4 className="font-bold mb-1 text-[12px]">Responsável do Cliente</h4>
+            <div className="border border-black h-16 flex items-center justify-center mb-1 max-w-xs mx-auto bg-white">
+              {assinaturaResponsavel && (
+                <img
+                  src={getAssinaturaCaminho(assinaturaResponsavel) || "/placeholder.svg"}
+                  alt="Assinatura Cliente"
+                  className="max-h-14 max-w-[90%] object-contain"
+                />
+              )}
+            </div>
+            <p className="text-[12px] font-semibold">
+              {ordemServico.nome_responsavel || ordemServico.responsavel || "Nome do Responsável"}
+            </p>
+            {assinaturaResponsavel && (
+              <p className="text-[11px] text-gray-600">
+                Assinado em: {new Date(assinaturaResponsavel.data_assinatura).toLocaleString("pt-BR")}
+              </p>
+            )}
+          </div>
+
+          {timbradoConfig?.rodape && (
+            <div
+              className="text-center text-[10px] border-t border-gray-650 pt-2 mt-3"
+              dangerouslySetInnerHTML={{ __html: timbradoConfig.rodape }}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+
+  // Modo sem tela: só gera o PDF e devolve via onPdfReady (usado para anexar a OS em outros PDFs)
+  if (onPdfReady) return pdfUrl ? null : conteudoOculto
 
   return (
     <Sheet open={true} onOpenChange={(open) => { if (!open) onClose() }}>
@@ -762,216 +983,7 @@ export function OrdemServicoPrint({ ordemServico, itens, fotos, assinaturas, onC
         )}
 
         {/* Container invisivel para geracao do PDF */}
-        {!pdfUrl && (
-          <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "794px" }}>
-            <div
-              ref={hiddenDivRef}
-              style={{
-                width: "794px",
-                height: "1122px",
-                boxSizing: "border-box",
-                display: "flex",
-                flexDirection: "column",
-                paddingTop: `${timbradoConfig?.margem_superior !== undefined ? timbradoConfig.margem_superior : 10}mm`,
-                paddingRight: `${timbradoConfig?.margem_direita !== undefined ? timbradoConfig.margem_direita : 8}mm`,
-                paddingBottom: `${timbradoConfig?.margem_inferior !== undefined ? timbradoConfig.margem_inferior : 10}mm`,
-                paddingLeft: `${timbradoConfig?.margem_esquerda !== undefined ? timbradoConfig.margem_esquerda : 8}mm`,
-              }}
-              className="bg-white text-black text-[13px] leading-normal"
-            >
-              {/* Cabeçalho fixo no topo */}
-              <div className="flex-shrink-0">
-                {(logoImpressao?.dados || logoImpressao?.caminho || timbradoConfig?.logo_url) && (
-                  <div className="text-center mb-2 pb-1.5 border-b border-gray-600">
-                    <img
-                      src={
-                        logoImpressao?.dados || logoImpressao?.caminho || timbradoConfig?.logo_url || "/placeholder.svg"
-                      }
-                      alt="Logo da Empresa"
-                      className="mx-auto h-14 object-contain"
-                    />
-                  </div>
-                )}
-
-                {timbradoConfig?.cabecalho && (
-                  <div
-                    className="text-center mb-2 text-[10px] border-b border-gray-600 pb-2"
-                    dangerouslySetInnerHTML={{ __html: timbradoConfig.cabecalho }}
-                  />
-                )}
-
-                <div className="text-center mb-3 pb-2 border-b border-gray-600">
-                  <h1 className="text-lg font-bold mb-1">ORDEM DE SERVIÇO Nº {ordemServico.numero}</h1>
-                  <p className="text-[12px]">
-                    Status: <strong>{getStatusLabel(ordemServico.situacao)}</strong>
-                  </p>
-                </div>
-              </div>
-
-              {/* Corpo da Ordem de Serviço */}
-              <div className="flex-grow flex flex-col gap-3 overflow-hidden">
-                <div className="grid grid-cols-2 gap-4 pb-2 border-b border-gray-300">
-                  <div>
-                    <h3 className="font-bold mb-1 underline text-[12px]">Dados do Cliente</h3>
-                    <div className="space-y-1">
-                      <p>
-                        <strong>Nome:</strong> {getClienteNome()}
-                      </p>
-                      {getClienteTelefone() && (
-                        <p>
-                          <strong>Telefone:</strong> {getClienteTelefone()}
-                        </p>
-                      )}
-                      {getClienteEmail() && (
-                        <p>
-                          <strong>E-mail:</strong> {getClienteEmail()}
-                        </p>
-                      )}
-                      {getClienteEndereco() && (
-                        <p>
-                          <strong>Endereço:</strong> {getClienteEndereco()}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-bold mb-1 underline text-[12px]">Dados da Ordem de Serviço</h3>
-                    <div className="space-y-1">
-                      <p>
-                        <strong>Data:</strong> {formatDate(ordemServico.data_atual)}
-                      </p>
-                      <p>
-                        <strong>Tipo de Serviço:</strong> {getTipoServicoLabel(ordemServico.tipo_servico)}
-                      </p>
-                      <p>
-                        <strong>Técnico:</strong> {ordemServico.tecnico_name || "Não informado"}
-                      </p>
-                      {ordemServico.data_agendamento && (
-                        <p>
-                          <strong>Data Agendamento:</strong> {formatDate(ordemServico.data_agendamento)}
-                          {ordemServico.periodo_agendamento && (
-                            <span className="ml-1 text-cyan-600 font-semibold">
-                              ({ordemServico.periodo_agendamento === "manha" ? "Manhã" : "Tarde"})
-                            </span>
-                          )}
-                        </p>
-                      )}
-                      {ordemServico.horario_entrada && (
-                        <p>
-                          <strong>Horário Entrada:</strong> {formatTime(ordemServico.horario_entrada)}
-                        </p>
-                      )}
-                      {ordemServico.horario_saida && (
-                        <p>
-                          <strong>Horário Saída:</strong> {formatTime(ordemServico.horario_saida)}
-                        </p>
-                      )}
-                      {ordemServico.solicitado_por && (
-                        <p>
-                          <strong>Solicitado por:</strong> {ordemServico.solicitado_por}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {ordemServico.descricao_defeito && ordemServico.tipo_servico !== "preventiva" && (
-                  <div className="p-2 bg-gray-50 rounded border border-gray-200">
-                    <h3 className="font-bold mb-0.5 text-[11px]">Descrição do Defeito</h3>
-                    <p className="text-[12px] whitespace-pre-wrap leading-tight">{ordemServico.descricao_defeito}</p>
-                  </div>
-                )}
-
-                {ordemServico.necessidades_cliente && ordemServico.tipo_servico === "preventiva" && (
-                  <div className="p-2 bg-gray-50 rounded border border-gray-200">
-                    <h3 className="font-bold mb-0.5 text-[11px]">Necessidades do Cliente</h3>
-                    <p className="text-[12px] whitespace-pre-wrap leading-tight">{ordemServico.necessidades_cliente}</p>
-                  </div>
-                )}
-
-                {ordemServico.servico_realizado && ordemServico.tipo_servico !== "preventiva" && (
-                  <div className="p-2 bg-gray-50 rounded border border-gray-200">
-                    <h3 className="font-bold mb-0.5 text-[11px]">Serviço Realizado</h3>
-                    <p className="text-[12px] whitespace-pre-wrap leading-tight">{ordemServico.servico_realizado}</p>
-                  </div>
-                )}
-
-                {ordemServico.relatorio_visita && (
-                  <div className="p-2 bg-gray-50 rounded border border-gray-200">
-                    <h3 className="font-bold mb-0.5 text-[11px]">Relatório da Visita</h3>
-                    <p className="text-[12px] whitespace-pre-wrap leading-tight">{ordemServico.relatorio_visita}</p>
-                  </div>
-                )}
-
-                {itens.length > 0 && (
-                  <div className="pb-1 border-b border-gray-300">
-                    <h3 className="font-bold mb-1 text-[12px] underline">Equipamentos</h3>
-                    <div className="bg-gray-50 p-2 rounded border border-gray-200">
-                      {itens.map((item, index) => (
-                        <div key={index} className="text-[12px] py-0.5 leading-tight">
-                          • {item.equipamento_nome_atual || item.equipamento_nome}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {fotos.length > 0 && (
-                  <div className="pb-2 border-b border-gray-300">
-                    <h3 className="font-bold mb-1 text-[12px] underline">Fotos do Serviço</h3>
-                    <div className="grid grid-cols-3 gap-3">
-                      {fotos.slice(0, 3).map((foto, index) => (
-                        <div key={index} className="text-center">
-                          <img
-                            src={getFotoCaminho(foto) || "/placeholder.svg"}
-                            alt={foto.nome_arquivo}
-                            className="w-full h-20 object-cover border rounded"
-                          />
-                          <p className="text-[11px] mt-0.5 truncate">{foto.nome_arquivo}</p>
-                        </div>
-                      ))}
-                    </div>
-                    {fotos.length > 3 && (
-                      <p className="text-[11px] text-center mt-1">E mais {fotos.length - 3} foto(s)...</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Assinatura e Rodapé fixados no final */}
-              <div className="flex-shrink-0 mt-auto pt-4 border-t border-gray-300">
-                <div className="text-center">
-                  <h4 className="font-bold mb-1 text-[12px]">Responsável do Cliente</h4>
-                  <div className="border border-black h-16 flex items-center justify-center mb-1 max-w-xs mx-auto bg-white">
-                    {assinaturaResponsavel && (
-                      <img
-                        src={getAssinaturaCaminho(assinaturaResponsavel) || "/placeholder.svg"}
-                        alt="Assinatura Cliente"
-                        className="max-h-14 max-w-[90%] object-contain"
-                      />
-                    )}
-                  </div>
-                  <p className="text-[12px] font-semibold">
-                    {ordemServico.nome_responsavel || ordemServico.responsavel || "Nome do Responsável"}
-                  </p>
-                  {assinaturaResponsavel && (
-                    <p className="text-[11px] text-gray-600">
-                      Assinado em: {new Date(assinaturaResponsavel.data_assinatura).toLocaleString("pt-BR")}
-                    </p>
-                  )}
-                </div>
-
-                {timbradoConfig?.rodape && (
-                  <div
-                    className="text-center text-[10px] border-t border-gray-650 pt-2 mt-3"
-                    dangerouslySetInnerHTML={{ __html: timbradoConfig.rodape }}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        {!pdfUrl && conteudoOculto}
       </SheetContent>
     </Sheet>
   )

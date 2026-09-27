@@ -13,11 +13,15 @@ import { Loader2, Printer, ExternalLink, Download } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { savePdfUrl } from "@/lib/pdf-utils"
 import { PDFViewer } from "@/components/pdf-viewer"
+import { juntarNotaComBoletos } from "@/lib/pdf-nota-boleto"
+import { OsPreventivaPdf } from "@/components/ordem-servico/os-preventiva-pdf"
 
 interface ImprimirNfseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   notaId: number | null
+  /** Junta os boletos da nota ao final do PDF */
+  comBoleto?: boolean
 }
 
 function formatDateBR(dateStr: string | null): string {
@@ -70,7 +74,11 @@ function formatCep(value: string): string {
   return value
 }
 
-export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseDialogProps) {
+export function ImprimirNfseDialog({ open, onOpenChange, notaId, comBoleto = false }: ImprimirNfseDialogProps) {
+  const [erroBoleto, setErroBoleto] = useState<string | null>(null)
+  // undefined = ainda gerando; null = sem OS concluída; Blob = PDF da OS
+  const [osPdf, setOsPdf] = useState<Blob | null | undefined>(undefined)
+  const [osMotivo, setOsMotivo] = useState<string | undefined>()
   const [loading, setLoading] = useState(false)
   const [dados, setDados] = useState<any>(null)
   const [brasaoBase64, setBrasaoBase64] = useState<string | null>(null)
@@ -126,11 +134,24 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
         setPdfUrl(null)
       }
       setDados(null)
+      setOsPdf(undefined)
+      setOsMotivo(undefined)
     }
   }, [open, pdfUrl])
 
+  // Segurança: se a OS não ficar pronta em 40s, segue sem ela
   useEffect(() => {
-    if (dados && !generatingPdf && !pdfUrl) {
+    if (!comBoleto || !dados || osPdf !== undefined) return
+    const t = setTimeout(() => {
+      setOsMotivo("Tempo esgotado ao gerar a OS preventiva.")
+      setOsPdf(null)
+    }, 40000)
+    return () => clearTimeout(t)
+  }, [comBoleto, dados, osPdf])
+
+  useEffect(() => {
+    // Com boleto: espera a OS preventiva terminar de ser gerada (osPdf deixa de ser undefined)
+    if (dados && !generatingPdf && !pdfUrl && (!comBoleto || osPdf !== undefined)) {
       setGeneratingPdf(true)
       // Aguardar renderização no DOM off-screen
       setTimeout(async () => {
@@ -168,7 +189,19 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
 
           pdf.setProperties({ title: `NFS-e_${dados?.nota?.numero_nfse || notaId}` })
 
-          const pdfBlob = pdf.output("blob")
+          let pdfBlob: Blob = pdf.output("blob")
+          setErroBoleto(null)
+          if (comBoleto && dados?.nota?.numero_nfse) {
+            // Ordem: NFS-e → boleto(s) → OS preventiva concluída do mês
+            try {
+              const r = await juntarNotaComBoletos(pdfBlob, dados.nota.numero_nfse, osPdf ? [osPdf] : [])
+              pdfBlob = r.blob
+              const avisos = [...r.avisos, ...(osPdf ? [] : [osMotivo || "OS preventiva não encontrada."])]
+              setErroBoleto(avisos.length ? avisos.join(" ") : null)
+            } catch (e: any) {
+              setErroBoleto(e?.message || "Não foi possível anexar boleto/OS.")
+            }
+          }
           const url = URL.createObjectURL(pdfBlob)
           setPdfUrl(url)
         } catch (error) {
@@ -178,7 +211,7 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
         }
       }, 600)
     }
-  }, [dados, generatingPdf, pdfUrl])
+  }, [dados, generatingPdf, pdfUrl, comBoleto, osPdf])
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -187,7 +220,7 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
           <SheetTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2 text-foreground">
               <Printer className="h-5 w-5 text-emerald-500" />
-              Imprimir NFS-e
+              {comBoleto ? "NFS-e + Boleto + OS" : "Imprimir NFS-e"}
             </span>
             <div className="flex gap-2 mr-6">
               {pdfUrl && (
@@ -204,7 +237,7 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
           </SheetTitle>
         </SheetHeader>
 
-        {loading || generatingPdf ? (
+        {loading || generatingPdf || (comBoleto && !!dados && !pdfUrl && osPdf === undefined) ? (
           <div className="flex-1 flex items-center justify-center py-16">
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin text-emerald-500 mx-auto mb-4" />
@@ -212,15 +245,31 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId }: ImprimirNfseD
             </div>
           </div>
         ) : pdfUrl ? (
-          <div className="flex-1 bg-white">
+          <div className="flex-1 bg-white flex flex-col">
+            {erroBoleto && (
+              <div className="px-4 py-2 text-xs bg-amber-100 text-amber-800 border-b border-amber-200">
+                Atenção: {erroBoleto}
+              </div>
+            )}
             <PDFViewer
               src={pdfUrl}
-              className="w-full h-full border-0"
-              title={`NFS-e_${dados?.nota?.numero_nfse || notaId}`}
+              className="w-full flex-1 border-0"
+              title={`NFS-e_${dados?.nota?.numero_nfse || notaId}${comBoleto ? "_com_boleto" : ""}`}
             />
           </div>
         ) : (
           <div className="py-8 text-center text-muted-foreground">Nota fiscal não encontrada</div>
+        )}
+
+        {/* OS preventiva concluída do mês, gerada fora da tela para anexar ao PDF */}
+        {comBoleto && dados?.nota?.numero_nfse && osPdf === undefined && (
+          <OsPreventivaPdf
+            numeroNota={String(dados.nota.numero_nfse)}
+            onReady={(pdf, motivo) => {
+              setOsMotivo(motivo)
+              setOsPdf(pdf)
+            }}
+          />
         )}
 
         {/* Container invisivel para geracao do PDF */}

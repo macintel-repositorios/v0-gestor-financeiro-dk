@@ -13,11 +13,16 @@ import { Loader2, Printer, Package, ExternalLink, Download } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { savePdfUrl } from "@/lib/pdf-utils"
 import { PDFViewer } from "@/components/pdf-viewer"
+import { juntarNotaComBoletos } from "@/lib/pdf-nota-boleto"
 
 interface DanfeDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   nfeId: number | null
+  /** Junta os boletos da nota ao final do PDF */
+  comBoleto?: boolean
+  /** Número da nota usado nos boletos (numero_nota) */
+  numeroNotaBoleto?: string
 }
 
 function formatDateBR(dateStr: string | null): string {
@@ -88,7 +93,8 @@ function formatChaveAcesso(chave: string): string {
   return chave.replace(/(\d{4})/g, "$1 ").trim()
 }
 
-export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
+export function DanfeDialog({ open, onOpenChange, nfeId, comBoleto = false, numeroNotaBoleto }: DanfeDialogProps) {
+  const [erroBoleto, setErroBoleto] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<any>(null)
   
@@ -170,7 +176,19 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
           // Define o titulo nos metadados -> a aba/visualizador mostra o nome correto
           pdf.setProperties({ title: `NF-e_${data?.nfe?.numero_nfe || nfeId}` })
 
-          const pdfBlob = pdf.output("blob")
+          let pdfBlob: Blob = pdf.output("blob")
+          setErroBoleto(null)
+          const numeroBoleto = numeroNotaBoleto || (data?.nfe?.numero_nfe != null ? String(Number(data.nfe.numero_nfe)) : "")
+          if (comBoleto && numeroBoleto) {
+            try {
+              const r = await juntarNotaComBoletos(pdfBlob, numeroBoleto)
+              pdfBlob = r.blob
+              if (r.avisos.length) setErroBoleto(r.avisos.join(" "))
+            } catch (e: any) {
+              // Sem boleto: mostra só o DANFE, com aviso
+              setErroBoleto(e?.message || "Não foi possível anexar o boleto.")
+            }
+          }
           const url = URL.createObjectURL(pdfBlob)
           setPdfUrl(url)
         } catch (error) {
@@ -189,7 +207,7 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
           <SheetTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2 text-foreground">
               <Printer className="h-5 w-5 text-blue-500" />
-              Imprimir DANFE
+              {comBoleto ? "DANFE + Boleto" : "Imprimir DANFE"}
             </span>
             <div className="flex gap-2 mr-6">
               {pdfUrl && (
@@ -214,11 +232,16 @@ export function DanfeDialog({ open, onOpenChange, nfeId }: DanfeDialogProps) {
             </div>
           </div>
         ) : pdfUrl ? (
-          <div className="flex-1 bg-white">
+          <div className="flex-1 bg-white flex flex-col">
+            {erroBoleto && (
+              <div className="px-4 py-2 text-xs bg-amber-100 text-amber-800 border-b border-amber-200">
+                Boleto não anexado: {erroBoleto}
+              </div>
+            )}
             <PDFViewer
               src={pdfUrl}
-              className="w-full h-full border-0"
-              title={`NF-e_${data?.nfe?.numero_nfe || nfeId}`}
+              className="w-full flex-1 border-0"
+              title={`NF-e_${data?.nfe?.numero_nfe || nfeId}${comBoleto ? "_com_boleto" : ""}`}
             />
           </div>
         ) : (
