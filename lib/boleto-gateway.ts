@@ -18,6 +18,11 @@ export function boletoNoInter(b?: BoletoGatewayCampos | null): boolean {
   return !!b?.inter_codigo_solicitacao
 }
 
+/** Pausa entre envios em lote ao Banco Inter, que limita requisições por segundo (HTTP 429). */
+export const INTERVALO_ENVIO_INTER_MS = 2000
+
+export const esperar = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+
 /** URL do PDF do boleto para impressão, conforme o gateway. */
 export function urlPdfBoleto(b?: BoletoGatewayCampos | null): string | null {
   if (!b) return null

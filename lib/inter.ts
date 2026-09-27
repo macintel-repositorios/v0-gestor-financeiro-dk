@@ -69,6 +69,10 @@ export interface InterBoletoResponse {
   pdfUrl?: string
 }
 
+// Token OAuth2 compartilhado entre instâncias/requisições do mesmo processo (chave: clientId)
+const tokenCache = new Map<string, { token: string; expiresAt: number }>()
+const authEmAndamento = new Map<string, Promise<{ token: string; expiresAt: number }>>()
+
 export class BancoInterAPI {
   private config: InterConfig
   private baseUrl: string
@@ -244,7 +248,7 @@ export class BancoInterAPI {
     method: string,
     headers: Record<string, string>,
     body?: string
-  ): Promise<{ status: number; text: string }> {
+  ): Promise<{ status: number; text: string; headers: Record<string, any> }> {
     return new Promise((resolve, reject) => {
       const { cert, key } = this.getCertAndKey()
       const url = new URL(urlStr)
@@ -264,7 +268,7 @@ export class BancoInterAPI {
         let data = ""
         res.on("data", (chunk) => { data += chunk })
         res.on("end", () => {
-          resolve({ status: res.statusCode || 0, text: data })
+          resolve({ status: res.statusCode || 0, text: data, headers: res.headers })
         })
       })
 
@@ -287,6 +291,49 @@ export class BancoInterAPI {
       return this.token
     }
 
+    // Cache compartilhado entre instâncias: o Inter limita (429) pedidos de token.
+    // getInterAPI() cria uma instância por requisição, então o token precisa viver no módulo.
+    const cacheKey = this.config.clientId
+    const cached = tokenCache.get(cacheKey)
+    if (cached && Date.now() < cached.expiresAt - 60000) {
+      this.token = cached.token
+      this.tokenExpiresAt = cached.expiresAt
+      return cached.token
+    }
+
+    // Pedidos simultâneos reaproveitam a mesma autenticação em andamento
+    let pendente = authEmAndamento.get(cacheKey)
+    if (!pendente) {
+      pendente = this.solicitarToken().finally(() => authEmAndamento.delete(cacheKey))
+      authEmAndamento.set(cacheKey, pendente)
+    }
+    const novo = await pendente
+    this.token = novo.token
+    this.tokenExpiresAt = novo.expiresAt
+    return novo.token
+  }
+
+  /**
+   * Repete a chamada quando o Inter responde 429 (limite de requisições),
+   * esperando 2s, 4s, 8s e 16s (ou o Retry-After, se vier).
+   */
+  private async comRetentativa429<R extends { status: number; text: string; headers?: any }>(
+    descricao: string,
+    fn: () => Promise<R>,
+    tentativas = 4
+  ): Promise<R> {
+    let res = await fn()
+    for (let i = 0; i < tentativas && res.status === 429; i++) {
+      const retryAfter = Number(res.headers?.["retry-after"])
+      const esperaMs = retryAfter > 0 ? retryAfter * 1000 : 2000 * 2 ** i
+      console.warn(`[Banco Inter] 429 em ${descricao}; nova tentativa em ${esperaMs / 1000}s (${i + 1}/${tentativas})`)
+      await new Promise((r) => setTimeout(r, esperaMs))
+      res = await fn()
+    }
+    return res
+  }
+
+  private async solicitarToken(): Promise<{ token: string; expiresAt: number }> {
     console.log("[Banco Inter] Solicitando novo Bearer Token OAuth2...")
     const url = `${this.baseUrl}/oauth/v2/token`
 
@@ -299,27 +346,33 @@ export class BancoInterAPI {
     const bodyStr = bodyParams.toString()
 
     try {
-      const { status, text } = await this.httpsRequest(
-        url,
-        "POST",
-        {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Content-Length": Buffer.byteLength(bodyStr).toString(),
-        },
-        bodyStr
+      const { status, text } = await this.comRetentativa429("autenticação", () =>
+        this.httpsRequest(
+          url,
+          "POST",
+          {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Length": Buffer.byteLength(bodyStr).toString(),
+          },
+          bodyStr
+        )
       )
 
       if (status < 200 || status >= 300) {
         console.error("[Banco Inter] Erro na autenticação OAuth2:", text)
-        throw new Error(`Banco Inter Auth (${status}): ${text}`)
+        throw new Error(
+          status === 429
+            ? "Banco Inter: limite de requisições atingido (429). Aguarde alguns segundos e tente novamente."
+            : `Banco Inter Auth (${status}): ${text}`
+        )
       }
 
       const data = JSON.parse(text)
-      this.token = data.access_token
-      this.tokenExpiresAt = Date.now() + (data.expires_in || 3600) * 1000
+      const novo = { token: data.access_token as string, expiresAt: Date.now() + (data.expires_in || 3600) * 1000 }
+      tokenCache.set(this.config.clientId, novo)
 
       console.log("[Banco Inter] Autenticação realizada com sucesso!")
-      return this.token!
+      return novo
     } catch (error: any) {
       console.error("[Banco Inter] Falha ao autenticar:", error.message || error)
       throw error
@@ -349,7 +402,14 @@ export class BancoInterAPI {
     }
 
     console.log(`[Banco Inter] ${method} ${url}`)
-    const { status, text } = await this.httpsRequest(url, method, headers, bodyStr)
+    // 429 = recusado sem processar pelo Inter, então é seguro repetir (inclusive o POST de emissão)
+    const { status, text } = await this.comRetentativa429(`${method} ${endpoint}`, () =>
+      this.httpsRequest(url, method, headers, bodyStr)
+    )
+
+    if (status === 401) {
+      tokenCache.delete(this.config.clientId)
+    }
 
     if (status < 200 || status >= 300) {
       console.error(`[Banco Inter] Erro API (${status}):`, text)

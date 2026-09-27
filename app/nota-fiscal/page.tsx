@@ -46,7 +46,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { boletoEnviado } from "@/lib/boleto-gateway"
+import { boletoEnviado, esperar, INTERVALO_ENVIO_INTER_MS } from "@/lib/boleto-gateway"
 import { formatCurrency, cn } from "@/lib/utils"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
 import { DetalheNfseDialog } from "@/components/nfse/detalhe-nfse-dialog"
@@ -378,6 +378,7 @@ export default function NotaFiscalPage() {
         } else {
           ultimoErro = result.message || ""
         }
+        if (gateway === "inter" && boletosLocais.length > 1) await esperar(INTERVALO_ENVIO_INTER_MS)
       }
 
       if (successCount > 0) {

@@ -50,7 +50,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { boletoEnviado, boletoNoInter } from "@/lib/boleto-gateway"
+import { boletoEnviado, boletoNoInter, esperar, INTERVALO_ENVIO_INTER_MS } from "@/lib/boleto-gateway"
 import { formatCurrency } from "@/lib/utils"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
 import { NovoContratoDialog } from "@/components/contratos/novo-contrato-dialog"
@@ -598,6 +598,26 @@ export default function ContratosPage() {
     setBatchAsaasSelecionados(elegiveisAsaas)
   }
 
+  // Regra do lote: emissão/vencimento é sempre o mês seguinte ao da preventiva
+  const deslocarMes = (mes: string, ano: string, delta: number) => {
+    const d = new Date(Number(ano), Number(mes) - 1 + delta, 1)
+    return { mes: String(d.getMonth() + 1).padStart(2, "0"), ano: String(d.getFullYear()) }
+  }
+
+  const aplicarPeriodoPorPreventiva = (mesPrev: string, anoPrev: string) => {
+    const emissao = deslocarMes(mesPrev, anoPrev, 1)
+    setBatchMesPreventiva(mesPrev)
+    setBatchAnoPreventiva(anoPrev)
+    setBatchMesRef(emissao.mes)
+    setBatchAnoRef(emissao.ano)
+    recalculateBatchSelections(emissao.mes, emissao.ano, mesPrev, anoPrev)
+  }
+
+  const aplicarPeriodoPorEmissao = (mesAtual: string, anoAtual: string) => {
+    const prev = deslocarMes(mesAtual, anoAtual, -1)
+    aplicarPeriodoPorPreventiva(prev.mes, prev.ano)
+  }
+
   const handleIniciarBatch = () => {
     const now = new Date()
     const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
@@ -834,6 +854,9 @@ export default function ContratosPage() {
           console.error(`Erro de conexão no contrato ${num}:`, error)
           setBatchProgress((prev) => ({ ...prev, [num]: "error" }))
         }
+
+        // Um de cada vez: pausa entre envios para não estourar o limite do Inter
+        if (batchTab === "inter") await esperar(INTERVALO_ENVIO_INTER_MS)
       }
 
       setBatchRunning(false)
@@ -2097,11 +2120,8 @@ export default function ContratosPage() {
                 {/* Seleção do Período */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="batch-mes-ref" className="text-xs font-semibold">Mês Atual (Emissão)</Label>
-                    <Select value={batchMesRef} onValueChange={(v) => {
-                      setBatchMesRef(v)
-                      recalculateBatchSelections(v, batchAnoRef, batchMesPreventiva, batchAnoPreventiva)
-                    }}>
+                    <Label htmlFor="batch-mes-ref" className="text-xs font-semibold">Mês de Emissão / Vencimento</Label>
+                    <Select value={batchMesRef} onValueChange={(v) => aplicarPeriodoPorEmissao(v, batchAnoRef)}>
                       <SelectTrigger id="batch-mes-ref" className="bg-background text-foreground border-border">
                         <SelectValue placeholder="Mês" />
                       </SelectTrigger>
@@ -2115,11 +2135,8 @@ export default function ContratosPage() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="batch-ano-ref" className="text-xs font-semibold">Ano Atual (Emissão)</Label>
-                    <Select value={batchAnoRef} onValueChange={(v) => {
-                      setBatchAnoRef(v)
-                      recalculateBatchSelections(batchMesRef, v, batchMesPreventiva, batchAnoPreventiva)
-                    }}>
+                    <Label htmlFor="batch-ano-ref" className="text-xs font-semibold">Ano de Emissão / Vencimento</Label>
+                    <Select value={batchAnoRef} onValueChange={(v) => aplicarPeriodoPorEmissao(batchMesRef, v)}>
                       <SelectTrigger id="batch-ano-ref" className="bg-background text-foreground border-border">
                         <SelectValue placeholder="Ano" />
                       </SelectTrigger>
@@ -2140,11 +2157,11 @@ export default function ContratosPage() {
                     <Label className="text-xs font-semibold text-blue-600 dark:text-blue-400 block">
                       Mês da Preventiva (para descrição da nota)
                     </Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      A emissão e o vencimento dos boletos ficam sempre no mês seguinte à preventiva.
+                    </p>
                     <div className="grid grid-cols-2 gap-2">
-                      <Select value={batchMesPreventiva} onValueChange={(v) => {
-                        setBatchMesPreventiva(v)
-                        recalculateBatchSelections(batchMesRef, batchAnoRef, v, batchAnoPreventiva)
-                      }}>
+                      <Select value={batchMesPreventiva} onValueChange={(v) => aplicarPeriodoPorPreventiva(v, batchAnoPreventiva)}>
                         <SelectTrigger className="bg-background text-foreground border-border h-8">
                           <SelectValue placeholder="Mês" />
                         </SelectTrigger>
@@ -2156,10 +2173,7 @@ export default function ContratosPage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <Select value={batchAnoPreventiva} onValueChange={(v) => {
-                        setBatchAnoPreventiva(v)
-                        recalculateBatchSelections(batchMesRef, batchAnoRef, batchMesPreventiva, v)
-                      }}>
+                      <Select value={batchAnoPreventiva} onValueChange={(v) => aplicarPeriodoPorPreventiva(batchMesPreventiva, v)}>
                         <SelectTrigger className="bg-background text-foreground border-border h-8">
                           <SelectValue placeholder="Ano" />
                         </SelectTrigger>

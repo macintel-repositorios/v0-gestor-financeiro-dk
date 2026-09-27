@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Building2, Loader2, Send } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { boletoEnviado } from "@/lib/boleto-gateway"
+import { boletoEnviado, esperar, INTERVALO_ENVIO_INTER_MS } from "@/lib/boleto-gateway"
 
 type Gateway = "inter" | "asaas"
 
@@ -32,6 +32,7 @@ export function EnviarBoletosGatewayButtons({ boletos, onEnviado }: { boletos: a
         const result = await res.json()
         if (result.success) successCount++
         else ultimoErro = result.message || ""
+        if (gateway === "inter" && pendentes.length > 1) await esperar(INTERVALO_ENVIO_INTER_MS)
       }
       if (successCount > 0) {
         toast({
