@@ -34,6 +34,7 @@ import {
   RefreshCw,
   Printer,
   Receipt,
+  Building2,
   Package,
   Wrench,
   Download,
@@ -45,6 +46,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import { boletoEnviado } from "@/lib/boleto-gateway"
 import { formatCurrency, cn } from "@/lib/utils"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
 import { DetalheNfseDialog } from "@/components/nfse/detalhe-nfse-dialog"
@@ -146,8 +148,9 @@ export default function NotaFiscalPage() {
   const [notaParaBoleto, setNotaParaBoleto] = useState<any>(null)
   const [visualizarBoletosOpen, setVisualizarBoletosOpen] = useState(false)
   const [visualizarBoletosNumero, setVisualizarBoletosNumero] = useState("")
-  const [boletoStatusMap, setBoletoStatusMap] = useState<Record<string, { temBoleto: boolean; enviadoAsaas: boolean; aguardandoPagamento: boolean }>>({})
+  const [boletoStatusMap, setBoletoStatusMap] = useState<Record<string, { temBoleto: boolean; enviado?: boolean; enviadoAsaas: boolean; enviadoInter?: boolean; aguardandoPagamento: boolean }>>({})
   const [enviandoAsaasNota, setEnviandoAsaasNota] = useState<string | null>(null)
+  const [enviandoGateway, setEnviandoGateway] = useState<"asaas" | "inter" | null>(null)
 
   const { toast } = useToast()
 
@@ -331,13 +334,15 @@ export default function NotaFiscalPage() {
     }
   }
 
-  const handleEnviarAsaasPorNota = async (numeroNota: string) => {
-    if (!confirm(`Enviar boleto(s) da nota ${numeroNota} para o Asaas?`)) {
+  const handleEnviarAsaasPorNota = async (numeroNota: string, gateway: "asaas" | "inter" = "asaas") => {
+    const gatewayNome = gateway === "inter" ? "Banco Inter" : "Asaas"
+    if (!confirm(`Enviar boleto(s) da nota ${numeroNota} para o ${gatewayNome}?`)) {
       return
     }
 
     try {
       setEnviandoAsaasNota(numeroNota)
+      setEnviandoGateway(gateway)
       const resBoletos = await fetch(`/api/boletos?numeroBase=${encodeURIComponent(numeroNota)}`)
       const resultBoletos = await resBoletos.json()
 
@@ -350,48 +355,54 @@ export default function NotaFiscalPage() {
         return
       }
 
-      const boletosLocais = resultBoletos.data.filter((b: any) => !b.asaas_id)
+      // Só boletos ainda não registrados em nenhum gateway (evita duplicidade Inter/Asaas)
+      const boletosLocais = resultBoletos.data.filter((b: any) => !boletoEnviado(b))
       if (boletosLocais.length === 0) {
         toast({
           title: "Aviso",
-          description: "Todos os boletos dessa nota já foram enviados ao Asaas.",
+          description: "Todos os boletos dessa nota já foram enviados ao Inter/Asaas.",
         })
         return
       }
 
+      // Envio sequencial, um boleto por vez
       let successCount = 0
+      let ultimoErro = ""
       for (const b of boletosLocais) {
-        const res = await fetch(`/api/boletos/${b.id}/enviar-asaas`, {
+        const res = await fetch(`/api/boletos/${b.id}/${gateway === "inter" ? "enviar-inter" : "enviar-asaas"}`, {
           method: "POST",
         })
         const result = await res.json()
         if (result.success) {
           successCount++
+        } else {
+          ultimoErro = result.message || ""
         }
       }
 
       if (successCount > 0) {
         toast({
           title: "Boletos enviados",
-          description: `${successCount} boleto(s) enviado(s) ao Asaas com sucesso!`,
+          description: `${successCount} de ${boletosLocais.length} boleto(s) enviado(s) ao ${gatewayNome} com sucesso!`,
         })
         fetchTodasNotas()
       } else {
         toast({
           title: "Erro ao enviar",
-          description: "Nenhum boleto pôde ser enviado ao Asaas.",
+          description: ultimoErro || `Nenhum boleto pôde ser enviado ao ${gatewayNome}.`,
           variant: "destructive",
         })
       }
     } catch (error) {
-      console.error("Erro ao enviar boletos para Asaas:", error)
+      console.error(`Erro ao enviar boletos para ${gatewayNome}:`, error)
       toast({
         title: "Erro",
-        description: "Erro ao processar envio ao Asaas",
+        description: `Erro ao processar envio ao ${gatewayNome}`,
         variant: "destructive",
       })
     } finally {
       setEnviandoAsaasNota(null)
+      setEnviandoGateway(null)
     }
   }
 
@@ -1293,8 +1304,14 @@ export default function NotaFiscalPage() {
                               if (!boletoInfo?.temBoleto) {
                                 return <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
                               }
-                              if (!boletoInfo.enviadoAsaas) {
-                                return <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-400 hover:bg-teal-955/20" onClick={() => handleEnviarAsaasPorNota(notaNum)} disabled={enviandoAsaasNota === notaNum} title="Enviar para Asaas">{enviandoAsaasNota === notaNum ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
+                              if (!boletoInfo.enviado && !boletoInfo.enviadoAsaas) {
+                                const enviando = enviandoAsaasNota === notaNum
+                                return (
+                                  <>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-orange-400 hover:bg-orange-955/20" onClick={() => handleEnviarAsaasPorNota(notaNum, "inter")} disabled={enviando} title="Enviar para Banco Inter">{enviando && enviandoGateway === "inter" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Building2 className="h-4 w-4" />}</Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-400 hover:bg-teal-955/20" onClick={() => handleEnviarAsaasPorNota(notaNum, "asaas")} disabled={enviando} title="Enviar para Asaas">{enviando && enviandoGateway === "asaas" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
+                                  </>
+                                )
                               }
                               return <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:bg-indigo-955/20" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
                             }
@@ -1352,8 +1369,13 @@ export default function NotaFiscalPage() {
                                         if (!boletoInfo?.temBoleto) {
                                           return <DropdownMenuItem onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }}><DollarSign className="h-4 w-4 mr-2" />Gerar Boleto</DropdownMenuItem>
                                         }
-                                        if (!boletoInfo.enviadoAsaas) {
-                                          return <DropdownMenuItem onClick={() => handleEnviarAsaasPorNota(notaNum)} disabled={enviandoAsaasNota === notaNum}><Send className="h-4 w-4 mr-2" />Enviar Asaas</DropdownMenuItem>
+                                        if (!boletoInfo.enviado && !boletoInfo.enviadoAsaas) {
+                                          return (
+                                            <>
+                                              <DropdownMenuItem onClick={() => handleEnviarAsaasPorNota(notaNum, "inter")} disabled={enviandoAsaasNota === notaNum}><Building2 className="h-4 w-4 mr-2 text-orange-500" />Enviar Inter</DropdownMenuItem>
+                                              <DropdownMenuItem onClick={() => handleEnviarAsaasPorNota(notaNum, "asaas")} disabled={enviandoAsaasNota === notaNum}><Send className="h-4 w-4 mr-2" />Enviar Asaas</DropdownMenuItem>
+                                            </>
+                                          )
                                         }
                                         return <DropdownMenuItem onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-4 w-4 mr-2" />Imprimir Boleto</DropdownMenuItem>
                                       })()}
@@ -1502,8 +1524,14 @@ export default function NotaFiscalPage() {
                                      if (!boletoInfo?.temBoleto) {
                                        return <Button variant="outline" size="sm" className="flex-1 text-xs text-blue-400 hover:bg-blue-955/20 border-blue-900/50" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }}><DollarSign className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
                                      }
-                                     if (!boletoInfo.enviadoAsaas) {
-                                       return <Button variant="outline" size="sm" className="flex-1 text-xs text-teal-400 hover:bg-teal-955/20 border-teal-900/50" onClick={() => handleEnviarAsaasPorNota(notaNum)} disabled={enviandoAsaasNota === notaNum}>{enviandoAsaasNota === notaNum ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Send className="h-3.5 w-3.5 mr-1" />} Enviar Asaas</Button>
+                                     if (!boletoInfo.enviado && !boletoInfo.enviadoAsaas) {
+                                       const enviando = enviandoAsaasNota === notaNum
+                                       return (
+                                         <>
+                                           <Button variant="outline" size="sm" className="flex-1 text-xs text-orange-400 hover:bg-orange-955/20 border-orange-900/50" onClick={() => handleEnviarAsaasPorNota(notaNum, "inter")} disabled={enviando}>{enviando && enviandoGateway === "inter" ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Building2 className="h-3.5 w-3.5 mr-1" />} Enviar Inter</Button>
+                                           <Button variant="outline" size="sm" className="flex-1 text-xs text-teal-400 hover:bg-teal-955/20 border-teal-900/50" onClick={() => handleEnviarAsaasPorNota(notaNum, "asaas")} disabled={enviando}>{enviando && enviandoGateway === "asaas" ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Send className="h-3.5 w-3.5 mr-1" />} Enviar Asaas</Button>
+                                         </>
+                                       )
                                      }
                                      return <Button variant="outline" size="sm" className="flex-1 text-xs text-indigo-400 hover:bg-indigo-950/20 border-indigo-900/50" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }}><Receipt className="h-3.5 w-3.5 mr-1" /> Boleto</Button>
                                    })()}

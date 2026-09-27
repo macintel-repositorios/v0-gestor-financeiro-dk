@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { EnviarBoletosGatewayButtons } from "@/components/financeiro/enviar-boletos-gateway"
+import { boletoEnviado } from "@/lib/boleto-gateway"
 import {
   Sheet,
   SheetContent,
@@ -48,7 +50,6 @@ export function DetalheNfeDialog({ open, onOpenChange, nfeId, onPrint, onBoleto,
   const [transmissoes, setTransmissoes] = useState<any[]>([])
   const [boletos, setBoletos] = useState<any[]>([])
   const [loadingBoletos, setLoadingBoletos] = useState(false)
-  const [enviandoAsaas, setEnviandoAsaas] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -224,48 +225,10 @@ export function DetalheNfeDialog({ open, onOpenChange, nfeId, onPrint, onBoleto,
                       Gerar Boleto
                     </Button>
                   )}
-                  {nfe.status === "autorizada" && boletos.length > 0 && boletos.some((b: any) => !b.asaas_id) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={enviandoAsaas}
-                      onClick={async () => {
-                        setEnviandoAsaas(true)
-                        try {
-                          const boletosLocais = boletos.filter((b: any) => !b.asaas_id)
-                          let successCount = 0
-                          for (const b of boletosLocais) {
-                            const res = await fetch(`/api/boletos/${b.id}/enviar-asaas`, { method: "POST" })
-                            const result = await res.json()
-                            if (result.success) successCount++
-                          }
-                          if (successCount > 0) {
-                            toast({
-                              title: "Envio ao Asaas",
-                              description: `${successCount} boleto(s) enviado(s) ao Asaas com sucesso!`,
-                            })
-                            if (nfe?.numero_nfe) fetchBoletos(String(nfe.numero_nfe))
-                          } else {
-                            toast({
-                              title: "Erro ao enviar",
-                              description: "Não foi possível enviar os boletos ao Asaas",
-                              variant: "destructive",
-                            })
-                          }
-                        } catch (err) {
-                          console.error(err)
-                          toast({ title: "Erro", description: "Erro ao enviar boletos", variant: "destructive" })
-                        } finally {
-                          setEnviandoAsaas(false)
-                        }
-                      }}
-                      className="text-teal-400 border-teal-900/50 hover:bg-teal-950/20 bg-background"
-                    >
-                      {enviandoAsaas ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
-                      Enviar Asaas
-                    </Button>
+                  {nfe.status === "autorizada" && (
+                    <EnviarBoletosGatewayButtons boletos={boletos} onEnviado={() => { if (nfe?.numero_nfe) fetchBoletos(String(nfe.numero_nfe)) }} />
                   )}
-                  {nfe.status === "autorizada" && boletos.length > 0 && boletos.every((b: any) => b.asaas_id) && onVisualizarBoletos && (
+                  {nfe.status === "autorizada" && boletos.length > 0 && boletos.every((b: any) => boletoEnviado(b)) && onVisualizarBoletos && (
                     <Button
                       size="sm"
                       variant="outline"
