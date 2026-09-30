@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@radix-ui/react-alert-dialog": "latest",
     "@radix-ui/react-avatar": "latest",
     "@radix-ui/react-checkbox": "latest",

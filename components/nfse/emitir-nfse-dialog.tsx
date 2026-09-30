@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import { Loader2, Send, AlertCircle, User, FileText, DollarSign } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
+import { SERVICOS_NFSE, SERVICO_NFSE_PADRAO, formatarAliquota } from "@/lib/nfse/servicos"
 
 interface EmitirNfseDialogProps {
   open: boolean
@@ -80,10 +81,16 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
     iss_retido: false,
   })
 
+  // Serviço prestado (padrão 3314-7/10) e característica, quando o serviço exigir
+  const [servicoId, setServicoId] = useState<string>(SERVICO_NFSE_PADRAO)
+  const [caracteristicaId, setCaracteristicaId] = useState<string | null>(null)
+
   const { toast } = useToast()
 
   useEffect(() => {
     if (open) {
+      setServicoId(SERVICO_NFSE_PADRAO)
+      setCaracteristicaId(null)
       fetchClientes()
       if (dadosOrigem) {
         preencherDadosOrigem()
@@ -178,6 +185,20 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
       return
     }
 
+    const servico = SERVICOS_NFSE.find((s) => s.id === servicoId) || SERVICOS_NFSE[0]
+    const caracteristica = servico.caracteristicas?.find((c) => c.id === caracteristicaId)
+    if (servico.caracteristicas && !caracteristica) {
+      const msg = `Selecione a característica do serviço ${servico.titulo}`
+      setSubmitError(msg)
+      toast({ title: "Campo obrigatorio", description: msg, variant: "destructive" })
+      return
+    }
+    // Código municipal (null = padrão das Configurações) e alíquota do serviço/característica escolhidos
+    const dadosServico = {
+      ...(servico.codigoServico ? { codigo_servico: servico.codigoServico } : {}),
+      aliquota_iss: caracteristica?.aliquota ?? servico.aliquota,
+    }
+
     setLoading(true)
     console.log("[v0] Emitindo NFS-e, dados:", {
       origem: form.origem,
@@ -189,7 +210,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
       const response = await fetch("/api/nfse/emitir", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, ...dadosServico }),
       })
 
       console.log("[v0] Response status:", response.status)
@@ -419,6 +440,94 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                   rows={3}
                   className="bg-background border-border text-foreground"
                 />
+              </div>
+
+              {/* Serviço prestado: 3314-7/10 por padrão; 01023 exige escolher a característica */}
+              <div className="space-y-2">
+                <Label>Serviço prestado *</Label>
+                <div className="space-y-2">
+                  {SERVICOS_NFSE.map((s) => {
+                    const selecionado = servicoId === s.id
+                    const carSel = s.caracteristicas?.find((c) => c.id === caracteristicaId)
+                    return (
+                      <div
+                        key={s.id}
+                        className={`rounded-lg border transition-colors ${
+                          selecionado ? "border-blue-500 bg-blue-500/10" : "border-border bg-background hover:bg-muted/40"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setServicoId(s.id)
+                            if (s.id !== servicoId) setCaracteristicaId(null)
+                          }}
+                          className="w-full text-left p-3 flex gap-3 items-start"
+                        >
+                          <span
+                            className={`mt-0.5 h-4 w-4 rounded-full border-2 flex-shrink-0 ${
+                              selecionado ? "border-blue-500 bg-blue-500 ring-2 ring-inset ring-background" : "border-muted-foreground"
+                            }`}
+                          />
+                          <span className={`text-sm ${selecionado ? "text-foreground font-medium" : "text-muted-foreground"} ${s.caracteristicas && !selecionado ? "line-clamp-2" : ""}`}>
+                            {s.titulo} - {s.descricao}
+                          </span>
+                        </button>
+
+                        {s.aliquota != null && (
+                          <div className="flex items-center justify-between px-3 pb-3 text-xs">
+                            <span className="text-muted-foreground">
+                              Alíquota: <b className="text-foreground">{formatarAliquota(s.aliquota)}</b>
+                            </span>
+                            <span className="flex gap-1">
+                              {s.tags?.map((t) => (
+                                <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                              ))}
+                            </span>
+                          </div>
+                        )}
+
+                        {s.caracteristicas && selecionado && (
+                          <div className="border-t border-border p-3 space-y-2">
+                            <p className="text-xs font-medium text-blue-500">Selecione a característica dessa atividade *</p>
+                            {s.caracteristicas.map((c) => (
+                              <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => setCaracteristicaId(c.id)}
+                                className={`w-full text-left rounded-md border p-2.5 text-xs transition-colors ${
+                                  caracteristicaId === c.id ? "border-blue-500 bg-blue-500/10" : "border-border hover:bg-muted/40"
+                                }`}
+                              >
+                                <div className="flex gap-2 items-start">
+                                  <span
+                                    className={`mt-0.5 h-3.5 w-3.5 rounded-full border-2 flex-shrink-0 ${
+                                      caracteristicaId === c.id ? "border-blue-500 bg-blue-500 ring-2 ring-inset ring-background" : "border-muted-foreground"
+                                    }`}
+                                  />
+                                  <span className="text-foreground">{c.cnae} - {c.descricao}</span>
+                                </div>
+                                <div className="flex items-center justify-between mt-2 pl-5">
+                                  <span className="text-muted-foreground">
+                                    Alíquota: <b className="text-foreground">{formatarAliquota(c.aliquota)}</b>
+                                  </span>
+                                  <span className="flex gap-1">
+                                    {c.tags.map((t) => (
+                                      <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                                    ))}
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
+                            {!carSel && (
+                              <p className="text-[11px] text-amber-500">Escolha uma característica para continuar.</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </div>
