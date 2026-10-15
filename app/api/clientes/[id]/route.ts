@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server"
 import { pool } from "@/lib/database"
+import { query } from "@/lib/db"
 import { normalizePhoneForStorage } from "@/lib/phone"
+
+// Cache local para evitar checar as colunas a cada request
+let _colsVerified = false
+let _hasEmailSindico = false
+let _hasEmailsExtras = false
+
+async function checkNewColumns() {
+  if (_colsVerified) return { hasEmailSindico: _hasEmailSindico, hasEmailsExtras: _hasEmailsExtras }
+  try { await query(`SELECT email_sindico FROM clientes LIMIT 1`); _hasEmailSindico = true } catch {}
+  try { await query(`SELECT emails_extras FROM clientes LIMIT 1`); _hasEmailsExtras = true } catch {}
+  _colsVerified = true
+  return { hasEmailSindico: _hasEmailSindico, hasEmailsExtras: _hasEmailsExtras }
+}
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -72,73 +86,38 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     console.log("Dados mesclados para atualização:", updatedData)
 
+    const { hasEmailSindico, hasEmailsExtras } = await checkNewColumns()
+
+    // Construir SET dinamicamente com base nas colunas disponíveis
+    const setClauses = [
+      `nome = ?`, `codigo = ?`, `cnpj = ?`, `cpf = ?`, `email = ?`,
+      ...(hasEmailsExtras ? [`emails_extras = ?`] : []),
+      `telefone = ?`, `endereco = ?`, `bairro = ?`, `cidade = ?`, `estado = ?`, `cep = ?`,
+      `contato = ?`, `distancia_km = ?`, `latitude = ?`, `longitude = ?`,
+      `sindico = ?`, `rg_sindico = ?`, `cpf_sindico = ?`,
+      ...(hasEmailSindico ? [`email_sindico = ?`] : []),
+      `zelador = ?`, `tem_contrato = ?`, `dia_contrato = ?`, `observacoes = ?`,
+      `nome_adm = ?`, `contato_adm = ?`, `telefone_adm = ?`, `email_adm = ?`,
+      `contribuinte_icms = ?`, `inscricao_estadual = ?`, `updated_at = NOW()`,
+    ]
+
+    const updateValues = [
+      updatedData.nome, updatedData.codigo, updatedData.cnpj, updatedData.cpf, updatedData.email,
+      ...(hasEmailsExtras ? [updatedData.emails_extras] : []),
+      updatedData.telefone, updatedData.endereco, updatedData.bairro, updatedData.cidade,
+      updatedData.estado, updatedData.cep, updatedData.contato, updatedData.distancia_km,
+      updatedData.latitude, updatedData.longitude,
+      updatedData.sindico, updatedData.rg_sindico, updatedData.cpf_sindico,
+      ...(hasEmailSindico ? [updatedData.email_sindico] : []),
+      updatedData.zelador, updatedData.tem_contrato, updatedData.dia_contrato, updatedData.observacoes,
+      updatedData.nome_adm, updatedData.contato_adm, updatedData.telefone_adm, updatedData.email_adm,
+      updatedData.contribuinte_icms, updatedData.inscricao_estadual,
+      id,
+    ]
+
     await pool.execute(
-      `UPDATE clientes SET 
-        nome = ?, 
-        codigo = ?, 
-        cnpj = ?, 
-        cpf = ?, 
-        email = ?, 
-        emails_extras = ?,
-        telefone = ?, 
-        endereco = ?, 
-        bairro = ?, 
-        cidade = ?, 
-        estado = ?, 
-        cep = ?, 
-        contato = ?, 
-        distancia_km = ?,
-        latitude = ?,
-        longitude = ?,
-        sindico = ?, 
-        rg_sindico = ?, 
-        cpf_sindico = ?, 
-        email_sindico = ?,
-        zelador = ?, 
-        tem_contrato = ?, 
-        dia_contrato = ?, 
-        observacoes = ?,
-        nome_adm = ?,
-        contato_adm = ?,
-        telefone_adm = ?,
-        email_adm = ?,
-        contribuinte_icms = ?,
-        inscricao_estadual = ?,
-        updated_at = NOW()
-      WHERE id = ?`,
-      [
-        updatedData.nome,
-        updatedData.codigo,
-        updatedData.cnpj,
-        updatedData.cpf,
-        updatedData.email,
-        updatedData.emails_extras,
-        updatedData.telefone,
-        updatedData.endereco,
-        updatedData.bairro,
-        updatedData.cidade,
-        updatedData.estado,
-        updatedData.cep,
-        updatedData.contato,
-        updatedData.distancia_km,
-        updatedData.latitude,
-        updatedData.longitude,
-        updatedData.sindico,
-        updatedData.rg_sindico,
-        updatedData.cpf_sindico,
-        updatedData.email_sindico,
-        updatedData.zelador,
-        updatedData.tem_contrato,
-        updatedData.dia_contrato,
-        updatedData.observacoes,
-        updatedData.nome_adm,
-        updatedData.contato_adm,
-        updatedData.telefone_adm,
-        updatedData.email_adm,
-        updatedData.contribuinte_icms,
-        updatedData.inscricao_estadual,
-        id,
-      ],
+      `UPDATE clientes SET ${setClauses.join(", ")} WHERE id = ?`,
+      updateValues,
     )
 
     console.log("Cliente atualizado com sucesso")

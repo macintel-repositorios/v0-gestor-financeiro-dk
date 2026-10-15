@@ -8,6 +8,18 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search")
     const limit = Number.parseInt(searchParams.get("limit") || "1000")
 
+    // Detectar quais colunas novas existem (migration pode não ter rodado ainda)
+    let hasEmailSindico = false
+    let hasEmailsExtras = false
+    try {
+      await query(`SELECT email_sindico FROM clientes LIMIT 1`)
+      hasEmailSindico = true
+    } catch {}
+    try {
+      await query(`SELECT emails_extras FROM clientes LIMIT 1`)
+      hasEmailsExtras = true
+    } catch {}
+
     let searchQuery = `
       SELECT
         id,
@@ -16,7 +28,7 @@ export async function GET(request: NextRequest) {
         cnpj,
         cpf,
         email,
-        emails_extras,
+        ${hasEmailsExtras ? "emails_extras," : "NULL as emails_extras,"}
         telefone,
         endereco,
         bairro,
@@ -28,7 +40,7 @@ export async function GET(request: NextRequest) {
         sindico,
         rg_sindico,
         cpf_sindico,
-        email_sindico,
+        ${hasEmailSindico ? "email_sindico," : "NULL as email_sindico,"}
         zelador,
         tem_contrato,
         dia_contrato,
