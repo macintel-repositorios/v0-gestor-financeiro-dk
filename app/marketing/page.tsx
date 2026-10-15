@@ -176,6 +176,43 @@ export default function MarketingPage() {
   })
   const [smtpAberto, setSmtpAberto] = useState(false)
 
+  // Status do servidor SMTP (LED): volta para "não testado" sempre que a configuração muda
+  type StatusSmtp = "nao_configurado" | "nao_testado" | "testando" | "online" | "erro"
+  const [smtpStatus, setSmtpStatus] = useState<StatusSmtp>("nao_configurado")
+  const [smtpStatusMsg, setSmtpStatusMsg] = useState("")
+
+  useEffect(() => {
+    const configurado = !!(smtpConfig.host && smtpConfig.user && smtpConfig.pass)
+    setSmtpStatus(configurado ? "nao_testado" : "nao_configurado")
+    setSmtpStatusMsg("")
+  }, [smtpConfig.host, smtpConfig.port, smtpConfig.user, smtpConfig.pass])
+
+  const testarSmtp = async () => {
+    setSmtpStatus("testando")
+    setSmtpStatusMsg("")
+    try {
+      const res = await fetch("/api/marketing/smtp-teste", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(smtpConfig),
+      })
+      const result = await res.json()
+      setSmtpStatus(result.success ? "online" : "erro")
+      setSmtpStatusMsg(result.success ? `${result.message} (${result.ms} ms)` : result.message)
+    } catch {
+      setSmtpStatus("erro")
+      setSmtpStatusMsg("Não foi possível testar a conexão")
+    }
+  }
+
+  const LED_SMTP: Record<StatusSmtp, { cor: string; texto: string }> = {
+    nao_configurado: { cor: "bg-zinc-500", texto: "Não configurado" },
+    nao_testado: { cor: "bg-amber-400", texto: "Configurado · não testado" },
+    testando: { cor: "bg-blue-400 animate-pulse", texto: "Testando..." },
+    online: { cor: "bg-green-500 shadow-[0_0_8px_2px_rgba(34,197,94,0.6)]", texto: "Online" },
+    erro: { cor: "bg-red-500 shadow-[0_0_8px_2px_rgba(239,68,68,0.6)]", texto: "Erro de conexão" },
+  }
+
   // Envio
   const [enviando, setEnviando] = useState(false)
 
@@ -592,11 +629,17 @@ export default function MarketingPage() {
                     <span className="flex items-center gap-2">
                       <Settings2 className="h-4 w-4 text-orange-400" />
                       Configuração SMTP
-                      {smtpConfig.user ? (
-                        <span className="text-xs text-green-400 font-normal">({smtpConfig.user})</span>
-                      ) : (
-                        <span className="text-xs text-orange-400 font-normal">⚠ não configurado</span>
+                      {smtpConfig.user && (
+                        <span className="text-xs text-muted-foreground font-normal">({smtpConfig.user})</span>
                       )}
+                    </span>
+                    {/* LED de status do servidor */}
+                    <span
+                      className="ml-auto mr-2 flex items-center gap-1.5 text-xs font-normal text-muted-foreground"
+                      title={smtpStatusMsg || LED_SMTP[smtpStatus].texto}
+                    >
+                      <span className={`h-2.5 w-2.5 rounded-full ${LED_SMTP[smtpStatus].cor}`} />
+                      {LED_SMTP[smtpStatus].texto}
                     </span>
                     {smtpAberto ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -669,6 +712,27 @@ export default function MarketingPage() {
                           setSmtpConfig((p) => ({ ...p, fromName: e.target.value }))
                         }
                       />
+                    </div>
+                    <div className="flex items-center gap-3 pt-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={testarSmtp}
+                        disabled={smtpStatus === "nao_configurado" || smtpStatus === "testando"}
+                      >
+                        {smtpStatus === "testando" ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                        )}
+                        Testar conexão
+                      </Button>
+                      {smtpStatusMsg && (
+                        <span className={`text-xs ${smtpStatus === "online" ? "text-green-400" : "text-red-400"}`}>
+                          {smtpStatusMsg}
+                        </span>
+                      )}
                     </div>
                   </CardContent>
                 )}
