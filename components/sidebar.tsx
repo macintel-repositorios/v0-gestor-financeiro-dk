@@ -27,6 +27,7 @@ import {
   Calendar,
   FileCheck,
   Building2,
+  Mail,
 } from "lucide-react"
 import { useSidebar } from "@/components/sidebar-provider"
 import { usePermissions } from "@/hooks/use-permissions"
@@ -97,6 +98,13 @@ const menuItems: MenuItem[] = [
     href: "/documentos",
     icon: File,
     permission: "documentos",
+    group: "comercial",
+  },
+  {
+    title: "Marketing",
+    href: "/marketing",
+    icon: Mail,
+    permission: "clientes",
     group: "comercial",
   },
   {

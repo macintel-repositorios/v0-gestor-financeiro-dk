@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
         cnpj,
         cpf,
         email,
+        emails_extras,
         telefone,
         endereco,
         bairro,
@@ -27,6 +28,7 @@ export async function GET(request: NextRequest) {
         sindico,
         rg_sindico,
         cpf_sindico,
+        email_sindico,
         zelador,
         tem_contrato,
         dia_contrato,
@@ -143,12 +145,12 @@ export async function POST(request: NextRequest) {
 
     const insertQuery = `
       INSERT INTO clientes (
-        codigo, nome, cnpj, cpf, email, telefone, endereco, bairro,
+        codigo, nome, cnpj, cpf, email, emails_extras, telefone, endereco, bairro,
         cidade, estado, cep, contato, distancia_km, sindico, rg_sindico,
-        cpf_sindico, zelador, tem_contrato, dia_contrato, observacoes,
+        cpf_sindico, email_sindico, zelador, tem_contrato, dia_contrato, observacoes,
         nome_adm, contato_adm, telefone_adm, email_adm,
         contribuinte_icms, inscricao_estadual, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `
 
     const params = [
@@ -157,6 +159,7 @@ export async function POST(request: NextRequest) {
       data.cnpj?.toUpperCase() || null,
       data.cpf?.toUpperCase() || null,
       data.email?.toLowerCase() || null,
+      data.emails_extras || null,
       normalizePhoneForStorage(data.telefone, "11"),
       data.endereco?.toUpperCase() || null,
       data.bairro?.toUpperCase() || null,
@@ -168,6 +171,7 @@ export async function POST(request: NextRequest) {
       data.sindico?.toUpperCase() || null,
       data.rg_sindico?.toUpperCase() || null,
       data.cpf_sindico?.toUpperCase() || null,
+      data.email_sindico?.toLowerCase() || null,
       data.zelador?.toUpperCase() || null,
       data.tem_contrato ? 1 : 0,
       data.dia_contrato || null,

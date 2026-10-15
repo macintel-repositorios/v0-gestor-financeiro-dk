@@ -26,7 +26,7 @@ import { PhoneInput } from "@/components/ui/phone-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { Plus, Save, User, Lock, Search, MapPinned } from 'lucide-react'
+import { Plus, Save, User, Lock, Search, MapPinned, Trash2, Mail } from 'lucide-react'
 import { useCep } from "@/hooks/use-cep"
 import { useDistancia } from "@/hooks/use-distancia"
  
@@ -51,6 +51,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
     cnpj: "",
     cpf: "",
     email: "",
+    emails_extras: [] as string[],
     telefone: "",
     endereco: "",
     bairro: "",
@@ -61,6 +62,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
     sindico: "",
     rg_sindico: "",
     cpf_sindico: "",
+    email_sindico: "",
     zelador: "",
     contato: "",
     nome_adm: "",
@@ -79,12 +81,21 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
 
   useEffect(() => {
     if (isOpen && cliente) {
+      let emailsExtras: string[] = []
+      try {
+        if (cliente.emails_extras) {
+          emailsExtras = typeof cliente.emails_extras === "string"
+            ? JSON.parse(cliente.emails_extras)
+            : cliente.emails_extras
+        }
+      } catch {}
       setFormData({
         nome: cliente.nome || "",
         codigo: cliente.codigo || "",
         cnpj: cliente.cnpj || "",
         cpf: cliente.cpf || "",
         email: cliente.email || "",
+        emails_extras: Array.isArray(emailsExtras) ? emailsExtras : [],
         telefone: cliente.telefone || "",
         endereco: cliente.endereco || "",
         bairro: cliente.bairro || "",
@@ -95,6 +106,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
         sindico: cliente.sindico || "",
         rg_sindico: cliente.rg_sindico || "",
         cpf_sindico: cliente.cpf_sindico || "",
+        email_sindico: cliente.email_sindico || "",
         zelador: cliente.zelador || "",
         contato: cliente.contato || "",
         nome_adm: cliente.nome_adm || "",
@@ -136,6 +148,25 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleAddEmailExtra = () => {
+    setFormData((prev) => ({ ...prev, emails_extras: [...prev.emails_extras, ""] }))
+  }
+
+  const handleEmailExtraChange = (index: number, value: string) => {
+    setFormData((prev) => {
+      const updated = [...prev.emails_extras]
+      updated[index] = value
+      return { ...prev, emails_extras: updated }
+    })
+  }
+
+  const handleRemoveEmailExtra = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      emails_extras: prev.emails_extras.filter((_, i) => i !== index),
+    }))
   }
 
   const handleCepChange = async (cep: string) => {
@@ -184,6 +215,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
       cnpj: "",
       cpf: "",
       email: "",
+      emails_extras: [],
       telefone: "",
       endereco: "",
       bairro: "",
@@ -194,6 +226,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
       sindico: "",
       rg_sindico: "",
       cpf_sindico: "",
+      email_sindico: "",
       zelador: "",
       contato: "",
       nome_adm: "",
@@ -242,6 +275,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
 
       const clienteData = {
         ...formData,
+        emails_extras: JSON.stringify(formData.emails_extras.filter((e) => e.trim() !== "")),
       }
 
       const response = await fetch(cliente ? `/api/clientes/${cliente.id}` : "/api/clientes", {
@@ -354,7 +388,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
         <h3 className="text-lg font-semibold">Contato</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email Principal</Label>
             <Input
               id="email"
               type="email"
@@ -381,6 +415,49 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
               placeholder="Nome do contato principal"
             />
           </div>
+        </div>
+
+        {/* Emails extras de contato */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-1.5">
+              <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+              Emails Adicionais de Contato
+            </Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddEmailExtra}
+              className="h-7 text-xs"
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Adicionar Email
+            </Button>
+          </div>
+          {formData.emails_extras.length === 0 && (
+            <p className="text-xs text-muted-foreground italic">Nenhum email adicional cadastrado</p>
+          )}
+          {formData.emails_extras.map((emailExtra, index) => (
+            <div key={index} className="flex gap-2 items-center">
+              <Input
+                type="email"
+                value={emailExtra}
+                onChange={(e) => handleEmailExtraChange(index, e.target.value)}
+                placeholder={`Email adicional ${index + 1}`}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => handleRemoveEmailExtra(index)}
+                className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -495,6 +572,16 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
               placeholder="000.000.000-00"
             />
           </div>
+        </div>
+        <div>
+          <Label htmlFor="email_sindico">Email do Síndico(a)</Label>
+          <Input
+            id="email_sindico"
+            type="email"
+            value={formData.email_sindico}
+            onChange={(e) => handleInputChange("email_sindico", e.target.value)}
+            placeholder="sindico@exemplo.com"
+          />
         </div>
         <div>
           <Label htmlFor="zelador">Zelador</Label>
