@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -181,13 +181,20 @@ export default function MarketingPage() {
   const [smtpStatus, setSmtpStatus] = useState<StatusSmtp>("nao_configurado")
   const [smtpStatusMsg, setSmtpStatusMsg] = useState("")
 
+  // Senha já salva no servidor (o campo fica vazio = "manter a senha salva")
+  const [temSenhaSalva, setTemSenhaSalva] = useState(false)
+  const smtpConfigurado = !!(smtpConfig.host && smtpConfig.user && (smtpConfig.pass || temSenhaSalva))
+  const smtpCarregadoRef = useRef(false)
+
   useEffect(() => {
-    const configurado = !!(smtpConfig.host && smtpConfig.user && smtpConfig.pass)
-    setSmtpStatus(configurado ? "nao_testado" : "nao_configurado")
+    // Ignora a mudança feita pelo carregamento da configuração salva (ela é testada logo em seguida)
+    if (!smtpCarregadoRef.current) return
+    setSmtpStatus(smtpConfigurado ? "nao_testado" : "nao_configurado")
     setSmtpStatusMsg("")
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [smtpConfig.host, smtpConfig.port, smtpConfig.user, smtpConfig.pass])
 
-  const testarSmtp = async () => {
+  const testarSmtp = async (salvarSeOk = true) => {
     setSmtpStatus("testando")
     setSmtpStatusMsg("")
     try {
@@ -199,11 +206,60 @@ export default function MarketingPage() {
       const result = await res.json()
       setSmtpStatus(result.success ? "online" : "erro")
       setSmtpStatusMsg(result.success ? `${result.message} (${result.ms} ms)` : result.message)
+
+      // Conexão OK: salva a configuração (senha criptografada no servidor)
+      if (result.success && salvarSeOk) {
+        const salvar = await fetch("/api/marketing/smtp", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(smtpConfig),
+        }).then((r) => r.json())
+        if (salvar.success) {
+          setTemSenhaSalva(!!salvar.temSenha)
+          setSmtpStatusMsg(`${result.message} (${result.ms} ms) · configuração salva`)
+        }
+      }
     } catch {
       setSmtpStatus("erro")
       setSmtpStatusMsg("Não foi possível testar a conexão")
     }
   }
+
+  // Ao abrir a página: carrega a configuração salva e testa a conexão automaticamente
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const r = await fetch("/api/marketing/smtp").then((x) => x.json())
+        if (r.success && r.data) {
+          setSmtpConfig({
+            host: r.data.host,
+            port: r.data.port,
+            user: r.data.user,
+            pass: "",
+            from: r.data.from,
+            fromName: r.data.fromName || "",
+          })
+          setTemSenhaSalva(!!r.data.temSenha)
+          if (r.data.temSenha) {
+            setSmtpStatus("testando")
+            const teste = await fetch("/api/marketing/smtp-teste", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({}),
+            }).then((x) => x.json())
+            setSmtpStatus(teste.success ? "online" : "erro")
+            setSmtpStatusMsg(teste.success ? `${teste.message} (${teste.ms} ms)` : teste.message)
+          } else {
+            setSmtpStatus("nao_configurado")
+          }
+        }
+      } catch {}
+      // Libera o efeito que marca "não testado" nas próximas edições
+      setTimeout(() => {
+        smtpCarregadoRef.current = true
+      }, 0)
+    })()
+  }, [])
 
   const LED_SMTP: Record<StatusSmtp, { cor: string; texto: string }> = {
     nao_configurado: { cor: "bg-zinc-500", texto: "Não configurado" },
@@ -298,7 +354,7 @@ export default function MarketingPage() {
       toast({ title: "Erro", description: "Selecione pelo menos um destinatário", variant: "destructive" })
       return
     }
-    if (!smtpConfig.host || !smtpConfig.user || !smtpConfig.pass) {
+    if (!smtpConfigurado) {
       toast({ title: "Erro", description: "Configure as credenciais SMTP antes de enviar", variant: "destructive" })
       setSmtpAberto(true)
       return
@@ -695,7 +751,7 @@ export default function MarketingPage() {
                         <Label className="text-xs">Senha / App Password</Label>
                         <Input
                           type="password"
-                          placeholder="••••••••"
+                          placeholder={temSenhaSalva ? "•••••••• (salva — deixe vazio para manter)" : "••••••••"}
                           value={smtpConfig.pass}
                           onChange={(e) =>
                             setSmtpConfig((p) => ({ ...p, pass: e.target.value }))
@@ -718,7 +774,7 @@ export default function MarketingPage() {
                         type="button"
                         size="sm"
                         variant="outline"
-                        onClick={testarSmtp}
+                        onClick={() => testarSmtp()}
                         disabled={smtpStatus === "nao_configurado" || smtpStatus === "testando"}
                       >
                         {smtpStatus === "testando" ? (

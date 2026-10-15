@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import nodemailer from "nodemailer"
+import { resolverSmtp } from "@/lib/smtp-config"
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,8 @@ export async function POST(request: NextRequest) {
     if (!data.destinatarios || data.destinatarios.length === 0) {
       return NextResponse.json({ success: false, message: "Selecione pelo menos um destinatário" }, { status: 400 })
     }
+    // Senha vazia na tela = usar a configuração/senha salva
+    data.smtp = await resolverSmtp(data.smtp)
     if (!data.smtp?.host || !data.smtp?.user || !data.smtp?.pass) {
       return NextResponse.json(
         { success: false, message: "Configurações SMTP incompletas" },

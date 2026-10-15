@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer from "nodemailer"
+import { resolverSmtp } from "@/lib/smtp-config"
 
 /**
  * Testa a conexão SMTP: conecta, negocia TLS e autentica, sem enviar e-mail.
@@ -8,7 +9,9 @@ import nodemailer from "nodemailer"
 export async function POST(request: NextRequest) {
   const inicio = Date.now()
   try {
-    const { host, port, user, pass } = await request.json()
+    // Senha vazia na tela = usar a senha salva
+    const cfg = await resolverSmtp(await request.json())
+    const { host, port, user, pass } = cfg || ({} as any)
     if (!host || !user || !pass) {
       return NextResponse.json({ success: false, message: "Preencha servidor, usuário e senha" }, { status: 400 })
     }
