@@ -32,6 +32,8 @@ import {
   RefreshCw,
   Info,
   AlertCircle,
+  ImagePlus,
+  Trash2,
 } from "lucide-react"
 
 interface Destinatario {
@@ -103,6 +105,65 @@ export default function MarketingPage() {
   // Email
   const [assunto, setAssunto] = useState("")
   const [corpo, setCorpo] = useState("")
+
+  // Assinatura (imagem) anexada no final do e-mail
+  const [assinatura, setAssinatura] = useState<{ dados: string; nome: string; dimensoes?: string } | null>(null)
+  const [incluirAssinatura, setIncluirAssinatura] = useState(true)
+  const [salvandoAssinatura, setSalvandoAssinatura] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/marketing/assinatura")
+      .then((r) => r.json())
+      .then((r) => r.success && setAssinatura(r.data))
+      .catch(() => {})
+  }, [])
+
+  const handleUploadAssinatura = async (file?: File) => {
+    if (!file) return
+    if (!/^image\/(png|jpe?g)$/.test(file.type)) {
+      toast({ title: "Formato inválido", description: "Use uma imagem PNG ou JPG", variant: "destructive" })
+      return
+    }
+    if (file.size > 1024 * 1024) {
+      toast({ title: "Imagem muito grande", description: "A assinatura deve ter no máximo 1 MB", variant: "destructive" })
+      return
+    }
+    setSalvandoAssinatura(true)
+    try {
+      const dados = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result))
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+      const dimensoes = await new Promise<string>((resolve) => {
+        const img = new Image()
+        img.onload = () => resolve(`${img.naturalWidth}x${img.naturalHeight}`)
+        img.onerror = () => resolve("")
+        img.src = dados
+      })
+      const res = await fetch("/api/marketing/assinatura", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: file.name, dados, dimensoes }),
+      })
+      const result = await res.json()
+      if (!result.success) throw new Error(result.message)
+      setAssinatura({ dados, nome: file.name, dimensoes })
+      setIncluirAssinatura(true)
+      toast({ title: "Assinatura salva", description: "Ela será incluída no final dos e-mails." })
+    } catch (e: any) {
+      toast({ title: "Erro ao salvar assinatura", description: e?.message, variant: "destructive" })
+    } finally {
+      setSalvandoAssinatura(false)
+    }
+  }
+
+  const handleRemoverAssinatura = async () => {
+    if (!confirm("Remover a assinatura dos e-mails?")) return
+    await fetch("/api/marketing/assinatura", { method: "DELETE" })
+    setAssinatura(null)
+  }
 
   // SMTP
   const [smtpConfig, setSmtpConfig] = useState<SmtpConfig>({
@@ -221,6 +282,7 @@ export default function MarketingPage() {
             tipo: d.tipo,
           })),
           smtp: smtpConfig,
+          incluirAssinatura: !!assinatura && incluirAssinatura,
           filtros: { temContrato, distanciaMin, distanciaMax, cidade, estado },
         }),
       })
@@ -641,6 +703,70 @@ export default function MarketingPage() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Dica: use tags HTML como &lt;b&gt;, &lt;br&gt;, &lt;a href=""&gt; para formatar o email.
                     </p>
+                  </div>
+
+                  {/* Assinatura em imagem */}
+                  <div className="rounded-lg border border-border p-3 space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="flex items-center gap-2">
+                        <ImagePlus className="h-4 w-4 text-violet-400" />
+                        Assinatura (imagem)
+                      </Label>
+                      {assinatura && (
+                        <label className="flex items-center gap-2 text-xs cursor-pointer">
+                          <Checkbox
+                            checked={incluirAssinatura}
+                            onCheckedChange={(v) => setIncluirAssinatura(!!v)}
+                          />
+                          Incluir neste e-mail
+                        </label>
+                      )}
+                    </div>
+
+                    {assinatura ? (
+                      <div className="space-y-2">
+                        <div className={`rounded-md bg-white p-3 ${incluirAssinatura ? "" : "opacity-40"}`}>
+                          <img src={assinatura.dados} alt="Assinatura" className="max-w-full max-h-40 object-contain" />
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span className="truncate">
+                            {assinatura.nome}
+                            {assinatura.dimensoes ? ` · ${assinatura.dimensoes}` : ""}
+                          </span>
+                          <div className="flex gap-2 shrink-0">
+                            <label className="cursor-pointer text-violet-400 hover:underline">
+                              Trocar
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg"
+                                className="hidden"
+                                onChange={(e) => handleUploadAssinatura(e.target.files?.[0])}
+                              />
+                            </label>
+                            <button type="button" onClick={handleRemoverAssinatura} className="text-red-400 hover:underline flex items-center gap-1">
+                              <Trash2 className="h-3 w-3" /> Remover
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border p-4 text-xs text-muted-foreground cursor-pointer hover:bg-muted/40">
+                        {salvandoAssinatura ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <ImagePlus className="h-5 w-5" />
+                        )}
+                        Clique para escolher a imagem da assinatura (PNG ou JPG, até 1 MB)
+                        <span className="text-[11px]">Recomendado: até 600 px de largura</span>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg"
+                          className="hidden"
+                          disabled={salvandoAssinatura}
+                          onChange={(e) => handleUploadAssinatura(e.target.files?.[0])}
+                        />
+                      </label>
+                    )}
                   </div>
 
                   {/* Resumo antes de enviar */}

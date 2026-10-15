@@ -59,6 +59,21 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Assinatura (imagem) embutida como anexo inline (cid): aparece no Gmail/Outlook sem bloqueio
+    let html = data.corpo
+    let attachments: any[] = []
+    if (data.incluirAssinatura) {
+      const rows: any = await query(`SELECT dados, formato FROM email_assinatura ORDER BY id DESC LIMIT 1`)
+      const m = String(rows[0]?.dados || "").match(/^data:(image\/(?:png|jpe?g));base64,(.+)$/)
+      if (m) {
+        const cid = "assinatura@gestor-financeiro"
+        html += `<br><br><img src="cid:${cid}" alt="Assinatura" style="max-width:600px;height:auto;display:block;border:0">`
+        attachments = [
+          { filename: `assinatura.${rows[0].formato || "png"}`, content: Buffer.from(m[2], "base64"), contentType: m[1], cid },
+        ]
+      }
+    }
+
     let totalEnviados = 0
     let totalErros = 0
     const erros: { email: string; erro: string }[] = []
@@ -70,7 +85,8 @@ export async function POST(request: NextRequest) {
           from: `"${data.smtp.fromName || "Gestor Financeiro"}" <${data.smtp.from || data.smtp.user}>`,
           to: dest.email,
           subject: data.assunto,
-          html: data.corpo,
+          html,
+          attachments,
         })
 
         // Atualizar status do destinatário
