@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { BlocoConsignacao } from "@/components/contratos/bloco-consignacao"
 import { Save, ArrowLeft, Calculator, Package, User, Settings, Plus, Building2, FileText, ChevronDown, ChevronUp } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -84,6 +85,9 @@ export default function NovaPropostaPage({
   const [frequencia, setFrequencia] = useState("mensal")
   const [observacoes, setObservacoes] = useState("")
   const [equipamentosConsignacao, setEquipamentosConsignacao] = useState("")
+  const [temConsignacao, setTemConsignacao] = useState(false)
+  const [prazoInstalacaoConsignacao, setPrazoInstalacaoConsignacao] = useState("")
+  const [dataInicioContrato, setDataInicioContrato] = useState("")
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showNewClientDialog, setShowNewClientDialog] = useState(false)
@@ -380,6 +384,15 @@ export default function NovaPropostaPage({
       return
     }
 
+    if (temConsignacao && (!equipamentosConsignacao.trim() || !prazoInstalacaoConsignacao)) {
+      toast({
+        title: "Consignação incompleta",
+        description: "Informe os equipamentos em consignação e o prazo para instalação",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       setSaving(true)
 
@@ -404,7 +417,9 @@ export default function NovaPropostaPage({
         prazo_contrato: prazoContrato,
         garantia,
         observacoes,
-        equipamentos_consignacao: equipamentosConsignacao,
+        equipamentos_consignacao: temConsignacao ? equipamentosConsignacao : "",
+        prazo_instalacao_consignacao: temConsignacao ? prazoInstalacaoConsignacao || null : null,
+        data_inicio: dataInicioContrato || null,
         status: "rascunho",
         data_validade: dataValidade,
         quantidade_visitas: quantidadeVisitas,
@@ -925,20 +940,27 @@ export default function NovaPropostaPage({
                         onChange={(e) => setGarantia(Number.parseInt(e.target.value) || 90)}
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="data_inicio_contrato">Início do Contrato</Label>
+                      <Input
+                        id="data_inicio_contrato"
+                        type="date"
+                        value={dataInicioContrato}
+                        onChange={(e) => setDataInicioContrato(e.target.value)}
+                      />
+                    </div>
                   </div>
 
                   <div className="mt-4">
-                    <Label htmlFor="equipamentos_consignacao">Equipamentos em Consignação</Label>
-                    <Textarea
-                      id="equipamentos_consignacao"
-                      value={equipamentosConsignacao}
-                      onChange={(e) => setEquipamentosConsignacao(e.target.value)}
-                      placeholder="Liste os equipamentos fornecidos em consignação (ex: 2x Interfone, 1x Controle Remoto Universal)..."
-                      rows={3}
+                    <BlocoConsignacao
+                      temConsignacao={temConsignacao}
+                      onTemConsignacao={setTemConsignacao}
+                      equipamentos={equipamentosConsignacao}
+                      onEquipamentos={setEquipamentosConsignacao}
+                      prazoInstalacao={prazoInstalacaoConsignacao}
+                      onPrazoInstalacao={setPrazoInstalacaoConsignacao}
+                      dataInicio={dataInicioContrato}
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ℹ️ Opcional. Será exibido na visualização e impressão logo após os equipamentos inclusos
-                    </p>
                   </div>
 
                   <div className="mt-4">

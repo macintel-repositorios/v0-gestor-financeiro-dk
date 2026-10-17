@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { BlocoConsignacao } from "@/components/contratos/bloco-consignacao"
 import { Badge } from "@/components/ui/badge"
 import { Save, ArrowLeft, Calculator, Package, User, Settings, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
 import Link from "next/link"
@@ -125,6 +126,9 @@ export default function EditarPropostaPage({
   const [frequencia, setFrequencia] = useState("mensal")
   const [observacoes, setObservacoes] = useState("")
   const [equipamentosConsignacao, setEquipamentosConsignacao] = useState("")
+  const [temConsignacao, setTemConsignacao] = useState(false)
+  const [prazoInstalacaoConsignacao, setPrazoInstalacaoConsignacao] = useState("")
+  const [dataInicioContrato, setDataInicioContrato] = useState("")
   const [status, setStatus] = useState("rascunho")
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -158,7 +162,7 @@ export default function EditarPropostaPage({
         triggerSaveRef.current = null
       }
     }
-  }, [triggerSaveRef, cliente, tipo, frequencia, observacoes, status, dataValidade, quantidadeVisitas, equipamentosSelecionados, formaPagamento, prazoContrato, garantia, equipamentosConsignacao, distanciaKm])
+  }, [triggerSaveRef, cliente, tipo, frequencia, observacoes, status, dataValidade, quantidadeVisitas, equipamentosSelecionados, formaPagamento, prazoContrato, garantia, equipamentosConsignacao, distanciaKm, temConsignacao, prazoInstalacaoConsignacao, dataInicioContrato])
 
   useEffect(() => {
     if (numero) {
@@ -211,6 +215,9 @@ export default function EditarPropostaPage({
         setGarantia(propostaData.garantia || 90)
         setObservacoes(propostaData.observacoes || "")
         setEquipamentosConsignacao(propostaData.equipamentos_consignacao || "")
+        setTemConsignacao(!!(propostaData.equipamentos_consignacao || "").trim())
+        setPrazoInstalacaoConsignacao(propostaData.prazo_instalacao_consignacao || "")
+        setDataInicioContrato(propostaData.data_inicio || "")
         setStatus(propostaData.status || "rascunho")
 
         // Configurar distância (vem do cliente na consulta)
@@ -480,9 +487,10 @@ export default function EditarPropostaPage({
         prazo_contrato: prazoContrato,
         garantia,
         observacoes,
-        equipamentos_consignacao: equipamentosConsignacao,
+        equipamentos_consignacao: temConsignacao ? equipamentosConsignacao : "",
+        prazo_instalacao_consignacao: temConsignacao ? prazoInstalacaoConsignacao || null : null,
         status: "ativo",
-        data_inicio: new Date().toISOString().split("T")[0],
+        data_inicio: dataInicioContrato || new Date().toISOString().split("T")[0],
         data_assinatura: new Date().toISOString().split("T")[0],
         itens: equipamentosSelecionados.map((item) => ({
           equipamento_id: item.equipamento_id,
@@ -535,6 +543,15 @@ export default function EditarPropostaPage({
       return false
     }
 
+    if (temConsignacao && (!equipamentosConsignacao.trim() || !prazoInstalacaoConsignacao)) {
+      toast({
+        title: "Consignação incompleta",
+        description: "Informe os equipamentos em consignação e o prazo para instalação",
+        variant: "destructive",
+      })
+      return false
+    }
+
     try {
       setSaving(true)
 
@@ -552,7 +569,9 @@ export default function EditarPropostaPage({
         prazo_contrato: prazoContrato,
         garantia,
         observacoes,
-        equipamentos_consignacao: equipamentosConsignacao,
+        equipamentos_consignacao: temConsignacao ? equipamentosConsignacao : "",
+        prazo_instalacao_consignacao: temConsignacao ? prazoInstalacaoConsignacao || null : null,
+        data_inicio: dataInicioContrato || null,
         status,
         data_validade: dataValidade,
         quantidade_visitas: quantidadeVisitas,
@@ -998,6 +1017,15 @@ export default function EditarPropostaPage({
                       />
                     </div>
                     <div>
+                      <Label htmlFor="data_inicio_contrato">Início do Contrato</Label>
+                      <Input
+                        id="data_inicio_contrato"
+                        type="date"
+                        value={dataInicioContrato}
+                        onChange={(e) => setDataInicioContrato(e.target.value)}
+                      />
+                    </div>
+                    <div>
                       <Label htmlFor="status">Status da Proposta</Label>
                       <div className="flex items-center gap-4 mt-2">
                         <Select value={status} onValueChange={setStatus}>
@@ -1027,17 +1055,15 @@ export default function EditarPropostaPage({
                   </div>
 
                   <div className="mt-4">
-                    <Label htmlFor="equipamentos_consignacao">Equipamentos em Consignação</Label>
-                    <Textarea
-                      id="equipamentos_consignacao"
-                      value={equipamentosConsignacao}
-                      onChange={(e) => setEquipamentosConsignacao(e.target.value)}
-                      placeholder="Liste os equipamentos fornecidos em consignação (ex: 2x Interfone, 1x Controle Remoto Universal)..."
-                      rows={3}
+                    <BlocoConsignacao
+                      temConsignacao={temConsignacao}
+                      onTemConsignacao={setTemConsignacao}
+                      equipamentos={equipamentosConsignacao}
+                      onEquipamentos={setEquipamentosConsignacao}
+                      prazoInstalacao={prazoInstalacaoConsignacao}
+                      onPrazoInstalacao={setPrazoInstalacaoConsignacao}
+                      dataInicio={dataInicioContrato}
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ℹ️ Opcional. Será exibido na visualização e impressão logo após os equipamentos inclusos
-                    </p>
                   </div>
 
                   <div className="mt-4">

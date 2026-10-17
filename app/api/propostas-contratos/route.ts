@@ -128,8 +128,8 @@ export async function POST(request: Request) {
           id, numero, cliente_id, tipo, frequencia, valor_equipamentos, valor_desconto,
           valor_deslocamento, desconto_quant_visitas, valor_total_proposta, forma_pagamento,
           prazo_contrato, garantia, observacoes, equipamentos_consignacao, status, data_proposta, data_validade,
-          quantidade_visitas
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          quantidade_visitas, data_inicio, prazo_instalacao_consignacao
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
           propostaId,
@@ -151,6 +151,8 @@ export async function POST(request: Request) {
           new Date().toISOString().split("T")[0],
           data.data_validade || null,
           data.quantidade_visitas || data.visita_id || 1,
+          data.data_inicio || null,
+          data.equipamentos_consignacao ? data.prazo_instalacao_consignacao || null : null,
         ],
       )
 

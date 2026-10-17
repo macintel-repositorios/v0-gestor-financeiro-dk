@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PhoneInput } from "@/components/ui/phone-input"
 import { Textarea } from "@/components/ui/textarea"
+import { BlocoConsignacao } from "@/components/contratos/bloco-consignacao"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
@@ -26,6 +27,7 @@ interface ContratoData {
   forma_pagamento: string
   equipamentos_inclusos: any[]
   equipamentos_consignacao: string
+  prazo_instalacao_consignacao?: string | null
   servicos_inclusos: string
   observacoes: string
   status: string
@@ -80,6 +82,12 @@ export default function EditarContratoPage({
   const router = useRouter()
   const { toast } = useToast()
   const [contrato, setContrato] = useState<ContratoData | null>(null)
+  // Caixa "Tem equipamentos em consignação?" (começa marcada se o contrato já tem a lista)
+  const [temConsignacao, setTemConsignacao] = useState(false)
+  useEffect(() => {
+    if (contrato) setTemConsignacao((t) => t || !!contrato.equipamentos_consignacao?.trim())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contrato?.numero])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -136,7 +144,8 @@ export default function EditarContratoPage({
         dia_vencimento: contrato.dia_vencimento,
         forma_pagamento: contrato.forma_pagamento,
         equipamentos_inclusos: contrato.equipamentos_inclusos,
-        equipamentos_consignacao: contrato.equipamentos_consignacao || "",
+        equipamentos_consignacao: temConsignacao ? contrato.equipamentos_consignacao || "" : "",
+        prazo_instalacao_consignacao: temConsignacao ? contrato.prazo_instalacao_consignacao || null : null,
         observacoes: contrato.observacoes,
         status: contrato.status,
         data_proposta: contrato.data_proposta,
@@ -733,18 +742,16 @@ export default function EditarContratoPage({
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="equipamentos_consignacao">Equipamentos em Consignação</Label>
-              <Textarea
-                id="equipamentos_consignacao"
-                value={contrato.equipamentos_consignacao || ""}
-                onChange={(e) => updateContrato("equipamentos_consignacao", e.target.value)}
-                rows={4}
-                placeholder="Liste os equipamentos fornecidos em consignação ao cliente..."
+            <div className="md:col-span-2">
+              <BlocoConsignacao
+                temConsignacao={temConsignacao}
+                onTemConsignacao={setTemConsignacao}
+                equipamentos={contrato.equipamentos_consignacao || ""}
+                onEquipamentos={(v) => updateContrato("equipamentos_consignacao", v)}
+                prazoInstalacao={contrato.prazo_instalacao_consignacao || ""}
+                onPrazoInstalacao={(v) => updateContrato("prazo_instalacao_consignacao", v)}
+                dataInicio={contrato.data_inicio}
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                ℹ️ Será exibido na minuta do contrato logo após os equipamentos inclusos
-              </p>
             </div>
 
             <div>

@@ -18,7 +18,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
         cl.endereco as cliente_endereco,
         cl.distancia_km,
         DATE_FORMAT(pc.data_proposta, '%Y-%m-%d') as data_proposta,
-        DATE_FORMAT(pc.data_validade, '%Y-%m-%d') as data_validade
+        DATE_FORMAT(pc.data_validade, '%Y-%m-%d') as data_validade,
+        DATE_FORMAT(pc.data_inicio, '%Y-%m-%d') as data_inicio,
+        DATE_FORMAT(pc.prazo_instalacao_consignacao, '%Y-%m-%d') as prazo_instalacao_consignacao
       FROM proposta_contratos pc
       LEFT JOIN clientes cl ON pc.cliente_id = cl.id
       WHERE pc.numero = ?
@@ -95,7 +97,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
           valor_desconto = ?, valor_deslocamento = ?, desconto_quant_visitas = ?,
           valor_total_proposta = ?, forma_pagamento = ?, prazo_contrato = ?,
           garantia = ?, observacoes = ?, equipamentos_consignacao = ?, status = ?, 
-          data_validade = ?, quantidade_visitas = ?, updated_at = NOW()
+          data_validade = ?, quantidade_visitas = ?, data_inicio = ?, prazo_instalacao_consignacao = ?, updated_at = NOW()
         WHERE numero = ?
         `,
         [
@@ -115,6 +117,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
           data.status || "rascunho",
           data.data_validade || null,
           data.quantidade_visitas || data.visita_id || 1,
+          data.data_inicio || null,
+          data.equipamentos_consignacao ? data.prazo_instalacao_consignacao || null : null,
           numero,
         ],
       )

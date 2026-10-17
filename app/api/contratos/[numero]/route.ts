@@ -36,7 +36,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
         pc.prazo_contrato,
         DATE_FORMAT(cc.data_inicio, '%Y-%m-%d') as data_inicio,
         DATE_FORMAT(cc.data_fim, '%Y-%m-%d') as data_fim,
-        DATE_FORMAT(cc.data_proposta, '%Y-%m-%d') as data_proposta
+        DATE_FORMAT(cc.data_proposta, '%Y-%m-%d') as data_proposta,
+        DATE_FORMAT(cc.prazo_instalacao_consignacao, '%Y-%m-%d') as prazo_instalacao_consignacao
       FROM contratos_conservacao cc
       LEFT JOIN clientes cl ON cc.cliente_id = cl.id
       LEFT JOIN proposta_contratos pc ON cc.proposta_id = pc.numero
@@ -202,6 +203,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
           forma_pagamento = ?,
           equipamentos_inclusos = ?,
           equipamentos_consignacao = ?,
+          prazo_instalacao_consignacao = ?,
           observacoes = ?,
           status = ?,
           data_proposta = ?,
@@ -221,6 +223,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
           data.forma_pagamento || "boleto",
           JSON.stringify(data.equipamentos_inclusos || []),
           equipamentosConsignacao,
+          equipamentosConsignacao ? data.prazo_instalacao_consignacao || null : null,
           data.observacoes || "",
           data.status || "ativo",
           data.data_proposta || data.data_assinatura,

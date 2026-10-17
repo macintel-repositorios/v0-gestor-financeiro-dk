@@ -166,6 +166,12 @@ export default function ContratoPage({
       // Substituir campos do contrato
       conteudo = conteudo.replace(/\[DIA_VENCIMENTO\]/g, contrato.dia_vencimento?.toString() || "[DIA_VENCIMENTO]")
       conteudo = conteudo.replace(/\[DATA_INICIO\]/g, formatDate(contrato.data_inicio) || "[DATA_INICIO]")
+      conteudo = conteudo.replace(
+        /\[PRAZO_INSTALACAO_CONSIGNACAO\]/g,
+        (contrato as any).prazo_instalacao_consignacao
+          ? formatDate((contrato as any).prazo_instalacao_consignacao)
+          : "data a combinar",
+      )
       conteudo = conteudo.replace(/\[VALOR_MENSAL\]/g, formatCurrency(contrato.valor_mensal) || "[VALOR_MENSAL]")
       conteudo = conteudo.replace(
         /\[QUANTIDADE_VISITAS\]/g,

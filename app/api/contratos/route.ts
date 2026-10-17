@@ -97,7 +97,9 @@ export async function POST(request: Request) {
         const [propostaRows] = await connection.execute(
           `SELECT 
             numero, valor_total_proposta, prazo_contrato, quantidade_visitas, cliente_id,
-            equipamentos_consignacao
+            equipamentos_consignacao,
+            DATE_FORMAT(data_inicio, '%Y-%m-%d') AS data_inicio,
+            DATE_FORMAT(prazo_instalacao_consignacao, '%Y-%m-%d') AS prazo_instalacao_consignacao
            FROM proposta_contratos 
            WHERE numero = ?`,
           [propostaId],
@@ -153,6 +155,9 @@ export async function POST(request: Request) {
         console.log("Valor mensal calculado da proposta:", valorMensal)
         console.log("Cliente ID da proposta:", clienteId)
         console.log("Quantidade de visitas da proposta:", quantidadeVisitas)
+
+        // Início do contrato definido na proposta tem prioridade
+        if (propostaData.data_inicio) data.data_inicio = propostaData.data_inicio
 
         // Calcular data de fim baseada na data de início + prazo do contrato
         if (data.data_inicio && propostaData.prazo_contrato) {
@@ -212,6 +217,9 @@ export async function POST(request: Request) {
         forma_pagamento: data.forma_pagamento || "boleto",
         equipamentos_inclusos: JSON.stringify(equipamentosInclusos),
         equipamentos_consignacao: equipamentosConsignacao, // ADICIONAR ESTE CAMPO
+        prazo_instalacao_consignacao: equipamentosConsignacao
+          ? propostaData?.prazo_instalacao_consignacao || data.prazo_instalacao_consignacao || null
+          : null,
         servicos_inclusos: data.servicos_inclusos || "",
         observacoes: data.observacoes || "",
         status: data.status || "ativo",
@@ -228,9 +236,9 @@ export async function POST(request: Request) {
         INSERT INTO contratos_conservacao (
           numero, cliente_id, proposta_id, quantidade_visitas, data_inicio, data_fim,
           valor_mensal, frequencia, dia_vencimento, forma_pagamento,
-          equipamentos_inclusos, equipamentos_consignacao, servicos_inclusos, observacoes,
+          equipamentos_inclusos, equipamentos_consignacao, prazo_instalacao_consignacao, servicos_inclusos, observacoes,
           status, data_proposta, prazo_meses
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
           dadosContrato.numero,
@@ -245,6 +253,7 @@ export async function POST(request: Request) {
           dadosContrato.forma_pagamento,
           dadosContrato.equipamentos_inclusos,
           dadosContrato.equipamentos_consignacao, // ADICIONAR ESTE PARÂMETRO
+          dadosContrato.prazo_instalacao_consignacao,
           dadosContrato.servicos_inclusos,
           dadosContrato.observacoes,
           dadosContrato.status,

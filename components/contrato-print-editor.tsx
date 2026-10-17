@@ -566,6 +566,10 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
     conteudo = conteudo.replace(/\[PRAZO_CONTRATO\]/g, contrato.prazo_contrato?.toString() || "")
     conteudo = conteudo.replace(/\[DIA_VENCIMENTO\]/g, contrato.dia_vencimento?.toString() || "")
     conteudo = conteudo.replace(/\[DATA_INICIO\]/g, formatDate(contrato.data_inicio) || "")
+    conteudo = conteudo.replace(
+      /\[PRAZO_INSTALACAO_CONSIGNACAO\]/g,
+      contrato.prazo_instalacao_consignacao ? formatDate(contrato.prazo_instalacao_consignacao) : "data a combinar",
+    )
     conteudo = conteudo.replace(/\[QUANTIDADE_VISITAS\]/g, contrato.quantidade_visitas?.toString() || "")
 
     const valorMensal = contrato.valor_mensal || 0
