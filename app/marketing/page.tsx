@@ -72,12 +72,14 @@ interface SmtpConfig {
 const TIPO_LABEL: Record<string, string> = {
   principal: "Principal",
   sindico: "Síndico",
+  administradora: "Administradora",
   contato_extra: "Extra",
 }
 
 const TIPO_COLOR: Record<string, string> = {
   principal: "bg-blue-500/15 text-blue-400 border-blue-500/30",
   sindico: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  administradora: "bg-amber-500/15 text-amber-400 border-amber-500/30",
   contato_extra: "bg-green-500/15 text-green-400 border-green-500/30",
 }
 
@@ -93,6 +95,7 @@ export default function MarketingPage() {
   const [tiposEmail, setTiposEmail] = useState({
     principal: true,
     sindico: true,
+    administradora: true,
     extras: true,
   })
   const [search, setSearch] = useState("")
@@ -553,7 +556,7 @@ export default function MarketingPage() {
                         Incluir tipos de e-mail
                       </Label>
                       <div className="space-y-2">
-                        {(["principal", "sindico", "extras"] as const).map((tipo) => (
+                        {(["principal", "sindico", "administradora", "extras"] as const).map((tipo) => (
                           <div key={tipo} className="flex items-center gap-2">
                             <Checkbox
                               id={`tipo-${tipo}`}
@@ -567,6 +570,8 @@ export default function MarketingPage() {
                                 ? "Email Principal do cliente"
                                 : tipo === "sindico"
                                 ? "Email do Síndico(a)"
+                                : tipo === "administradora"
+                                ? "Email da Administradora"
                                 : "Emails adicionais de contato"}
                             </Label>
                           </div>

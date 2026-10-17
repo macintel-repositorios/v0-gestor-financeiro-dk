@@ -38,12 +38,22 @@ import {
 } from "@/components/ui/sheet"
 import { useRouter } from "next/navigation"
 
+// Cliente com pelo menos um e-mail válido (principal, síndico, administradora ou extras)
+function temEmailCadastrado(c: any): boolean {
+  const valido = (e?: string | null) => !!e && e.includes("@")
+  let extras: string[] = []
+  try {
+    extras = typeof c.emails_extras === "string" ? JSON.parse(c.emails_extras || "[]") : c.emails_extras || []
+  } catch {}
+  return valido(c.email) || valido(c.email_sindico) || valido(c.email_adm) || extras.some(valido)
+}
+
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [distanceFilter, setDistanceFilter] = useState("all")
-  const [cardFilter, setCardFilter] = useState<"all" | "empresas" | "com_contrato" | "sem_contrato">("all")
+  const [cardFilter, setCardFilter] = useState<"all" | "empresas" | "com_contrato" | "sem_contrato" | "sem_email">("all")
   const [logoMenu, setLogoMenu] = useState<string>("")
   const [expandedClientId, setExpandedClientId] = useState<string | null>(null)
   const [pageIndex, setPageIndex] = useState(0)
@@ -125,6 +135,9 @@ export default function ClientesPage() {
           break
         case "sem_contrato":
           filtered = filtered.filter((c) => !c.tem_contrato)
+          break
+        case "sem_email":
+          filtered = filtered.filter((c) => !temEmailCadastrado(c))
           break
       }
     }
@@ -222,11 +235,12 @@ export default function ClientesPage() {
       case "empresas": return "Empresas"
       case "com_contrato": return "Com Contrato"
       case "sem_contrato": return "Sem Contrato"
+      case "sem_email": return "Sem E-mail"
       default: return ""
     }
   }
 
-  const handleCardFilterToggle = (filter: "all" | "empresas" | "com_contrato" | "sem_contrato") => {
+  const handleCardFilterToggle = (filter: "all" | "empresas" | "com_contrato" | "sem_contrato" | "sem_email") => {
     setCardFilter(prev => prev === filter ? "all" : filter)
     setExpandedClientId(null)
   }
@@ -349,7 +363,7 @@ export default function ClientesPage() {
       </div>
 
       {/* Stats Cards — clicáveis como filtros */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <Card
           className={`group relative border border-border shadow-xs hover:border-indigo-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-indigo-500/30 ${
             cardFilter === "all" ? "ring-2 ring-indigo-500 border-indigo-500/40" : ""
@@ -423,6 +437,25 @@ export default function ClientesPage() {
               {clientes.filter((c) => !c.tem_contrato).length}
             </div>
             <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">Sem contratos</p>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`group relative border border-border shadow-xs hover:border-rose-500/50 hover:bg-muted/10 transition-all duration-300 bg-card cursor-pointer select-none overflow-hidden hover:ring-2 hover:ring-rose-500/30 ${
+            cardFilter === "sem_email" ? "ring-2 ring-rose-500 border-rose-500/40" : ""
+          }`}
+          onClick={() => handleCardFilterToggle("sem_email")}
+        >
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-rose-500" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-xs lg:text-sm font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Sem E-mail</CardTitle>
+            <Mail className="h-4 w-4 text-rose-500 group-hover:scale-110 transition-transform" />
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl lg:text-2xl font-bold text-foreground">
+              {clientes.filter((c) => !temEmailCadastrado(c)).length}
+            </div>
+            <p className="text-[10px] lg:text-xs text-muted-foreground mt-0.5">Nenhum e-mail cadastrado</p>
           </CardContent>
         </Card>
       </div>

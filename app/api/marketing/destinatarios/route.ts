@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     const clientes = (await query(sql, params)) as any[]
 
     // Montar lista de destinatários expandida por tipo de email
-    const tipos = tiposEmail ? tiposEmail.split(",") : ["principal", "sindico", "extras"]
+    const tipos = tiposEmail ? tiposEmail.split(",") : ["principal", "sindico", "administradora", "extras"]
     const destinatarios: {
       cliente_id: number
       cliente_nome: string
@@ -88,6 +88,18 @@ export async function GET(request: NextRequest) {
           cliente_nome: c.nome,
           email: c.email_sindico,
           tipo: "sindico",
+          cidade: c.cidade,
+          estado: c.estado,
+          distancia_km: c.distancia_km,
+          tem_contrato: c.tem_contrato,
+        })
+      }
+      if (tipos.includes("administradora") && c.email_adm) {
+        destinatarios.push({
+          cliente_id: c.id,
+          cliente_nome: c.nome,
+          email: c.email_adm,
+          tipo: "administradora",
           cidade: c.cidade,
           estado: c.estado,
           distancia_km: c.distancia_km,
