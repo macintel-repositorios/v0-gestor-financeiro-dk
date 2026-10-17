@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Printer, Edit, Trash2 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { ContratoPrintEditor } from "@/components/contrato-print-editor"
+import { aplicarCondicionaisContrato } from "@/lib/contrato-template"
 
 interface Contrato {
   numero: string
@@ -123,7 +124,7 @@ export default function ContratoPage({
       const timbradoResult = await timbradoResponse.json()
       const timbradoConfig = timbradoResult.success ? timbradoResult.data : {}
 
-      let conteudo = contrato.conteudo_contrato
+      let conteudo = aplicarCondicionaisContrato(contrato.conteudo_contrato, contrato)
 
       // Substituir campos da empresa (timbrado_config)
       conteudo = conteudo.replace(/\[EMPRESA_NOME\]/g, timbradoConfig.empresa_nome || "[EMPRESA_NOME]")

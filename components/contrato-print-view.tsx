@@ -1,4 +1,5 @@
 "use client"
+import { tituloContratoConservacao } from "@/lib/contrato-template"
 
 interface ContratoPrintViewProps {
   contrato: any
@@ -83,7 +84,7 @@ export function ContratoPrintView({
 
         <div className="page-content">
           <div className="titulo">
-            <h1>CONTRATO DE CONSERVAÇÃO E PREVENÇÃO DOS EQUIPAMENTOS ELETRÔNICOS</h1>
+            <h1>{tituloContratoConservacao(contrato)}</h1>
             <p>
               Contrato Nº: <strong>{contrato.numero}</strong>
             </p>

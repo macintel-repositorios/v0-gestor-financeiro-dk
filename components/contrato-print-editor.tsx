@@ -33,6 +33,7 @@ import { toast } from "@/hooks/use-toast"
 import { ContratoPrintView } from "./contrato-print-view"
 import { savePdfUrl } from "@/lib/pdf-utils"
 import { PDFViewer } from "@/components/pdf-viewer"
+import { aplicarCondicionaisContrato, tituloContratoConservacao } from "@/lib/contrato-template"
 
 interface ContratoPrintEditorProps {
   contrato: any
@@ -536,7 +537,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
   const processarConteudo = () => {
     if (!contrato.conteudo_contrato || !timbradoConfig) return
 
-    let conteudo = contrato.conteudo_contrato
+    let conteudo = aplicarCondicionaisContrato(contrato.conteudo_contrato, contrato)
 
     conteudo = conteudo.replace(/\[EMPRESA_NOME\]/g, timbradoConfig.empresa_nome || "")
     conteudo = conteudo.replace(/\[EMPRESA_CNPJ\]/g, timbradoConfig.empresa_cnpj || "")
@@ -1561,7 +1562,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                       {paginaAtual === 0 && (
                         <div className="text-center">
                           <h1 className="font-bold mb-2" style={{ fontSize: `${layoutConfig.titleFontSize}px` }}>
-                            CONTRATO DE CONSERVAÇÃO E PREVENÇÃO DOS EQUIPAMENTOS ELETRÔNICOS
+                            {tituloContratoConservacao(contrato)}
                           </h1>
                           <p style={{ fontSize: `${layoutConfig.fontSize + 2}px` }}>
                             Contrato Nº: <strong>{contrato.numero}</strong>
