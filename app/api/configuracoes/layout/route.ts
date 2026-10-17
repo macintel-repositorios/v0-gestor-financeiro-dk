@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { normalizePhoneForStorage } from "@/lib/phone"
+import { normalizarEmail } from "@/lib/email"
 
 export async function GET() {
   try {
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
           data.empresa_cidade || null,
           data.empresa_uf || null,
           empresaTelefoneNormalizado || null,
-          data.empresa_email || null,
+          normalizarEmail(data.empresa_email),
           data.empresa_site || null,
           data.empresa_representante_legal || null,
           data.representante_nacionalidade || null,
@@ -148,7 +149,7 @@ export async function POST(request: Request) {
           data.empresa_cidade || null,
           data.empresa_uf || null,
           empresaTelefoneNormalizado || null,
-          data.empresa_email || null,
+          normalizarEmail(data.empresa_email),
           data.empresa_site || null,
           data.empresa_representante_legal || null,
           data.representante_nacionalidade || null,

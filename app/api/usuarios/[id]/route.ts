@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { normalizePhoneForStorage } from "@/lib/phone"
+import { normalizarEmail } from "@/lib/email"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -50,7 +51,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       UPDATE usuarios 
       SET nome = ?, email = ?, cpf = ?, telefone = ?, tipo = ?, ativo = ?, permissoes = ?, updated_at = NOW()
     `
-    const params_array = [nome, email, cpf || null, telefoneNormalizado, tipo, ativo, permissoesJson]
+    const params_array = [nome, normalizarEmail(email), cpf || null, telefoneNormalizado, tipo, ativo, permissoesJson]
 
     if (senha && senha.trim() !== "") {
       updateQuery += ", senha = ?"

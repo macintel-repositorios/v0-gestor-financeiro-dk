@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { pool } from "@/lib/db"
 import { normalizePhoneForStorage } from "@/lib/phone"
+import { normalizarEmail } from "@/lib/email"
 
 export async function GET() {
   try {
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
              empresa_telefone = ?, empresa_email = ?, empresa_site = ?,
              updated_at = CURRENT_TIMESTAMP
          WHERE ativo = 1`,
-        [nome, cnpj, endereco, telefoneNormalizado, email, site],
+        [nome, cnpj, endereco, telefoneNormalizado, normalizarEmail(email), site],
       )
     } else {
       // Criar nova configuração
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
          (empresa_nome, empresa_cnpj, empresa_endereco, empresa_telefone, 
           empresa_email, empresa_site, ativo, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-        [nome, cnpj, endereco, telefoneNormalizado, email, site],
+        [nome, cnpj, endereco, telefoneNormalizado, normalizarEmail(email), site],
       )
     }
 

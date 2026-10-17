@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { pool } from "@/lib/database"
 import { query } from "@/lib/db"
+import { normalizarEmail, normalizarEmailsExtras } from "@/lib/email"
 import { normalizePhoneForStorage } from "@/lib/phone"
 
 // Cache local para evitar checar as colunas a cada request
@@ -56,8 +57,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       codigo: data.codigo !== undefined ? data.codigo.toUpperCase() : currentClient.codigo,
       cnpj: data.cnpj !== undefined ? data.cnpj.toUpperCase() : currentClient.cnpj,
       cpf: data.cpf !== undefined ? data.cpf.toUpperCase() : currentClient.cpf,
-      email: data.email !== undefined ? data.email.toLowerCase() : currentClient.email,
-      emails_extras: data.emails_extras !== undefined ? data.emails_extras : currentClient.emails_extras,
+      email: data.email !== undefined ? normalizarEmail(data.email) : currentClient.email,
+      emails_extras: data.emails_extras !== undefined ? normalizarEmailsExtras(data.emails_extras) : currentClient.emails_extras,
       telefone: data.telefone !== undefined ? normalizePhoneForStorage(data.telefone, "11") : currentClient.telefone,
       endereco: data.endereco !== undefined ? data.endereco.toUpperCase() : currentClient.endereco,
       bairro: data.bairro !== undefined ? data.bairro.toUpperCase() : currentClient.bairro,
@@ -71,7 +72,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       sindico: data.sindico !== undefined ? data.sindico.toUpperCase() : currentClient.sindico,
       rg_sindico: data.rg_sindico !== undefined ? data.rg_sindico.toUpperCase() : currentClient.rg_sindico,
       cpf_sindico: data.cpf_sindico !== undefined ? data.cpf_sindico.toUpperCase() : currentClient.cpf_sindico,
-      email_sindico: data.email_sindico !== undefined ? (data.email_sindico?.toLowerCase() || null) : currentClient.email_sindico,
+      email_sindico: data.email_sindico !== undefined ? normalizarEmail(data.email_sindico) : currentClient.email_sindico,
       zelador: data.zelador !== undefined ? data.zelador.toUpperCase() : currentClient.zelador,
       tem_contrato: data.tem_contrato !== undefined ? data.tem_contrato : currentClient.tem_contrato,
       dia_contrato: data.dia_contrato !== undefined ? data.dia_contrato : currentClient.dia_contrato,
@@ -79,7 +80,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       nome_adm: data.nome_adm !== undefined ? data.nome_adm.toUpperCase() : currentClient.nome_adm,
       contato_adm: data.contato_adm !== undefined ? data.contato_adm.toUpperCase() : currentClient.contato_adm,
       telefone_adm: data.telefone_adm !== undefined ? normalizePhoneForStorage(data.telefone_adm, "11") : currentClient.telefone_adm,
-      email_adm: data.email_adm !== undefined ? data.email_adm.toLowerCase() : currentClient.email_adm,
+      email_adm: data.email_adm !== undefined ? normalizarEmail(data.email_adm) : currentClient.email_adm,
       contribuinte_icms: data.contribuinte_icms !== undefined ? Number(data.contribuinte_icms) : (currentClient.contribuinte_icms ?? 0),
       inscricao_estadual: data.inscricao_estadual !== undefined ? (data.inscricao_estadual?.replace(/[^\d]/g, "") || null) : currentClient.inscricao_estadual,
     }

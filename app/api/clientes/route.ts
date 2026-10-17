@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
+import { normalizarEmail, normalizarEmailsExtras } from "@/lib/email"
 import { normalizePhoneForStorage } from "@/lib/phone"
 
 export async function GET(request: NextRequest) {
@@ -170,8 +171,8 @@ export async function POST(request: NextRequest) {
       data.nome?.toUpperCase(),
       data.cnpj?.toUpperCase() || null,
       data.cpf?.toUpperCase() || null,
-      data.email?.toLowerCase() || null,
-      data.emails_extras || null,
+      normalizarEmail(data.email),
+      normalizarEmailsExtras(data.emails_extras),
       normalizePhoneForStorage(data.telefone, "11"),
       data.endereco?.toUpperCase() || null,
       data.bairro?.toUpperCase() || null,
@@ -183,7 +184,7 @@ export async function POST(request: NextRequest) {
       data.sindico?.toUpperCase() || null,
       data.rg_sindico?.toUpperCase() || null,
       data.cpf_sindico?.toUpperCase() || null,
-      data.email_sindico?.toLowerCase() || null,
+      normalizarEmail(data.email_sindico),
       data.zelador?.toUpperCase() || null,
       data.tem_contrato ? 1 : 0,
       data.dia_contrato || null,
@@ -191,7 +192,7 @@ export async function POST(request: NextRequest) {
       data.nome_adm?.toUpperCase() || null,
       data.contato_adm?.toUpperCase() || null,
       normalizePhoneForStorage(data.telefone_adm, "11"),
-      data.email_adm?.toLowerCase() || null,
+      normalizarEmail(data.email_adm),
       data.contribuinte_icms !== undefined ? Number(data.contribuinte_icms) : 0,
       data.inscricao_estadual?.replace(/[^\d]/g, "") || null,
     ]

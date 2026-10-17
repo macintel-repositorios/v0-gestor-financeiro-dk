@@ -393,7 +393,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value.toLowerCase())}
               placeholder="email@exemplo.com"
             />
           </div>
@@ -443,7 +443,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
               <Input
                 type="email"
                 value={emailExtra}
-                onChange={(e) => handleEmailExtraChange(index, e.target.value)}
+                onChange={(e) => handleEmailExtraChange(index, e.target.value.toLowerCase())}
                 placeholder={`Email adicional ${index + 1}`}
                 className="flex-1"
               />
@@ -579,7 +579,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
             id="email_sindico"
             type="email"
             value={formData.email_sindico}
-            onChange={(e) => handleInputChange("email_sindico", e.target.value)}
+            onChange={(e) => handleInputChange("email_sindico", e.target.value.toLowerCase())}
             placeholder="sindico@exemplo.com"
           />
         </div>
@@ -677,7 +677,7 @@ export function ClienteFormDialog({ children, open, onOpenChange, onSuccess, asD
               id="email_adm"
               type="email"
               value={formData.email_adm}
-              onChange={(e) => handleInputChange("email_adm", e.target.value)}
+              onChange={(e) => handleInputChange("email_adm", e.target.value.toLowerCase())}
               placeholder="email@administradora.com"
             />
           </div>

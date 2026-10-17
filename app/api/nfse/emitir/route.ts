@@ -4,6 +4,7 @@ import { gerarXmlEnvioLoteRps, gerarXmlConsultaNfseRps, type DadosNfse } from "@
 import { enviarLoteRps, testeEnvioLoteRps, consultarNfse, extrairDadosNfseRetorno } from "@/lib/nfse/soap-client"
 import { assinarXmlNfse, extrairCertKeyDoPfx } from "@/lib/nfse/xml-signer"
 import { verificarEConcluirOrcamento } from "@/lib/orcamentos"
+import { normalizarEmail } from "@/lib/email"
 
 export async function POST(request: NextRequest) {
   const connection = await pool.getConnection()
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
         cpfCnpj: tomador_cpf_cnpj?.replace(/\D/g, ""),
         inscricaoMunicipal: tomador_inscricao_municipal,
         razaoSocial: tomador_razao_social,
-        email: tomador_email,
+        email: normalizarEmail(tomador_email) || undefined,
         telefone: tomador_telefone,
         endereco: tomador_endereco,
         numero: tomador_numero,
@@ -210,7 +211,7 @@ export async function POST(request: NextRequest) {
         config.cnpj, config.inscricao_municipal,
         cliente_id || null, tomador_tipo || "PJ",
         tomador_cpf_cnpj?.replace(/\D/g, ""), tomador_inscricao_municipal || null,
-        tomador_razao_social, tomador_email || null, tomador_telefone || null,
+        tomador_razao_social, normalizarEmail(tomador_email), tomador_telefone || null,
         tomador_endereco || null, tomador_numero || null, tomador_complemento || null,
         tomador_bairro || null, tomador_cidade || null, tomador_uf || null,
         tomador_cep?.replace(/\D/g, "") || null, tomador_codigo_municipio || null,

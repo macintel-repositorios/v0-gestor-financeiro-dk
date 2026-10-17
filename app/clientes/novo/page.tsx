@@ -457,7 +457,7 @@ export default function NovoClientePage() {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    onChange={(e) => handleInputChange("email", e.target.value.toLowerCase())}
                     placeholder="email@exemplo.com"
                     className="h-9"
                   />
@@ -812,7 +812,7 @@ export default function NovoClientePage() {
                     id="email_adm"
                     type="email"
                     value={formData.email_adm}
-                    onChange={(e) => handleInputChange("email_adm", e.target.value)}
+                    onChange={(e) => handleInputChange("email_adm", e.target.value.toLowerCase())}
                     placeholder="contato@administradora.com"
                     className="h-9"
                   />

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
+import { normalizarEmail } from "@/lib/email"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -170,7 +171,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         data.contrato_numero || null,
         data.tecnico_id || null,
         data.tecnico_name,
-        data.tecnico_email || null,
+        normalizarEmail(data.tecnico_email),
         data.data_execucao || null,
         data.horario_entrada || null,
         data.horario_saida || null,

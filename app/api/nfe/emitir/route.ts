@@ -12,6 +12,7 @@ import {
 import { assinarXmlNFe, extrairCertKeyDoPfx } from "@/lib/nfe/xml-signer"
 import { autorizarNFe } from "@/lib/nfe/soap-client"
 import { verificarEConcluirOrcamento } from "@/lib/orcamentos"
+import { normalizarEmail } from "@/lib/email"
 
 export async function POST(request: NextRequest) {
   const connection = await pool.getConnection()
@@ -163,7 +164,7 @@ export async function POST(request: NextRequest) {
       razaoSocial: dest_razao_social || "",
       inscricaoEstadual: dest_inscricao_estadual || undefined,
       indicadorIE: dest_ind_ie_dest || 9,
-      email: dest_email || undefined,
+      email: normalizarEmail(dest_email) || undefined,
       telefone: dest_telefone || undefined,
       endereco: dest_endereco ? {
         logradouro: sanitizeField(dest_endereco),
@@ -290,7 +291,7 @@ export async function POST(request: NextRequest) {
         cliente_id || null, tipoDoc,
         cpfCnpjDest,
         ambiente === 2 ? "NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL" : (dest_razao_social || ""),
-        dest_email || null, dest_telefone || null,
+        normalizarEmail(dest_email), dest_telefone || null,
         dest_inscricao_estadual || null, dest_ind_ie_dest || 9,
         dest_endereco || null, dest_numero || null,
         dest_complemento || null, dest_bairro || null,
