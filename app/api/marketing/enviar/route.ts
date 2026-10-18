@@ -63,7 +63,8 @@ export async function POST(request: NextRequest) {
     })
 
     // Assinatura (imagem) embutida como anexo inline (cid): aparece no Gmail/Outlook sem bloqueio
-    let html = data.corpo
+    // Texto digitado sem tags de bloco: preserva as quebras de linha no e-mail
+    let html: string = /<(br|p|div|table)\b/i.test(data.corpo) ? data.corpo : String(data.corpo).replace(/\r?\n/g, "<br>")
     let attachments: any[] = []
     if (data.incluirAssinatura) {
       const rows: any = await query(`SELECT dados, formato FROM email_assinatura ORDER BY id DESC LIMIT 1`)

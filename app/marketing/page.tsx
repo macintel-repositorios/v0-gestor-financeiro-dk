@@ -83,6 +83,16 @@ const TIPO_COLOR: Record<string, string> = {
   contato_extra: "bg-green-500/15 text-green-400 border-green-500/30",
 }
 
+/** "Bom dia!" (até 11h59), "Boa tarde!" (12h–17h59) ou "Boa noite!" — horário de Brasília */
+function saudacaoBrasilia(): string {
+  const hora = Number(
+    new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", hour12: false }).format(new Date())
+  )
+  if (hora >= 5 && hora < 12) return "Bom dia!"
+  if (hora >= 12 && hora < 18) return "Boa tarde!"
+  return "Boa noite!"
+}
+
 export default function MarketingPage() {
   const { toast } = useToast()
 
@@ -107,7 +117,8 @@ export default function MarketingPage() {
 
   // Email
   const [assunto, setAssunto] = useState("")
-  const [corpo, setCorpo] = useState("")
+  // Corpo já começa com a saudação conforme o horário de Brasília (editável)
+  const [corpo, setCorpo] = useState(() => `Prezados(as),\n\n${saudacaoBrasilia()}\n\n`)
 
   // Assinatura (imagem) anexada no final do e-mail
   const [assinatura, setAssinatura] = useState<{ dados: string; nome: string; dimensoes?: string } | null>(null)
@@ -349,7 +360,9 @@ export default function MarketingPage() {
       toast({ title: "Erro", description: "Preencha o assunto do email", variant: "destructive" })
       return
     }
-    if (!corpo.trim()) {
+    // Não deixa enviar só com a saudação padrão
+    const semSaudacao = corpo.replace(/Prezados\(as\),|Bom dia!|Boa tarde!|Boa noite!/g, "").trim()
+    if (!semSaudacao) {
       toast({ title: "Erro", description: "Preencha o corpo do email", variant: "destructive" })
       return
     }
