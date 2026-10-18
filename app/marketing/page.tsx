@@ -34,7 +34,9 @@ import {
   AlertCircle,
   ImagePlus,
   Trash2,
+  Pencil,
 } from "lucide-react"
+import { ClienteFormDialog } from "@/components/cliente-form-dialog"
 
 interface Destinatario {
   cliente_id: number
@@ -292,6 +294,31 @@ export default function MarketingPage() {
   const [activeTab, setActiveTab] = useState("compose")
 
   const selecionados = destinatarios.filter((d) => d.selecionado)
+
+  // Edição rápida do cadastro do cliente a partir da lista de destinatários
+  const [clienteEdicao, setClienteEdicao] = useState<any>(null)
+  const [carregandoClienteId, setCarregandoClienteId] = useState<number | null>(null)
+
+  const abrirEdicaoCliente = async (clienteId: number) => {
+    setCarregandoClienteId(clienteId)
+    try {
+      const r = await fetch(`/api/clientes/${clienteId}`).then((x) => x.json())
+      if (!r.success || !r.data) throw new Error(r.message)
+      setClienteEdicao(r.data)
+    } catch {
+      toast({ title: "Erro", description: "Não foi possível carregar o cliente", variant: "destructive" })
+    } finally {
+      setCarregandoClienteId(null)
+    }
+  }
+
+  // Depois de salvar: recarrega a lista mantendo desmarcados os que o usuário tinha desmarcado
+  const aposSalvarCliente = async () => {
+    const desmarcados = new Set(destinatarios.filter((d) => !d.selecionado).map((d) => d.email))
+    setClienteEdicao(null)
+    await buscarDestinatarios()
+    setDestinatarios((prev) => prev.map((d) => ({ ...d, selecionado: !desmarcados.has(d.email) })))
+  }
 
   const buscarDestinatarios = useCallback(async () => {
     setLoadingDestinatarios(true)
@@ -683,6 +710,22 @@ export default function MarketingPage() {
                               {dest.distancia_km > 0 ? ` · ${dest.distancia_km} km` : ""}
                             </p>
                           </div>
+                          {/* Editar cadastro do cliente (não marca/desmarca o destinatário) */}
+                          <button
+                            type="button"
+                            title="Editar cliente"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              abrirEdicaoCliente(dest.cliente_id)
+                            }}
+                            className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-violet-400 hover:bg-violet-500/10 transition-colors"
+                          >
+                            {carregandoClienteId === dest.cliente_id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Pencil className="h-4 w-4" />
+                            )}
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -1025,6 +1068,16 @@ export default function MarketingPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <ClienteFormDialog
+        open={!!clienteEdicao}
+        onOpenChange={(open) => {
+          if (!open) setClienteEdicao(null)
+        }}
+        asDrawer={true}
+        cliente={clienteEdicao}
+        onSuccess={aposSalvarCliente}
+      />
     </div>
   )
 }
