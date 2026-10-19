@@ -54,6 +54,11 @@ const getTipoInfo = (tipo: string) => {
   return tiposTermos[tipo] || { label: "Desconhecido", icon: "❓", color: "gray" }
 }
 
+// Texto sem tags HTML/entidades, para prévias
+function textoSimples(html: string) {
+  return String(html || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim()
+}
+
 export function TermosTab() {
   const [termos, setTermos] = useState<Termo[]>([])
   const [loading, setLoading] = useState(true)
@@ -169,7 +174,7 @@ export function TermosTab() {
               Novo Termo/Contrato
             </Button>
           </SheetTrigger>
-          <SheetContent className="bg-card text-foreground border-l border-border shadow-2xl w-full sm:max-w-3xl overflow-y-auto">
+          <SheetContent className="bg-card text-foreground border-l border-border shadow-2xl w-full sm:max-w-5xl overflow-y-auto">
             <SheetHeader>
               <SheetTitle className="text-foreground">{editingTermo ? "Editar Termo/Contrato" : "Novo Termo/Contrato"}</SheetTitle>
               <SheetDescription className="text-muted-foreground">
@@ -230,7 +235,7 @@ export function TermosTab() {
       </Tabs>
 
       <Sheet open={!!viewingTermo} onOpenChange={() => setViewingTermo(null)}>
-        <SheetContent className="bg-card text-foreground border-l border-border shadow-2xl w-full sm:max-w-3xl overflow-y-auto">
+        <SheetContent className="bg-card text-foreground border-l border-border shadow-2xl w-full sm:max-w-5xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2 text-foreground">
               {viewingTermo && getTipoInfo(viewingTermo.tipo).icon}
@@ -243,8 +248,12 @@ export function TermosTab() {
               <Badge variant="outline" className="border-border text-muted-foreground">Versão {viewingTermo?.versao}</Badge>
               {viewingTermo?.obrigatorio && <Badge variant="destructive">Obrigatório</Badge>}
             </div>
-            <div className="bg-background border border-border p-4 rounded-lg">
-              <pre className="whitespace-pre-wrap text-sm text-foreground font-mono">{viewingTermo?.conteudo}</pre>
+            {/* Visualização como documento (folha branca), em vez do código HTML */}
+            <div className="bg-slate-200 p-4 rounded-lg max-h-[70vh] overflow-y-auto">
+              <div
+                className="mx-auto max-w-[800px] bg-white text-slate-900 p-10 shadow-md text-[13px] leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: viewingTermo?.conteudo || "" }}
+              />
             </div>
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" className="border-border text-foreground hover:bg-muted bg-transparent" onClick={() => viewingTermo && handleExportar(viewingTermo)}>
@@ -355,7 +364,7 @@ function TermosList({
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-2">{termo.conteudo.substring(0, 200)}...</p>
+                <p className="text-sm text-muted-foreground mb-2">{textoSimples(termo.conteudo).substring(0, 200)}...</p>
                 <p className="text-xs text-muted-foreground">
                   Atualizado em: {new Date(termo.updated_at).toLocaleDateString("pt-BR")}
                 </p>
@@ -543,6 +552,7 @@ function TermoForm({
         <Label htmlFor="conteudo" className="text-muted-foreground">Conteúdo</Label>
         <div className="border border-border rounded-md bg-background text-foreground overflow-hidden">
           <RichTextEditor
+            papel
             value={formData.conteudo}
             onChange={(value: string) => setFormData({ ...formData, conteudo: value })}
             placeholder="Digite o conteúdo do termo/contrato. Use as variáveis disponíveis como [EMPRESA_NOME], [CLIENTE_NOME], etc."

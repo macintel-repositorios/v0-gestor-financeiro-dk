@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Printer, Edit, Trash2 } from "lucide-react"
+import { ArrowLeft, Printer, Edit, Trash2, FileText } from "lucide-react"
+import { EditarTextoContrato } from "@/components/contratos/editar-texto-contrato"
 import { toast } from "@/hooks/use-toast"
 import { ContratoPrintEditor } from "@/components/contrato-print-editor"
 import { aplicarCondicionaisContrato } from "@/lib/contrato-template"
@@ -70,6 +71,7 @@ export default function ContratoPage({
   const params = useParams()
   const router = useRouter()
   const [contrato, setContrato] = useState<Contrato | null>(null)
+  const [editandoTexto, setEditandoTexto] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showEditor, setShowEditor] = useState(false)
   const [conteudoFormatado, setConteudoFormatado] = useState("")
@@ -334,6 +336,10 @@ export default function ContratoPage({
           }}>
             <Edit className="mr-2 h-4 w-4" />
             Editar
+          </Button>
+          <Button variant="outline" onClick={() => setEditandoTexto(true)}>
+            <FileText className="mr-2 h-4 w-4" />
+            Texto do Contrato
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
             <Trash2 className="mr-2 h-4 w-4" />
@@ -643,6 +649,13 @@ export default function ContratoPage({
 
       {/* Editor de Impressão */}
       {showEditor && <ContratoPrintEditor contrato={contrato} onClose={() => setShowEditor(false)} />}
+      <EditarTextoContrato
+        open={editandoTexto}
+        onOpenChange={setEditandoTexto}
+        numero={String(numero)}
+        conteudoAtual={contrato.conteudo_contrato || ""}
+        onSalvo={(texto) => setContrato((c) => (c ? { ...c, conteudo_contrato: texto } : c))}
+      />
     </div>
   )
 }

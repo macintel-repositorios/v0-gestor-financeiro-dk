@@ -43,6 +43,8 @@ interface RichTextEditorProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  /** Modo folha de papel: fundo branco e texto escuro (documentos/contratos) */
+  papel?: boolean
 }
 
 const fontSizes = [
@@ -104,7 +106,7 @@ const colors = [
   "#800040",
 ]
 
-export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, placeholder, papel = false }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [linkDialog, setLinkDialog] = useState(false)
   const [imageDialog, setImageDialog] = useState(false)
@@ -602,11 +604,16 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       </div>
 
       {/* Editor */}
-      <div className="relative bg-background">
+      <div className={`relative ${papel ? "bg-slate-200 p-4" : "bg-background"}`}>
         <div
           ref={editorRef}
           contentEditable
-          className="min-h-[300px] p-4 focus:outline-none prose prose-invert max-w-none text-foreground bg-background"
+          className={
+            papel
+              ? // Folha branca, como no documento impresso (textos com cor fixa escura ficam visíveis)
+                "min-h-[500px] max-h-[65vh] overflow-y-auto mx-auto max-w-[800px] p-10 shadow-md focus:outline-none bg-white text-slate-900 text-[13px] leading-relaxed"
+              : "min-h-[300px] p-4 focus:outline-none prose prose-invert max-w-none text-foreground bg-background"
+          }
           onInput={handleInput}
           onFocus={handleFocus}
           onBlur={handleBlur}
