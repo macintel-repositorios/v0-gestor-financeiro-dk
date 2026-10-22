@@ -164,7 +164,9 @@ export function Header() {
               return true
             }
 
-            if (boleto.status === "pendente" && boleto.data_vencimento) {
+            // Inter não marca o boleto como "vencido": vale a data para pendentes e aguardando pagamento
+            // (mesma regra da página Financeiro)
+            if ((boleto.status === "pendente" || boleto.status === "aguardando_pagamento") && boleto.data_vencimento) {
               const dataStr = boleto.data_vencimento.split("T")[0]
 
               if (dataStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -357,34 +359,6 @@ export function Header() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0 max-h-80 overflow-y-auto">
-                  {/* Feriados do mês */}
-                  {feriados.length > 0 && (
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <PartyPopper className="w-4 h-4 text-[hsl(var(--success))]" />
-                        <span className="font-medium text-sm">Feriados deste mês</span>
-                      </div>
-                      <div className="space-y-2">
-                        {feriados.map((feriado) => (
-                          <div
-                            key={feriado.id}
-                            className="flex items-center justify-between p-3 bg-[hsl(var(--success))]/5 rounded-lg border border-[hsl(var(--success))]/20"
-                          >
-                            <div>
-                              <p className="font-medium text-sm">{feriado.nome}</p>
-                              <p className="text-xs text-muted-foreground">{formatDate(feriado.data)}</p>
-                            </div>
-                            <Badge className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-0 text-xs">
-                              {feriado.tipo}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {feriados.length > 0 && boletosVencidos.length > 0 && <Separator />}
-
                   {/* Boletos vencidos */}
                   {boletosVencidos.length > 0 && (
                     <div className="p-4">
@@ -427,6 +401,34 @@ export function Header() {
                             E mais {boletosVencidos.length - 3} boleto(s) vencido(s)
                           </p>
                         )}
+
+                  {feriados.length > 0 && boletosVencidos.length > 0 && <Separator />}
+
+                  {/* Feriados do mês */}
+                  {feriados.length > 0 && (
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <PartyPopper className="w-4 h-4 text-[hsl(var(--success))]" />
+                        <span className="font-medium text-sm">Feriados deste mês</span>
+                      </div>
+                      <div className="space-y-2">
+                        {feriados.map((feriado) => (
+                          <div
+                            key={feriado.id}
+                            className="flex items-center justify-between p-3 bg-[hsl(var(--success))]/5 rounded-lg border border-[hsl(var(--success))]/20"
+                          >
+                            <div>
+                              <p className="font-medium text-sm">{feriado.nome}</p>
+                              <p className="text-xs text-muted-foreground">{formatDate(feriado.data)}</p>
+                            </div>
+                            <Badge className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-0 text-xs">
+                              {feriado.tipo}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                       </div>
                     </div>
                   )}
