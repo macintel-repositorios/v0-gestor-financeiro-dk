@@ -69,11 +69,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Converter arquivo para base64
     const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    let buffer: Buffer = Buffer.from(bytes)
+    let mimeType = file.type || "image/jpeg"
+
+    // Comprime antes de gravar (fotos de celular têm ~2 MB): máx. 1600 px, JPEG qualidade 75.
+    // Se a compressão falhar, grava a foto original.
+    const comprimida = await comprimirFoto(buffer)
+    if (comprimida) {
+      console.log(`Foto comprimida: ${Math.round(buffer.length / 1024)} KB -> ${Math.round(comprimida.length / 1024)} KB`)
+      buffer = comprimida
+      mimeType = "image/jpeg"
+    }
     const base64 = buffer.toString("base64")
 
     // Criar data URI com o tipo MIME correto
-    const mimeType = file.type || "image/jpeg"
     const dataUri = `data:${mimeType};base64,${base64}`
 
     console.log("Salvando foto no banco de dados...")
@@ -108,5 +117,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       { status: 500 },
     )
+  }
+}
+
+/** Reduz a foto para no máx. 1600 px (lado maior), JPEG 75%, respeitando a rotação do celular. null = manter original. */
+async function comprimirFoto(original: Buffer): Promise<Buffer | null> {
+  try {
+    const sharp = (await import("sharp")).default
+    const saida = await sharp(original)
+      .rotate()
+      .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 75, mozjpeg: true })
+      .toBuffer()
+    return saida.length < original.length ? saida : null
+  } catch (e) {
+    console.warn("Não foi possível comprimir a foto, salvando original:", e)
+    return null
   }
 }

@@ -1,0 +1,5 @@
+{
+ "tabela": "whatsapp_messages_log",
+ "create": "CREATE TABLE `whatsapp_messages_log` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `phone_number` varchar(20) NOT NULL,\n  `direction` enum('incoming','outgoing') NOT NULL,\n  `message_type` varchar(50) DEFAULT NULL,\n  `message_content` text DEFAULT NULL,\n  `created_at` timestamp NULL DEFAULT current_timestamp(),\n  `empresa_id` int(11) DEFAULT 1,\n  PRIMARY KEY (`id`),\n  KEY `idx_phone_created` (`phone_number`,`created_at`),\n  KEY `fk_empresa_whatsapp_messages_log` (`empresa_id`),\n  CONSTRAINT `fk_empresa_whatsapp_messages_log` FOREIGN KEY (`empresa_id`) REFERENCES `empresas` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+ "registros": []
+}

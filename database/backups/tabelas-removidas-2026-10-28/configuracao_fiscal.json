@@ -1,0 +1,25 @@
+{
+ "tabela": "configuracao_fiscal",
+ "create": "CREATE TABLE `configuracao_fiscal` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `municipal_service_id` varchar(50) DEFAULT NULL,\n  `municipal_service_code` varchar(20) DEFAULT NULL,\n  `municipal_service_name` varchar(500) DEFAULT NULL,\n  `descricao_servico_padrao` text DEFAULT NULL,\n  `iss_percentual` decimal(5,2) DEFAULT 5.00,\n  `cofins_percentual` decimal(5,2) DEFAULT 0.00,\n  `csll_percentual` decimal(5,2) DEFAULT 0.00,\n  `inss_percentual` decimal(5,2) DEFAULT 0.00,\n  `ir_percentual` decimal(5,2) DEFAULT 0.00,\n  `pis_percentual` decimal(5,2) DEFAULT 0.00,\n  `reter_iss` tinyint(1) DEFAULT 0,\n  `emissao_automatica` tinyint(1) DEFAULT 0,\n  `ativo` tinyint(1) DEFAULT 1,\n  `created_at` timestamp NULL DEFAULT current_timestamp(),\n  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  `empresa_id` int(11) DEFAULT 1,\n  PRIMARY KEY (`id`),\n  KEY `fk_empresa_configuracao_fiscal` (`empresa_id`),\n  CONSTRAINT `fk_empresa_configuracao_fiscal` FOREIGN KEY (`empresa_id`) REFERENCES `empresas` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+ "registros": [
+  {
+   "id": 1,
+   "municipal_service_id": "07498",
+   "municipal_service_code": "14.01",
+   "municipal_service_name": "Conserto, restauracao, manutencao e conservacao de maquinas, equipamentos, elevadores e congeneres",
+   "descricao_servico_padrao": "Servicos de conserto, restauracao, manutencao e conservacao de maquinas, equipamentos, elevadores e congeneres",
+   "iss_percentual": "5.00",
+   "cofins_percentual": "0.00",
+   "csll_percentual": "0.00",
+   "inss_percentual": "0.00",
+   "ir_percentual": "0.00",
+   "pis_percentual": "0.00",
+   "reter_iss": 0,
+   "emissao_automatica": 0,
+   "ativo": 1,
+   "created_at": "2026-02-05 23:15:07",
+   "updated_at": "2026-02-05 23:26:22",
+   "empresa_id": 1
+  }
+ ]
+}
