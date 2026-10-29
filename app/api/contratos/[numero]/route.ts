@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { pool } from "@/lib/database"
+import { sincronizarTemContrato } from "@/lib/cliente-contrato"
 
 export async function GET(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
@@ -235,6 +236,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       console.log("Contrato atualizado com sucesso")
 
       await connection.commit()
+      // Cliente antigo e novo (o contrato pode ter mudado de cliente)
+      await sincronizarTemContrato((contratoRows as any[])[0]?.cliente_id)
+      if (String(data.cliente_id) !== String((contratoRows as any[])[0]?.cliente_id)) await sincronizarTemContrato(data.cliente_id)
 
       return NextResponse.json({
         success: true,
@@ -285,6 +289,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ n
       await connection.execute("DELETE FROM contratos_conservacao WHERE numero = ?", [numero])
 
       await connection.commit()
+      await sincronizarTemContrato((contratoRows as any[])[0]?.cliente_id)
 
       return NextResponse.json({
         success: true,

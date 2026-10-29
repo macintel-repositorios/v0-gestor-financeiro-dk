@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { pool } from "@/lib/database"
+import { sincronizarTemContrato } from "@/lib/cliente-contrato"
 
 export async function GET() {
   try {
@@ -265,6 +266,7 @@ export async function POST(request: Request) {
       console.log("Contrato inserido com sucesso. ID:", result)
 
       await connection.commit()
+      await sincronizarTemContrato(dadosContrato.cliente_id)
 
       return NextResponse.json({
         success: true,
@@ -331,6 +333,7 @@ export async function DELETE(request: Request) {
       await connection.execute("DELETE FROM contratos_conservacao WHERE numero = ?", [numero])
 
       await connection.commit()
+      await sincronizarTemContrato((contratoRows as any[])[0]?.cliente_id)
 
       return NextResponse.json({
         success: true,

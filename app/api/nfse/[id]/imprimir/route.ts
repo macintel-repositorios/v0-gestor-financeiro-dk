@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { getEmpresa } from "@/lib/empresa"
 import { pool } from "@/lib/db"
 
 export async function GET(
@@ -28,18 +29,23 @@ export async function GET(
     const configs = configRows as any[]
     const config = configs.length > 0 ? configs[0] : null
 
-    // Buscar email e telefone do timbrado_config para complementar dados do prestador
-    try {
-      const [timbradoRows] = await pool.execute(
-        "SELECT empresa_email, empresa_telefone FROM timbrado_config WHERE ativo = 1 LIMIT 1"
-      )
-      const timbrados = timbradoRows as any[]
-      if (timbrados.length > 0 && config) {
-        if (timbrados[0].empresa_email) config.email = timbrados[0].empresa_email
-        if (timbrados[0].empresa_telefone) config.telefone = timbrados[0].empresa_telefone
-      }
-    } catch {
-      // Tabela timbrado_config pode nao existir
+    // Dados cadastrais do prestador vêm da fonte única (Configurações > Empresa);
+    // da configuração NFS-e ficam só os dados fiscais (inscrição municipal, código de serviço, Simples)
+    if (config) {
+      const empresa = await getEmpresa()
+      Object.assign(config, {
+        razao_social: empresa.nome || config.razao_social,
+        cnpj: empresa.cnpj || config.cnpj,
+        endereco: empresa.endereco || config.endereco,
+        numero_endereco: empresa.endereco ? "" : config.numero_endereco,
+        complemento: empresa.endereco ? "" : config.complemento,
+        bairro: empresa.bairro || config.bairro,
+        cidade: empresa.cidade || config.cidade,
+        uf: empresa.uf || config.uf,
+        cep: empresa.cep || config.cep,
+        email: empresa.email,
+        telefone: empresa.telefone,
+      })
     }
 
     // Buscar Logo do Sistema para a NFS-e
