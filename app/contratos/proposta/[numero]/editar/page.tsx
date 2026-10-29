@@ -129,6 +129,8 @@ export default function EditarPropostaPage({
   const [temConsignacao, setTemConsignacao] = useState(false)
   const [prazoInstalacaoConsignacao, setPrazoInstalacaoConsignacao] = useState("")
   const [dataInicioContrato, setDataInicioContrato] = useState("")
+  // Dia do contrato (vencimento da mensalidade)
+  const [diaVencimento, setDiaVencimento] = useState("10")
   const [status, setStatus] = useState("rascunho")
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -162,7 +164,7 @@ export default function EditarPropostaPage({
         triggerSaveRef.current = null
       }
     }
-  }, [triggerSaveRef, cliente, tipo, frequencia, observacoes, status, dataValidade, quantidadeVisitas, equipamentosSelecionados, formaPagamento, prazoContrato, garantia, equipamentosConsignacao, distanciaKm, temConsignacao, prazoInstalacaoConsignacao, dataInicioContrato])
+  }, [triggerSaveRef, cliente, tipo, frequencia, observacoes, status, dataValidade, quantidadeVisitas, equipamentosSelecionados, formaPagamento, prazoContrato, garantia, equipamentosConsignacao, distanciaKm, temConsignacao, prazoInstalacaoConsignacao, dataInicioContrato, diaVencimento])
 
   useEffect(() => {
     if (numero) {
@@ -218,6 +220,7 @@ export default function EditarPropostaPage({
         setTemConsignacao(!!(propostaData.equipamentos_consignacao || "").trim())
         setPrazoInstalacaoConsignacao(propostaData.prazo_instalacao_consignacao || "")
         setDataInicioContrato(propostaData.data_inicio || "")
+        setDiaVencimento(String(propostaData.dia_vencimento || propostaData.cliente_dia_contrato || 10))
         setStatus(propostaData.status || "rascunho")
 
         // Configurar distância (vem do cliente na consulta)
@@ -451,6 +454,7 @@ export default function EditarPropostaPage({
 
   const handleClienteChange = async (novoCliente: Cliente | null) => {
     setCliente(novoCliente)
+    if ((novoCliente as any)?.dia_contrato) setDiaVencimento(String((novoCliente as any).dia_contrato))
 
     if (novoCliente && novoCliente.id) {
       try {
@@ -491,6 +495,7 @@ export default function EditarPropostaPage({
         prazo_instalacao_consignacao: temConsignacao ? prazoInstalacaoConsignacao || null : null,
         status: "ativo",
         data_inicio: dataInicioContrato || new Date().toISOString().split("T")[0],
+        dia_vencimento: Number(diaVencimento) || 10,
         data_assinatura: new Date().toISOString().split("T")[0],
         itens: equipamentosSelecionados.map((item) => ({
           equipamento_id: item.equipamento_id,
@@ -572,6 +577,7 @@ export default function EditarPropostaPage({
         equipamentos_consignacao: temConsignacao ? equipamentosConsignacao : "",
         prazo_instalacao_consignacao: temConsignacao ? prazoInstalacaoConsignacao || null : null,
         data_inicio: dataInicioContrato || null,
+        dia_vencimento: Number(diaVencimento) || null,
         status,
         data_validade: dataValidade,
         quantidade_visitas: quantidadeVisitas,
@@ -1024,6 +1030,19 @@ export default function EditarPropostaPage({
                         value={dataInicioContrato}
                         onChange={(e) => setDataInicioContrato(e.target.value)}
                       />
+                    </div>
+                    <div>
+                      <Label htmlFor="dia_vencimento">Dia do Contrato</Label>
+                      <Input
+                        id="dia_vencimento"
+                        type="number"
+                        min={1}
+                        max={31}
+                        value={diaVencimento}
+                        onChange={(e) => setDiaVencimento(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))}
+                        placeholder="10"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Dia do vencimento da mensalidade (1 a 31)</p>
                     </div>
                     <div>
                       <Label htmlFor="status">Status da Proposta</Label>

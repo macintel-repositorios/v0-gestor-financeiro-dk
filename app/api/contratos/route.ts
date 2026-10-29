@@ -100,7 +100,8 @@ export async function POST(request: Request) {
             numero, valor_total_proposta, prazo_contrato, quantidade_visitas, cliente_id,
             equipamentos_consignacao,
             DATE_FORMAT(data_inicio, '%Y-%m-%d') AS data_inicio,
-            DATE_FORMAT(prazo_instalacao_consignacao, '%Y-%m-%d') AS prazo_instalacao_consignacao
+            DATE_FORMAT(prazo_instalacao_consignacao, '%Y-%m-%d') AS prazo_instalacao_consignacao,
+            dia_vencimento
            FROM proposta_contratos 
            WHERE numero = ?`,
           [propostaId],
@@ -214,7 +215,8 @@ export async function POST(request: Request) {
         data_fim: dataFim || null,
         valor_mensal: valorMensal,
         frequencia: data.frequencia || "mensal",
-        dia_vencimento: Number.parseInt(data.dia_vencimento) || 10,
+        // Dia do contrato definido na proposta tem prioridade
+        dia_vencimento: Number(propostaData?.dia_vencimento) || Number.parseInt(data.dia_vencimento) || 10,
         forma_pagamento: data.forma_pagamento || "boleto",
         equipamentos_inclusos: JSON.stringify(equipamentosInclusos),
         equipamentos_consignacao: equipamentosConsignacao, // ADICIONAR ESTE CAMPO

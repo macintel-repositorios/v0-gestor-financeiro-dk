@@ -88,6 +88,8 @@ export default function NovaPropostaPage({
   const [temConsignacao, setTemConsignacao] = useState(false)
   const [prazoInstalacaoConsignacao, setPrazoInstalacaoConsignacao] = useState("")
   const [dataInicioContrato, setDataInicioContrato] = useState("")
+  // Dia do contrato (vencimento da mensalidade); sugere o dia cadastrado no cliente
+  const [diaVencimento, setDiaVencimento] = useState("10")
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showNewClientDialog, setShowNewClientDialog] = useState(false)
@@ -315,6 +317,7 @@ export default function NovaPropostaPage({
 
   const handleClienteChange = async (novoCliente: Cliente | null) => {
     setCliente(novoCliente)
+    if ((novoCliente as any)?.dia_contrato) setDiaVencimento(String((novoCliente as any).dia_contrato))
 
     if (novoCliente && novoCliente.id) {
       try {
@@ -420,6 +423,7 @@ export default function NovaPropostaPage({
         equipamentos_consignacao: temConsignacao ? equipamentosConsignacao : "",
         prazo_instalacao_consignacao: temConsignacao ? prazoInstalacaoConsignacao || null : null,
         data_inicio: dataInicioContrato || null,
+        dia_vencimento: Number(diaVencimento) || null,
         status: "rascunho",
         data_validade: dataValidade,
         quantidade_visitas: quantidadeVisitas,
@@ -948,6 +952,19 @@ export default function NovaPropostaPage({
                         value={dataInicioContrato}
                         onChange={(e) => setDataInicioContrato(e.target.value)}
                       />
+                    </div>
+                    <div>
+                      <Label htmlFor="dia_vencimento">Dia do Contrato</Label>
+                      <Input
+                        id="dia_vencimento"
+                        type="number"
+                        min={1}
+                        max={31}
+                        value={diaVencimento}
+                        onChange={(e) => setDiaVencimento(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))}
+                        placeholder="10"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Dia do vencimento da mensalidade (1 a 31)</p>
                     </div>
                   </div>
 
