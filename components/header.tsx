@@ -401,6 +401,9 @@ export function Header() {
                             E mais {boletosVencidos.length - 3} boleto(s) vencido(s)
                           </p>
                         )}
+                      </div>
+                    </div>
+                  )}
 
                   {feriados.length > 0 && boletosVencidos.length > 0 && <Separator />}
 
@@ -426,9 +429,6 @@ export function Header() {
                             </Badge>
                           </div>
                         ))}
-                      </div>
-                    </div>
-                  )}
                       </div>
                     </div>
                   )}
