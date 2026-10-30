@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { formatCNPJ, formatCPF, formatPhone } from "@/lib/utils"
+import { CopiarBotao } from "@/components/copiar-botao"
 import type { Cliente } from "@/types/database"
 import { ClienteFormDialog } from "@/components/cliente-form-dialog"
 import {
@@ -669,6 +670,7 @@ export default function ClientesPage() {
                               >
                                 {formatPhone(cliente.telefone)}
                               </a>
+                              <CopiarBotao texto={formatPhone(cliente.telefone)} titulo="Copiar telefone" />
                             </div>
                           )}
 
@@ -686,6 +688,7 @@ export default function ClientesPage() {
                               >
                                 {cliente.email}
                               </a>
+                              <CopiarBotao texto={cliente.email} titulo="Copiar e-mail" />
                             </div>
                           )}
 
@@ -847,12 +850,14 @@ export default function ClientesPage() {
                               <div className="flex items-center text-xs">
                                 <Mail className="h-3.5 w-3.5 mr-1 text-muted-foreground flex-shrink-0" />
                                 <span className="text-foreground truncate">{cliente.email}</span>
+                                <CopiarBotao texto={cliente.email} titulo="Copiar e-mail" />
                               </div>
                             )}
                             {cliente.telefone && (
                               <div className="flex items-center text-xs">
                                 <Phone className="h-3.5 w-3.5 mr-1 text-muted-foreground flex-shrink-0" />
                                 <span className="text-foreground">{formatPhone(cliente.telefone)}</span>
+                                <CopiarBotao texto={formatPhone(cliente.telefone)} titulo="Copiar telefone" />
                               </div>
                             )}
                           </div>
