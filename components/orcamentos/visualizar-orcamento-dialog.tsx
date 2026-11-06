@@ -813,6 +813,8 @@ export function VisualizarOrcamentoDialog({
           dadosOrigem={{
             origem: "orcamento",
             origem_numero: orcamento.numero,
+            servico_fiscal: (orcamento as any).servico_fiscal || null,
+            nbs: (orcamento as any).nbs || null,
             cliente_id: Number(orcamento.cliente_id),
             cliente_nome: orcamento.cliente_nome,
             cliente_cnpj: orcamento.cliente_cnpj,

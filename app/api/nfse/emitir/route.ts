@@ -5,6 +5,7 @@ import { enviarLoteRps, testeEnvioLoteRps, consultarNfse, extrairDadosNfseRetorn
 import { assinarXmlNfse, extrairCertKeyDoPfx } from "@/lib/nfse/xml-signer"
 import { verificarEConcluirOrcamento } from "@/lib/orcamentos"
 import { normalizarEmail } from "@/lib/email"
+import { dadosFiscaisDoServico } from "@/lib/nfse/servicos-fiscais"
 
 export async function POST(request: NextRequest) {
   const connection = await pool.getConnection()
@@ -40,7 +41,12 @@ export async function POST(request: NextRequest) {
       valor_csll,
       iss_retido,
       aliquota_iss: aliquotaOverride,
+      servico_fiscal,
+      nbs,
     } = body
+
+    // Classificação fiscal (padrão nacional) registrada na nota
+    const fiscal = dadosFiscaisDoServico(servico_fiscal, nbs)
 
     // Buscar e reservar próximo número RPS atomicamente
     await connection.query("START TRANSACTION")
@@ -203,8 +209,9 @@ export async function POST(request: NextRequest) {
         codigo_servico, descricao_servico, codigo_cnae,
         valor_servicos, valor_deducoes, valor_pis, valor_cofins,
         valor_inss, valor_ir, valor_csll, valor_iss, aliquota_iss,
-        iss_retido, valor_total, status, xml_envio
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'processando', ?)`,
+        iss_retido, valor_total, status, xml_envio,
+        servico_fiscal, cnae, codigo_tributacao_nacional, codigo_tributacao_municipal, nbs, ind_op
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'processando', ?, ?, ?, ?, ?, ?, ?)`,
       [
         numeroRps, config.serie_rps || "11", config.tipo_rps || 1,
         origem, origem_id || null, origem_numero || null,
@@ -220,6 +227,8 @@ export async function POST(request: NextRequest) {
         valorServicos, valor_deducoes || 0, valor_pis || 0, valor_cofins || 0,
         valor_inss || 0, valor_ir || 0, valor_csll || 0, valorIss, aliquota,
         issRetidoBool ? 1 : 0, valorTotal, xmlEnvio,
+        fiscal?.servico_fiscal ?? null, fiscal?.cnae ?? null, fiscal?.codigo_tributacao_nacional ?? null,
+        fiscal?.codigo_tributacao_municipal ?? null, fiscal?.nbs ?? null, fiscal?.ind_op ?? null,
       ],
     )
     const notaId = (insertResult as any).insertId

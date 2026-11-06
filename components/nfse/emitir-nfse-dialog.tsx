@@ -20,7 +20,9 @@ import { Badge } from "@/components/ui/badge"
 import { Loader2, Send, AlertCircle, User, FileText, DollarSign } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
-import { SERVICOS_NFSE, SERVICO_NFSE_PADRAO, formatarAliquota } from "@/lib/nfse/servicos"
+import { SERVICOS_NFSE, SERVICO_NFSE_PADRAO } from "@/lib/nfse/servicos"
+import { getServicoFiscal } from "@/lib/nfse/servicos-fiscais"
+import { CampoClassificacaoFiscal } from "@/components/orcamentos/campo-classificacao-fiscal"
 
 interface EmitirNfseDialogProps {
   open: boolean
@@ -46,6 +48,9 @@ interface EmitirNfseDialogProps {
     valor_material?: number
     valor_total_orcamento?: number
     descricao?: string
+    /** Classificação fiscal definida no orçamento/contrato (lib/nfse/servicos-fiscais) */
+    servico_fiscal?: string | null
+    nbs?: string | null
   }
 }
 
@@ -85,12 +90,31 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
   const [servicoId, setServicoId] = useState<string>(SERVICO_NFSE_PADRAO)
   const [caracteristicaId, setCaracteristicaId] = useState<string | null>(null)
 
+  // Classificação fiscal (padrão nacional) e NBS da nota
+  const [servicoFiscal, setServicoFiscal] = useState<string>("")
+  const [nbsNota, setNbsNota] = useState<string>("")
+  const [alterarClassificacao, setAlterarClassificacao] = useState(false)
+  const servicoFiscalOrigem = !!dadosOrigem?.servico_fiscal
+
+  const aplicarServicoFiscal = (id: string, nbs?: string) => {
+    const sf = getServicoFiscal(id)
+    setServicoFiscal(id)
+    setNbsNota(nbs || sf?.nbsPadrao || "")
+    if (sf) {
+      setServicoId(sf.servicoEmissao.servicoId)
+      setCaracteristicaId(sf.servicoEmissao.caracteristicaId || null)
+    }
+  }
+
   const { toast } = useToast()
 
   useEffect(() => {
     if (open) {
       setServicoId(SERVICO_NFSE_PADRAO)
       setCaracteristicaId(null)
+      setAlterarClassificacao(false)
+      // Classificação vinda do orçamento/contrato; nota avulsa começa em "Conserto"
+      aplicarServicoFiscal(dadosOrigem?.servico_fiscal || "conserto", dadosOrigem?.nbs || undefined)
       fetchClientes()
       if (dadosOrigem) {
         preencherDadosOrigem()
@@ -197,6 +221,8 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
     const dadosServico = {
       ...(servico.codigoServico ? { codigo_servico: servico.codigoServico } : {}),
       aliquota_iss: caracteristica?.aliquota ?? servico.aliquota,
+      servico_fiscal: servicoFiscal || null,
+      nbs: nbsNota || null,
     }
 
     setLoading(true)
@@ -442,93 +468,36 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                 />
               </div>
 
-              {/* Serviço prestado: 3314-7/10 por padrão; 01023 exige escolher a característica */}
-              <div className="space-y-2">
-                <Label>Serviço prestado *</Label>
-                <div className="space-y-2">
-                  {SERVICOS_NFSE.map((s) => {
-                    const selecionado = servicoId === s.id
-                    const carSel = s.caracteristicas?.find((c) => c.id === caracteristicaId)
-                    return (
-                      <div
-                        key={s.id}
-                        className={`rounded-lg border transition-colors ${
-                          selecionado ? "border-blue-500 bg-blue-500/10" : "border-border bg-background hover:bg-muted/40"
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setServicoId(s.id)
-                            if (s.id !== servicoId) setCaracteristicaId(null)
-                          }}
-                          className="w-full text-left p-3 flex gap-3 items-start"
-                        >
-                          <span
-                            className={`mt-0.5 h-4 w-4 rounded-full border-2 flex-shrink-0 ${
-                              selecionado ? "border-blue-500 bg-blue-500 ring-2 ring-inset ring-background" : "border-muted-foreground"
-                            }`}
-                          />
-                          <span className={`text-sm ${selecionado ? "text-foreground font-medium" : "text-muted-foreground"} ${s.caracteristicas && !selecionado ? "line-clamp-2" : ""}`}>
-                            {s.titulo} - {s.descricao}
-                          </span>
-                        </button>
-
-                        {s.aliquota != null && (
-                          <div className="flex items-center justify-between px-3 pb-3 text-xs">
-                            <span className="text-muted-foreground">
-                              Alíquota: <b className="text-foreground">{formatarAliquota(s.aliquota)}</b>
-                            </span>
-                            <span className="flex gap-1">
-                              {s.tags?.map((t) => (
-                                <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
-                              ))}
-                            </span>
-                          </div>
-                        )}
-
-                        {s.caracteristicas && selecionado && (
-                          <div className="border-t border-border p-3 space-y-2">
-                            <p className="text-xs font-medium text-blue-500">Selecione a característica dessa atividade *</p>
-                            {s.caracteristicas.map((c) => (
-                              <button
-                                key={c.id}
-                                type="button"
-                                onClick={() => setCaracteristicaId(c.id)}
-                                className={`w-full text-left rounded-md border p-2.5 text-xs transition-colors ${
-                                  caracteristicaId === c.id ? "border-blue-500 bg-blue-500/10" : "border-border hover:bg-muted/40"
-                                }`}
-                              >
-                                <div className="flex gap-2 items-start">
-                                  <span
-                                    className={`mt-0.5 h-3.5 w-3.5 rounded-full border-2 flex-shrink-0 ${
-                                      caracteristicaId === c.id ? "border-blue-500 bg-blue-500 ring-2 ring-inset ring-background" : "border-muted-foreground"
-                                    }`}
-                                  />
-                                  <span className="text-foreground">{c.cnae} - {c.descricao}</span>
-                                </div>
-                                <div className="flex items-center justify-between mt-2 pl-5">
-                                  <span className="text-muted-foreground">
-                                    Alíquota: <b className="text-foreground">{formatarAliquota(c.aliquota)}</b>
-                                  </span>
-                                  <span className="flex gap-1">
-                                    {c.tags.map((t) => (
-                                      <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
-                                    ))}
-                                  </span>
-                                </div>
-                              </button>
-                            ))}
-                            {!carSel && (
-                              <p className="text-[11px] text-amber-500">Escolha uma característica para continuar.</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
+              {/* Classificação fiscal do serviço: vem do orçamento/contrato; na nota avulsa é escolhida aqui */}
+              {servicoFiscalOrigem && !alterarClassificacao ? (
+                <div className="rounded-md border border-border bg-muted/30 p-3 text-xs space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-foreground">
+                      {getServicoFiscal(servicoFiscal)?.nome || "Classificação fiscal"}
+                    </span>
+                    <button type="button" className="text-[11px] text-blue-500 hover:underline" onClick={() => setAlterarClassificacao(true)}>
+                      alterar
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {(() => {
+                      const sf = getServicoFiscal(servicoFiscal)
+                      return sf
+                        ? `CNAE ${sf.cnae} · Anexo ${sf.anexo} · Nacional ${sf.codigoTributacaoNacional} · Municipal ${sf.codigoTributacaoMunicipal} · NBS ${nbsNota || sf.nbsPadrao}`
+                        : ""
+                    })()}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">Definido {dadosOrigem?.origem === "contrato" ? "pelo contrato" : "no orçamento"}.</p>
                 </div>
-              </div>
+              ) : (
+                <CampoClassificacaoFiscal
+                  obrigatorio
+                  servicoFiscal={servicoFiscal}
+                  onServicoFiscal={aplicarServicoFiscal}
+                  nbs={nbsNota}
+                  onNbs={setNbsNota}
+                />
+              )}
             </div>
           </div>
 

@@ -32,6 +32,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useFeriados } from "@/hooks/use-feriados"
 import { calcularJurosMaterial, sugerirDataPrimeiraParcela } from "@/lib/orcamento-parcelas"
 import { CampoPrimeiraParcela } from "@/components/orcamentos/campo-primeira-parcela"
+import { CampoClassificacaoFiscal } from "@/components/orcamentos/campo-classificacao-fiscal"
+import { getServicoFiscal, sugerirServicoFiscal } from "@/lib/nfse/servicos-fiscais"
 import { formatCurrency, cn } from "@/lib/utils"
 import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { ProdutoCombobox } from "@/components/produto-combobox"
@@ -71,6 +73,16 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
   const [cliente, setCliente] = useState<Cliente | null>(null)
   const [itens, setItens] = useState<OrcamentoItem[]>([])
   const [tipoServico, setTipoServico] = useState("")
+  // Classificação fiscal (NFS-e): sugerida pelo título até o usuário escolher
+  const [servicoFiscal, setServicoFiscal] = useState("")
+  const [nbs, setNbs] = useState("")
+  const [servicoFiscalEditado, setServicoFiscalEditado] = useState(false)
+  useEffect(() => {
+    if (servicoFiscalEditado || !tipoServico.trim()) return
+    const sugerido = sugerirServicoFiscal(tipoServico)
+    setServicoFiscal(sugerido)
+    setNbs(getServicoFiscal(sugerido)?.nbsPadrao || "")
+  }, [tipoServico, servicoFiscalEditado])
   const [detalhesServico, setDetalhesServico] = useState("")
   const [observacoes, setObservacoes] = useState("")
   const [validade, setValidade] = useState(30)
@@ -240,6 +252,9 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
       setParcelamentoMaterial(1)
       setMaterialAVista(false)
       setDataPrimeiraEditada(false)
+      setServicoFiscal("")
+      setNbs("")
+      setServicoFiscalEditado(false)
       setDataOrcamento(new Date().toISOString().split("T")[0])
       
       setExpandCliente(false)
@@ -660,6 +675,14 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
       })
       return
     }
+    if (!servicoFiscal) {
+      toast({
+        title: "Erro",
+        description: "Selecione a classificação fiscal (NFS-e) do serviço",
+        variant: "destructive",
+      })
+      return
+    }
 
     if (itens.length === 0 && parcelamentoMaterial > 0) {
       toast({
@@ -676,6 +699,8 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
       const orcamentoData = {
         cliente_id: cliente.id,
         tipo_servico: tipoServico,
+        servico_fiscal: servicoFiscal || null,
+        nbs: nbs || null,
         detalhes_servico: detalhesServico,
         valor_material: calcularValorMaterial(),
         valor_mao_obra: calcularValorMaoObra(),
@@ -979,6 +1004,18 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                               placeholder="Ex: Manutenção..."
                               className="h-9 border-border text-xs"
                               required
+                            />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <CampoClassificacaoFiscal
+                              obrigatorio
+                              servicoFiscal={servicoFiscal}
+                              onServicoFiscal={(v) => {
+                                setServicoFiscalEditado(true)
+                                setServicoFiscal(v)
+                              }}
+                              nbs={nbs}
+                              onNbs={setNbs}
                             />
                           </div>
                           <div>

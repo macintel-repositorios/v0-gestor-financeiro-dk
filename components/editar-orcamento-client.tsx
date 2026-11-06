@@ -34,6 +34,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useFeriados } from "@/hooks/use-feriados"
 import { calcularJurosMaterial, situacaoRecebeDataPrimeiraParcela, sugerirDataPrimeiraParcela } from "@/lib/orcamento-parcelas"
 import { CampoPrimeiraParcela } from "@/components/orcamentos/campo-primeira-parcela"
+import { CampoClassificacaoFiscal } from "@/components/orcamentos/campo-classificacao-fiscal"
+import { getServicoFiscal, sugerirServicoFiscal } from "@/lib/nfse/servicos-fiscais"
 import { formatCurrency, cn } from "@/lib/utils"
 import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { ProdutoCombobox } from "@/components/produto-combobox"
@@ -86,6 +88,11 @@ export function EditarOrcamentoClient({
   const [cliente, setCliente] = useState<Cliente | null>(null)
   const [itens, setItens] = useState<OrcamentoItem[]>([])
   const [tipoServico, setTipoServico] = useState(orcamento.tipo_servico || "")
+  // Classificação fiscal (NFS-e). Pendentes/enviados sem classificação recebem a sugestão pelo título;
+  // concluídos ficam como estão.
+  const [servicoFiscal, setServicoFiscal] = useState<string>(orcamento.servico_fiscal || "")
+  const [nbs, setNbs] = useState<string>(orcamento.nbs || "")
+  const [servicoFiscalEditado, setServicoFiscalEditado] = useState(!!orcamento.servico_fiscal)
   const [detalhesServico, setDetalhesServico] = useState(orcamento.detalhes_servico || "")
   const [observacoes, setObservacoes] = useState(orcamento.observacoes || "")
   const [validade, setValidade] = useState(orcamento.validade_dias || 30)
@@ -141,6 +148,13 @@ export function EditarOrcamentoClient({
       setDataPrimeiraParcela(sugerirDataPrimeiraParcela(dataOrcamento, feriados))
     }
   }, [dataOrcamento, feriados, dataPrimeiraEditada, situacao])
+
+  useEffect(() => {
+    if (servicoFiscalEditado || !tipoServico.trim() || !situacaoRecebeDataPrimeiraParcela(situacao)) return
+    const sugerido = sugerirServicoFiscal(tipoServico)
+    setServicoFiscal(sugerido)
+    setNbs(getServicoFiscal(sugerido)?.nbsPadrao || "")
+  }, [tipoServico, servicoFiscalEditado, situacao])
 
   // Estado para controlar o modal de impressão
   const [showPrintModal, setShowPrintModal] = useState(false)
@@ -860,6 +874,8 @@ export function EditarOrcamentoClient({
       const orcamentoData = {
         cliente_id: cliente.id,
         tipo_servico: tipoServico,
+        servico_fiscal: servicoFiscal || null,
+        nbs: nbs || null,
         detalhes_servico: detalhesServico,
         valor_material: calcularValorMaterial(),
         valor_mao_obra: calcularValorMaoObra(),
@@ -952,7 +968,7 @@ export function EditarOrcamentoClient({
         triggerSaveRef.current = null
       }
     }
-  }, [triggerSaveRef, cliente, tipoServico, itens, detailsTextareaRef, detalhesServico, observacoes, situacao, dataOrcamento, dataInicio, distanciaKm, valorBoleto, prazoDias, jurosAm, impostoServico, impostoMaterial, descontoMdoPercent, parcelamentoMdo, parcelamentoMaterial, materialAVista, desconto, dataPrimeiraParcela])
+  }, [triggerSaveRef, cliente, tipoServico, itens, detailsTextareaRef, detalhesServico, observacoes, situacao, dataOrcamento, dataInicio, distanciaKm, valorBoleto, prazoDias, jurosAm, impostoServico, impostoMaterial, descontoMdoPercent, parcelamentoMdo, parcelamentoMaterial, materialAVista, desconto, dataPrimeiraParcela, servicoFiscal, nbs])
 
   if (!cliente) {
     return (
@@ -1256,6 +1272,17 @@ export function EditarOrcamentoClient({
                             onChange={(e) => setTipoServico(e.target.value)}
                             placeholder="Ex: Manutenção, Instalação, Reparo..."
                             required
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <CampoClassificacaoFiscal
+                            servicoFiscal={servicoFiscal}
+                            onServicoFiscal={(v) => {
+                              setServicoFiscalEditado(true)
+                              setServicoFiscal(v)
+                            }}
+                            nbs={nbs}
+                            onNbs={setNbs}
                           />
                         </div>
                         <div>

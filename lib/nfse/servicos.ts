@@ -28,7 +28,7 @@ export const SERVICOS_NFSE: ServicoNfse[] = [
     codigoServico: null,
     titulo: "3314-7/10",
     descricao: "Manutenção e reparação de máquinas e equipamentos para uso geral não especificados anteriormente",
-    aliquota: 0.0926,
+    aliquota: 0.0946,
     tags: ["Não intelectual"],
   },
   {
@@ -43,14 +43,14 @@ export const SERVICOS_NFSE: ServicoNfse[] = [
         cnae: "4321-5/00",
         descricao:
           "Serviço de construção de imóvel ou obra de engenharia, onde o serviço de instalação e manutenção elétrica faça parte do contrato",
-        aliquota: 0.0721,
+        aliquota: 0.0736,
         tags: ["Anexo 4"],
       },
       {
         id: "4321-5/00-isolado",
         cnae: "4321-5/00",
         descricao: "Serviços isolados de instalação e manutenção elétrica em todos os tipos de construções",
-        aliquota: 0.0926,
+        aliquota: 0.0946,
         tags: ["Não intelectual", "Anexo 3"],
       },
     ],

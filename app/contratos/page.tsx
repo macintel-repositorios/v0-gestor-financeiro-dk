@@ -50,6 +50,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import { SERVICO_FISCAL_CONTRATO } from "@/lib/nfse/servicos-fiscais"
 import { boletoEnviado, boletoNoInter, esperar, INTERVALO_ENVIO_INTER_MS } from "@/lib/boleto-gateway"
 import { formatCurrency } from "@/lib/utils"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
@@ -677,6 +678,7 @@ export default function ContratosPage() {
           const payload = {
             origem: "contrato",
             origem_numero: contrato.numero,
+            servico_fiscal: SERVICO_FISCAL_CONTRATO,
             cliente_id: Number(contrato.cliente_id),
             tomador_tipo: contrato.cliente_cnpj ? "PJ" : "PF",
             tomador_cpf_cnpj: contrato.cliente_cnpj || contrato.cliente_cpf || "",
@@ -2689,6 +2691,7 @@ export default function ContratosPage() {
           onSuccess={handleNfseSuccess}
           dadosOrigem={{
             origem: "contrato",
+            servico_fiscal: SERVICO_FISCAL_CONTRATO,
             origem_numero: nfseContrato.numero,
             cliente_id: Number(nfseContrato.cliente_id),
             cliente_nome: nfseContrato.cliente_nome,

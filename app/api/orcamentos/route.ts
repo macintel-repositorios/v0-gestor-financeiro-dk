@@ -38,6 +38,8 @@ export async function GET(request: NextRequest) {
         o.parcelamento_material,
         o.material_a_vista,
         o.valor_juros,
+        o.servico_fiscal,
+        o.nbs,
         c.nome as cliente_nome,
         c.codigo as cliente_codigo,
         c.cnpj as cliente_cnpj,
@@ -154,8 +156,10 @@ export async function POST(request: NextRequest) {
         parcelamento_material,
         material_a_vista,
         data_primeira_parcela,
+        servico_fiscal,
+        nbs,
         created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `
 
     const orcamentoId = generateUUID()
@@ -187,6 +191,8 @@ export async function POST(request: NextRequest) {
       data.parcelamento_material ?? 1,
       data.material_a_vista ? 1 : 0, // Adicionado material_a_vista
       data.data_primeira_parcela ? String(data.data_primeira_parcela).slice(0, 10) : null,
+      data.servico_fiscal || null,
+      data.nbs || null,
     ])
 
     // Inserir itens

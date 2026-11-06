@@ -1302,6 +1302,8 @@ export default function OrcamentosPage({
           dadosOrigem={{
             origem: "orcamento",
             origem_numero: nfseOrcamento.numero,
+            servico_fiscal: (nfseOrcamento as any).servico_fiscal || null,
+            nbs: (nfseOrcamento as any).nbs || null,
             cliente_id: Number(nfseOrcamento.cliente_id),
             cliente_nome: nfseOrcamento.cliente_nome,
             cliente_cnpj: nfseOrcamento.cliente_cnpj,
