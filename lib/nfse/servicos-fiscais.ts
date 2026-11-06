@@ -1,6 +1,7 @@
 // Classificação fiscal dos serviços da Macintel (padrão NFS-e Nacional — LC 116 / NBS / IBS-CBS).
 // Definida no orçamento (ou fixa nos contratos) e usada na emissão da NFS-e, sem precisar escolher códigos.
-// Códigos levantados no emissor (Contabilizei / Emissor Nacional) — confirmar com o contador.
+// Códigos levantados no emissor (Contabilizei / Emissor Nacional) e validados pelo contador em 06/11/2026.
+// Simples Nacional: cClassTrib (IBS/CBS) não é obrigatório em 2026; o campo principal é o código nacional.
 
 export interface ServicoFiscal {
   id: string
@@ -36,6 +37,18 @@ export const SERVICOS_FISCAIS: ServicoFiscal[] = [
     codigoTributacaoMunicipal: "009",
     nbsPadrao: "1.2001.89.00",
     indOp: "050102",
+    servicoEmissao: { servicoId: "3314-7/10" },
+  },
+  {
+    // Validado pelo contador: conserto feito dentro da oficina usa indOp 050101 (no estabelecimento)
+    id: "conserto_bancada",
+    nome: "Conserto em bancada (na oficina da Macintel)",
+    cnae: "3314-7/10",
+    anexo: "III",
+    codigoTributacaoNacional: "14.01.01",
+    codigoTributacaoMunicipal: "009",
+    nbsPadrao: "1.2001.89.00",
+    indOp: "050101",
     servicoEmissao: { servicoId: "3314-7/10" },
   },
   {

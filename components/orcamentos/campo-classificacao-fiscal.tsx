@@ -49,7 +49,7 @@ export function CampoClassificacaoFiscal({
         <>
           <p className="text-[10px] leading-relaxed text-muted-foreground">
             CNAE {servico.cnae} · Anexo {servico.anexo} · Código nacional {servico.codigoTributacaoNacional} · Municipal{" "}
-            {servico.codigoTributacaoMunicipal} · Local: no cliente ({servico.indOp})
+            {servico.codigoTributacaoMunicipal} · Local: {servico.indOp === "050101" ? "na oficina" : "no cliente"} ({servico.indOp})
           </p>
           <div>
             <Label className="text-[10px]">Detalhamento do serviço (NBS)</Label>
