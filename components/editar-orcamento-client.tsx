@@ -1749,19 +1749,19 @@ export function EditarOrcamentoClient({
                       </div>
                     </div>
                   </div>
-                    <div className="mt-3">
-                      <CampoPrimeiraParcela
-                        value={dataPrimeiraParcela}
-                        onChange={(v) => {
-                          setDataPrimeiraEditada(true)
-                          setDataPrimeiraParcela(v)
-                        }}
-                        parcelamentoMdo={parcelamentoMdo}
-                        parcelamentoMaterial={parcelamentoMaterial}
-                        materialAVista={materialAVista}
-                        dataOrcamento={dataOrcamento}
-                      />
-                    </div>
+                  <div className="mt-3">
+                    <CampoPrimeiraParcela
+                      value={dataPrimeiraParcela}
+                      onChange={(v) => {
+                        setDataPrimeiraEditada(true)
+                        setDataPrimeiraParcela(v)
+                      }}
+                      parcelamentoMdo={parcelamentoMdo}
+                      parcelamentoMaterial={parcelamentoMaterial}
+                      materialAVista={materialAVista}
+                      dataOrcamento={dataOrcamento}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2 text-sm">
