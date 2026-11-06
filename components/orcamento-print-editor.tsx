@@ -261,6 +261,10 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
     return { parcelamentoMdo, parcelamentoMaterial, materialAVista, prazosMdo, prazosMaterial }
   }
 
+  const temCobrancaMdo = (parcelas: number, subtotal: number) => parcelas > 0 && subtotal > 0
+  const temCobrancaMaterial = (parcelas: number, aVista: boolean, subtotal: number) =>
+    (aVista || parcelas > 0) && subtotal > 0
+
   const gerarTextoParcelamento = () => {
     const { parcelamentoMdo, parcelamentoMaterial, materialAVista, prazosMdo, prazosMaterial } = parcelasOrcamento()
     const subtotalMdo = calcularSubtotalMdo()
@@ -269,29 +273,28 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
     const valorParcelaMdo = parcelamentoMdo > 0 ? subtotalMdo / parcelamentoMdo : 0
     const valorParcelaMaterial = parcelamentoMaterial > 0 ? subtotalMaterial / parcelamentoMaterial : 0
 
-    let texto = "Parcelamento: "
+    // Partes sem cobrança (0 parcelas ou valor zero) são omitidas da impressão
+    const partes: string[] = []
 
-    if (parcelamentoMdo === 0) {
-      texto += "Mão de Obra: Sem cobrança"
-    } else if (parcelamentoMdo === 1) {
-      texto += `Mão de Obra: ${prazosMdo[0] === "À vista" ? "À vista" : prazosMdo[0]} ${formatCurrency(subtotalMdo)}`
-    } else {
-      texto += `Mão de Obra: ${parcelamentoMdo}x ${formatCurrency(valorParcelaMdo)} (${prazosMdo.join(", ")})`
+    if (temCobrancaMdo(parcelamentoMdo, subtotalMdo)) {
+      partes.push(
+        parcelamentoMdo === 1
+          ? `Mão de Obra: ${prazosMdo[0]} ${formatCurrency(subtotalMdo)}`
+          : `Mão de Obra: ${parcelamentoMdo}x ${formatCurrency(valorParcelaMdo)} (${prazosMdo.join(", ")})`
+      )
     }
 
-    texto += " e "
-
-    if (materialAVista) {
-      texto += `Material: À vista ${formatCurrency(subtotalMaterial)}`
-    } else if (parcelamentoMaterial === 0) {
-      texto += "Material: Sem cobrança"
-    } else if (parcelamentoMaterial === 1) {
-      texto += `Material: ${prazosMaterial[0]} ${formatCurrency(subtotalMaterial)}`
-    } else {
-      texto += `Material: ${parcelamentoMaterial}x ${formatCurrency(valorParcelaMaterial)} (${prazosMaterial.join(", ")})`
+    if (temCobrancaMaterial(parcelamentoMaterial, materialAVista, subtotalMaterial)) {
+      if (materialAVista) {
+        partes.push(`Material: À vista ${formatCurrency(subtotalMaterial)}`)
+      } else if (parcelamentoMaterial === 1) {
+        partes.push(`Material: ${prazosMaterial[0]} ${formatCurrency(subtotalMaterial)}`)
+      } else {
+        partes.push(`Material: ${parcelamentoMaterial}x ${formatCurrency(valorParcelaMaterial)} (${prazosMaterial.join(", ")})`)
+      }
     }
 
-    return texto
+    return partes.length ? `Parcelamento: ${partes.join(" e ")}` : ""
   }
 
   const handleResizeStart = (e: React.MouseEvent, direction: string) => {
@@ -585,25 +588,29 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
       textoMaterial = `${parcelamentoMaterial}x (${prazosMaterial.join(", ")})`
     }
 
+    // Mão de obra / material sem cobrança não aparecem na impressão
+    const mostrarMdo = temCobrancaMdo(parcelamentoMdo, subtotalMdo)
+    const mostrarMaterial = temCobrancaMaterial(parcelamentoMaterial, materialAVista, subtotalMaterial)
+
     tabelaProdutosHTML += `
 <div style="margin-top: 6px;">
   ${descontoPercent > 0 ? `<p style="color: #dc2626; font-weight: bold; margin-bottom: 2px; font-size: 12px;">Desconto (${descontoPercent.toFixed(2)}%): - ${formatCurrency(descontoValor)}</p>` : ""}
-  <p style="font-weight: bold; margin-bottom: 2px; font-size: 12px;">Subtotal MDO: ${formatCurrency(subtotalMdo)}</p>
-  <p style="font-weight: bold; font-size: 12px;">Subtotal Material: ${formatCurrency(subtotalMaterial)}</p>
+  ${mostrarMdo ? `<p style="font-weight: bold; margin-bottom: 2px; font-size: 12px;">Subtotal MDO: ${formatCurrency(subtotalMdo)}</p>` : ""}
+  ${mostrarMaterial ? `<p style="font-weight: bold; font-size: 12px;">Subtotal Material: ${formatCurrency(subtotalMaterial)}</p>` : ""}
 </div>
 
 <div style="margin-top: 8px; border: 1px solid #000; padding: 8px;">
   <div style="text-align: center; margin-bottom: 6px;">
     <p style="font-weight: bold; font-size: 16px; color: #16a34a; margin-bottom: 2px;">Total: ${formatCurrency(valorTotal)}</p>
-    <p style="color: #2563eb; font-size: 11px; font-weight: 500;">${textoParcelamento}</p>
+    ${textoParcelamento ? `<p style="color: #2563eb; font-size: 11px; font-weight: 500;">${textoParcelamento}</p>` : ""}
   </div>
   
   <div style="border-top: 1px solid #000; padding-top: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10px;">
     <div style="padding-right: 6px;">
       <p style="margin-bottom: 2px;"><strong>Validade:</strong> ${calcularDataValidade()}</p>
       ${orcamento.prazo_dias ? `<p style="margin-bottom: 2px;"><strong>Prazo:</strong> ${orcamento.prazo_dias} dias úteis</p>` : ""}
-      <p style="margin-bottom: 2px;"><strong>Mão de obra:</strong> ${textoMdo}</p>
-      <p style="margin-bottom: 2px;"><strong>Material:</strong> ${textoMaterial}</p>
+      ${mostrarMdo ? `<p style="margin-bottom: 2px;"><strong>Mão de obra:</strong> ${textoMdo}</p>` : ""}
+      ${mostrarMaterial ? `<p style="margin-bottom: 2px;"><strong>Material:</strong> ${textoMaterial}</p>` : ""}
       <p style="margin-bottom: 2px;"><strong>Garantia:</strong> 90d serviços / 180d materiais</p>
       <p style="margin-bottom: 0;"><strong>Não inclui:</strong> Obras civis, pintura, limpeza</p>
     </div>
