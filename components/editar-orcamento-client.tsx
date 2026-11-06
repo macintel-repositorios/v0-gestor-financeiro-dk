@@ -31,6 +31,9 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { useFeriados } from "@/hooks/use-feriados"
+import { calcularJurosMaterial, situacaoRecebeDataPrimeiraParcela, sugerirDataPrimeiraParcela } from "@/lib/orcamento-parcelas"
+import { CampoPrimeiraParcela } from "@/components/orcamentos/campo-primeira-parcela"
 import { formatCurrency, cn } from "@/lib/utils"
 import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { ProdutoCombobox } from "@/components/produto-combobox"
@@ -125,6 +128,19 @@ export function EditarOrcamentoClient({
   const [dataOrcamento, setDataOrcamento] = useState(
     orcamento.data_orcamento ? orcamento.data_orcamento.split("T")[0] : new Date().toISOString().split("T")[0],
   )
+
+  // Data da 1ª parcela. Orçamentos pendentes/enviados sem a data recebem o padrão
+  // (dia 10 do mês seguinte ao orçamento, próximo dia útil); os demais ficam como estão.
+  const feriados = useFeriados()
+  const [dataPrimeiraParcela, setDataPrimeiraParcela] = useState<string>(
+    orcamento.data_primeira_parcela ? String(orcamento.data_primeira_parcela).slice(0, 10) : "",
+  )
+  const [dataPrimeiraEditada, setDataPrimeiraEditada] = useState(!!orcamento.data_primeira_parcela)
+  useEffect(() => {
+    if (!dataPrimeiraEditada && situacaoRecebeDataPrimeiraParcela(situacao)) {
+      setDataPrimeiraParcela(sugerirDataPrimeiraParcela(dataOrcamento, feriados))
+    }
+  }, [dataOrcamento, feriados, dataPrimeiraEditada, situacao])
 
   // Estado para controlar o modal de impressão
   const [showPrintModal, setShowPrintModal] = useState(false)
@@ -647,10 +663,16 @@ export function EditarOrcamentoClient({
     return distanciaKm * 2 * valorPorKm * prazoDias
   }
 
-  const calcularValorJuros = () => {
-    if (parcelamentoMaterial === 0) return 0
-    return ((parcelamentoMdo + parcelamentoMaterial - 1) * jurosAm * calcularValorMaterial()) / 100
-  }
+  const calcularValorJuros = () =>
+    calcularJurosMaterial({
+      parcelamentoMdo,
+      parcelamentoMaterial,
+      materialAVista,
+      jurosAm,
+      valorMaterial: calcularValorMaterial(),
+      dataOrcamento,
+      dataPrimeiraParcela,
+    })
 
   const calcularTaxaBoletoMdo = () => {
     return parcelamentoMdo * valorBoleto
@@ -859,6 +881,7 @@ export function EditarOrcamentoClient({
         parcelamento_mdo: parcelamentoMdo,
         parcelamento_material: materialAVista ? 1 : parcelamentoMaterial,
         material_a_vista: materialAVista,
+        data_primeira_parcela: dataPrimeiraParcela || null,
         custo_deslocamento: custoDeslocamento,
         valor_juros: valorJuros,
         taxa_boleto_mdo: taxaBoletoMdo,
@@ -929,7 +952,7 @@ export function EditarOrcamentoClient({
         triggerSaveRef.current = null
       }
     }
-  }, [triggerSaveRef, cliente, tipoServico, itens, detailsTextareaRef, detalhesServico, observacoes, situacao, dataOrcamento, dataInicio, distanciaKm, valorBoleto, prazoDias, jurosAm, impostoServico, impostoMaterial, descontoMdoPercent, parcelamentoMdo, parcelamentoMaterial, materialAVista, desconto])
+  }, [triggerSaveRef, cliente, tipoServico, itens, detailsTextareaRef, detalhesServico, observacoes, situacao, dataOrcamento, dataInicio, distanciaKm, valorBoleto, prazoDias, jurosAm, impostoServico, impostoMaterial, descontoMdoPercent, parcelamentoMdo, parcelamentoMaterial, materialAVista, desconto, dataPrimeiraParcela])
 
   if (!cliente) {
     return (
@@ -1723,6 +1746,19 @@ export function EditarOrcamentoClient({
                         <Label htmlFor="material_a_vista" className="text-xs cursor-pointer">
                           Material à vista
                         </Label>
+                      </div>
+                      <div className="mt-2">
+                        <CampoPrimeiraParcela
+                          value={dataPrimeiraParcela}
+                          onChange={(v) => {
+                            setDataPrimeiraEditada(true)
+                            setDataPrimeiraParcela(v)
+                          }}
+                          parcelamentoMdo={parcelamentoMdo}
+                          parcelamentoMaterial={parcelamentoMaterial}
+                          materialAVista={materialAVista}
+                          dataOrcamento={dataOrcamento}
+                        />
                       </div>
                     </div>
                   </div>

@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
         o.situacao,
         DATE_FORMAT(o.data_orcamento, '%Y-%m-%d') as data_orcamento,
         DATE_FORMAT(o.data_inicio, '%Y-%m-%d') as data_inicio,
+        DATE_FORMAT(o.data_primeira_parcela, '%Y-%m-%d') as data_primeira_parcela,
         DATE_FORMAT(o.created_at, '%Y-%m-%d %H:%i:%s') as created_at,
         DATE_FORMAT(o.updated_at, '%Y-%m-%d %H:%i:%s') as updated_at,
         o.distancia_km,
@@ -35,6 +36,8 @@ export async function GET(request: NextRequest) {
         o.desconto_mdo_valor,
         o.parcelamento_mdo,
         o.parcelamento_material,
+        o.material_a_vista,
+        o.valor_juros,
         c.nome as cliente_nome,
         c.codigo as cliente_codigo,
         c.cnpj as cliente_cnpj,
@@ -150,8 +153,9 @@ export async function POST(request: NextRequest) {
         parcelamento_mdo,
         parcelamento_material,
         material_a_vista,
+        data_primeira_parcela,
         created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `
 
     const orcamentoId = generateUUID()
@@ -182,6 +186,7 @@ export async function POST(request: NextRequest) {
       data.parcelamento_mdo ?? 1,
       data.parcelamento_material ?? 1,
       data.material_a_vista ? 1 : 0, // Adicionado material_a_vista
+      data.data_primeira_parcela ? String(data.data_primeira_parcela).slice(0, 10) : null,
     ])
 
     // Inserir itens

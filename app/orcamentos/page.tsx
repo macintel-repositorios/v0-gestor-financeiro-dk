@@ -37,6 +37,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { calcularJurosMaterial } from "@/lib/orcamento-parcelas"
 import { useToast } from "@/hooks/use-toast"
 import { EmitirNfseDialog } from "@/components/nfse/emitir-nfse-dialog"
 import { EmitirNfeDialog } from "@/components/nfe/emitir-nfe-dialog"
@@ -466,7 +467,18 @@ export default function OrcamentosPage({
     const impostoMaterialPerc = safeNumber(orc.imposto_material)
     const jurosAm = safeNumber(orc.juros_am)
 
-    const valorJuros = ((parcelamentoMdo + parcelamentoMaterial - 1) * jurosAm * valorMaterial) / 100
+    // Orçamento concluído: mantém os juros já salvos (não recalcula)
+    const valorJuros = String((orc as any).situacao || "").toLowerCase() === "concluido" && (orc as any).valor_juros != null
+      ? safeNumber((orc as any).valor_juros)
+      : calcularJurosMaterial({
+      parcelamentoMdo,
+      parcelamentoMaterial,
+      materialAVista: (orc as any).material_a_vista === true || (orc as any).material_a_vista === 1,
+      jurosAm,
+      valorMaterial,
+      dataOrcamento: (orc as any).data_orcamento,
+      dataPrimeiraParcela: (orc as any).data_primeira_parcela,
+    })
     const taxaBoletoMaterial = parcelamentoMaterial * valorBoleto
     const baseImposto = valorMaterial + valorJuros + taxaBoletoMaterial
     const impostoMaterialValor = (baseImposto * impostoMaterialPerc) / 100

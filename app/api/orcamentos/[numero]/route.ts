@@ -8,6 +8,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const orcamentoQuery = `
       SELECT 
         o.*,
+        DATE_FORMAT(o.data_primeira_parcela, '%Y-%m-%d') as data_primeira_parcela,
         c.nome as cliente_nome,
         c.codigo as cliente_codigo,
         c.cnpj as cliente_cnpj,
@@ -135,6 +136,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         parcelamento_mdo = ?,
         parcelamento_material = ?,
         material_a_vista = ?,
+        data_primeira_parcela = ?,
         custo_deslocamento = ?,
         valor_juros = ?,
         taxa_boleto_mdo = ?,
@@ -171,6 +173,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data.parcelamento_mdo ?? 1,
       data.parcelamento_material ?? 1,
       data.material_a_vista ? 1 : 0,
+      data.data_primeira_parcela ? String(data.data_primeira_parcela).slice(0, 10) : null,
       data.custo_deslocamento || 0,
       data.valor_juros || 0,
       data.taxa_boleto_mdo || 0,

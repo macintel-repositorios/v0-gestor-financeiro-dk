@@ -29,6 +29,9 @@ import {
   ChevronUp
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useFeriados } from "@/hooks/use-feriados"
+import { calcularJurosMaterial, sugerirDataPrimeiraParcela } from "@/lib/orcamento-parcelas"
+import { CampoPrimeiraParcela } from "@/components/orcamentos/campo-primeira-parcela"
 import { formatCurrency, cn } from "@/lib/utils"
 import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { ProdutoCombobox } from "@/components/produto-combobox"
@@ -101,6 +104,10 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
   const [parcelamentoMdo, setParcelamentoMdo] = useState(1)
   const [parcelamentoMaterial, setParcelamentoMaterial] = useState(1)
   const [materialAVista, setMaterialAVista] = useState(false)
+  // Data da 1ª parcela: padrão dia 10 do mês seguinte ao orçamento (próximo dia útil)
+  const feriados = useFeriados()
+  const [dataPrimeiraParcela, setDataPrimeiraParcela] = useState("")
+  const [dataPrimeiraEditada, setDataPrimeiraEditada] = useState(false)
 
   const [valorPorKm, setValorPorKm] = useState(1.5)
   const [dataOrcamento, setDataOrcamento] = useState(new Date().toISOString().split("T")[0])
@@ -232,6 +239,7 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
       setParcelamentoMdo(1)
       setParcelamentoMaterial(1)
       setMaterialAVista(false)
+      setDataPrimeiraEditada(false)
       setDataOrcamento(new Date().toISOString().split("T")[0])
       
       setExpandCliente(false)
@@ -570,10 +578,21 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
     )
   }
 
-  const calcularValorJuros = () => {
-    if (materialAVista || parcelamentoMaterial === 0) return 0
-    return ((parcelamentoMdo + parcelamentoMaterial - 1) * jurosAm * calcularValorMaterial()) / 100
-  }
+  // Enquanto o usuário não alterar a data, ela acompanha a data do orçamento (dia 10 do mês seguinte)
+  useEffect(() => {
+    if (!dataPrimeiraEditada) setDataPrimeiraParcela(sugerirDataPrimeiraParcela(dataOrcamento, feriados))
+  }, [dataOrcamento, feriados, dataPrimeiraEditada])
+
+  const calcularValorJuros = () =>
+    calcularJurosMaterial({
+      parcelamentoMdo,
+      parcelamentoMaterial,
+      materialAVista,
+      jurosAm,
+      valorMaterial: calcularValorMaterial(),
+      dataOrcamento,
+      dataPrimeiraParcela,
+    })
 
   const calcularTaxaBoletoMdo = () => {
     return parcelamentoMdo * valorBoleto
@@ -678,6 +697,7 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
         parcelamento_mdo: parcelamentoMdo,
         parcelamento_material: materialAVista ? 1 : parcelamentoMaterial,
         material_a_vista: materialAVista,
+        data_primeira_parcela: dataPrimeiraParcela || null,
         custo_deslocamento: calcularCustoDeslocamento(),
         valor_juros: calcularValorJuros(),
         taxa_boleto_mdo: calcularTaxaBoletoMdo(),
@@ -1363,6 +1383,20 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                         <Label htmlFor="material_a_vista_dialog" className="text-[10px] cursor-pointer">
                           Material à vista
                         </Label>
+                      </div>
+                      <div className="mt-2">
+                        <CampoPrimeiraParcela
+                          id="data_primeira_parcela_dialog"
+                          value={dataPrimeiraParcela}
+                          onChange={(v) => {
+                            setDataPrimeiraEditada(true)
+                            setDataPrimeiraParcela(v)
+                          }}
+                          parcelamentoMdo={parcelamentoMdo}
+                          parcelamentoMaterial={parcelamentoMaterial}
+                          materialAVista={materialAVista}
+                          dataOrcamento={dataOrcamento}
+                        />
                       </div>
                     </div>
 

@@ -22,6 +22,7 @@ import {
   Settings,
 } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { calcularJurosMaterial } from "@/lib/orcamento-parcelas"
 import { useToast } from "@/hooks/use-toast"
 import { OrcamentoPrintEditor } from "@/components/orcamento-print-editor"
 import { LaudoTecnicoPrintEditor } from "@/components/laudo-tecnico-print-editor"
@@ -248,10 +249,19 @@ export function VisualizarOrcamentoDialog({
     const parcelamentoMaterial = orcamento.parcelamento_material !== undefined && orcamento.parcelamento_material !== null
       ? safeNumber(orcamento.parcelamento_material)
       : 1
-    if (parcelamentoMaterial === 0) return 0
-    const jurosAm = safeNumber(orcamento.juros_am)
-    const valorMaterial = safeNumber(orcamento.valor_material)
-    return ((parcelamentoMdo + parcelamentoMaterial - 1) * jurosAm * valorMaterial) / 100
+    // Orçamento concluído: mantém os juros já salvos (não recalcula)
+    if (String((orcamento as any).situacao || "").toLowerCase() === "concluido" && (orcamento as any).valor_juros != null) {
+      return safeNumber((orcamento as any).valor_juros)
+    }
+    return calcularJurosMaterial({
+      parcelamentoMdo,
+      parcelamentoMaterial,
+      materialAVista: (orcamento as any).material_a_vista === true || (orcamento as any).material_a_vista === 1,
+      jurosAm: safeNumber(orcamento.juros_am),
+      valorMaterial: safeNumber(orcamento.valor_material),
+      dataOrcamento: (orcamento as any).data_orcamento,
+      dataPrimeiraParcela: (orcamento as any).data_primeira_parcela,
+    })
   }
 
   const calcularTaxaBoletoMdo = () => {

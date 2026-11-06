@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
+import { useFeriados } from "@/hooks/use-feriados"
+import { cronogramaParcelas, formatarDataBR } from "@/lib/orcamento-parcelas"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -129,6 +131,7 @@ interface TermoOrcamento {
 }
 
 export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mode = "editor" }: OrcamentoPrintEditorProps) {
+  const feriados = useFeriados()
   const [timbradoConfig, setTimbradoConfig] = useState<TimbradoConfig | null>(null)
   const [logoImpressao, setLogoImpressao] = useState<LogoConfig | null>(null)
   const [termoOrcamento, setTermoOrcamento] = useState<TermoOrcamento | null>(null)
@@ -237,29 +240,43 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
     return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor + custoDeslocamentoExtra
   }
 
-  const gerarTextoParcelamento = () => {
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
-    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material) || 1
+  // Parcelas do orçamento (0 = sem cobrança; vazio = 1). Com "data da 1ª parcela", usa as datas reais (dia útil).
+  const parcelasOrcamento = () => {
+    const valorOu1 = (v: any) => (v === undefined || v === null || v === "" ? 1 : safeNumber(v))
+    const parcelamentoMdo = valorOu1(orcamento.parcelamento_mdo)
+    const parcelamentoMaterial = valorOu1(orcamento.parcelamento_material)
     const materialAVista = orcamento.material_a_vista === true || orcamento.material_a_vista === 1
+    const datas = cronogramaParcelas(
+      { parcelamentoMdo, parcelamentoMaterial, materialAVista, dataPrimeiraParcela: orcamento.data_primeira_parcela },
+      feriados
+    )
+    const comDatas = datas.mdo.length > 0 || datas.material.length > 0
+    const prazosMdo = comDatas
+      ? datas.mdo.map(formatarDataBR)
+      : Array.from({ length: parcelamentoMdo }, (_, i) => (i === 0 ? "À vista" : `${i * 30}dd`))
+    const inicioMaterial = parcelamentoMdo * 30
+    const prazosMaterial = comDatas
+      ? datas.material.map(formatarDataBR)
+      : Array.from({ length: parcelamentoMaterial }, (_, i) => `${(parcelamentoMdo === 0 ? 30 : inicioMaterial) + i * 30}dd`)
+    return { parcelamentoMdo, parcelamentoMaterial, materialAVista, prazosMdo, prazosMaterial }
+  }
+
+  const gerarTextoParcelamento = () => {
+    const { parcelamentoMdo, parcelamentoMaterial, materialAVista, prazosMdo, prazosMaterial } = parcelasOrcamento()
     const subtotalMdo = calcularSubtotalMdo()
     const subtotalMaterial = calcularSubtotalMaterial()
 
-    const valorParcelaMdo = subtotalMdo / parcelamentoMdo
-    const valorParcelaMaterial = subtotalMaterial / parcelamentoMaterial
+    const valorParcelaMdo = parcelamentoMdo > 0 ? subtotalMdo / parcelamentoMdo : 0
+    const valorParcelaMaterial = parcelamentoMaterial > 0 ? subtotalMaterial / parcelamentoMaterial : 0
 
     let texto = "Parcelamento: "
 
     if (parcelamentoMdo === 0) {
       texto += "Mão de Obra: Sem cobrança"
     } else if (parcelamentoMdo === 1) {
-      texto += `Mão de Obra: À vista ${formatCurrency(subtotalMdo)}`
+      texto += `Mão de Obra: ${prazosMdo[0] === "À vista" ? "À vista" : prazosMdo[0]} ${formatCurrency(subtotalMdo)}`
     } else {
-      // Generate payment schedule starting from cash (0dd), then 30dd, 60dd, etc.
-      const parcelasMdo = []
-      for (let i = 0; i < parcelamentoMdo; i++) {
-        parcelasMdo.push(i === 0 ? "À vista" : `${i * 30}dd`)
-      }
-      texto += `Mão de Obra: ${parcelamentoMdo}x ${formatCurrency(valorParcelaMdo)} (${parcelasMdo.join(", ")})`
+      texto += `Mão de Obra: ${parcelamentoMdo}x ${formatCurrency(valorParcelaMdo)} (${prazosMdo.join(", ")})`
     }
 
     texto += " e "
@@ -269,17 +286,9 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
     } else if (parcelamentoMaterial === 0) {
       texto += "Material: Sem cobrança"
     } else if (parcelamentoMaterial === 1) {
-      // Material starts after last MDO payment
-      const inicioMaterial = parcelamentoMdo * 30
-      texto += `Material: ${inicioMaterial}dd ${formatCurrency(subtotalMaterial)}`
+      texto += `Material: ${prazosMaterial[0]} ${formatCurrency(subtotalMaterial)}`
     } else {
-      // Material starts after the last MDO payment
-      const inicioMaterial = parcelamentoMdo * 30
-      const parcelasMaterial = []
-      for (let i = 0; i < parcelamentoMaterial; i++) {
-        parcelasMaterial.push(`${inicioMaterial + i * 30}dd`)
-      }
-      texto += `Material: ${parcelamentoMaterial}x ${formatCurrency(valorParcelaMaterial)} (${parcelasMaterial.join(", ")})`
+      texto += `Material: ${parcelamentoMaterial}x ${formatCurrency(valorParcelaMaterial)} (${prazosMaterial.join(", ")})`
     }
 
     return texto
@@ -556,35 +565,24 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
     const subtotalMaterial = calcularSubtotalMaterial()
     const textoParcelamento = gerarTextoParcelamento()
 
-    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
-    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material) || 1
-    const materialAVista = orcamento.material_a_vista === true || orcamento.material_a_vista === 1
+    const { parcelamentoMdo, parcelamentoMaterial, materialAVista, prazosMdo, prazosMaterial } = parcelasOrcamento()
 
-    let textoMdo = "À vista"
+    let textoMdo = prazosMdo[0] || "À vista"
     if (parcelamentoMdo === 0) {
       textoMdo = "Sem cobrança"
     } else if (parcelamentoMdo > 1) {
-      const parcelasMdo = []
-      for (let i = 0; i < parcelamentoMdo; i++) {
-        parcelasMdo.push(i === 0 ? "À vista" : `${i * 30}dd`)
-      }
-      textoMdo = `${parcelamentoMdo}x (${parcelasMdo.join(", ")})`
+      textoMdo = `${parcelamentoMdo}x (${prazosMdo.join(", ")})`
     }
 
-    const inicioMaterial = parcelamentoMdo * 30
     let textoMaterial = "À vista"
     if (materialAVista) {
       textoMaterial = "À vista"
     } else if (parcelamentoMaterial === 0) {
       textoMaterial = "Sem cobrança"
     } else if (parcelamentoMaterial === 1) {
-      textoMaterial = `${inicioMaterial}dd`
+      textoMaterial = prazosMaterial[0]
     } else {
-      const parcelasMaterial = []
-      for (let i = 0; i < parcelamentoMaterial; i++) {
-        parcelasMaterial.push(`${inicioMaterial + i * 30}dd`)
-      }
-      textoMaterial = `${parcelamentoMaterial}x (${parcelasMaterial.join(", ")})`
+      textoMaterial = `${parcelamentoMaterial}x (${prazosMaterial.join(", ")})`
     }
 
     tabelaProdutosHTML += `
