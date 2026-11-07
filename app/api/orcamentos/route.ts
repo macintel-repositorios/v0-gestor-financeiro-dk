@@ -158,8 +158,10 @@ export async function POST(request: NextRequest) {
         data_primeira_parcela,
         servico_fiscal,
         nbs,
+        subtotal_mdo,
+        subtotal_material,
         created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `
 
     const orcamentoId = generateUUID()
@@ -193,6 +195,9 @@ export async function POST(request: NextRequest) {
       data.data_primeira_parcela ? String(data.data_primeira_parcela).slice(0, 10) : null,
       data.servico_fiscal || null,
       data.nbs || null,
+      // a impressão usa estes subtotais (antes só eram gravados ao editar)
+      data.subtotal_mdo || 0,
+      data.subtotal_material || 0,
     ])
 
     // Inserir itens
