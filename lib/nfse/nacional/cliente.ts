@@ -42,15 +42,15 @@ export const deGzB64 = (b64: string) => gunzipSync(Buffer.from(b64, "base64")).t
 
 interface Resposta { status: number; json: any; texto: string; buffer: Buffer }
 
-function requisicao(url: string, metodo: string, pfx: Buffer, senha: string, corpo?: unknown): Promise<Resposta> {
+function requisicao(url: string, metodo: string, cred: { cert: string; key: string }, corpo?: unknown): Promise<Resposta> {
   return new Promise((resolve, reject) => {
     const dados = corpo === undefined ? undefined : Buffer.from(JSON.stringify(corpo), "utf8")
     const req = https.request(
       url,
       {
         method: metodo,
-        pfx,
-        passphrase: senha,
+        cert: cred.cert,
+        key: cred.key,
         headers: {
           Accept: "application/json",
           ...(dados ? { "Content-Type": "application/json", "Content-Length": dados.length } : {}),
@@ -78,15 +78,17 @@ function requisicao(url: string, metodo: string, pfx: Buffer, senha: string, cor
 
 export interface CredenciaisNacional { ambiente: AmbienteNacional; pfxBase64: string; senha: string }
 
-function pfxBuffer(b64: string) {
-  return Buffer.from((b64.includes(",") ? b64.split(",")[1] : b64).replace(/\s/g, ""), "base64")
+// PFX de A1 costuma usar cifra legada (RC2) não suportada pelo OpenSSL 3 do Node — usa PEM extraído via node-forge
+function credTls(c: CredenciaisNacional) {
+  const { certPem, keyPem } = extrairCertKeyDoPfx(c.pfxBase64, c.senha)
+  return { cert: certPem, key: keyPem }
 }
 
 async function chamarSefin(c: CredenciaisNacional, caminho: string, metodo: string, corpo?: unknown) {
-  const pfx = pfxBuffer(c.pfxBase64)
+  const cred = credTls(c)
   let r: Resposta | null = null
   for (const prefixo of PREFIXOS) {
-    r = await requisicao(`${HOSTS[c.ambiente].sefin}${prefixo}${caminho}`, metodo, pfx, c.senha, corpo)
+    r = await requisicao(`${HOSTS[c.ambiente].sefin}${prefixo}${caminho}`, metodo, cred, corpo)
     if (!(r.status === 404 && !r.json)) break
   }
   return r!
@@ -152,12 +154,12 @@ export async function cancelarNfse(
   dados: { chave: string; cnpjAutor: string; cMotivo: 1 | 2 | 9; motivo: string; dhEvento: string },
 ) {
   const { certPem, keyPem } = extrairCertKeyDoPfx(c.pfxBase64, c.senha)
-  const id = `PRE${dados.chave}101101001`
+  const id = `PRE${dados.chave}101101`
   const xml =
     `<pedRegEvento xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.01"><infPedReg Id="${id}">` +
     `<tpAmb>${c.ambiente === "producao" ? 1 : 2}</tpAmb><verAplic>GestorMacintel_1.0</verAplic>` +
     `<dhEvento>${dados.dhEvento}</dhEvento><CNPJAutor>${dados.cnpjAutor.replace(/[^0-9]/g, "")}</CNPJAutor>` +
-    `<chNFSe>${dados.chave}</chNFSe><nPedRegEvento>1</nPedRegEvento>` +
+    `<chNFSe>${dados.chave}</chNFSe>` +
     `<e101101><xDesc>Cancelamento de NFS-e</xDesc><cMotivo>${dados.cMotivo}</cMotivo>` +
     `<xMotivo>${dados.motivo.replace(/[<>&]/g, " ").slice(0, 255)}</xMotivo></e101101>` +
     `</infPedReg></pedRegEvento>`
@@ -168,6 +170,6 @@ export async function cancelarNfse(
 
 /** PDF oficial (DANFSe) gerado pelo Ambiente de Dados Nacional */
 export async function baixarDanfse(c: CredenciaisNacional, chave: string): Promise<Buffer | null> {
-  const r = await requisicao(`${HOSTS[c.ambiente].adn}/danfse/${chave}`, "GET", pfxBuffer(c.pfxBase64), c.senha)
+  const r = await requisicao(`${HOSTS[c.ambiente].adn}/danfse/${chave}`, "GET", credTls(c))
   return r.status === 200 && r.buffer.subarray(0, 4).toString() === "%PDF" ? r.buffer : null
 }

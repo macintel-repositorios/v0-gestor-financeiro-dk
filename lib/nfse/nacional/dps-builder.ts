@@ -86,6 +86,7 @@ export function montarDps(d: DadosDps): { xml: string; id: string } {
     `<nDPS>${d.numero}</nDPS>` +
     `<dCompet>${d.dCompet}</dCompet>` +
     `<tpEmit>1</tpEmit>` +
+    `<finNFSe>0</finNFSe>` + // 0 = NFS-e regular (leiaute vigente na Sefin)
     `<cLocEmi>${cMunEmi}</cLocEmi>` +
     `<prest><CNPJ>${so(d.prestador.cnpj)}</CNPJ>` +
     // Simples Nacional ME/EPP (opSimpNac 3), apuração pelo SN (1), sem regime especial (0)
@@ -93,7 +94,7 @@ export function montarDps(d: DadosDps): { xml: string; id: string } {
     `<toma>${docTomador}${tag("xNome", t.nome)}${endereco}${tag("email", t.email)}</toma>` +
     `<serv><locPrest><cLocPrestacao>${s.codMunPrestacao || cMunEmi}</cLocPrestacao></locPrest>` +
     `<cServ><cTribNac>${so(s.codTribNacional)}</cTribNac>${tag("cTribMun", so(s.codTribMunicipal))}` +
-    `${tag("xDescServ", s.descricao.slice(0, 2000))}${tag("cNBS", so(s.nbs))}</cServ></serv>` +
+    `${tag("cNBS", so(s.nbs))}${tag("xDescServ", s.descricao.slice(0, 2000))}</cServ></serv>` +
     `<valores><vServPrest><vServ>${dec(d.valor)}</vServ></vServPrest>` +
     `<trib><tribMun><tribISSQN>1</tribISSQN><tpRetISSQN>1</tpRetISSQN></tribMun>` +
     `<tribFed><piscofins><CST>00</CST><vPis>0</vPis><vCofins>0</vCofins><tpRetPisCofins>0</tpRetPisCofins></piscofins></tribFed>` +
