@@ -562,7 +562,6 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
 </div>
 `
 
-    const descontoValor = Number(orcamento.desconto_mdo_valor) || 0
     const descontoPercent = Number(orcamento.desconto_mdo_percent) || 0
     const subtotalMdo = calcularSubtotalMdo()
     const subtotalMaterial = calcularSubtotalMaterial()
@@ -594,7 +593,9 @@ export function OrcamentoPrintEditor({ open, onOpenChange, orcamento, itens, mod
 
     tabelaProdutosHTML += `
 <div style="margin-top: 6px;">
-  ${descontoPercent > 0 ? `<p style="color: #dc2626; font-weight: bold; margin-bottom: 2px; font-size: 12px;">Desconto (${descontoPercent.toFixed(2)}%): - ${formatCurrency(descontoValor)}</p>` : ""}
+  ${/* Pedido do usuário: na impressão, o desconto exibido é o % do orçamento aplicado sobre o Subtotal MDO
+       (ex.: 50% de R$ 224,38 = R$ 112,19). Só exibição — os cálculos e o desconto real (desconto_mdo_valor) não mudam. */ ""}
+  ${descontoPercent > 0 && subtotalMdo > 0 ? `<p style="color: #dc2626; font-weight: bold; margin-bottom: 2px; font-size: 12px;">Desconto (${descontoPercent.toFixed(2)}%) MDO: - ${formatCurrency(subtotalMdo * descontoPercent / 100)}</p>` : ""}
   ${mostrarMdo ? `<p style="font-weight: bold; margin-bottom: 2px; font-size: 12px;">Subtotal MDO: ${formatCurrency(subtotalMdo)}</p>` : ""}
   ${mostrarMaterial ? `<p style="font-weight: bold; font-size: 12px;">Subtotal Material: ${formatCurrency(subtotalMaterial)}</p>` : ""}
 </div>
