@@ -80,8 +80,7 @@ export function DanfseNacional({ nota, logo }: { nota: any; logo?: string | null
         <tbody>
           <tr>
             <td style={{ ...celula, width: "28%", verticalAlign: "middle" }}>
-              <div style={{ fontSize: "20px", fontWeight: "bold", color: "#1b4f9c" }}>NFS-e</div>
-              <div style={{ fontSize: "7px", color: "#555" }}>Nota Fiscal de Serviço eletrônica</div>
+              <img src="/images/nfse-logo.png" alt="NFS-e Nota Fiscal de Serviço eletrônica" style={{ display: "block", width: 170, height: "auto" }} />
             </td>
             <td style={{ ...celula, textAlign: "center", verticalAlign: "middle" }}>
               <div style={{ fontSize: "12px", fontWeight: "bold" }}>DANFSe v1.0</div>
@@ -261,7 +260,8 @@ export function DanfseNacional({ nota, logo }: { nota: any; logo?: string | null
 }
 
 const tabela: React.CSSProperties = { width: "100%", borderCollapse: "collapse", border: "1px solid #000", borderTop: "none", position: "relative", zIndex: 2 }
-const celula: React.CSSProperties = { padding: "4px 7px", verticalAlign: "top", border: "1px solid #999" }
+// padding inferior maior: o html2canvas desenha o texto um pouco abaixo e ele encostava na linha
+const celula: React.CSSProperties = { padding: "4px 8px 8px", verticalAlign: "top", border: "1px solid #999" }
 
 function Secao({ children }: { children: React.ReactNode }) {
   return (
