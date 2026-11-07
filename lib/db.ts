@@ -19,6 +19,9 @@ const pool = mysql.createPool({
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000,
   charset: "utf8mb4",
+  // O MySQL da Hostinger grava NOW() em UTC: lê as datas como UTC em qualquer máquina
+  // (na Vercel já era assim; evita horário adiantado 3h ao rodar localmente)
+  timezone: "Z",
 })
 
 // Verificar conexão no startup com retry

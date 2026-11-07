@@ -29,7 +29,14 @@ const cep = (v?: string | null) => {
   return c === "00000000" ? "-" : c.replace(/(\d{5})(\d{3})/, "$1-$2")
 }
 const dataBR = (v?: string | null) => (v ? v.slice(0, 10).split("-").reverse().join("/") : "-")
-const dataHoraBR = (v?: string | null) => (v ? `${dataBR(v)} ${v.slice(11, 19)}` : "-")
+// XML traz horário local com offset (-03:00); datas do banco chegam em UTC ("Z") e são convertidas para Brasília
+const dataHoraBR = (v?: string | Date | null) => {
+  if (!v) return "-"
+  const t = String(v instanceof Date ? v.toISOString() : v)
+  if (/[+-]\d{2}:\d{2}$/.test(t)) return `${dataBR(t)} ${t.slice(11, 19)}`
+  const d = new Date(t)
+  return isNaN(d.getTime()) ? t : d.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }).replace(",", "")
+}
 const codTrib = (c?: string | null) => {
   const s = String(c || "").replace(/[^0-9]/g, "")
   return s.length === 6 ? `${s.slice(0, 2)}.${s.slice(2, 4)}.${s.slice(4)}` : c || "-"
@@ -240,7 +247,7 @@ export function DanfseNacional({ nota, logo }: { nota: any; logo?: string | null
           <tbody>
             <tr>
               <td style={{ ...celula, textAlign: "center", color: "#c00", fontWeight: "bold" }}>
-                NFS-e CANCELADA{nota.data_cancelamento ? ` em ${new Date(nota.data_cancelamento).toLocaleString("pt-BR")}` : ""}
+                NFS-e CANCELADA{nota.data_cancelamento ? ` em ${dataHoraBR(nota.data_cancelamento)}` : ""}
                 {nota.motivo_cancelamento ? ` — Motivo: ${nota.motivo_cancelamento}` : ""}
               </td>
             </tr>
@@ -256,7 +263,7 @@ const celula: React.CSSProperties = { padding: "4px 7px", verticalAlign: "top", 
 
 function Secao({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ background: "#1b4f9c", color: "#fff", fontWeight: "bold", fontSize: "8.5px", padding: "3px 8px", textTransform: "uppercase", border: "1px solid #1b4f9c", marginTop: 4 }}>
+    <div style={{ background: "#1b4f9c", color: "#fff", fontWeight: "bold", fontSize: "8.5px", lineHeight: 1, padding: "3px 8px 7px", textTransform: "uppercase", border: "1px solid #1b4f9c", marginTop: 4 }}>
       {children}
     </div>
   )

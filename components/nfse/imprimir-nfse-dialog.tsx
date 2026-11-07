@@ -366,7 +366,8 @@ export function NfsePrefeituraSP({ nota, prestador, logo, brasaoBase64 }: { nota
                   color: "#fff",
                   fontWeight: "bold",
                   fontSize: "11px",
-                  padding: "3px 10px",
+                  lineHeight: 1,
+                  padding: "3px 10px 8px",
                   marginBottom: 6,
                   textAlign: "center",
                 }}>
@@ -681,7 +682,9 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
       color: "#fff",
       fontSize: "9px",
       fontWeight: "bold",
-      padding: "4px 12px",
+      lineHeight: 1,
+      // html2canvas desenha o texto ~3px abaixo: padding inferior maior centraliza na faixa do PDF
+      padding: "3px 12px 7px",
       letterSpacing: "0.5px",
       textTransform: "uppercase",
       border: "1px solid #1a3a6e",
