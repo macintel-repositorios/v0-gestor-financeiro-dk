@@ -32,6 +32,7 @@ export interface DadosDps {
   }
   valor: number
   valorTotTribMun?: number // Lei 12.741 (aprox.)
+  valorTotTribFed?: number
   percTotTribSN?: number // alíquota efetiva do Simples (%), alternativa ao valor por esfera
 }
 
@@ -77,6 +78,8 @@ export function montarDps(d: DadosDps): { xml: string; id: string } {
       : ""
 
   const s = d.servico
+  // Leiaute da produção restrita (homologação) está à frente do da produção
+  const novo = d.ambiente === "homologacao"
   const xml =
     `<DPS xmlns="${NS_NFSE}" versao="${VERSAO_DPS}">` +
     `<infDPS Id="${id}">` +
@@ -87,7 +90,8 @@ export function montarDps(d: DadosDps): { xml: string; id: string } {
     `<nDPS>${d.numero}</nDPS>` +
     `<dCompet>${d.dCompet}</dCompet>` +
     `<tpEmit>1</tpEmit>` +
-    `<finNFSe>0</finNFSe>` + // 0 = NFS-e regular (leiaute vigente na Sefin)
+    // finNFSe só existe no leiaute novo (produção restrita); a produção ainda o recusa (E1235)
+    (novo ? `<finNFSe>0</finNFSe>` : "") +
     `<cLocEmi>${cMunEmi}</cLocEmi>` +
     `<prest><CNPJ>${so(d.prestador.cnpj)}</CNPJ>` +
     // Simples Nacional ME/EPP (opSimpNac 3), apuração pelo SN (1), sem regime especial (0)
@@ -95,14 +99,18 @@ export function montarDps(d: DadosDps): { xml: string; id: string } {
     `<toma>${docTomador}${tag("xNome", t.nome)}${endereco}${tag("email", t.email)}</toma>` +
     `<serv><locPrest><cLocPrestacao>${s.codMunPrestacao || cMunEmi}</cLocPrestacao></locPrest>` +
     `<cServ><cTribNac>${so(s.codTribNacional)}</cTribNac>${tag("cTribMun", so(s.codTribMunicipal))}` +
-    `${tag("cNBS", so(s.nbs))}${tag("xDescServ", s.descricao.slice(0, 2000))}</cServ></serv>` +
+    // ordem do cNBS difere entre os leiautes: novo = antes da descrição; produção = depois (como na NFS-e nº 1 do portal)
+    (novo
+      ? `${tag("cNBS", so(s.nbs))}${tag("xDescServ", s.descricao.slice(0, 2000))}`
+      : `${tag("xDescServ", s.descricao.slice(0, 2000))}${tag("cNBS", so(s.nbs))}`) +
+    `</cServ></serv>` +
     `<valores><vServPrest><vServ>${dec(d.valor)}</vServ></vServPrest>` +
     `<trib><tribMun><tribISSQN>1</tribISSQN><tpRetISSQN>1</tpRetISSQN></tribMun>` +
     `<tribFed><piscofins><CST>00</CST><vPis>0</vPis><vCofins>0</vCofins><tpRetPisCofins>0</tpRetPisCofins></piscofins></tribFed>` +
     `<totTrib>` +
-    (d.percTotTribSN
+    (novo && d.percTotTribSN
       ? `<pTotTribSN>${dec(d.percTotTribSN)}</pTotTribSN>`
-      : `<vTotTrib><vTotTribFed>0</vTotTribFed><vTotTribEst>0</vTotTribEst><vTotTribMun>${dec(d.valorTotTribMun || 0)}</vTotTribMun></vTotTrib>`) +
+      : `<vTotTrib><vTotTribFed>${dec(d.valorTotTribFed || 0)}</vTotTribFed><vTotTribEst>0</vTotTribEst><vTotTribMun>${dec(d.valorTotTribMun || 0)}</vTotTribMun></vTotTrib>`) +
     `</totTrib></trib></valores>` +
     `</infDPS></DPS>`
 

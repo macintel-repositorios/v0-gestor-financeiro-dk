@@ -95,6 +95,10 @@ export async function emitirNfseNacional(connection: PoolConnection, body: any, 
     },
     valor,
     percTotTribSN: aliquota * 100,
+    // Produção: valores aproximados por esfera (Lei 12.741), ISS ≈ 32,5% da alíquota do Simples (Anexo III),
+    // mesmo critério da NFS-e nº 1 emitida pelo portal (R$ 250 → R$ 7,69 municipal)
+    valorTotTribMun: valor * aliquota * 0.325,
+    valorTotTribFed: valor * aliquota * 0.675,
   })
 
   const [ins] = await connection.execute(
