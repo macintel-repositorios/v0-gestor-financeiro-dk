@@ -6,6 +6,8 @@
 export interface ServicoFiscal {
   id: string
   nome: string
+  /** Texto sugerido para o "Tipo de Serviço" do orçamento ao escolher esta classificação */
+  tipoServico: string
   cnae: string
   anexo: "III" | "IV"
   codigoTributacaoNacional: string // cTribNac (LC 116)
@@ -20,6 +22,7 @@ export const SERVICOS_FISCAIS: ServicoFiscal[] = [
   {
     id: "contrato_manutencao",
     nome: "Contrato de manutenção (limpeza e lubrificação)",
+    tipoServico: "MANUTENÇÃO PREVENTIVA",
     cnae: "3314-7/10",
     anexo: "III",
     codigoTributacaoNacional: "14.01.01",
@@ -31,6 +34,7 @@ export const SERVICOS_FISCAIS: ServicoFiscal[] = [
   {
     id: "conserto",
     nome: "Conserto / manutenção corretiva",
+    tipoServico: "CONSERTO",
     cnae: "3314-7/10",
     anexo: "III",
     codigoTributacaoNacional: "14.01.01",
@@ -43,6 +47,7 @@ export const SERVICOS_FISCAIS: ServicoFiscal[] = [
     // Validado pelo contador: conserto feito dentro da oficina usa indOp 050101 (no estabelecimento)
     id: "conserto_bancada",
     nome: "Conserto em bancada (na oficina da Macintel)",
+    tipoServico: "CONSERTO EM BANCADA",
     cnae: "3314-7/10",
     anexo: "III",
     codigoTributacaoNacional: "14.01.01",
@@ -54,6 +59,7 @@ export const SERVICOS_FISCAIS: ServicoFiscal[] = [
   {
     id: "instalacao_material_macintel",
     nome: "Instalação com material da Macintel (serviço isolado)",
+    tipoServico: "INSTALAÇÃO",
     cnae: "4321-5/00",
     anexo: "III",
     codigoTributacaoNacional: "07.02.01",
@@ -65,6 +71,7 @@ export const SERVICOS_FISCAIS: ServicoFiscal[] = [
   {
     id: "instalacao_obra",
     nome: "Instalação dentro de obra de engenharia",
+    tipoServico: "INSTALAÇÃO EM OBRA",
     cnae: "4321-5/00",
     anexo: "IV",
     codigoTributacaoNacional: "07.02.01",
@@ -76,6 +83,7 @@ export const SERVICOS_FISCAIS: ServicoFiscal[] = [
   {
     id: "instalacao_material_cliente",
     nome: "Instalação com material do cliente (só mão de obra)",
+    tipoServico: "INSTALAÇÃO (MATERIAL DO CLIENTE)",
     cnae: "4321-5/00",
     anexo: "III",
     codigoTributacaoNacional: "14.06.01",
@@ -101,6 +109,14 @@ export const NBS_OPCOES: { codigo: string; descricao: string }[] = [
   { codigo: "1.2003.23.00", descricao: "Instalação de equipamentos de comunicação" },
   { codigo: "1.2003.29.00", descricao: "Instalação de maquinários/equipamentos (padrão material do cliente)" },
 ]
+
+/** Novo "Tipo de Serviço" ao trocar a classificação: preenche se vazio ou se ainda é um texto sugerido (não apaga o que o usuário digitou) */
+export function tipoServicoAoClassificar(atual: string, servicoId: string): string {
+  const t = atual.trim()
+  const sugestao = SERVICOS_FISCAIS.find((s) => s.id === servicoId)?.tipoServico
+  if (!sugestao) return atual
+  return !t || SERVICOS_FISCAIS.some((s) => s.tipoServico === t) ? sugestao : atual
+}
 
 export const getServicoFiscal = (id?: string | null) => SERVICOS_FISCAIS.find((s) => s.id === id) || null
 

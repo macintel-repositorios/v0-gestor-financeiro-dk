@@ -33,7 +33,7 @@ import { useFeriados } from "@/hooks/use-feriados"
 import { calcularJurosMaterial, sugerirDataPrimeiraParcela } from "@/lib/orcamento-parcelas"
 import { CampoPrimeiraParcela } from "@/components/orcamentos/campo-primeira-parcela"
 import { CampoClassificacaoFiscal } from "@/components/orcamentos/campo-classificacao-fiscal"
-import { getServicoFiscal, sugerirServicoFiscal } from "@/lib/nfse/servicos-fiscais"
+import { getServicoFiscal, sugerirServicoFiscal, tipoServicoAoClassificar } from "@/lib/nfse/servicos-fiscais"
 import { formatCurrency, cn } from "@/lib/utils"
 import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { ProdutoCombobox } from "@/components/produto-combobox"
@@ -995,17 +995,6 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                     {expandDetalhes && (
                       <div className="space-y-4 mt-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="tipo_servico" className="text-xs">Tipo de Serviço *</Label>
-                            <Input
-                              id="tipo_servico"
-                              value={tipoServico}
-                              onChange={(e) => setTipoServico(e.target.value)}
-                              placeholder="Ex: Manutenção..."
-                              className="h-9 border-border text-xs"
-                              required
-                            />
-                          </div>
                           <div className="sm:col-span-2">
                             <CampoClassificacaoFiscal
                               obrigatorio
@@ -1013,9 +1002,21 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                               onServicoFiscal={(v) => {
                                 setServicoFiscalEditado(true)
                                 setServicoFiscal(v)
+                                setTipoServico((t) => tipoServicoAoClassificar(t, v))
                               }}
                               nbs={nbs}
                               onNbs={setNbs}
+                            />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <Label htmlFor="tipo_servico" className="text-xs">Tipo de Serviço *</Label>
+                            <Input
+                              id="tipo_servico"
+                              value={tipoServico}
+                              onChange={(e) => setTipoServico(e.target.value)}
+                              placeholder="Preenchido pela classificação — complemente se quiser"
+                              className="h-9 border-border text-xs"
+                              required
                             />
                           </div>
                           <div>

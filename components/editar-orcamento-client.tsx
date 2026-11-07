@@ -35,7 +35,7 @@ import { useFeriados } from "@/hooks/use-feriados"
 import { calcularJurosMaterial, situacaoRecebeDataPrimeiraParcela, sugerirDataPrimeiraParcela } from "@/lib/orcamento-parcelas"
 import { CampoPrimeiraParcela } from "@/components/orcamentos/campo-primeira-parcela"
 import { CampoClassificacaoFiscal } from "@/components/orcamentos/campo-classificacao-fiscal"
-import { getServicoFiscal, sugerirServicoFiscal } from "@/lib/nfse/servicos-fiscais"
+import { getServicoFiscal, sugerirServicoFiscal, tipoServicoAoClassificar } from "@/lib/nfse/servicos-fiscais"
 import { formatCurrency, cn } from "@/lib/utils"
 import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { ProdutoCombobox } from "@/components/produto-combobox"
@@ -1280,6 +1280,7 @@ export function EditarOrcamentoClient({
                             onServicoFiscal={(v) => {
                               setServicoFiscalEditado(true)
                               setServicoFiscal(v)
+                              setTipoServico((t: string) => tipoServicoAoClassificar(t, v))
                             }}
                             nbs={nbs}
                             onNbs={setNbs}
