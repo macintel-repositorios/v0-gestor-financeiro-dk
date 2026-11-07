@@ -15,6 +15,7 @@ import { savePdfUrl } from "@/lib/pdf-utils"
 import { PDFViewer } from "@/components/pdf-viewer"
 import { juntarNotaComBoletos } from "@/lib/pdf-nota-boleto"
 import { OsPreventivaPdf } from "@/components/ordem-servico/os-preventiva-pdf"
+import { DanfseNacional } from "@/components/nfse/danfse-nacional"
 
 interface ImprimirNfseDialogProps {
   open: boolean
@@ -276,12 +277,16 @@ export function ImprimirNfseDialog({ open, onOpenChange, notaId, comBoleto = fal
         {dados && !pdfUrl && (
           <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: "800px" }}>
             <div ref={hiddenDivRef} className="p-6 bg-white">
-              <NfsePrefeituraSP
-                nota={dados.nota}
-                prestador={dados.prestador}
-                logo={dados.logo}
-                brasaoBase64={brasaoBase64}
-              />
+              {dados.nota?.padrao_emissao === "nacional" ? (
+                <DanfseNacional nota={dados.nota} logo={dados.logo} />
+              ) : (
+                <NfsePrefeituraSP
+                  nota={dados.nota}
+                  prestador={dados.prestador}
+                  logo={dados.logo}
+                  brasaoBase64={brasaoBase64}
+                />
+              )}
             </div>
           </div>
         )}

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { pool } from "@/lib/db"
 import { gerarXmlConsultaNfseRps, gerarXmlConsultaLote } from "@/lib/nfse/xml-builder"
 import { consultarNfse, consultarLote, extrairDadosNfseRetorno } from "@/lib/nfse/soap-client"
+import { consultarNfse as consultarNfseNacional } from "@/lib/nfse/nacional/cliente"
 
 /**
  * POST /api/nfse/[id]/consultar
@@ -36,6 +37,26 @@ export async function POST(
       )
     }
     const nota = notas[0]
+
+    // NFS-e Nacional: emissão síncrona — sem chave, a DPS foi rejeitada (ver mensagem de erro) e deve ser reemitida
+    if (nota.padrao_emissao === "nacional") {
+      if (!nota.chave_acesso) {
+        return NextResponse.json({
+          success: false,
+          message: "DPS não autorizada pelo Emissor Nacional: " + (nota.mensagem_erro || "sem retorno") + ". Corrija e emita novamente.",
+          data: { status: nota.status },
+        })
+      }
+      const [cfgRows] = await connection.execute("SELECT certificado_base64, certificado_senha FROM nfse_config WHERE ativo = 1 LIMIT 1")
+      const cfg = (cfgRows as any[])[0]
+      const ambiente = nota.status === "homologacao" ? "homologacao" : "producao"
+      const r = await consultarNfseNacional({ ambiente, pfxBase64: cfg.certificado_base64, senha: cfg.certificado_senha }, nota.chave_acesso)
+      if (!r.xmlNfse) {
+        return NextResponse.json({ success: false, message: "Consulta no Emissor Nacional: " + (r.erros.join("; ") || `HTTP ${r.status}`) })
+      }
+      await connection.execute("UPDATE notas_fiscais SET xml_retorno = ? WHERE id = ?", [r.xmlNfse, id])
+      return NextResponse.json({ success: true, message: `NFS-e ${nota.numero_nfse} confirmada no Emissor Nacional`, data: { status: nota.status } })
+    }
 
     // Buscar configuracao NFS-e
     const [configRows] = await connection.execute(

@@ -3,6 +3,8 @@ import { pool } from "@/lib/db"
 import { gerarXmlCancelamentoNfse } from "@/lib/nfse/xml-builder"
 import { assinarXmlNfse, extrairCertKeyDoPfx } from "@/lib/nfse/xml-signer"
 import { cancelarNfse } from "@/lib/nfse/soap-client"
+import { cancelarNfse as cancelarNfseNacional } from "@/lib/nfse/nacional/cliente"
+import { agoraSaoPaulo } from "@/lib/nfse/nacional/dps-builder"
 
 export async function POST(
   request: NextRequest,
@@ -21,6 +23,45 @@ export async function POST(
       return NextResponse.json({ success: false, message: "Nota fiscal nao encontrada" }, { status: 404 })
     }
     const nota = notas[0]
+
+    // NFS-e Nacional: evento de cancelamento na Sefin Nacional, identificado pela chave de acesso
+    if (nota.padrao_emissao === "nacional") {
+      if ((nota.status !== "emitida" && nota.status !== "homologacao") || !nota.chave_acesso) {
+        return NextResponse.json({ success: false, message: "Apenas notas emitidas podem ser canceladas" }, { status: 400 })
+      }
+      const [cfgRows] = await connection.execute("SELECT * FROM nfse_config WHERE ativo = 1 LIMIT 1")
+      const cfg = (cfgRows as any[])[0]
+      if (!cfg?.certificado_base64) {
+        return NextResponse.json({ success: false, message: "Certificado digital não configurado" }, { status: 400 })
+      }
+      const ambiente = nota.status === "homologacao" ? "homologacao" : "producao"
+      const motivoTxt = String(motivo || "Cancelamento solicitado").trim()
+      const inicio = Date.now()
+      const r = await cancelarNfseNacional(
+        { ambiente, pfxBase64: cfg.certificado_base64, senha: cfg.certificado_senha },
+        {
+          chave: nota.chave_acesso,
+          cnpjAutor: cfg.cnpj,
+          // 1 = erro na emissão, 2 = serviço não prestado, 9 = outros
+          cMotivo: /n[aã]o (foi )?prestado/i.test(motivoTxt) ? 2 : /erro/i.test(motivoTxt) ? 1 : 9,
+          motivo: motivoTxt.length >= 15 ? motivoTxt : `${motivoTxt} - cancelamento solicitado`,
+          dhEvento: agoraSaoPaulo().dhEmi,
+        },
+      )
+      await connection.execute(
+        `INSERT INTO nfse_transmissoes (nota_fiscal_id, tipo, xml_envio, xml_retorno, sucesso, mensagem_erro, tempo_resposta_ms)
+         VALUES (?, 'cancelamento_nacional', NULL, ?, ?, ?, ?)`,
+        [id, r.respostaBruta, r.sucesso ? 1 : 0, r.erros.join("; ") || null, Date.now() - inicio],
+      )
+      if (!r.sucesso) {
+        return NextResponse.json({ success: false, message: "Erro ao cancelar NFS-e: " + (r.erros.join("; ") || `HTTP ${r.status}`) })
+      }
+      await connection.execute(
+        `UPDATE notas_fiscais SET status = 'cancelada', data_cancelamento = NOW(), motivo_cancelamento = ? WHERE id = ?`,
+        [motivoTxt, id],
+      )
+      return NextResponse.json({ success: true, message: "NFS-e cancelada no Emissor Nacional!" })
+    }
 
     if (nota.status !== "emitida") {
       return NextResponse.json(

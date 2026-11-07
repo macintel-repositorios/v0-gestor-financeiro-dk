@@ -6,6 +6,7 @@ import { assinarXmlNfse, extrairCertKeyDoPfx } from "@/lib/nfse/xml-signer"
 import { verificarEConcluirOrcamento } from "@/lib/orcamentos"
 import { normalizarEmail } from "@/lib/email"
 import { dadosFiscaisDoServico } from "@/lib/nfse/servicos-fiscais"
+import { emitirNfseNacional } from "@/lib/nfse/nacional/emitir"
 
 export async function POST(request: NextRequest) {
   const connection = await pool.getConnection()
@@ -47,6 +48,13 @@ export async function POST(request: NextRequest) {
 
     // Classificação fiscal (padrão nacional) registrada na nota
     const fiscal = dadosFiscaisDoServico(servico_fiscal, nbs)
+
+    // Desde 01/11/2026 (Simples Nacional ME/EPP em SP) a emissão é pelo Emissor Nacional.
+    // A Nota Fiscal Paulistana (SOAP abaixo) fica só para fato gerador até 31/10/2026: padrao = "municipal".
+    if (body.padrao !== "municipal") {
+      const r = await emitirNfseNacional(connection, body, fiscal)
+      return NextResponse.json(r.json, { status: r.status })
+    }
 
     // Buscar e reservar próximo número RPS atomicamente
     await connection.query("START TRANSACTION")

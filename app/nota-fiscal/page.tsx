@@ -539,6 +539,13 @@ export default function NotaFiscalPage() {
             {status === "autorizada" ? "Autorizada" : "Emitida"}
           </Badge>
         )
+      case "homologacao":
+        return (
+          <Badge variant="outline" className="bg-purple-950/40 text-purple-400 border-purple-900/50 gap-1 font-semibold py-0.5">
+            <AlertCircle className="h-3 w-3" />
+            Homologação (teste)
+          </Badge>
+        )
       case "processando":
         return (
           <Badge variant="outline" className="bg-blue-950/40 text-blue-400 border-blue-900/50 gap-1 font-semibold py-0.5">
@@ -1305,7 +1312,7 @@ export default function NotaFiscalPage() {
                             }
 
                             const renderImprimirBtn = () => {
-                              if (((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
+                              if (((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada" || nota.status === "homologacao")) || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
                                 return (
                                   <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:bg-emerald-955/20" onClick={() => handleImprimir(nota)} title={nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}>
                                     <Printer className="h-4 w-4" />
@@ -1340,7 +1347,7 @@ export default function NotaFiscalPage() {
                             }
 
                             const renderCancelarBtn = () => {
-                              if (((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
+                              if (((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "homologacao")) || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
                                 return (
                                   <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:bg-red-955/20" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }} title={`Cancelar ${nota.tipo === "nfse" ? "NFS-e" : "NF-e"}`}>
                                     <XCircle className="h-4 w-4" />
@@ -1383,7 +1390,7 @@ export default function NotaFiscalPage() {
                                       <DropdownMenuItem onClick={() => handleVerDetalhes(nota)}>
                                         <Eye className="h-4 w-4 mr-2" />Ver detalhes
                                       </DropdownMenuItem>
-                                      {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                      {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada" || nota.status === "homologacao")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
                                         <DropdownMenuItem onClick={() => handleImprimir(nota)}>
                                           <Printer className="h-4 w-4 mr-2" />{nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}
                                         </DropdownMenuItem>
@@ -1407,7 +1414,7 @@ export default function NotaFiscalPage() {
                                           </>
                                         )
                                       })()}
-                                      {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                      {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "homologacao")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
                                         <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }}>
                                           <XCircle className="h-4 w-4 mr-2" />Cancelar Nota
                                         </DropdownMenuItem>
@@ -1541,7 +1548,7 @@ export default function NotaFiscalPage() {
                                   <Button variant="outline" size="sm" className="flex-1 text-xs text-muted-foreground hover:bg-muted border-border" onClick={() => handleVerDetalhes(nota)}>
                                     <Eye className="h-3.5 w-3.5 mr-1" /> Detalhes
                                   </Button>
-                                  {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                  {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada" || nota.status === "homologacao")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
                                     <Button variant="outline" size="sm" className="flex-1 text-xs text-emerald-400 hover:bg-emerald-950/20 border-emerald-900/50" onClick={() => handleImprimir(nota)}>
                                       <Printer className="h-3.5 w-3.5 mr-1" /> {nota.tipo === "nfse" ? "Imprimir" : "DANFE"}
                                     </Button>
@@ -1568,7 +1575,7 @@ export default function NotaFiscalPage() {
                                        </>
                                      )
                                    })()}
-                                  {((nota.tipo === "nfse" && nota.status === "emitida") || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
+                                  {((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "homologacao")) || (nota.tipo === "nfe" && nota.status === "autorizada")) && (
                                     <Button variant="outline" size="sm" className="flex-1 text-xs text-red-400 hover:bg-red-950/20 border-red-900/50" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }}>
                                       <XCircle className="h-3.5 w-3.5 mr-1" /> Cancelar
                                     </Button>

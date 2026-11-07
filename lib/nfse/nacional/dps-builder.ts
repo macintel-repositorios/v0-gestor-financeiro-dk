@@ -32,6 +32,7 @@ export interface DadosDps {
   }
   valor: number
   valorTotTribMun?: number // Lei 12.741 (aprox.)
+  percTotTribSN?: number // alíquota efetiva do Simples (%), alternativa ao valor por esfera
 }
 
 const so = (v: unknown) => String(v ?? "").replace(/[^0-9]/g, "")
@@ -98,8 +99,11 @@ export function montarDps(d: DadosDps): { xml: string; id: string } {
     `<valores><vServPrest><vServ>${dec(d.valor)}</vServ></vServPrest>` +
     `<trib><tribMun><tribISSQN>1</tribISSQN><tpRetISSQN>1</tpRetISSQN></tribMun>` +
     `<tribFed><piscofins><CST>00</CST><vPis>0</vPis><vCofins>0</vCofins><tpRetPisCofins>0</tpRetPisCofins></piscofins></tribFed>` +
-    `<totTrib><vTotTrib><vTotTribFed>0</vTotTribFed><vTotTribEst>0</vTotTribEst>` +
-    `<vTotTribMun>${dec(d.valorTotTribMun || 0)}</vTotTribMun></vTotTrib></totTrib></trib></valores>` +
+    `<totTrib>` +
+    (d.percTotTribSN
+      ? `<pTotTribSN>${dec(d.percTotTribSN)}</pTotTribSN>`
+      : `<vTotTrib><vTotTribFed>0</vTotTribFed><vTotTribEst>0</vTotTribEst><vTotTribMun>${dec(d.valorTotTribMun || 0)}</vTotTribMun></vTotTrib>`) +
+    `</totTrib></trib></valores>` +
     `</infDPS></DPS>`
 
   return { xml, id }
