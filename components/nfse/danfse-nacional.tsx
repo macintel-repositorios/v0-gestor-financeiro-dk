@@ -88,7 +88,15 @@ export function DanfseNacional({ nota, logo }: { nota: any; logo?: string | null
               {homologacao && <div style={{ color: "#c00", fontWeight: "bold" }}>AMBIENTE DE HOMOLOGAÇÃO — SEM VALOR FISCAL</div>}
             </td>
             <td style={{ ...celula, width: "28%", textAlign: "right", verticalAlign: "middle" }}>
-              {logo ? <img src={logo} alt="" crossOrigin="anonymous" style={{ maxHeight: 40, maxWidth: 120, objectFit: "contain" }} /> : null}
+              {/* só altura fixa: o html2canvas ignora object-fit e distorce/desloca a imagem com max-width/max-height */}
+              {logo ? (
+                <img
+                  src={logo}
+                  alt=""
+                  crossOrigin="anonymous"
+                  style={{ display: "block", height: 44, width: "auto", marginLeft: "auto", marginBottom: 4 }}
+                />
+              ) : null}
               <div style={{ fontWeight: "bold" }}>{x("xLocEmi") || "São Paulo"} / SP</div>
             </td>
           </tr>
