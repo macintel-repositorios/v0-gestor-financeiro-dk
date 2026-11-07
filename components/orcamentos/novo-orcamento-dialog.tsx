@@ -1151,7 +1151,21 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                               
                               <div className="flex-1 min-w-0">
                                 {expandedIndex === index ? (
-                                  <span className="font-semibold text-xs text-foreground block break-words">{item.produto.descricao}</span>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-semibold text-xs text-foreground block break-words">{item.produto.descricao}</span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        editarProduto(item.produto)
+                                      }}
+                                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-1 h-6 w-6 inline-flex"
+                                      title="Editar produto"
+                                    >
+                                      <Edit2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
                                 ) : (
                                   <span className="font-medium text-xs text-foreground truncate block">{item.produto.descricao}</span>
                                 )}
@@ -1377,110 +1391,221 @@ export function NovoOrcamentoDialog({ open, onOpenChange, onSuccess }: NovoOrcam
                   </CardHeader>
                   {expandResumo && (
                     <CardContent className="p-4 space-y-4 text-xs">
-                    <div>
-                      <div className="text-[10px] text-muted-foreground uppercase font-semibold">Parcelas</div>
-                      <div className="grid grid-cols-2 gap-2 mt-1">
-                        <div>
-                          <Label htmlFor="parcelamento_mdo_dialog" className="text-[9px]">MDO</Label>
-                          <Input
-                            id="parcelamento_mdo_dialog"
-                            type="number"
-                            min="0"
-                            value={parcelamentoMdo}
-                            onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 0)}
-                            className="h-8 text-xs"
+                      <div className="border-b pb-4">
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-blue-600" />
+                          Parcelamento
+                        </h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label htmlFor="parcelamento_mdo" className="text-xs">
+                              MDO
+                            </Label>
+                            <Input
+                              id="parcelamento_mdo"
+                              type="number"
+                              min="0"
+                              value={parcelamentoMdo}
+                              onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 0)}
+                              className="text-sm"
+                            />
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {parcelamentoMdo === 0
+                                ? "Sem cobrança"
+                                : parcelamentoMdo === 1
+                                  ? "À vista"
+                                  : parcelamentoMdo === 2
+                                    ? "À vista + 30dd"
+                                    : parcelamentoMdo === 3
+                                      ? "À vista + 30dd + 60dd"
+                                      : `À vista + ${parcelamentoMdo - 1}x 30dd`}
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="parcelamento_material" className="text-xs">
+                              Material
+                            </Label>
+                            <Input
+                              id="parcelamento_material"
+                              type="number"
+                              min="0"
+                              value={parcelamentoMaterial}
+                              onChange={(e) => setParcelamentoMaterial(Number.parseInt(e.target.value) || 0)}
+                              className="text-sm"
+                              disabled={materialAVista}
+                            />
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {materialAVista
+                                ? "À vista"
+                                : parcelamentoMaterial === 0
+                                  ? "Sem cobrança"
+                                  : parcelamentoMaterial === 1
+                                    ? "1x"
+                                    : `${parcelamentoMaterial}x`}
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <input
+                                type="checkbox"
+                                id="material_a_vista"
+                                aria-label="Material à vista"
+                                checked={materialAVista}
+                                onChange={(e) => {
+                                  setMaterialAVista(e.target.checked)
+                                }}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <Label htmlFor="material_a_vista" className="text-xs cursor-pointer">
+                                Material à vista
+                              </Label>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <CampoPrimeiraParcela
+                            value={dataPrimeiraParcela}
+                            onChange={(v) => {
+                              setDataPrimeiraEditada(true)
+                              setDataPrimeiraParcela(v)
+                            }}
+                            parcelamentoMdo={parcelamentoMdo}
+                            parcelamentoMaterial={parcelamentoMaterial}
+                            materialAVista={materialAVista}
+                            dataOrcamento={dataOrcamento}
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="parcelamento_material_dialog" className="text-[9px]">Material</Label>
-                          <Input
-                            id="parcelamento_material_dialog"
-                            type="number"
-                            min="0"
-                            value={parcelamentoMaterial}
-                            onChange={(e) => setParcelamentoMaterial(Number.parseInt(e.target.value) || 0)}
-                            className="h-8 text-xs"
-                            disabled={materialAVista}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <input
-                          type="checkbox"
-                          id="material_a_vista_dialog"
-                          aria-label="Material à vista"
-                          checked={materialAVista}
-                          onChange={(e) => {
-                            setMaterialAVista(e.target.checked)
-                            if (e.target.checked) {
-                              setParcelamentoMaterial(1)
-                            }
-                          }}
-                          className="h-3 w-3 rounded border-border"
-                        />
-                        <Label htmlFor="material_a_vista_dialog" className="text-[10px] cursor-pointer">
-                          Material à vista
-                        </Label>
-                      </div>
-                      <div className="mt-2">
-                        <CampoPrimeiraParcela
-                          id="data_primeira_parcela_dialog"
-                          value={dataPrimeiraParcela}
-                          onChange={(v) => {
-                            setDataPrimeiraEditada(true)
-                            setDataPrimeiraParcela(v)
-                          }}
-                          parcelamentoMdo={parcelamentoMdo}
-                          parcelamentoMaterial={parcelamentoMaterial}
-                          materialAVista={materialAVista}
-                          dataOrcamento={dataOrcamento}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 border-t border-border pt-3">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Valor Material:</span>
-                        <span className="font-medium text-foreground">{formatCurrency(calcularValorMaterial())}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Mão de Obra:</span>
-                        <span className="font-medium text-foreground">{formatCurrency(calcularValorMaoObra())}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Custo Deslocamento:</span>
-                        <span className="font-medium text-foreground">{formatCurrency(calcularCustoDeslocamento())}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Juros Material:</span>
-                        <span className="font-medium text-foreground">{formatCurrency(calcularValorJuros())}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Imposto Serviço:</span>
-                        <span className="font-medium text-foreground">{formatCurrency(calcularImpostoServicoValor())}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Imposto Material:</span>
-                        <span className="font-medium text-foreground">{formatCurrency(calcularImpostoMaterialValor())}</span>
                       </div>
 
-                      <div className="border-t border-border pt-2 font-semibold">
-                        <div className="flex justify-between text-indigo-600 dark:text-indigo-400">
-                          <span>Subtotal MDO:</span>
-                          <span>{formatCurrency(calcularSubtotalMdo())}</span>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                          <span>Valor Material:</span>
+                          <span className="font-medium">{formatCurrency(calcularValorMaterial())}</span>
                         </div>
-                        <div className="flex justify-between text-indigo-600 dark:text-indigo-400">
-                          <span>Subtotal Mat:</span>
-                          <span>{formatCurrency(calcularSubtotalMaterial())}</span>
+
+                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                          <span>Mão de Obra:</span>
+                          <span className="font-medium">{formatCurrency(calcularValorMaoObra())}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                          <span>Custo Deslocamento:</span>
+                          <span className="font-medium">{formatCurrency(calcularCustoDeslocamento())}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                          <span>Valor dos Juros:</span>
+                          <span className="font-medium">{formatCurrency(calcularValorJuros())}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                          <span>Taxa Boleto MDO:</span>
+                          <span className="font-medium">{formatCurrency(calcularTaxaBoletoMdo())}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                          <span>Taxa Boleto Material:</span>
+                          <span className="font-medium">{formatCurrency(calcularTaxaBoletoMaterial())}</span>
+                        </div>
+
+                        {descontoMdoPercent > 0 && (
+                          <div className="flex justify-between items-center text-red-600">
+                            <span>Desconto MDO ({descontoMdoPercent}%):</span>
+                            <span className="font-medium">-{formatCurrency(calcularDescontoMdoValor())}</span>
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                          <span>Imposto Serviço:</span>
+                          <span className="font-medium">{formatCurrency(calcularImpostoServicoValor())}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                          <span>Imposto Material:</span>
+                          <span className="font-medium">{formatCurrency(calcularImpostoMaterialValor())}</span>
+                        </div>
+
+                        <div className="border-t pt-2">
+                          <div className="flex justify-between items-center font-semibold">
+                            <span>Subtotal MDO:</span>
+                            <span className="text-blue-600">{formatCurrency(calcularSubtotalMdo())}</span>
+                          </div>
+                          <div className="flex justify-between items-center font-semibold">
+                            <span>Subtotal Material:</span>
+                            <span className="text-blue-600">{formatCurrency(calcularSubtotalMaterial())}</span>
+                          </div>
+                        </div>
+
+                        {/* Seção de Parcelamento */}
+                        <div className="border-t pt-4">
+                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-blue-600" />
+                            Forma de Pagamento
+                          </h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+                              <span>Mão de Obra:</span>
+                              <span className="font-medium text-blue-600">
+                                {parcelamentoMdo === 0
+                                  ? "Sem cobrança"
+                                  : parcelamentoMdo === 1
+                                    ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
+                                    : `${parcelamentoMdo}x de ${formatCurrency(calcularSubtotalMdo() / parcelamentoMdo)}`}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+                              <span>Material:</span>
+                              <span className="font-medium text-blue-600">
+                                {materialAVista
+                                  ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
+                                  : parcelamentoMaterial === 0
+                                    ? "Sem cobrança"
+                                    : parcelamentoMaterial === 1
+                                      ? `1x - ${formatCurrency(calcularSubtotalMaterial())}`
+                                      : `${parcelamentoMaterial}x de ${formatCurrency(calcularSubtotalMaterial() / parcelamentoMaterial)}`}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+
+                        {desconto > 0 && (
+                          <div className="flex justify-between items-center text-red-600">
+                            <span>Desconto:</span>
+                            <span className="font-medium">-{formatCurrency(desconto)}</span>
+                          </div>
+                        )}
+
+                        <div className="border-t pt-4">
+                          <div className="flex justify-between items-center text-lg font-bold">
+                            <span>Total:</span>
+                            <span className="text-green-600">{formatCurrency(calcularTotal())}</span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="border-t border-border pt-2 text-sm font-bold flex justify-between text-foreground">
-                        <span>Total Geral:</span>
-                        <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calcularTotal())}</span>
+                      <div className="pt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex justify-between">
+                          <span>Itens:</span>
+                          <span>{itens.length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Cliente:</span>
+                          <span>{cliente ? cliente.nome : "Não selecionado"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Validade:</span>
+                          <span>{validade} dias</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Situação:</span>
+                          <Badge variant="outline" className="text-xs">
+                            {situacao === "pendente" && "Pendente"}
+                            {situacao === "enviado por email" && "Enviado por Email"}
+                            {situacao === "nota fiscal emitida" && "Nota Fiscal Emitida"}
+                            {situacao === "concluido" && "Concluído"}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                    </CardContent>
+                  </CardContent>
                   )}
                 </Card>
                 <Button
