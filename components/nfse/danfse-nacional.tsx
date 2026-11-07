@@ -56,7 +56,9 @@ export function DanfseNacional({ nota, logo }: { nota: any; logo?: string | null
     import("qrcode").then((Q) => Q.toDataURL(URL_CONSULTA + chave, { margin: 0, width: 220 }).then(setQr)).catch(() => {})
   }, [chave])
 
-  const homologacao = nota.status === "homologacao" || x("ambGer") === "2" || x("tpAmb") === "2"
+  // Ambiente vem do tpAmb da DPS (1 = produção, 2 = homologação).
+  // Atenção: ambGer NÃO é ambiente — é quem gerou a nota (2 = Sefin Nacional), vale 2 em notas reais.
+  const homologacao = nota.status === "homologacao" || x("tpAmb") === "2"
   const cancelada = nota.status === "cancelada"
   const valor = Number(nota.valor_servicos || x("vServ") || 0)
   const aliquota = Number(nota.aliquota_iss || 0) * 100
