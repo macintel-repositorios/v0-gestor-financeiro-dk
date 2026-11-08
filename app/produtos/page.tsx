@@ -361,7 +361,7 @@ export default function ProdutosPage({
             return <span className="font-medium text-sm text-foreground break-words whitespace-normal leading-tight" title={produto.descricao}>{produto.descricao}</span>
           case "categoria_nome":
             return produto.categoria_nome && produto.categoria_nome !== "0" ? (
-              <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs border-0 truncate max-w-[110px]" title={produto.categoria_nome}>
+              <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs border-0 max-w-full truncate" title={produto.categoria_nome}>
                 {produto.categoria_nome}
               </Badge>
             ) : (
@@ -369,7 +369,7 @@ export default function ProdutosPage({
             )
           case "marca_nome":
             return produto.marca_nome && produto.marca_nome !== "0" ? (
-              <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs border-0 truncate max-w-[100px]" title={produto.marca_nome}>
+              <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs border-0 max-w-full truncate" title={produto.marca_nome}>
                 {produto.marca_nome}
               </Badge>
             ) : (

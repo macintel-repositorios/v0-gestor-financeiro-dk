@@ -70,8 +70,114 @@ export function ResizableTable<T extends object>({
     return map
   }, [columns])
 
-  const { columnWidths, startResize } = useResizableColumns(defaultWidths, storageKey)
+  const { columnWidths, startResize, ajusteManual, aplicarAutomatico, definirLargura } = useResizableColumns(
+    defaultWidths,
+    storageKey,
+  )
   const { sort, toggleSort, sortedData } = useSortableTable(data)
+  const tableRef = React.useRef<HTMLTableElement>(null)
+
+  /**
+   * Largura "natural" (sem quebra de linha) do conteúdo de cada coluna, medida no DOM.
+   * Textos longos (ex.: descrição) são limitados a LARGURA_MAX e passam a quebrar linha.
+   */
+  const medirColunas = React.useCallback(
+    (somente?: string): Record<string, number> => {
+      const table = tableRef.current
+      if (!table) return {}
+      const LARGURA_MAX = 340
+      const probe = document.createElement("div")
+      probe.style.cssText = "position:absolute;visibility:hidden;left:-99999px;top:0;white-space:nowrap;"
+      table.parentElement?.appendChild(probe)
+      const linhas = Array.from(table.querySelectorAll("tbody tr")).slice(0, 60)
+      const ths = Array.from(table.querySelectorAll("thead th"))
+      const res: Record<string, number> = {}
+      columns.forEach((col, i) => {
+        if (somente && col.key !== somente) return
+        let max = 0
+        const medir = (el: Element | undefined, extra: number) => {
+          if (!el) return
+          const cs = getComputedStyle(el)
+          probe.style.font = cs.font
+          probe.style.letterSpacing = cs.letterSpacing
+          probe.style.textTransform = cs.textTransform
+          probe.innerHTML = (el as HTMLElement).innerHTML
+          // filhos "block/truncate" não podem limitar a largura durante a medição
+          probe.querySelectorAll<HTMLElement>("*").forEach((n) => {
+            n.style.maxWidth = "none"
+            n.style.overflow = "visible"
+            n.style.whiteSpace = "nowrap"
+          })
+          max = Math.max(max, probe.scrollWidth + extra)
+        }
+        // cabeçalho: rótulo + ícone de ordenação
+        const th = ths[i]
+        if (th) {
+          const label = th.querySelector("span.truncate")
+          if (label) {
+            probe.style.font = getComputedStyle(label).font
+            probe.style.letterSpacing = getComputedStyle(label).letterSpacing
+            probe.style.textTransform = getComputedStyle(label).textTransform
+            probe.innerHTML = label.innerHTML
+            max = Math.max(max, probe.scrollWidth + 24 + (col.sortable ? 18 : 0) + 4)
+          }
+        }
+        for (const tr of linhas) medir(tr.children[i], 24 + 4) // px-3 dos dois lados + folga
+        if (max > 0) res[col.key] = Math.min(LARGURA_MAX, Math.max(col.minWidth ?? 56, Math.ceil(max)))
+      })
+      probe.remove()
+      return res
+    },
+    [columns],
+  )
+
+  // Coluna que recebe a sobra de espaço (a de maior largura, normalmente a descrição);
+  // sem isso o navegador distribui a sobra entre todas e colunas curtas (ex.: estoque) ficam largas
+  const colunaFlex = React.useMemo(() => {
+    let melhor = ""
+    let maior = -1
+    for (const c of columns) {
+      if (c.noResize || c.sticky) continue
+      const w = columnWidths[c.key] ?? 0
+      if (w > maior) {
+        maior = w
+        melhor = c.key
+      }
+    }
+    return melhor
+  }, [columns, columnWidths])
+  const larguraTotal = columns.reduce((t, c) => t + (columnWidths[c.key] ?? 120), 0)
+
+  // Ajuste automático pelo conteúdo quando os dados chegam (se o usuário não ajustou manualmente)
+  const assinaturaDados = sortedData.length > 0 ? `${columns.map((c) => c.key).join(",")}|${sortedData.length}` : ""
+  React.useEffect(() => {
+    if (ajusteManual || !assinaturaDados) return
+    const id = requestAnimationFrame(() => {
+      const medidas = medirColunas()
+      if (!Object.keys(medidas).length) return
+      // Cabe na área visível: encolhe só colunas de texto longo (> 220px) até 200px; o resto rola na horizontal
+      const disponivel = (wrapperRef.current?.clientWidth || 0) - 2
+      const total = columns.reduce((t, c) => t + (medidas[c.key] ?? columnWidths[c.key] ?? 120), 0)
+      let excesso = total - disponivel
+      if (disponivel > 0 && excesso > 0) {
+        const MIN = 200 // colunas curtas (etiquetas, datas, valores) nunca são encolhidas
+        for (let rodada = 0; rodada < 5 && excesso > 0.5; rodada++) {
+          const largas = columns.filter((c) => !c.noResize && !c.sticky && (medidas[c.key] ?? 0) > 220)
+          const folga = largas.reduce((t, c) => t + (medidas[c.key] - MIN), 0)
+          if (folga <= 0) break
+          const corte = Math.min(excesso, folga)
+          for (const c of largas) {
+            const reduz = Math.round((corte * (medidas[c.key] - MIN)) / folga)
+            medidas[c.key] -= reduz
+            excesso -= reduz
+          }
+        }
+      }
+      aplicarAutomatico(medidas)
+    })
+    return () => cancelAnimationFrame(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assinaturaDados, ajusteManual])
 
   // Determine which columns are sticky (noResize columns default to sticky)
   const stickyKeys = React.useMemo(
@@ -121,12 +227,13 @@ export function ResizableTable<T extends object>({
 
       <div ref={wrapperRef} className="w-full overflow-x-auto">
         <table
+          ref={tableRef}
           className="w-full border-collapse text-sm"
-          style={{ tableLayout: "fixed" }}
+          style={{ tableLayout: "fixed", minWidth: larguraTotal }}
         >
           <colgroup>
             {columns.map((col) => (
-              <col key={col.key} style={{ width: columnWidths[col.key] }} />
+              <col key={col.key} style={{ width: col.key === colunaFlex ? undefined : columnWidths[col.key] }} />
             ))}
           </colgroup>
 
@@ -153,7 +260,7 @@ export function ResizableTable<T extends object>({
                       isSticky && "sticky right-0 z-10 bg-muted/90 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.08)]",
                       isSticky && isSorted && "bg-indigo-500/15"
                     )}
-                    style={{ width: columnWidths[col.key], overflow: "hidden" }}
+                    style={{ width: col.key === colunaFlex ? undefined : columnWidths[col.key], overflow: "hidden" }}
                     onClick={col.sortable ? () => toggleSort(col.key) : undefined}
                   >
                     {/* Label + sort icon */}
@@ -188,7 +295,12 @@ export function ResizableTable<T extends object>({
                         )}
                         onMouseDown={(e) => startResize(col.key, e)}
                         onClick={(e) => e.stopPropagation()}
-                        title="Arraste para redimensionar"
+                        onDoubleClick={(e) => {
+                          e.stopPropagation()
+                          const m = medirColunas(col.key)[col.key]
+                          if (m) definirLargura(col.key, m)
+                        }}
+                        title="Arraste para redimensionar · duplo clique ajusta ao conteúdo"
                       >
                         <div className="w-0.5 h-4 bg-indigo-400 rounded-full" />
                       </div>
@@ -232,7 +344,7 @@ export function ResizableTable<T extends object>({
                           // group-hover:bg-muted matches the row hover so it blends in
                           isSticky && "sticky right-0 z-10 bg-card group-hover:bg-muted shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.06)]"
                         )}
-                        style={{ maxWidth: columnWidths[col.key] }}
+                        style={{ maxWidth: col.key === colunaFlex ? undefined : columnWidths[col.key] }}
                       >
                         {renderCell(row, col.key, idx)}
                       </td>
