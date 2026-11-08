@@ -94,8 +94,20 @@ export function ResizableTable<T extends object>({
       const res: Record<string, number> = {}
       columns.forEach((col, i) => {
         if (somente && col.key !== somente) return
-        // Colunas fixas (ações) mantêm a largura definida na página: a medição dos botões saía menor e cortava
-        if (col.noResize || col.sticky) return
+        // Colunas fixas (ações): mede os botões reais na tela (o grupo de botões tem largura própria);
+        // nunca fica menor que a largura definida na página
+        if (col.noResize || col.sticky) {
+          let maxBotoes = 0
+          for (const tr of linhas) {
+            const td = tr.children[i] as HTMLElement | undefined
+            td?.querySelectorAll<HTMLElement>("div").forEach((d) => {
+              if (d.offsetParent !== null && getComputedStyle(d).display === "flex") maxBotoes = Math.max(maxBotoes, d.scrollWidth)
+            })
+          }
+          const base = col.width ?? 120
+          if (maxBotoes > 0) res[col.key] = Math.max(base, Math.ceil(maxBotoes + 24 + 4))
+          return
+        }
         let max = 0
         const medir = (el: Element | undefined, extra: number) => {
           if (!el) return
