@@ -1240,7 +1240,7 @@ export default function NotaFiscalPage() {
                         { key: "valor_total", label: "Valor",   width: 110, sortable: true, align: "right" },
                         { key: "status",      label: "Status",  width: 120, sortable: true },
                         { key: "data",        label: "Data",    width: 90,  sortable: true },
-                        { key: "acoes",       label: "Ações",   width: 160, sortable: false, noResize: true, align: "right" },
+                        { key: "acoes",       label: "Ações",   width: 240, sortable: false, noResize: true },
                       ]}
                       data={notasFiltradas}
                       rowKey={(row) => `${row.tipo}-${row.id}`}
@@ -1294,7 +1294,7 @@ export default function NotaFiscalPage() {
                             const renderConsultarBtn = () => {
                               if (nota.tipo === "nfse" && (nota.status === "processando" || nota.status === "erro") && !nota.numero_nfse) {
                                 return (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20"
+                                  <Button variant="outline" size="sm" className="border-blue-500 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 bg-transparent h-8 w-8 p-0"
                                     onClick={() => handleConsultarNfse(nota.id)} disabled={consultandoId === nota.id} title="Consultar">
                                     {consultandoId === nota.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                                   </Button>
@@ -1302,7 +1302,7 @@ export default function NotaFiscalPage() {
                               }
                               if (nota.tipo === "nfe" && (nota.status === "processando" || nota.status === "rejeitada")) {
                                 return (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20"
+                                  <Button variant="outline" size="sm" className="border-blue-500 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 bg-transparent h-8 w-8 p-0"
                                     onClick={() => handleConsultarNfe(nota.id)} disabled={consultandoId === nota.id} title="Consultar SEFAZ">
                                     {consultandoId === nota.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                                   </Button>
@@ -1314,7 +1314,7 @@ export default function NotaFiscalPage() {
                             const renderImprimirBtn = () => {
                               if (((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "cancelada" || nota.status === "homologacao")) || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
                                 return (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:bg-emerald-955/20" onClick={() => handleImprimir(nota)} title={nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}>
+                                  <Button variant="outline" size="sm" className="border-emerald-500 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 bg-transparent h-8 w-8 p-0" onClick={() => handleImprimir(nota)} title={nota.tipo === "nfse" ? "Imprimir NFS-e" : "Imprimir DANFE"}>
                                     <Printer className="h-4 w-4" />
                                   </Button>
                                 )
@@ -1327,21 +1327,21 @@ export default function NotaFiscalPage() {
                                 return null
                               }
                               if (!boletoInfo?.temBoleto) {
-                                return <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-955/20" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
+                                return <Button variant="outline" size="sm" className="border-blue-500 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 bg-transparent h-8 w-8 p-0" onClick={() => { setNotaParaBoleto(nota); setBoletoOpen(true) }} title="Gerar Boleto"><DollarSign className="h-4 w-4" /></Button>
                               }
                               if (!boletoInfo.enviado && !boletoInfo.enviadoAsaas) {
                                 const enviando = enviandoAsaasNota === notaNum
                                 return (
                                   <>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-orange-400 hover:bg-orange-955/20" onClick={() => handleEnviarAsaasPorNota(notaNum, "inter")} disabled={enviando} title="Enviar para Banco Inter">{enviando && enviandoGateway === "inter" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Building2 className="h-4 w-4" />}</Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-teal-400 hover:bg-teal-955/20" onClick={() => handleEnviarAsaasPorNota(notaNum, "asaas")} disabled={enviando} title="Enviar para Asaas">{enviando && enviandoGateway === "asaas" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
+                                    <Button variant="outline" size="sm" className="border-orange-500 dark:border-orange-700 text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 bg-transparent h-8 w-8 p-0" onClick={() => handleEnviarAsaasPorNota(notaNum, "inter")} disabled={enviando} title="Enviar para Banco Inter">{enviando && enviandoGateway === "inter" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Building2 className="h-4 w-4" />}</Button>
+                                    <Button variant="outline" size="sm" className="border-teal-500 dark:border-teal-700 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 bg-transparent h-8 w-8 p-0" onClick={() => handleEnviarAsaasPorNota(notaNum, "asaas")} disabled={enviando} title="Enviar para Asaas">{enviando && enviandoGateway === "asaas" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
                                   </>
                                 )
                               }
                               return (
                                 <>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:bg-indigo-955/20" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-fuchsia-400 hover:bg-fuchsia-955/20" onClick={() => handleImprimirComBoleto(nota, notaNum)} title="Nota + Boleto + OS preventiva em um PDF"><Files className="h-4 w-4" /></Button>
+                                  <Button variant="outline" size="sm" className="border-indigo-500 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 bg-transparent h-8 w-8 p-0" onClick={() => { setVisualizarBoletosNumero(notaNum); setVisualizarBoletosOpen(true) }} title="Imprimir Boleto"><Receipt className="h-4 w-4" /></Button>
+                                  <Button variant="outline" size="sm" className="border-fuchsia-500 dark:border-fuchsia-700 text-fuchsia-600 dark:text-fuchsia-400 hover:bg-fuchsia-500/10 bg-transparent h-8 w-8 p-0" onClick={() => handleImprimirComBoleto(nota, notaNum)} title="Nota + Boleto + OS preventiva em um PDF"><Files className="h-4 w-4" /></Button>
                                 </>
                               )
                             }
@@ -1349,7 +1349,7 @@ export default function NotaFiscalPage() {
                             const renderCancelarBtn = () => {
                               if (((nota.tipo === "nfse" && (nota.status === "emitida" || nota.status === "homologacao")) || (nota.tipo === "nfe" && nota.status === "autorizada"))) {
                                 return (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:bg-red-955/20" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }} title={`Cancelar ${nota.tipo === "nfse" ? "NFS-e" : "NF-e"}`}>
+                                  <Button variant="outline" size="sm" className="border-red-500 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-500/10 bg-transparent h-8 w-8 p-0" onClick={() => { setNotaCancelar(nota); setCancelarOpen(true) }} title={`Cancelar ${nota.tipo === "nfse" ? "NFS-e" : "NF-e"}`}>
                                     <XCircle className="h-4 w-4" />
                                   </Button>
                                 )
@@ -1358,11 +1358,11 @@ export default function NotaFiscalPage() {
                             }
 
                             return (
-                              <div className="flex items-center justify-end gap-1">
+                              <div className="flex items-center gap-1">
                                 {/* Desktop View */}
-                                <div className="hidden xl:flex gap-0.5">
+                                <div className="hidden xl:flex gap-1">
                                   {renderConsultarBtn()}
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => handleVerDetalhes(nota)} title="Ver detalhes">
+                                  <Button variant="outline" size="sm" className="border-blue-200 dark:border-blue-900/50 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 bg-transparent h-8 w-8 p-0" onClick={() => handleVerDetalhes(nota)} title="Ver detalhes">
                                     <Eye className="h-4 w-4" />
                                   </Button>
                                   {renderImprimirBtn()}
