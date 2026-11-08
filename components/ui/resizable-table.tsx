@@ -94,6 +94,8 @@ export function ResizableTable<T extends object>({
       const res: Record<string, number> = {}
       columns.forEach((col, i) => {
         if (somente && col.key !== somente) return
+        // Colunas fixas (ações) mantêm a largura definida na página: a medição dos botões saía menor e cortava
+        if (col.noResize || col.sticky) return
         let max = 0
         const medir = (el: Element | undefined, extra: number) => {
           if (!el) return
