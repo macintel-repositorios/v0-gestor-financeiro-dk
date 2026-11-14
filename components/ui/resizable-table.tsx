@@ -165,10 +165,19 @@ export function ResizableTable<T extends object>({
   // Ajuste automático pelo conteúdo quando os dados chegam (se o usuário não ajustou manualmente)
   const assinaturaDados = sortedData.length > 0 ? `${columns.map((c) => c.key).join(",")}|${sortedData.length}` : ""
   React.useEffect(() => {
-    if (ajusteManual || !assinaturaDados) return
+    if (!assinaturaDados) return
     const id = requestAnimationFrame(() => {
       const medidas = medirColunas()
       if (!Object.keys(medidas).length) return
+      // Com larguras ajustadas pelo usuário, só a coluna de ações é recalculada (para nunca cortar botões)
+      if (ajusteManual) {
+        const acoes: Record<string, number> = {}
+        for (const c of columns) {
+          if ((c.noResize || c.sticky) && medidas[c.key] && medidas[c.key] > (columnWidths[c.key] ?? 0)) acoes[c.key] = medidas[c.key]
+        }
+        if (Object.keys(acoes).length) aplicarAutomatico(acoes)
+        return
+      }
       // Cabe na área visível: encolhe só colunas de texto longo (> 220px) até 200px; o resto rola na horizontal
       const disponivel = (wrapperRef.current?.clientWidth || 0) - 2
       const total = columns.reduce((t, c) => t + (medidas[c.key] ?? columnWidths[c.key] ?? 120), 0)
