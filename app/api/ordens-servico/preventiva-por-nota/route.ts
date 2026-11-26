@@ -14,11 +14,24 @@ export async function GET(request: NextRequest) {
     }
 
     const notas: any = await query(
-      `SELECT origem, origem_numero, cliente_id, descricao_servico FROM notas_fiscais
+      `SELECT origem, origem_id, origem_numero, cliente_id, descricao_servico FROM notas_fiscais
        WHERE numero_nfse = ? ORDER BY id DESC LIMIT 1`,
       [numeroNota]
     )
     const nota = notas[0]
+    // Nota emitida a partir de uma OS de manutenção: anexa a própria OS de origem
+    if (nota?.origem === "ordem_servico" && (nota.origem_id || nota.origem_numero)) {
+      const os: any = await query(
+        `SELECT id, numero FROM ordens_servico WHERE id = ? OR numero = ? ORDER BY (id = ?) DESC LIMIT 1`,
+        [nota.origem_id || 0, nota.origem_numero || "", nota.origem_id || 0]
+      )
+      return NextResponse.json({
+        success: true,
+        data: os[0] || null,
+        motivo: os[0] ? undefined : `OS ${nota.origem_numero} não encontrada`,
+      })
+    }
+
     if (!nota || nota.origem !== "contrato" || !nota.origem_numero) {
       return NextResponse.json({ success: true, data: null, motivo: "Nota não é de contrato" })
     }
