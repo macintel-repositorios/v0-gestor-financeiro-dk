@@ -27,6 +27,7 @@ import {
   ChevronRight,
   MoreHorizontal,
   Printer,
+  Receipt,
   Loader2
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -46,6 +47,7 @@ import { VisualizarOSDialog } from "@/components/ordem-servico/visualizar-os-dia
 import { EditarOSDialog } from "@/components/ordem-servico/editar-os-dialog"
 import { OrdemServicoDeleteDialog } from "@/components/ordem-servico/ordem-servico-delete-dialog"
 import { OrdemServicoPrint } from "@/components/ordem-servico-print"
+import { EmitirNotasOsDialog, type NotasDaOs } from "@/components/ordem-servico/emitir-notas-os-dialog"
 
 export default function OrdemServicoPage({ searchParams }: { searchParams: Promise<{ nova?: string }> }) {
   const [loading, setLoading] = useState(true)
@@ -62,6 +64,32 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
   const [isEditarOSOpen, setIsEditarOSOpen] = useState(false)
   const [printOSData, setPrintOSData] = useState<{ os: any; itens: any[]; fotos: any[]; assinaturas: any[] } | null>(null)
   const [loadingPrintOSId, setLoadingPrintOSId] = useState<number | null>(null)
+  // Notas emitidas a partir de OS de manutenção (origem = ordem_servico), por número da OS
+  const [notasPorOs, setNotasPorOs] = useState<Record<string, NotasDaOs>>({})
+  const [osNota, setOsNota] = useState<OrdemServico | null>(null)
+
+  const carregarNotasDasOs = async () => {
+    try {
+      const [rs, re] = await Promise.all([fetch("/api/nfse").catch(() => null), fetch("/api/nfe").catch(() => null)])
+      const mapa: Record<string, NotasDaOs> = {}
+      const js = rs?.ok ? await rs.json() : null
+      for (const n of js?.data || []) {
+        if (n.origem === "ordem_servico" && n.origem_numero && n.status === "emitida") {
+          mapa[n.origem_numero] = { ...mapa[n.origem_numero], nfse: n.numero_nfse }
+        }
+      }
+      const je = re?.ok ? await re.json() : null
+      for (const n of je?.data || []) {
+        if (n.origem === "ordem_servico" && n.origem_numero && n.status === "autorizada") {
+          mapa[n.origem_numero] = { ...mapa[n.origem_numero], nfe: String(n.numero_nfe) }
+        }
+      }
+      setNotasPorOs(mapa)
+    } catch {}
+  }
+  useEffect(() => {
+    carregarNotasDasOs()
+  }, [])
   const { toast } = useToast()
   const router = useRouter()
 
@@ -705,6 +733,25 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
                               )}
                             </Button>
                           )}
+                          {os.situacao === "concluida" && os.tipo_servico === "manutencao" && (() => {
+                            const ja = notasPorOs[os.numero] || {}
+                            const tudo = !!ja.nfse && !!ja.nfe
+                            return (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setOsNota(os)}
+                                className={`h-8 w-8 p-0 bg-transparent ${ja.nfse || ja.nfe ? "text-emerald-600 dark:text-emerald-400 border-emerald-500 dark:border-emerald-700 hover:bg-emerald-500/10" : "text-amber-600 dark:text-amber-400 border-amber-500 dark:border-amber-700 hover:bg-amber-500/10"}`}
+                                title={
+                                  ja.nfse || ja.nfe
+                                    ? `Notas emitidas: ${[ja.nfse && `NFS-e ${ja.nfse}`, ja.nfe && `NF-e ${ja.nfe}`].filter(Boolean).join(" · ")}${tudo ? "" : " — emitir a outra"}`
+                                    : "Emitir nota fiscal (NFS-e / NF-e)"
+                                }
+                              >
+                                <Receipt className="h-4 w-4" />
+                              </Button>
+                            )
+                          })()}
                           <Button
                             variant="outline"
                             size="sm"
@@ -737,6 +784,11 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
                                     <Printer className="h-4 w-4 mr-2" />
                                   )}
                                   Imprimir
+                                </DropdownMenuItem>
+                              )}
+                              {os.situacao === "concluida" && os.tipo_servico === "manutencao" && (
+                                <DropdownMenuItem onClick={() => setOsNota(os)}>
+                                  <Receipt className="h-4 w-4 mr-2" />Emitir nota fiscal
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem onClick={handleEditarClick}>
@@ -952,6 +1004,14 @@ export default function OrdemServicoPage({ searchParams }: { searchParams: Promi
 
       <LotePreventivasDialog open={loteDialogOpen} onOpenChange={setLoteDialogOpen} onSuccess={carregarDados} />
       <NovaOSDialog open={isNovaOSOpen} onOpenChange={setIsNovaOSOpen} onSuccess={carregarDados} />
+
+      <EmitirNotasOsDialog
+        os={osNota ? { id: Number(osNota.id), numero: String(osNota.numero), cliente_id: Number(osNota.cliente_id), servico_realizado: (osNota as any).servico_realizado } : null}
+        emitidas={osNota ? notasPorOs[String(osNota.numero)] || {} : {}}
+        open={!!osNota}
+        onOpenChange={(v) => !v && setOsNota(null)}
+        onEmitida={carregarNotasDasOs}
+      />
 
       <VisualizarOSDialog
         id={selectedOSIdVisualizar}

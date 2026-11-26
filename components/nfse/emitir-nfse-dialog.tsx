@@ -487,7 +487,7 @@ export function EmitirNfseDialog({ open, onOpenChange, onSuccess, dadosOrigem }:
                         : ""
                     })()}
                   </p>
-                  <p className="text-[10px] text-muted-foreground">Definido {dadosOrigem?.origem === "contrato" ? "pelo contrato" : "no orçamento"}.</p>
+                  <p className="text-[10px] text-muted-foreground">Definido {dadosOrigem?.origem === "contrato" ? "pelo contrato" : dadosOrigem?.origem === "ordem_servico" ? "pela OS de manutenção (conserto)" : "no orçamento"}.</p>
                 </div>
               ) : (
                 <CampoClassificacaoFiscal
