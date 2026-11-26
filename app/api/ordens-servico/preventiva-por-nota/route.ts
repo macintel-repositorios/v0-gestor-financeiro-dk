@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const notas: any = await query(
-      `SELECT origem, origem_numero, descricao_servico FROM notas_fiscais
+      `SELECT origem, origem_numero, cliente_id, descricao_servico FROM notas_fiscais
        WHERE numero_nfse = ? ORDER BY id DESC LIMIT 1`,
       [numeroNota]
     )
@@ -35,10 +35,13 @@ export async function GET(request: NextRequest) {
 
     const os: any = await query(
       `SELECT id, numero FROM ordens_servico
-       WHERE contrato_numero = ? AND LOWER(tipo_servico) = 'preventiva' AND situacao = 'concluida'
+       WHERE (contrato_numero = ? OR (? IS NOT NULL AND cliente_id = ?))
+         AND LOWER(tipo_servico) = 'preventiva' AND situacao = 'concluida'
          AND data_atual BETWEEN ? AND LAST_DAY(?)
-       ORDER BY data_execucao DESC, id DESC LIMIT 1`,
-      [nota.origem_numero, inicio, inicio]
+       -- prioriza a OS do mesmo contrato; senão, a do mesmo cliente (ex.: contrato renovado no mês,
+       -- OS gerada pelo contrato antigo e nota emitida pelo novo)
+       ORDER BY (contrato_numero = ?) DESC, data_execucao DESC, id DESC LIMIT 1`,
+      [nota.origem_numero, nota.cliente_id ?? null, nota.cliente_id ?? null, inicio, inicio, nota.origem_numero]
     )
 
     return NextResponse.json({
